@@ -1,0 +1,20 @@
+{
+	"name": "anyone_can_pay",
+	"description": "Anyone can pay lock script",
+	"sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/anyone_can_pay.c",
+	"scriptType": "lock",
+	"mainnet": {
+		"codeHash": "0xd369597ff47f29fbc0d47d2e3775370d1250b85140c670e4718af712983a2354",
+		"hashType": "type",
+		"txHash": "0x4153a2014952d7cac45f285ce9a7c5c0c0e1b21f2d378b82ac1433cb11c25c4d",
+		"txIndex": "0x0",
+		"depType": "dep_group"
+	},
+	"testnet": {
+		"codeHash": "0x3419a1c09eb2567f6552ee7a8ecffd64155cffe0f1796e6e61ec088d740c1356",
+		"hashType": "type",
+		"txHash": "0xec26b0f85ed839ece5f11c4c4e837ec359f5adc4420410f6453b1f6b60fb96a6",
+		"txIndex": "0x0",
+		"depType": "dep_group"
+	}
+}

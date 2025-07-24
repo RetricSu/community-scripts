@@ -1,0 +1,20 @@
+{
+	"name": "output_type_proxy_lock",
+	"description": "Output type proxy lock script",
+	"sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/output_type_proxy_lock.c",
+	"scriptType": "lock",
+	"mainnet": {
+		"codeHash": "0x2df53b592db3ae3685b7787adcfef0332a611edb83ca3feca435809964c3aff2",
+		"hashType": "data1",
+		"txHash": "0x10d63a996157d32c01078058000052674ca58d15f921bec7f1dcdac2160eb66b",
+		"txIndex": "0x2",
+		"depType": "code"
+	},
+	"testnet": {
+		"codeHash": "0x2df53b592db3ae3685b7787adcfef0332a611edb83ca3feca435809964c3aff2",
+		"hashType": "data1",
+		"txHash": "0xb4f171c9c9caf7401f54a8e56225ae21d95032150a87a4678eac3f66a3137b93",
+		"txIndex": "0x2",
+		"depType": "code"
+	}
+}

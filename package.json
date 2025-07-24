@@ -1,0 +1,22 @@
+{
+  "name": "community-scripts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "check": "npx @biomejs/biome check --write src",
+    "fmt": "npx @biomejs/biome format --write src",
+    "lint": "npx @biomejs/biome lint --write src",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@biomejs/biome": "^2.1.2",
+    "@types/node": "^24.1.0",
+    "typescript": "^5.8.3"
+  }
+}

@@ -1,0 +1,20 @@
+{
+	"name": "easy_to_discover_type",
+	"description": "Easy to discover type",
+	"sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/easy_to_discover_type.c",
+	"scriptType": "type",
+	"mainnet": {
+		"codeHash": "0xaba4430cc7110d699007095430a1faa72973edf2322ddbfd4d1d219cacf237af",
+		"hashType": "data1",
+		"txHash": "0xb0ed754fb27d67fd8388c97fed914fb7998eceaa01f3e6f967e498de1ba0ac9b",
+		"txIndex": "0x0",
+		"depType": "code"
+	},
+	"testnet": {
+		"codeHash": "0xaba4430cc7110d699007095430a1faa72973edf2322ddbfd4d1d219cacf237af",
+		"hashType": "data1",
+		"txHash": "0x1b4ffcad55ecd36ffb2715b6816b83da73851f1a24fe594f263c4f34dad90792",
+		"txIndex": "0x0",
+		"depType": "code"
+	}
+}
