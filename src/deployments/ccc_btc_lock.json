@@ -6,8 +6,14 @@
 	"testnet": {
 		"codeHash": "0x8f026d6113b24800e04bfb33703f98dfaa6db6719097ab5d3050db9cf4fec45e",
 		"hashType": "type",
-		"txHash": "0xba5a1a77019be0e8942119ad549f01ca3c61fd9f911aa46e27d508a802236614",
-		"txIndex": "0x0",
-		"depType": "code"
+		"cellDeps": [
+			{
+				"depType": "code",
+				"outPoint": {
+					"txHash": "0xba5a1a77019be0e8942119ad549f01ca3c61fd9f911aa46e27d508a802236614",
+					"index": "0x0"
+				}
+			}
+		]
 	}
 }
