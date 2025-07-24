@@ -21,12 +21,20 @@ export enum HashType {
 	Type = 'type',
 }
 
+export interface OutPoint {
+	txHash: HexString;
+	index: HexNumber;
+}
+
+export interface CellDep {
+	depType: DepType;
+	outPoint: OutPoint;
+}
+
 export interface ScriptInfo {
 	codeHash: HexString;
 	hashType: HashType;
-	txHash: HexString;
-	txIndex: HexNumber;
-	depType: DepType;
+	cellDeps: CellDep[];
 }
 
 export interface ScriptDeployment {
