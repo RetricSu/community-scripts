@@ -1,5 +1,5 @@
 {
-	"name": "xudt",		
+	"name": "xudt",
 	"description": "XUDT lock script",
 	"sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/xudt.c",
 	"scriptType": "type",

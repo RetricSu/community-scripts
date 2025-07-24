@@ -1,5 +1,5 @@
 {
-	"name": "always_success",	
+	"name": "always_success",
 	"description": "Always success script",
 	"sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/always_success.c",
 	"scriptType": "both",

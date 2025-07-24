@@ -1,5 +1,5 @@
 {
-	"name": "nostr_lock",	
+	"name": "nostr_lock",
 	"description": "Nostr lock script",
 	"sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/nostr_lock.c",
 	"scriptType": "lock",

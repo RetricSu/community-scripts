@@ -1,5 +1,5 @@
 {
-	"name": "dob_1",	
+	"name": "dob_1",
 	"description": "DOB 1",
 	"sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/dob_1.c",
 	"scriptType": "type",

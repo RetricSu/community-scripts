@@ -5,7 +5,7 @@ export type HexString = string;
 export enum ScriptType {
 	Lock = 'lock',
 	Type = 'type',
-  Both = 'both',
+	Both = 'both',
 	Library = 'library',
 }
 
