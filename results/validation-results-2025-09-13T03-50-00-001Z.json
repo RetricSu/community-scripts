@@ -1,0 +1,445 @@
+{
+  "summary": {
+    "totalSDKs": 1,
+    "successfulSDKs": 1,
+    "failedSDKs": 0,
+    "totalTests": 42,
+    "passedTests": 24,
+    "failedTests": 18,
+    "successRate": 100,
+    "timestamp": "2025-09-13T03:50:00.001Z",
+    "duration": 14487
+  },
+  "reports": [
+    {
+      "sdkName": "@ckb-ccc/core",
+      "sdkVersion": "1.12.0",
+      "success": true,
+      "tests": [
+        {
+          "scriptName": "nervos_dao",
+          "network": "mainnet",
+          "result": {
+            "isValid": true,
+            "errors": [],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "secp256k1_blake160_sighash_all",
+          "network": "mainnet",
+          "result": {
+            "isValid": true,
+            "errors": [],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "secp256k1_blake160_multisig_all",
+          "network": "mainnet",
+          "result": {
+            "isValid": true,
+            "errors": [],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "secp256k1_multisig_v2",
+          "network": "mainnet",
+          "result": {
+            "isValid": false,
+            "errors": [
+              "Script 'secp256k1_multisig_v2' not found in deployments"
+            ],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "anyone_can_pay",
+          "network": "mainnet",
+          "result": {
+            "isValid": true,
+            "errors": [],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "type_id",
+          "network": "mainnet",
+          "result": {
+            "isValid": false,
+            "errors": [
+              "Script 'type_id' not found in deployments"
+            ],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "xudt",
+          "network": "mainnet",
+          "result": {
+            "isValid": true,
+            "errors": [],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "joy_id",
+          "network": "mainnet",
+          "result": {
+            "isValid": false,
+            "errors": [
+              "Script 'joy_id' not found in deployments"
+            ],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "cota",
+          "network": "mainnet",
+          "result": {
+            "isValid": false,
+            "errors": [
+              "Script 'cota' not found in deployments"
+            ],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "pw_lock",
+          "network": "mainnet",
+          "result": {
+            "isValid": false,
+            "errors": [
+              "Script 'pw_lock' not found in deployments"
+            ],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "omnilock",
+          "network": "mainnet",
+          "result": {
+            "isValid": false,
+            "errors": [
+              "CellDeps count mismatch: expected 1, got 2"
+            ],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "nostr_lock",
+          "network": "mainnet",
+          "result": {
+            "isValid": true,
+            "errors": [],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "unique_type",
+          "network": "mainnet",
+          "result": {
+            "isValid": false,
+            "errors": [
+              "Script 'unique_type' not found in deployments"
+            ],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "always_success",
+          "network": "mainnet",
+          "result": {
+            "isValid": false,
+            "errors": [
+              "HashType mismatch: expected type, got data1"
+            ],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "input_type_proxy_lock",
+          "network": "mainnet",
+          "result": {
+            "isValid": true,
+            "errors": [],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "output_type_proxy_lock",
+          "network": "mainnet",
+          "result": {
+            "isValid": true,
+            "errors": [],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "lock_proxy_lock",
+          "network": "mainnet",
+          "result": {
+            "isValid": true,
+            "errors": [],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "single_use_lock",
+          "network": "mainnet",
+          "result": {
+            "isValid": true,
+            "errors": [],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "type_burn_lock",
+          "network": "mainnet",
+          "result": {
+            "isValid": true,
+            "errors": [],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "easy_to_discover_type",
+          "network": "mainnet",
+          "result": {
+            "isValid": true,
+            "errors": [],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "time_lock",
+          "network": "mainnet",
+          "result": {
+            "isValid": true,
+            "errors": [],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "nervos_dao",
+          "network": "testnet",
+          "result": {
+            "isValid": false,
+            "errors": [
+              "CellDep 0 txHash mismatch: expected 0x8f8c635ebd3267ad8608585848c4f0ae7c65fbaf12c1b2d0c4388aacb842b17e, got 0x8f8c79eb6671709633fe6a46de93c0fedc9c1b8a6527a18d3983879542635c9f"
+            ],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "secp256k1_blake160_sighash_all",
+          "network": "testnet",
+          "result": {
+            "isValid": true,
+            "errors": [],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "secp256k1_blake160_multisig_all",
+          "network": "testnet",
+          "result": {
+            "isValid": true,
+            "errors": [],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "secp256k1_multisig_v2",
+          "network": "testnet",
+          "result": {
+            "isValid": false,
+            "errors": [
+              "Script 'secp256k1_multisig_v2' not found in deployments"
+            ],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "anyone_can_pay",
+          "network": "testnet",
+          "result": {
+            "isValid": true,
+            "errors": [],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "type_id",
+          "network": "testnet",
+          "result": {
+            "isValid": false,
+            "errors": [
+              "Script 'type_id' not found in deployments"
+            ],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "xudt",
+          "network": "testnet",
+          "result": {
+            "isValid": false,
+            "errors": [
+              "CodeHash mismatch: expected 0x50bd8d6680b8b9cf98b73f3c08faf8b2a21914311954118ad6609be6e78a1b95, got 0x25c29dc317811a6f6f3985a7a9ebc4838bd388d19d0feeecf0bcd60f6c0975bb",
+              "HashType mismatch: expected data1, got type"
+            ],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "joy_id",
+          "network": "testnet",
+          "result": {
+            "isValid": false,
+            "errors": [
+              "Script 'joy_id' not found in deployments"
+            ],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "cota",
+          "network": "testnet",
+          "result": {
+            "isValid": false,
+            "errors": [
+              "Script 'cota' not found in deployments"
+            ],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "pw_lock",
+          "network": "testnet",
+          "result": {
+            "isValid": false,
+            "errors": [
+              "Script 'pw_lock' not found in deployments"
+            ],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "omnilock",
+          "network": "testnet",
+          "result": {
+            "isValid": false,
+            "errors": [
+              "CellDeps count mismatch: expected 1, got 2"
+            ],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "nostr_lock",
+          "network": "testnet",
+          "result": {
+            "isValid": true,
+            "errors": [],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "unique_type",
+          "network": "testnet",
+          "result": {
+            "isValid": false,
+            "errors": [
+              "Script 'unique_type' not found in deployments"
+            ],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "always_success",
+          "network": "testnet",
+          "result": {
+            "isValid": false,
+            "errors": [
+              "HashType mismatch: expected type, got data1"
+            ],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "input_type_proxy_lock",
+          "network": "testnet",
+          "result": {
+            "isValid": true,
+            "errors": [],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "output_type_proxy_lock",
+          "network": "testnet",
+          "result": {
+            "isValid": true,
+            "errors": [],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "lock_proxy_lock",
+          "network": "testnet",
+          "result": {
+            "isValid": true,
+            "errors": [],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "single_use_lock",
+          "network": "testnet",
+          "result": {
+            "isValid": true,
+            "errors": [],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "type_burn_lock",
+          "network": "testnet",
+          "result": {
+            "isValid": true,
+            "errors": [],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "easy_to_discover_type",
+          "network": "testnet",
+          "result": {
+            "isValid": true,
+            "errors": [],
+            "warnings": []
+          }
+        },
+        {
+          "scriptName": "time_lock",
+          "network": "testnet",
+          "result": {
+            "isValid": true,
+            "errors": [],
+            "warnings": []
+          }
+        }
+      ],
+      "timestamp": "2025-09-13T03:49:59.738Z",
+      "totalTests": 42,
+      "passedTests": 24,
+      "failedTests": 18
+    }
+  ],
+  "metadata": {
+    "generatedAt": "2025-09-13T03:50:00.001Z",
+    "version": "1.0.0"
+  }
+}
