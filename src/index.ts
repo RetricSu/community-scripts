@@ -4,7 +4,7 @@ import { Command } from 'commander';
 import { DailyTestRunner } from './ci/daily-test-runner';
 import { NPMSDKDiscoverer } from './discovery/npm-sdk-discoverer';
 import { DynamicSDKTester } from './testing/dynamic-sdk-tester';
-import { CCCValidator } from './validate/ccc';
+import { writeFileSync } from 'fs';
 
 const program = new Command();
 
@@ -55,12 +55,16 @@ async function runDiscovery() {
 }
 
 async function runTest() {
-	const sdkName = 'ccc';
-	const validator = new CCCValidator(require('@@ckb-ccc/core'));
+	const packageName = '@ckb-ccc/core';
 
-	console.log(`🧪 Testing SDK: ${sdkName}`);
+	console.log(`🧪 Testing SDK: ${packageName}`);
 	const tester = new DynamicSDKTester();
-	await tester.testSDK(sdkName, validator);
+	const report = await tester.testSDK(packageName);
+
+	// Output report to a local file
+	const outputPath = './sdk-test-report.json';
+	writeFileSync(outputPath, JSON.stringify(report, null, 2));
+	console.log(`📝 Report saved to ${outputPath}`);
 }
 
 async function runDailyTests() {

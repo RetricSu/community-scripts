@@ -1,13 +1,14 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import { SDKValidator, ValidationResult } from '../validate/base';
+import type { SDKValidator, ValidationResult } from '../validate/base';
+import { validators } from '../validate';
 
 const execAsync = promisify(exec);
 
 export interface TestResult {
 	scriptName: string;
 	network: 'mainnet' | 'testnet';
-	result: ValidationResult;
+	result: Omit<ValidationResult, 'scriptName' | 'network'>;
 }
 
 export interface TestReport {
@@ -25,10 +26,7 @@ export interface TestReport {
 export class DynamicSDKTester {
 	constructor() {}
 
-	async testSDK(
-		packageName: string,
-		validator: SDKValidator
-	): Promise<TestReport> {
+	async testSDK(packageName: string): Promise<TestReport> {
 		const startTime = Date.now();
 
 		try {
@@ -39,6 +37,15 @@ export class DynamicSDKTester {
 			// Try to load the SDK
 			console.log(`  🔧 Loading SDK module...`);
 			const sdk = require(packageName);
+			const validatorClass = validators.find(
+				(v) => v.packageName === packageName
+			)?.validatorClass;
+			if (!validatorClass) {
+				throw new Error(
+					`No validator found for package ${packageName}`
+				);
+			}
+			const validator: SDKValidator = new validatorClass(sdk);
 
 			// Get SDK version if possible
 			let sdkVersion: string | undefined;
@@ -72,7 +79,11 @@ export class DynamicSDKTester {
 				tests.push({
 					scriptName: res.scriptName,
 					network: res.network,
-					result: res,
+					result: {
+						isValid: res.isValid,
+						errors: res.errors,
+						warnings: res.warnings,
+					},
 				});
 			}
 

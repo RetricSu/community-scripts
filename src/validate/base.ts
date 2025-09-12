@@ -3,10 +3,10 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 export interface ValidationResult {
+	scriptName: string;
 	isValid: boolean;
 	errors: string[];
 	warnings: string[];
-	scriptName: string;
 	network: 'mainnet' | 'testnet';
 }
 
@@ -89,7 +89,6 @@ export abstract class SDKValidator {
 				`HashType mismatch: expected ${expectedScript.hashType}, got ${sdkScriptInfo.hashType}`
 			);
 		}
-
 		// Validate cellDeps if provided
 		if (sdkScriptInfo.cellDeps && expectedScript.cellDeps) {
 			if (
@@ -117,14 +116,14 @@ export abstract class SDKValidator {
 					) {
 						result.isValid = false;
 						result.errors.push(
-							`CellDep ${i} txHash mismatch: expected ${expected.outPoint.txHash}, got ${actual.outPoint.txHash}`
+							`CellDep ${+i} txHash mismatch: expected ${expected.outPoint.txHash}, got ${actual.outPoint.txHash}`
 						);
 					}
 
-					if (actual.outPoint.index !== expected.outPoint.index) {
+					if (+actual.outPoint.index !== +expected.outPoint.index) {
 						result.isValid = false;
 						result.errors.push(
-							`CellDep ${i} index mismatch: expected ${expected.outPoint.index}, got ${actual.outPoint.index}`
+							`CellDep ${i} index mismatch: expected ${+expected.outPoint.index}, got ${+actual.outPoint.index}`
 						);
 					}
 				}
