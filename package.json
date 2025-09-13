@@ -24,6 +24,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@ckb-ccc/core": "^1.12.0",
     "commander": "^14.0.1"
   },
   "devDependencies": {

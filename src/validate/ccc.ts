@@ -1,4 +1,6 @@
+import type { DepType, HashType, ScriptInfo } from '../type/deployment';
 import { type SDKScriptInfo, SDKValidator } from './base';
+import { type ccc as CCC, hashTypeFrom, hexFrom, numToHex } from '@ckb-ccc/core';
 
 export class CCCValidator extends SDKValidator {
   private sdk: any;
@@ -8,7 +10,7 @@ export class CCCValidator extends SDKValidator {
   }
 
   async getSDKScriptInfo(): Promise<SDKScriptInfo[]> {
-    const ccc = this.sdk.ccc;
+    const ccc: typeof CCC = this.sdk.ccc;
     const mainnetClient = new ccc.ClientPublicMainnet();
     const testnetClient = new ccc.ClientPublicTestnet();
 
@@ -80,24 +82,21 @@ export class CCCValidator extends SDKValidator {
     }
   }
 
-  private toScriptInfo(script: any) {
-    const scriptInfo = script;
+  private toScriptInfo(script: CCC.ScriptInfoLike): ScriptInfo {
+    const scriptInfo: ScriptInfo = {
+      codeHash: hexFrom(script.codeHash),
+      hashType: hashTypeFrom(script.hashType) as HashType,
+      cellDeps: script.cellDeps.map((dep) => ({
+        outPoint: {
+          txHash: hexFrom(dep.cellDep.outPoint.txHash),
+          index: numToHex(dep.cellDep.outPoint.index),
+        },
+        depType: (dep.cellDep.depType === 'code'
+          ? 'code'
+          : 'dep_group') as DepType,
+      })),
+    };
 
-    scriptInfo.cellDeps = script.cellDeps
-      .map((dep: any) => {
-        if (!dep.cellDep) {
-          return dep;
-        }
-
-        return {
-          outPoint: {
-            txHash: dep.cellDep.outPoint.txHash,
-            index: dep.cellDep.outPoint.index,
-          },
-          depType: dep.cellDep.depType === 'code' ? 'code' : 'dep_group',
-        };
-      })
-      .filter((dep: any) => dep !== null);
     return scriptInfo;
   }
 }

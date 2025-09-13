@@ -181,6 +181,4 @@ export class DynamicSDKTester {
       );
     }
   }
-
-  // uninstallPackage is no longer needed, as temp dir is deleted
 }
