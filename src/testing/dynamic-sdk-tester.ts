@@ -30,13 +30,8 @@ export class DynamicSDKTester {
 		const startTime = Date.now();
 
 		try {
-			// Install latest version
-			console.log(`  📥 Installing ${packageName}@latest...`);
-			await execAsync(`pnpm add ${packageName}@latest`);
-
-			// Try to load the SDK
-			console.log(`  🔧 Loading SDK module...`);
-			const sdk = require(packageName);
+			const { module: sdk, version: sdkVersion } =
+				await this.installPackage(packageName);
 			const validatorClass = validators.find(
 				(v) => v.packageName === packageName
 			)?.validatorClass;
@@ -46,15 +41,6 @@ export class DynamicSDKTester {
 				);
 			}
 			const validator: SDKValidator = new validatorClass(sdk);
-
-			// Get SDK version if possible
-			let sdkVersion: string | undefined;
-			try {
-				const packageJson = require(`${packageName}/package.json`);
-				sdkVersion = packageJson.version;
-			} catch (error) {
-				// Version info not available
-			}
 
 			const scriptLength = await validator.getSDKScriptInfo();
 
@@ -117,5 +103,55 @@ export class DynamicSDKTester {
 				failedTests: 0,
 			};
 		}
+	}
+
+	private async installPackage(
+		packageName: string,
+		version?: string,
+		exportSDKName?: string
+	): Promise<{ module: any; version?: string }> {
+		const versionFlag = version ? `@${version}` : '@latest';
+		console.log(`  📥 Installing ${packageName}${versionFlag}...`);
+		await execAsync(`pnpm add ${packageName}${versionFlag}`);
+		try {
+			console.log(`  🔧 Loading SDK module...`);
+			const sdk = require(packageName);
+
+			// Get SDK version if possible
+			let sdkVersion: string | undefined;
+			try {
+				const packageJson = require(`${packageName}/package.json`);
+				sdkVersion = packageJson.version;
+			} catch (error) {
+				// Version info not available
+			}
+			console.log(
+				`  📦 Loaded ${packageName} version ${sdkVersion || 'unknown'}`
+			);
+
+			if (exportSDKName) {
+				if (!(exportSDKName in sdk)) {
+					throw new Error(
+						`Package ${packageName} does not export ${exportSDKName}`
+					);
+				}
+				return {
+					module: sdk[exportSDKName],
+					version: sdkVersion,
+				};
+			}
+			return {
+				module: sdk,
+				version: sdkVersion,
+			};
+		} catch (error) {
+			throw new Error(
+				`Failed to load package ${packageName}: ${error instanceof Error ? error.message : String(error)}`
+			);
+		}
+	}
+
+	private async uninstallPackage(packageName: string): Promise<void> {
+		await execAsync(`pnpm remove ${packageName}`);
 	}
 }
