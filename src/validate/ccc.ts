@@ -1,6 +1,11 @@
 import type { DepType, HashType, ScriptInfo } from '../type/deployment';
 import { type SDKScriptInfo, SDKValidator } from './base';
-import { type ccc as CCC, hashTypeFrom, hexFrom, numToHex } from '@ckb-ccc/core';
+import {
+  type ccc as CCC,
+  hashTypeFrom,
+  hexFrom,
+  numToHex,
+} from '@ckb-ccc/core';
 
 export class CCCValidator extends SDKValidator {
   private sdk: any;

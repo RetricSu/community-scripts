@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import { DailyTestRunner } from './ci/daily-test-runner';
+import { DailyTestRunner } from './testing/daily-test-runner';
 import { NPMSDKDiscoverer } from './discovery/npm-sdk-discoverer';
 import { DynamicSDKTester } from './testing/dynamic-sdk-tester';
 import { writeFileSync } from 'fs';

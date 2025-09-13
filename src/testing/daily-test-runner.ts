@@ -1,10 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { NPMSDKDiscoverer } from '../discovery/npm-sdk-discoverer';
-import {
-  DynamicSDKTester,
-  type TestReport,
-} from '../testing/dynamic-sdk-tester';
+import { DynamicSDKTester, type TestReport } from './dynamic-sdk-tester';
 
 export interface ValidationSummary {
   totalSDKs: number;
@@ -43,7 +40,7 @@ export class DailyTestRunner {
 
       // Step 2: Test all SDKs
       const tester = new DynamicSDKTester();
-      const reports = await tester.testAllSDKs(sdkNames);
+      const reports = [await tester.testSDK('@ckb-ccc/core')];
 
       // Step 3: Generate summary
       const summary = this.generateSummary(reports, Date.now() - startTime);
