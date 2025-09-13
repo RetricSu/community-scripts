@@ -1,5 +1,8 @@
-import { exec } from 'child_process';
+import { exec, spawn } from 'child_process';
 import { promisify } from 'util';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as os from 'os';
 import type { SDKValidator, ValidationResult } from '../validate/base';
 import { validators } from '../validate';
 
@@ -28,10 +31,25 @@ export class DynamicSDKTester {
 
 	async testSDK(packageName: string): Promise<TestReport> {
 		const startTime = Date.now();
-
+		// 1. Create temp dir
+		const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sdk-test-'));
 		try {
+			// 2. Init new package.json
+			fs.writeFileSync(
+				path.join(tempDir, 'package.json'),
+				JSON.stringify({ name: 'sdk-test', version: '1.0.0' })
+			);
+
+			// 3. Install SDK in temp dir
 			const { module: sdk, version: sdkVersion } =
-				await this.installPackage(packageName);
+				await this.installPackage(
+					packageName,
+					undefined,
+					undefined,
+					tempDir
+				);
+
+			// 4. Find validator
 			const validatorClass = validators.find(
 				(v) => v.packageName === packageName
 			)?.validatorClass;
@@ -43,18 +61,15 @@ export class DynamicSDKTester {
 			const validator: SDKValidator = new validatorClass(sdk);
 
 			const scriptLength = await validator.getSDKScriptInfo();
-
 			console.log(
 				`  🧪 Testing against ${scriptLength.length} known scripts...`
 			);
 
-			// Test against our known scripts
+			// 5. Run validation
 			const result = await validator.validate();
-
 			const tests: TestResult[] = [];
 			let passedTests = 0;
 			let failedTests = 0;
-
 			for (const res of result) {
 				const isValid = res.isValid;
 				if (isValid) {
@@ -72,15 +87,12 @@ export class DynamicSDKTester {
 					},
 				});
 			}
-
 			const endTime = Date.now();
 			const duration = ((endTime - startTime) / 1000).toFixed(2);
 			console.log(
 				`  ✅ Testing completed in ${duration}s: ${passedTests}/${tests.length} tests passed.`
 			);
-
 			const totalTests = tests.length;
-
 			return {
 				sdkName: packageName,
 				sdkVersion,
@@ -102,25 +114,57 @@ export class DynamicSDKTester {
 				passedTests: 0,
 				failedTests: 0,
 			};
+		} finally {
+			// 6. Clean up temp dir
+			try {
+				fs.rmSync(tempDir, { recursive: true, force: true });
+			} catch (e) {
+				// ignore
+			}
 		}
 	}
 
 	private async installPackage(
 		packageName: string,
 		version?: string,
-		exportSDKName?: string
+		exportSDKName?: string,
+		cwd?: string
 	): Promise<{ module: any; version?: string }> {
 		const versionFlag = version ? `@${version}` : '@latest';
-		console.log(`  📥 Installing ${packageName}${versionFlag}...`);
-		await execAsync(`pnpm add ${packageName}${versionFlag}`);
+		console.log(
+			`  📥 Installing ${packageName}${versionFlag} at ${cwd}...`
+		);
+
+		// Use spawn for real-time logging
+		await new Promise<void>((resolve, reject) => {
+			const child = spawn(
+				'pnpm',
+				['add', `${packageName}${versionFlag}`],
+				{
+					cwd,
+					stdio: 'inherit',
+					shell: true,
+				}
+			);
+			child.on('close', (code) => {
+				if (code === 0) resolve();
+				else reject(new Error(`pnpm add exited with code ${code}`));
+			});
+			child.on('error', reject);
+		});
 		try {
 			console.log(`  🔧 Loading SDK module...`);
-			const sdk = require(packageName);
-
+			// Dynamically require from temp dir
+			const sdkPath = path.join(
+				cwd || process.cwd(),
+				'node_modules',
+				packageName
+			);
+			const sdk = require(sdkPath);
 			// Get SDK version if possible
 			let sdkVersion: string | undefined;
 			try {
-				const packageJson = require(`${packageName}/package.json`);
+				const packageJson = require(path.join(sdkPath, 'package.json'));
 				sdkVersion = packageJson.version;
 			} catch (error) {
 				// Version info not available
@@ -128,7 +172,6 @@ export class DynamicSDKTester {
 			console.log(
 				`  📦 Loaded ${packageName} version ${sdkVersion || 'unknown'}`
 			);
-
 			if (exportSDKName) {
 				if (!(exportSDKName in sdk)) {
 					throw new Error(
@@ -151,7 +194,5 @@ export class DynamicSDKTester {
 		}
 	}
 
-	private async uninstallPackage(packageName: string): Promise<void> {
-		await execAsync(`pnpm remove ${packageName}`);
-	}
+	// uninstallPackage is no longer needed, as temp dir is deleted
 }
