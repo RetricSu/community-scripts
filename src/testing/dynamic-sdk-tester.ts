@@ -1,12 +1,9 @@
-import { exec, spawn } from 'child_process';
-import { promisify } from 'util';
+import { spawn } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import type { SDKValidator, ValidationResult } from '../validate/base';
 import { validators } from '../validate';
-
-const execAsync = promisify(exec);
 
 export interface TestResult {
   scriptName: string;
