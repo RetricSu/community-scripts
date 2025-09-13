@@ -1,32 +1,32 @@
 {
-	"name": "single_use_lock",
-	"description": "Single use lock script",
-	"sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/single_use_lock.c",
-	"scriptType": "lock",
-	"mainnet": {
-		"codeHash": "0x8290467a512e5b9a6b816469b0edabba1f4ac474e28ffdd604c2a7c76446bbaf",
-		"hashType": "data1",
-		"cellDeps": [
-			{
-				"depType": "code",
-				"outPoint": {
-					"txHash": "0x10d63a996157d32c01078058000052674ca58d15f921bec7f1dcdac2160eb66b",
-					"index": "0x4"
-				}
-			}
-		]
-	},
-	"testnet": {
-		"codeHash": "0x8290467a512e5b9a6b816469b0edabba1f4ac474e28ffdd604c2a7c76446bbaf",
-		"hashType": "data1",
-		"cellDeps": [
-			{
-				"depType": "code",
-				"outPoint": {
-					"txHash": "0xb4f171c9c9caf7401f54a8e56225ae21d95032150a87a4678eac3f66a3137b93",
-					"index": "0x4"
-				}
-			}
-		]
-	}
+  "name": "single_use_lock",
+  "description": "Single use lock script",
+  "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/single_use_lock.c",
+  "scriptType": "lock",
+  "mainnet": {
+    "codeHash": "0x8290467a512e5b9a6b816469b0edabba1f4ac474e28ffdd604c2a7c76446bbaf",
+    "hashType": "data1",
+    "cellDeps": [
+      {
+        "depType": "code",
+        "outPoint": {
+          "txHash": "0x10d63a996157d32c01078058000052674ca58d15f921bec7f1dcdac2160eb66b",
+          "index": "0x4"
+        }
+      }
+    ]
+  },
+  "testnet": {
+    "codeHash": "0x8290467a512e5b9a6b816469b0edabba1f4ac474e28ffdd604c2a7c76446bbaf",
+    "hashType": "data1",
+    "cellDeps": [
+      {
+        "depType": "code",
+        "outPoint": {
+          "txHash": "0xb4f171c9c9caf7401f54a8e56225ae21d95032150a87a4678eac3f66a3137b93",
+          "index": "0x4"
+        }
+      }
+    ]
+  }
 }

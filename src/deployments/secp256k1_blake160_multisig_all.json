@@ -1,32 +1,32 @@
 {
-	"name": "secp256k1_blake160_multisig_all",
-	"description": "Multi-signature lock script on CKB",
-	"sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/secp256k1_blake160_multisig_all.c",
-	"scriptType": "lock",
-	"mainnet": {
-		"codeHash": "0x5c5069eb0857efc65e1bca0c07df34c31663b3622fd3876c876320fc9634e2a8",
-		"hashType": "type",
-		"cellDeps": [
-			{
-				"depType": "dep_group",
-				"outPoint": {
-					"txHash": "0x71a7ba8fc96349fea0ed3a5c47992e3b4084b031a42264a018e0072e8172e46c",
-					"index": "0x1"
-				}
-			}
-		]
-	},
-	"testnet": {
-		"codeHash": "0x5c5069eb0857efc65e1bca0c07df34c31663b3622fd3876c876320fc9634e2a8",
-		"hashType": "type",
-		"cellDeps": [
-			{
-				"depType": "dep_group",
-				"outPoint": {
-					"txHash": "0xf8de3bb47d055cdf460d93a2a6e1b05f7432f9777c8c474abf4eec1d4aee5d37",
-					"index": "0x1"
-				}
-			}
-		]
-	}
+  "name": "secp256k1_blake160_multisig_all",
+  "description": "Multi-signature lock script on CKB",
+  "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/secp256k1_blake160_multisig_all.c",
+  "scriptType": "lock",
+  "mainnet": {
+    "codeHash": "0x5c5069eb0857efc65e1bca0c07df34c31663b3622fd3876c876320fc9634e2a8",
+    "hashType": "type",
+    "cellDeps": [
+      {
+        "depType": "dep_group",
+        "outPoint": {
+          "txHash": "0x71a7ba8fc96349fea0ed3a5c47992e3b4084b031a42264a018e0072e8172e46c",
+          "index": "0x1"
+        }
+      }
+    ]
+  },
+  "testnet": {
+    "codeHash": "0x5c5069eb0857efc65e1bca0c07df34c31663b3622fd3876c876320fc9634e2a8",
+    "hashType": "type",
+    "cellDeps": [
+      {
+        "depType": "dep_group",
+        "outPoint": {
+          "txHash": "0xf8de3bb47d055cdf460d93a2a6e1b05f7432f9777c8c474abf4eec1d4aee5d37",
+          "index": "0x1"
+        }
+      }
+    ]
+  }
 }

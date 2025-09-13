@@ -1,32 +1,32 @@
 {
-	"name": "lock_proxy_lock",
-	"description": "Lock proxy lock script",
-	"sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/lock_proxy_lock.c",
-	"scriptType": "lock",
-	"mainnet": {
-		"codeHash": "0x5d41e32e224c15f152b7e6529100ebeac83b162f5f692a5365774dad2c1a1d02",
-		"hashType": "data1",
-		"cellDeps": [
-			{
-				"depType": "code",
-				"outPoint": {
-					"txHash": "0x10d63a996157d32c01078058000052674ca58d15f921bec7f1dcdac2160eb66b",
-					"index": "0x3"
-				}
-			}
-		]
-	},
-	"testnet": {
-		"codeHash": "0x5d41e32e224c15f152b7e6529100ebeac83b162f5f692a5365774dad2c1a1d02",
-		"hashType": "data1",
-		"cellDeps": [
-			{
-				"depType": "code",
-				"outPoint": {
-					"txHash": "0xb4f171c9c9caf7401f54a8e56225ae21d95032150a87a4678eac3f66a3137b93",
-					"index": "0x3"
-				}
-			}
-		]
-	}
+  "name": "lock_proxy_lock",
+  "description": "Lock proxy lock script",
+  "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/lock_proxy_lock.c",
+  "scriptType": "lock",
+  "mainnet": {
+    "codeHash": "0x5d41e32e224c15f152b7e6529100ebeac83b162f5f692a5365774dad2c1a1d02",
+    "hashType": "data1",
+    "cellDeps": [
+      {
+        "depType": "code",
+        "outPoint": {
+          "txHash": "0x10d63a996157d32c01078058000052674ca58d15f921bec7f1dcdac2160eb66b",
+          "index": "0x3"
+        }
+      }
+    ]
+  },
+  "testnet": {
+    "codeHash": "0x5d41e32e224c15f152b7e6529100ebeac83b162f5f692a5365774dad2c1a1d02",
+    "hashType": "data1",
+    "cellDeps": [
+      {
+        "depType": "code",
+        "outPoint": {
+          "txHash": "0xb4f171c9c9caf7401f54a8e56225ae21d95032150a87a4678eac3f66a3137b93",
+          "index": "0x3"
+        }
+      }
+    ]
+  }
 }

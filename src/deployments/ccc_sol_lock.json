@@ -1,19 +1,19 @@
 {
-	"name": "ccc_sol_lock",
-	"description": "CCC SOL lock script",
-	"sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/ccc_sol_lock.c",
-	"scriptType": "lock",
-	"testnet": {
-		"codeHash": "0x98870bb4f49768bbd5bcf48b7cd189ab8a2cf2649869715c00a5d3cedd9db86b",
-		"hashType": "type",
-		"cellDeps": [
-			{
-				"depType": "code",
-				"outPoint": {
-					"txHash": "0x3fae7df1db56ae21edfd98054995bbbf7331aaebad66c3e1632b84eb50904531",
-					"index": "0x0"
-				}
-			}
-		]
-	}
+  "name": "ccc_sol_lock",
+  "description": "CCC SOL lock script",
+  "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/ccc_sol_lock.c",
+  "scriptType": "lock",
+  "testnet": {
+    "codeHash": "0x98870bb4f49768bbd5bcf48b7cd189ab8a2cf2649869715c00a5d3cedd9db86b",
+    "hashType": "type",
+    "cellDeps": [
+      {
+        "depType": "code",
+        "outPoint": {
+          "txHash": "0x3fae7df1db56ae21edfd98054995bbbf7331aaebad66c3e1632b84eb50904531",
+          "index": "0x0"
+        }
+      }
+    ]
+  }
 }
