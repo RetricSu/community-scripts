@@ -37,11 +37,22 @@ export interface ScriptInfo {
   cellDeps: CellDep[];
 }
 
+export interface DeploymentInfo {
+  data: Pick<ScriptInfo, 'codeHash' | 'hashType'>;
+  type: Pick<ScriptInfo, 'codeHash' | 'hashType'>;
+  cellDeps: CellDep[];
+  typeId?: {
+    codeHash: HexString;
+    hashType: HashType.Type;
+    args: HexString;
+  };
+}
+
 export interface ScriptDeployment {
   name: string;
   description: string;
   sourceUrl?: string;
   scriptType: ScriptType;
-  mainnet?: ScriptInfo;
-  testnet?: ScriptInfo;
+  mainnet?: DeploymentInfo;
+  testnet?: DeploymentInfo;
 }

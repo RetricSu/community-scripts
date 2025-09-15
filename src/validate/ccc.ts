@@ -20,10 +20,10 @@ export class CCCValidator extends SDKValidator {
     const testnetClient = new ccc.ClientPublicTestnet();
 
     const mainnet = Object.entries(mainnetClient.scripts).map(
-      ([name, scriptInfo]: [string, any]) => ({
+      ([name, scriptInfo]) => ({
         name: this.toName(name),
         network: 'mainnet' as const,
-        scriptInfo: this.toScriptInfo(scriptInfo),
+        scriptInfo: this.toScriptInfo(scriptInfo!),
       })
     );
     const testnet = Object.entries(testnetClient.scripts).map(

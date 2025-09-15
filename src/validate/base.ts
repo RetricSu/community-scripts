@@ -1,4 +1,8 @@
-import type { ScriptDeployment, ScriptInfo } from '../type/deployment';
+import {
+  HashType,
+  type ScriptDeployment,
+  type ScriptInfo,
+} from '../type/deployment';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -59,8 +63,15 @@ export abstract class SDKValidator {
       return result;
     }
 
-    const expectedScript =
+    const deploymentInfo =
       network === 'mainnet' ? deployment.mainnet : deployment.testnet;
+    const expectedScriptInfo =
+      sdkScriptInfo.hashType === HashType.Type
+        ? deploymentInfo?.type
+        : deploymentInfo?.data;
+    const expectedScript = expectedScriptInfo
+      ? { ...expectedScriptInfo, cellDeps: deploymentInfo!.cellDeps }
+      : null;
     if (!expectedScript) {
       result.isValid = false;
       result.errors.push(
@@ -87,6 +98,7 @@ export abstract class SDKValidator {
         `HashType mismatch: expected ${expectedScript.hashType}, got ${sdkScriptInfo.hashType}`
       );
     }
+
     // Validate cellDeps if provided
     if (sdkScriptInfo.cellDeps && expectedScript.cellDeps) {
       if (sdkScriptInfo.cellDeps.length !== expectedScript.cellDeps.length) {
@@ -125,6 +137,8 @@ export abstract class SDKValidator {
         }
       }
     }
+
+    // todo validate type-id info if applicable
 
     return result;
   }
