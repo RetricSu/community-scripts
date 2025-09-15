@@ -5,6 +5,8 @@ import { DailyTestRunner } from './testing/daily-test-runner';
 import { NPMSDKDiscoverer } from './discovery/npm-sdk-discoverer';
 import { DynamicSDKTester } from './testing/dynamic-sdk-tester';
 import { writeFileSync } from 'fs';
+import { version } from '../package.json';
+import { SDK_PACKAGE_NAMES } from './validate';
 
 const program = new Command();
 
@@ -13,7 +15,7 @@ program
   .description(
     'CKB Script validation tool for testing SDKs against deployment configurations'
   )
-  .version('1.0.0');
+  .version(version);
 
 program
   .command('discover')
@@ -24,9 +26,9 @@ program
 
 program
   .command('test')
-  .description('Test a specific SDK')
+  .description('Test all SDKs')
   .action(async () => {
-    await runTest();
+    await runTests();
   });
 
 program
@@ -54,9 +56,13 @@ async function runDiscovery() {
   });
 }
 
-async function runTest() {
-  const packageName = '@ckb-ccc/core';
+export async function runTests() {
+  for (const packageName of SDK_PACKAGE_NAMES) {
+    await runTest(packageName);
+  }
+}
 
+async function runTest(packageName: string) {
   console.log(`🧪 Testing SDK: ${packageName}`);
   const tester = new DynamicSDKTester();
   const report = await tester.testSDK(packageName);
