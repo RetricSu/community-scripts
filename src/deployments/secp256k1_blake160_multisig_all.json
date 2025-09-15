@@ -4,8 +4,8 @@
   "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/secp256k1_blake160_multisig_all.c",
   "scriptType": "lock",
   "mainnet": {
-    "codeHash": "0x5c5069eb0857efc65e1bca0c07df34c31663b3622fd3876c876320fc9634e2a8",
-    "hashType": "type",
+    "dataHash": "",
+    "typeHash": "0x5c5069eb0857efc65e1bca0c07df34c31663b3622fd3876c876320fc9634e2a8",
     "cellDeps": [
       {
         "depType": "dep_group",
@@ -17,8 +17,8 @@
     ]
   },
   "testnet": {
-    "codeHash": "0x5c5069eb0857efc65e1bca0c07df34c31663b3622fd3876c876320fc9634e2a8",
-    "hashType": "type",
+    "dataHash": "",
+    "typeHash": "0x5c5069eb0857efc65e1bca0c07df34c31663b3622fd3876c876320fc9634e2a8",
     "cellDeps": [
       {
         "depType": "dep_group",

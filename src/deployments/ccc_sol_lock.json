@@ -4,8 +4,8 @@
   "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/ccc_sol_lock.c",
   "scriptType": "lock",
   "testnet": {
-    "codeHash": "0x98870bb4f49768bbd5bcf48b7cd189ab8a2cf2649869715c00a5d3cedd9db86b",
-    "hashType": "type",
+    "dataHash": "",
+    "typeHash": "0x98870bb4f49768bbd5bcf48b7cd189ab8a2cf2649869715c00a5d3cedd9db86b",
     "cellDeps": [
       {
         "depType": "code",

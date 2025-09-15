@@ -4,8 +4,8 @@
   "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/single_use_lock.c",
   "scriptType": "lock",
   "mainnet": {
-    "codeHash": "0x8290467a512e5b9a6b816469b0edabba1f4ac474e28ffdd604c2a7c76446bbaf",
-    "hashType": "data1",
+    "dataHash": "0x8290467a512e5b9a6b816469b0edabba1f4ac474e28ffdd604c2a7c76446bbaf",
+    "typeHash": "",
     "cellDeps": [
       {
         "depType": "code",
@@ -17,8 +17,8 @@
     ]
   },
   "testnet": {
-    "codeHash": "0x8290467a512e5b9a6b816469b0edabba1f4ac474e28ffdd604c2a7c76446bbaf",
-    "hashType": "data1",
+    "dataHash": "0x8290467a512e5b9a6b816469b0edabba1f4ac474e28ffdd604c2a7c76446bbaf",
+    "typeHash": "",
     "cellDeps": [
       {
         "depType": "code",

@@ -4,8 +4,8 @@
   "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/time_lock.c",
   "scriptType": "lock",
   "mainnet": {
-    "codeHash": "0x6fac4b2e89360a1e692efcddcb3a28656d8446549fb83da6d896db8b714f4451",
-    "hashType": "data1",
+    "dataHash": "0x6fac4b2e89360a1e692efcddcb3a28656d8446549fb83da6d896db8b714f4451",
+    "typeHash": "",
     "cellDeps": [
       {
         "depType": "code",
@@ -17,8 +17,8 @@
     ]
   },
   "testnet": {
-    "codeHash": "0x6fac4b2e89360a1e692efcddcb3a28656d8446549fb83da6d896db8b714f4451",
-    "hashType": "data1",
+    "dataHash": "0x6fac4b2e89360a1e692efcddcb3a28656d8446549fb83da6d896db8b714f4451",
+    "typeHash": "",
     "cellDeps": [
       {
         "depType": "code",

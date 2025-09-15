@@ -4,8 +4,8 @@
   "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/ccc_eth_lock.c",
   "scriptType": "lock",
   "testnet": {
-    "codeHash": "0x5b1983cf4242009f72e82b37fb6b36790e6d4858474046fc3c798e5142cf8835",
-    "hashType": "type",
+    "dataHash": "",
+    "typeHash": "0x5b1983cf4242009f72e82b37fb6b36790e6d4858474046fc3c798e5142cf8835",
     "cellDeps": [
       {
         "depType": "code",

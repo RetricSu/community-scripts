@@ -4,8 +4,8 @@
   "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/nostr_lock.c",
   "scriptType": "lock",
   "mainnet": {
-    "codeHash": "0x641a89ad2f77721b803cd50d01351c1f308444072d5fa20088567196c0574c68",
-    "hashType": "type",
+    "dataHash": "",
+    "typeHash": "0x641a89ad2f77721b803cd50d01351c1f308444072d5fa20088567196c0574c68",
     "cellDeps": [
       {
         "depType": "code",
@@ -17,8 +17,8 @@
     ]
   },
   "testnet": {
-    "codeHash": "0x6ae5ee0cb887b2df5a9a18137315b9bdc55be8d52637b2de0624092d5f0c91d5",
-    "hashType": "type",
+    "dataHash": "",
+    "typeHash": "0x6ae5ee0cb887b2df5a9a18137315b9bdc55be8d52637b2de0624092d5f0c91d5",
     "cellDeps": [
       {
         "depType": "code",

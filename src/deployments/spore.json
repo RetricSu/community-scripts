@@ -4,8 +4,8 @@
   "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/spore.c",
   "scriptType": "type",
   "mainnet": {
-    "codeHash": "0x4a4dce1df3dffff7f8b2cd7dff7303df3b6150c9788cb75dcf6747247132b9f5",
-    "hashType": "data1",
+    "dataHash": "0x4a4dce1df3dffff7f8b2cd7dff7303df3b6150c9788cb75dcf6747247132b9f5",
+    "typeHash": "",
     "cellDeps": [
       {
         "depType": "code",
@@ -17,8 +17,8 @@
     ]
   },
   "testnet": {
-    "codeHash": "0x685a60219309029d01310311dba953d67029170ca4848a4ff638e57002130a0d",
-    "hashType": "data1",
+    "dataHash": "0x685a60219309029d01310311dba953d67029170ca4848a4ff638e57002130a0d",
+    "typeHash": "",
     "cellDeps": [
       {
         "depType": "code",

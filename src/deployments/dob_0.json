@@ -4,8 +4,8 @@
   "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/dob_0.c",
   "scriptType": "type",
   "mainnet": {
-    "codeHash": "0x13cac78ad8482202f18f9df4ea707611c35f994375fa03ae79121312dda9925c",
-    "hashType": "data1",
+    "dataHash": "0x13cac78ad8482202f18f9df4ea707611c35f994375fa03ae79121312dda9925c",
+    "typeHash": "",
     "cellDeps": [
       {
         "depType": "code",
@@ -17,8 +17,8 @@
     ]
   },
   "testnet": {
-    "codeHash": "0x13cac78ad8482202f18f9df4ea707611c35f994375fa03ae79121312dda9925c",
-    "hashType": "data1",
+    "dataHash": "0x13cac78ad8482202f18f9df4ea707611c35f994375fa03ae79121312dda9925c",
+    "typeHash": "",
     "cellDeps": [
       {
         "depType": "code",

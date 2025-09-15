@@ -4,8 +4,8 @@
   "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/nostr_binding.c",
   "scriptType": "type",
   "mainnet": {
-    "codeHash": "0xb56ea08c4b10b454ed3389bb0e504ecfc57dcfe3089a5030654525a2def2108e",
-    "hashType": "type",
+    "dataHash": "",
+    "typeHash": "0xb56ea08c4b10b454ed3389bb0e504ecfc57dcfe3089a5030654525a2def2108e",
     "cellDeps": [
       {
         "depType": "code",
@@ -17,8 +17,8 @@
     ]
   },
   "testnet": {
-    "codeHash": "0x4105801324b70b3a1508ded8958aba66a6faf68cab26f863b4902b50dfb8b9ab",
-    "hashType": "type",
+    "dataHash": "",
+    "typeHash": "0x4105801324b70b3a1508ded8958aba66a6faf68cab26f863b4902b50dfb8b9ab",
     "cellDeps": [
       {
         "depType": "code",
