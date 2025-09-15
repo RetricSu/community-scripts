@@ -4,7 +4,8 @@
   "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/always_success.c",
   "scriptType": "both",
   "mainnet": {
-    "typeHash": "",
+    "dataHash": "",
+    "typeHash": "0x3b521cc4b552f109d092d8cc468a8048acb53c5952dbe769d2b2f9cf6e47f7f1",
     "cellDeps": [
       {
         "depType": "code",
@@ -16,7 +17,8 @@
     ]
   },
   "testnet": {
-    "typeHash": "",
+    "dataHash": "",
+    "typeHash": "0x3b521cc4b552f109d092d8cc468a8048acb53c5952dbe769d2b2f9cf6e47f7f1",
     "cellDeps": [
       {
         "depType": "code",

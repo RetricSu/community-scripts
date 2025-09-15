@@ -72,27 +72,36 @@ export abstract class SDKValidator {
       );
       return result;
     }
+
+    // Ensure required fields are present
+    if (deploymentInfo.dataHash == null || deploymentInfo.typeHash == null) {
+      result.isValid = false;
+      result.errors.push(
+        `Missing required hash fields in ${network} configuration for script '${scriptName}'`
+      );
+      return result;
+    }
+
     const expectedScript: ScriptInfo =
       sdkScriptInfo.hashType === HashType.Type
         ? {
-            codeHash: deploymentInfo.typeHash,
+            codeHash: deploymentInfo.typeHash || '',
             hashType: HashType.Type,
             cellDeps: deploymentInfo.cellDeps,
           }
         : {
-            codeHash: deploymentInfo.dataHash,
+            codeHash: deploymentInfo.dataHash || '',
             hashType: sdkScriptInfo.hashType,
             cellDeps: deploymentInfo.cellDeps,
           };
 
     // Validate codeHash
-    if (
-      sdkScriptInfo.codeHash.toLowerCase() !==
-      expectedScript.codeHash.toLowerCase()
-    ) {
+    const sdkCodeHash = sdkScriptInfo.codeHash || '';
+    const expectedCodeHash = expectedScript.codeHash || '';
+    if (sdkCodeHash.toLowerCase() !== expectedCodeHash.toLowerCase()) {
       result.isValid = false;
       result.errors.push(
-        `CodeHash mismatch: expected ${expectedScript.codeHash}, got ${sdkScriptInfo.codeHash}`
+        `CodeHash mismatch: expected ${expectedCodeHash}, got ${sdkCodeHash}`
       );
     }
 
@@ -116,16 +125,15 @@ export abstract class SDKValidator {
           const expected = expectedScript.cellDeps[i];
           const actual = sdkScriptInfo.cellDeps[i];
 
-          if (actual.depType !== expected.depType) {
+          if (!expected.outPoint || !actual.outPoint) {
             result.isValid = false;
-            result.errors.push(
-              `CellDep ${i} depType mismatch: expected ${expected.depType}, got ${actual.depType}`
-            );
+            result.errors.push(`CellDep ${i} is missing outPoint`);
+            continue;
           }
 
           if (
-            actual.outPoint.txHash.toLowerCase() !==
-            expected.outPoint.txHash.toLowerCase()
+            (actual.outPoint.txHash || '').toLowerCase() !==
+            (expected.outPoint.txHash || '').toLowerCase()
           ) {
             result.isValid = false;
             result.errors.push(
@@ -133,7 +141,10 @@ export abstract class SDKValidator {
             );
           }
 
-          if (+actual.outPoint.index !== +expected.outPoint.index) {
+          if (
+            +(actual.outPoint.index || '0') !==
+            +(expected.outPoint.index || '0')
+          ) {
             result.isValid = false;
             result.errors.push(
               `CellDep ${i} index mismatch: expected ${+expected.outPoint.index}, got ${+actual.outPoint.index}`

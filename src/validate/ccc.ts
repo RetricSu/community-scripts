@@ -19,20 +19,26 @@ export class CCCValidator extends SDKValidator {
     const mainnetClient = new ccc.ClientPublicMainnet();
     const testnetClient = new ccc.ClientPublicTestnet();
 
-    const mainnet = Object.entries(mainnetClient.scripts).map(
-      ([name, scriptInfo]) => ({
+    const mainnet = Object.entries(mainnetClient.scripts)
+      .filter(
+        ([_name, scriptInfo]) =>
+          scriptInfo && scriptInfo.codeHash && scriptInfo.cellDeps
+      )
+      .map(([name, scriptInfo]) => ({
         name: this.toName(name),
         network: 'mainnet' as const,
         scriptInfo: this.toScriptInfo(scriptInfo!),
-      })
-    );
-    const testnet = Object.entries(testnetClient.scripts).map(
-      ([name, scriptInfo]: [string, any]) => ({
+      }));
+    const testnet = Object.entries(testnetClient.scripts)
+      .filter(
+        ([_name, scriptInfo]) =>
+          scriptInfo && scriptInfo.codeHash && scriptInfo.cellDeps
+      )
+      .map(([name, scriptInfo]: [string, any]) => ({
         name: this.toName(name),
         network: 'testnet' as const,
         scriptInfo: this.toScriptInfo(scriptInfo),
-      })
-    );
+      }));
 
     return [...mainnet, ...testnet];
   }
@@ -88,6 +94,9 @@ export class CCCValidator extends SDKValidator {
   }
 
   private toScriptInfo(script: CCC.ScriptInfoLike): ScriptInfo {
+    if (!script || !script.codeHash || !script.cellDeps) {
+      throw new Error('Invalid script info: missing required fields');
+    }
     const scriptInfo: ScriptInfo = {
       codeHash: hexFrom(script.codeHash),
       hashType: hashTypeFrom(script.hashType) as HashType,

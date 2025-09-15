@@ -4,7 +4,8 @@
   "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/ccc_btc_lock.c",
   "scriptType": "lock",
   "testnet": {
-    "typeHash": "",
+    "dataHash": "",
+    "typeHash": "0x8f026d6113b24800e04bfb33703f98dfaa6db6719097ab5d3050db9cf4fec45e",
     "cellDeps": [
       {
         "depType": "code",
