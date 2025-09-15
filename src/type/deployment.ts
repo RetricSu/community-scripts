@@ -38,8 +38,8 @@ export interface ScriptInfo {
 }
 
 export interface DeploymentInfo {
-  data: Pick<ScriptInfo, 'codeHash' | 'hashType'>;
-  type: Pick<ScriptInfo, 'codeHash' | 'hashType'>;
+  dataHash: HexString; // codeHash for hashType is dataN
+  typeHash: HexString; // codeHash for hashType == "type"
   cellDeps: CellDep[];
   typeId?: {
     codeHash: HexString;

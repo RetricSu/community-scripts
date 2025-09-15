@@ -65,20 +65,25 @@ export abstract class SDKValidator {
 
     const deploymentInfo =
       network === 'mainnet' ? deployment.mainnet : deployment.testnet;
-    const expectedScriptInfo =
-      sdkScriptInfo.hashType === HashType.Type
-        ? deploymentInfo?.type
-        : deploymentInfo?.data;
-    const expectedScript = expectedScriptInfo
-      ? { ...expectedScriptInfo, cellDeps: deploymentInfo!.cellDeps }
-      : null;
-    if (!expectedScript) {
+    if (!deploymentInfo) {
       result.isValid = false;
       result.errors.push(
         `No ${network} configuration found for script '${scriptName}'`
       );
       return result;
     }
+    const expectedScript: ScriptInfo =
+      sdkScriptInfo.hashType === HashType.Type
+        ? {
+            codeHash: deploymentInfo.typeHash,
+            hashType: HashType.Type,
+            cellDeps: deploymentInfo.cellDeps,
+          }
+        : {
+            codeHash: deploymentInfo.dataHash,
+            hashType: sdkScriptInfo.hashType,
+            cellDeps: deploymentInfo.cellDeps,
+          };
 
     // Validate codeHash
     if (
