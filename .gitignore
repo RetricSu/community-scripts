@@ -164,3 +164,6 @@ coverage/
 .env.development.local
 .env.test.local
 .env.production.local
+
+sdk-test-report.json
+results/

@@ -1,19 +1,19 @@
 {
-	"name": "ccc_eth_lock",
-	"description": "CCC ETH lock script",
-	"sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/ccc_eth_lock.c",
-	"scriptType": "lock",
-	"testnet": {
-		"codeHash": "0x5b1983cf4242009f72e82b37fb6b36790e6d4858474046fc3c798e5142cf8835",
-		"hashType": "type",
-		"cellDeps": [
-			{
-				"depType": "code",
-				"outPoint": {
-					"txHash": "0x2e6a50a9ce96c7b9697ed0fd21bd0a736d3df5e62d25137f728d8354a36cb369",
-					"index": "0x0"
-				}
-			}
-		]
-	}
+  "name": "ccc_eth_lock",
+  "description": "CCC ETH lock script",
+  "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/ccc_eth_lock.c",
+  "scriptType": "lock",
+  "testnet": {
+    "dataHash": "",
+    "typeHash": "0x5b1983cf4242009f72e82b37fb6b36790e6d4858474046fc3c798e5142cf8835",
+    "cellDeps": [
+      {
+        "depType": "code",
+        "outPoint": {
+          "txHash": "0x2e6a50a9ce96c7b9697ed0fd21bd0a736d3df5e62d25137f728d8354a36cb369",
+          "index": "0x0"
+        }
+      }
+    ]
+  }
 }

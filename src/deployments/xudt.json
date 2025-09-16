@@ -1,32 +1,32 @@
 {
-	"name": "xudt",
-	"description": "Extended UDT script",
-	"sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/xudt.c",
-	"scriptType": "type",
-	"mainnet": {
-		"codeHash": "0x50bd8d6680b8b9cf98b73f3c08faf8b2a21914311954118ad6609be6e78a1b95",
-		"hashType": "data1",
-		"cellDeps": [
-			{
-				"depType": "code",
-				"outPoint": {
-					"txHash": "0xc07844ce21b38e4b071dd0e1ee3b0e27afd8d7532491327f39b786343f558ab7",
-					"index": "0x0"
-				}
-			}
-		]
-	},
-	"testnet": {
-		"codeHash": "0x50bd8d6680b8b9cf98b73f3c08faf8b2a21914311954118ad6609be6e78a1b95",
-		"hashType": "data1",
-		"cellDeps": [
-			{
-				"depType": "code",
-				"outPoint": {
-					"txHash": "0xbf6fb538763efec2a70a6a3dcb7242787087e1030c4e7d86585bc63a9d337f5f",
-					"index": "0x0"
-				}
-			}
-		]
-	}
+  "name": "xudt",
+  "description": "Extended UDT script",
+  "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/xudt.c",
+  "scriptType": "type",
+  "mainnet": {
+    "dataHash": "0x50bd8d6680b8b9cf98b73f3c08faf8b2a21914311954118ad6609be6e78a1b95",
+    "typeHash": "",
+    "cellDeps": [
+      {
+        "depType": "code",
+        "outPoint": {
+          "txHash": "0xc07844ce21b38e4b071dd0e1ee3b0e27afd8d7532491327f39b786343f558ab7",
+          "index": "0x0"
+        }
+      }
+    ]
+  },
+  "testnet": {
+    "dataHash": "0x50bd8d6680b8b9cf98b73f3c08faf8b2a21914311954118ad6609be6e78a1b95",
+    "typeHash": "",
+    "cellDeps": [
+      {
+        "depType": "code",
+        "outPoint": {
+          "txHash": "0xbf6fb538763efec2a70a6a3dcb7242787087e1030c4e7d86585bc63a9d337f5f",
+          "index": "0x0"
+        }
+      }
+    ]
+  }
 }

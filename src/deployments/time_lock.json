@@ -1,32 +1,32 @@
 {
-	"name": "time_lock",
-	"description": "Time lock script",
-	"sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/time_lock.c",
-	"scriptType": "lock",
-	"mainnet": {
-		"codeHash": "0x6fac4b2e89360a1e692efcddcb3a28656d8446549fb83da6d896db8b714f4451",
-		"hashType": "data1",
-		"cellDeps": [
-			{
-				"depType": "code",
-				"outPoint": {
-					"txHash": "0xb0ed754fb27d67fd8388c97fed914fb7998eceaa01f3e6f967e498de1ba0ac9b",
-					"index": "0x1"
-				}
-			}
-		]
-	},
-	"testnet": {
-		"codeHash": "0x6fac4b2e89360a1e692efcddcb3a28656d8446549fb83da6d896db8b714f4451",
-		"hashType": "data1",
-		"cellDeps": [
-			{
-				"depType": "code",
-				"outPoint": {
-					"txHash": "0x1b4ffcad55ecd36ffb2715b6816b83da73851f1a24fe594f263c4f34dad90792",
-					"index": "0x1"
-				}
-			}
-		]
-	}
+  "name": "time_lock",
+  "description": "Time lock script",
+  "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/time_lock.c",
+  "scriptType": "lock",
+  "mainnet": {
+    "dataHash": "0x6fac4b2e89360a1e692efcddcb3a28656d8446549fb83da6d896db8b714f4451",
+    "typeHash": "",
+    "cellDeps": [
+      {
+        "depType": "code",
+        "outPoint": {
+          "txHash": "0xb0ed754fb27d67fd8388c97fed914fb7998eceaa01f3e6f967e498de1ba0ac9b",
+          "index": "0x1"
+        }
+      }
+    ]
+  },
+  "testnet": {
+    "dataHash": "0x6fac4b2e89360a1e692efcddcb3a28656d8446549fb83da6d896db8b714f4451",
+    "typeHash": "",
+    "cellDeps": [
+      {
+        "depType": "code",
+        "outPoint": {
+          "txHash": "0x1b4ffcad55ecd36ffb2715b6816b83da73851f1a24fe594f263c4f34dad90792",
+          "index": "0x1"
+        }
+      }
+    ]
+  }
 }
