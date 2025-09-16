@@ -137,7 +137,7 @@ export abstract class SDKValidator {
           ) {
             result.isValid = false;
             result.errors.push(
-              `CellDep ${+i} txHash mismatch: expected ${expected.outPoint.txHash}, got ${actual.outPoint.txHash}`
+              `CellDep ${i} txHash mismatch: expected ${expected.outPoint.txHash}, got ${actual.outPoint.txHash}`
             );
           }
 

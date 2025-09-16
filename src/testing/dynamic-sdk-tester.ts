@@ -132,7 +132,6 @@ export class DynamicSDKTester {
       const child = spawn('pnpm', ['add', `${packageName}${versionFlag}`], {
         cwd,
         stdio: 'inherit',
-        shell: true,
       });
       child.on('close', (code) => {
         if (code === 0) resolve();

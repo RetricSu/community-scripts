@@ -34,10 +34,10 @@ export class CCCValidator extends SDKValidator {
         ([_name, scriptInfo]) =>
           scriptInfo && scriptInfo.codeHash && scriptInfo.cellDeps
       )
-      .map(([name, scriptInfo]: [string, any]) => ({
+      .map(([name, scriptInfo]) => ({
         name: this.toName(name),
         network: 'testnet' as const,
-        scriptInfo: this.toScriptInfo(scriptInfo),
+        scriptInfo: this.toScriptInfo(scriptInfo!),
       }));
 
     return [...mainnet, ...testnet];
