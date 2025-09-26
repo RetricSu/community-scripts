@@ -79,7 +79,7 @@ jobs:
                 - Failed tests: ${summary.failedTests || 0}
                 - Duration: ${((summary.duration || 0) / 1000).toFixed(1)}s
                 
-                [View detailed results](${context.payload.repository.html_url}/actions/runs/${context.runId})
+                View detailed results: ${context.payload.repository.html_url}/actions/runs/${context.runId}
                 `;
                 
                 await github.rest.issues.createComment({
