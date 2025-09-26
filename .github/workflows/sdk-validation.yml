@@ -79,7 +79,7 @@ jobs:
                 - Failed tests: ${summary.failedTests || 0}
                 - Duration: ${((summary.duration || 0) / 1000).toFixed(1)}s
                 
-                [View detailed results](${github.server_url}/${github.repository}/actions/runs/${github.run_id})
+                [View detailed results](${context.payload.repository.html_url}/actions/runs/${context.runId})
                 `;
                 
                 await github.rest.issues.createComment({
@@ -94,7 +94,7 @@ jobs:
                   issue_number: context.issue.number,
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  body: '## SDK Validation Results\n\n❌ No validation results found. Check the [workflow run](' + github.server_url + '/' + github.repository + '/actions/runs/' + github.run_id + ') for details.'
+                  body: '## SDK Validation Results\n\n❌ No validation results found. Check the [workflow run](' + context.payload.repository.html_url + '/actions/runs/' + context.runId + ') for details.'
                 });
               }
             } catch (error) {
@@ -103,6 +103,6 @@ jobs:
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: '## SDK Validation Results\n\n❌ Error reading validation results. Check the [workflow run](' + github.server_url + '/' + github.repository + '/actions/runs/' + github.run_id + ') for details.'
+                body: '## SDK Validation Results\n\n❌ Error reading validation results. Check the [workflow run](' + context.payload.repository.html_url + '/actions/runs/' + context.runId + ') for details.'
               });
             }

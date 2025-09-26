@@ -2,7 +2,7 @@
   "name": "community-scripts",
   "version": "1.0.0",
   "description": "CKB Script validation tool for testing SDKs against deployment configurations",
-  "main": "dist/index.js",
+  "main": "dist/src/index.js",
   "bin": {
     "community-scripts": "./dist/src/index.js"
   },
