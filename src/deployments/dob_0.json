@@ -1,11 +1,11 @@
 {
   "name": "dob_0",
   "description": "DOB 0",
-  "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/dob_0.c",
+  "sourceUrl": "https://github.com/sporeprotocol/spore-dob-0",
   "scriptType": "type",
   "mainnet": {
     "dataHash": "0x13cac78ad8482202f18f9df4ea707611c35f994375fa03ae79121312dda9925c",
-    "typeHash": "",
+    "typeHash": "0x",
     "cellDeps": [
       {
         "depType": "code",
@@ -18,7 +18,7 @@
   },
   "testnet": {
     "dataHash": "0x13cac78ad8482202f18f9df4ea707611c35f994375fa03ae79121312dda9925c",
-    "typeHash": "",
+    "typeHash": "0x",
     "cellDeps": [
       {
         "depType": "code",
