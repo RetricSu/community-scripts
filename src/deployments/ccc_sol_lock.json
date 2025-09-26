@@ -1,10 +1,10 @@
 {
   "name": "ccc_sol_lock",
   "description": "CCC SOL lock script",
-  "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/ccc_sol_lock.c",
+  "sourceUrl": "https://github.com/ckb-devrel/ccc-locks/blob/master/docs/sol.md",
   "scriptType": "lock",
   "testnet": {
-    "dataHash": "",
+    "dataHash": "0x697ca3d2731f2eca7e1725353ce5b07f30fc4577a6e9250e2232a0f90f97a877",
     "typeHash": "0x98870bb4f49768bbd5bcf48b7cd189ab8a2cf2649869715c00a5d3cedd9db86b",
     "cellDeps": [
       {

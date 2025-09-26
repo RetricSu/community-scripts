@@ -1,10 +1,10 @@
 {
   "name": "ccc_btc_lock",
   "description": "CCC BTC lock script",
-  "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/ccc_btc_lock.c",
+  "sourceUrl": "https://github.com/ckb-devrel/ccc-locks/blob/master/docs/btc.md",
   "scriptType": "lock",
   "testnet": {
-    "dataHash": "",
+    "dataHash": "0x3fa562b394f65aac8c2649b6d7d1dea25c677ccfcd4d912e63b272b78bbacb14",
     "typeHash": "0x8f026d6113b24800e04bfb33703f98dfaa6db6719097ab5d3050db9cf4fec45e",
     "cellDeps": [
       {

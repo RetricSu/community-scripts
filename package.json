@@ -2,10 +2,13 @@
   "name": "community-scripts",
   "version": "1.0.0",
   "description": "CKB Script validation tool for testing SDKs against deployment configurations",
-  "main": "dist/index.js",
+  "main": "dist/src/index.js",
   "bin": {
-    "community-scripts": "./dist/index.js"
+    "community-scripts": "./dist/src/index.js"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
     "check": "npx @biomejs/biome check --write src",

@@ -1,10 +1,10 @@
 {
   "name": "ccc_eth_lock",
   "description": "CCC ETH lock script",
-  "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/ccc_eth_lock.c",
+  "sourceUrl": "https://github.com/ckb-devrel/ccc-locks/blob/master/docs/eth.md",
   "scriptType": "lock",
   "testnet": {
-    "dataHash": "",
+    "dataHash": "0x66be3ce5f50be813bc583e733583db33bc1757b462006258471e52e358aced50",
     "typeHash": "0x5b1983cf4242009f72e82b37fb6b36790e6d4858474046fc3c798e5142cf8835",
     "cellDeps": [
       {

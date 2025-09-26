@@ -3,6 +3,11 @@ on:
   schedule:
     - cron: '0 2 * * *'  # Daily at 2 AM UTC
   workflow_dispatch:  # Manual trigger
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - '.github/workflows/sdk-validation.yml'
   push:
     branches: [ master ]
     paths:
@@ -13,6 +18,9 @@ on:
 jobs:
   validate-sdks:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -55,28 +63,46 @@ jobs:
             const fs = require('fs');
             const summaryPath = './results/latest-summary.json';
             
-            if (fs.existsSync(summaryPath)) {
-              const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf-8'));
-              
-              const comment = `## SDK Validation Results
-              
-              **Summary:**
-              - Total SDKs tested: ${summary.totalSDKs}
-              - Successful: ${summary.successfulSDKs}
-              - Failed: ${summary.failedSDKs}
-              - Success rate: ${summary.successRate.toFixed(1)}%
-              - Total tests: ${summary.totalTests}
-              - Passed tests: ${summary.passedTests}
-              - Failed tests: ${summary.failedTests}
-              - Duration: ${(summary.duration / 1000).toFixed(1)}s
-              
-              [View detailed results](${github.server_url}/${github.repository}/actions/runs/${github.run_id})
-              `;
-              
-              github.rest.issues.createComment({
+            try {
+              if (fs.existsSync(summaryPath)) {
+                const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf-8'));
+                
+                const comment = `## SDK Validation Results
+                
+                **Summary:**
+                - Total SDKs tested: ${summary.totalSDKs || 0}
+                - Successful: ${summary.successfulSDKs || 0}
+                - Failed: ${summary.failedSDKs || 0}
+                - Success rate: ${(summary.successRate || 0).toFixed(1)}%
+                - Total tests: ${summary.totalTests || 0}
+                - Passed tests: ${summary.passedTests || 0}
+                - Failed tests: ${summary.failedTests || 0}
+                - Duration: ${((summary.duration || 0) / 1000).toFixed(1)}s
+                
+                View detailed results: ${context.payload.repository.html_url}/actions/runs/${context.runId}
+                `;
+                
+                await github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: comment
+                });
+              } else {
+                console.log('Summary file not found, skipping PR comment');
+                await github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: '## SDK Validation Results\n\n❌ No validation results found. Check the [workflow run](' + context.payload.repository.html_url + '/actions/runs/' + context.runId + ') for details.'
+                });
+              }
+            } catch (error) {
+              console.error('Error posting PR comment:', error);
+              await github.rest.issues.createComment({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: comment
+                body: '## SDK Validation Results\n\n❌ Error reading validation results. Check the [workflow run](' + context.payload.repository.html_url + '/actions/runs/' + context.runId + ') for details.'
               });
-            } 
+            }
