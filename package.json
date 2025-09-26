@@ -12,7 +12,9 @@
     "fmt": "npx @biomejs/biome format --write src",
     "lint": "npx @biomejs/biome lint --write src",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "ts-node --transpile-only src/index.ts"
+    "start": "ts-node --transpile-only src/index.ts",
+    "discover": "node dist/src/index.js discover",
+    "daily": "node dist/src/index.js daily"
   },
   "keywords": [
     "ckb",
