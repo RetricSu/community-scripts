@@ -4,26 +4,26 @@
   "sourceUrl": "https://github.com/sporeprotocol/spore-dob-0",
   "scriptType": "type",
   "mainnet": {
-    "dataHash": "0x13cac78ad8482202f18f9df4ea707611c35f994375fa03ae79121312dda9925c",
-    "typeHash": "0x",
+    "code_hash": "0x13cac78ad8482202f18f9df4ea707611c35f994375fa03ae79121312dda9925c",
+    "hash_type": "data1",
     "cellDeps": [
       {
-        "depType": "code",
+        "dep_type": "code",
         "outPoint": {
-          "txHash": "0x71023885a2178648be6a7f138ee49379000a82cda98dd8adabee99eaaca42fde",
+          "tx_hash": "0x71023885a2178648be6a7f138ee49379000a82cda98dd8adabee99eaaca42fde",
           "index": "0x0"
         }
       }
     ]
   },
   "testnet": {
-    "dataHash": "0x13cac78ad8482202f18f9df4ea707611c35f994375fa03ae79121312dda9925c",
-    "typeHash": "0x",
+    "code_hash": "0x13cac78ad8482202f18f9df4ea707611c35f994375fa03ae79121312dda9925c",
+    "hash_type": "data1",
     "cellDeps": [
       {
-        "depType": "code",
+        "dep_type": "code",
         "outPoint": {
-          "txHash": "0xf6ebcf3881b9ffe64e94f4ee2f643cfc69515faba1dadf4a9e4a7d3f9ecc4094",
+          "tx_hash": "0xf6ebcf3881b9ffe64e94f4ee2f643cfc69515faba1dadf4a9e4a7d3f9ecc4094",
           "index": "0x0"
         }
       }

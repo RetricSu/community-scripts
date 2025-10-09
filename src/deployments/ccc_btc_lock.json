@@ -4,13 +4,13 @@
   "sourceUrl": "https://github.com/ckb-devrel/ccc-locks/blob/master/docs/btc.md",
   "scriptType": "lock",
   "testnet": {
-    "dataHash": "0x3fa562b394f65aac8c2649b6d7d1dea25c677ccfcd4d912e63b272b78bbacb14",
-    "typeHash": "0x8f026d6113b24800e04bfb33703f98dfaa6db6719097ab5d3050db9cf4fec45e",
+    "code_hash": "0x8f026d6113b24800e04bfb33703f98dfaa6db6719097ab5d3050db9cf4fec45e",
+    "hash_type": "type",
     "cellDeps": [
       {
-        "depType": "code",
+        "dep_type": "code",
         "outPoint": {
-          "txHash": "0xba5a1a77019be0e8942119ad549f01ca3c61fd9f911aa46e27d508a802236614",
+          "tx_hash": "0xba5a1a77019be0e8942119ad549f01ca3c61fd9f911aa46e27d508a802236614",
           "index": "0x0"
         }
       }

@@ -4,13 +4,13 @@
   "sourceUrl": "https://github.com/ckb-devrel/ccc-locks/blob/master/docs/eth.md",
   "scriptType": "lock",
   "testnet": {
-    "dataHash": "0x66be3ce5f50be813bc583e733583db33bc1757b462006258471e52e358aced50",
-    "typeHash": "0x5b1983cf4242009f72e82b37fb6b36790e6d4858474046fc3c798e5142cf8835",
+    "code_hash": "0x5b1983cf4242009f72e82b37fb6b36790e6d4858474046fc3c798e5142cf8835",
+    "hash_type": "",
     "cellDeps": [
       {
-        "depType": "code",
+        "dep_type": "code",
         "outPoint": {
-          "txHash": "0x2e6a50a9ce96c7b9697ed0fd21bd0a736d3df5e62d25137f728d8354a36cb369",
+          "tx_hash": "0x2e6a50a9ce96c7b9697ed0fd21bd0a736d3df5e62d25137f728d8354a36cb369",
           "index": "0x0"
         }
       }

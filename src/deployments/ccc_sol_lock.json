@@ -4,13 +4,13 @@
   "sourceUrl": "https://github.com/ckb-devrel/ccc-locks/blob/master/docs/sol.md",
   "scriptType": "lock",
   "testnet": {
-    "dataHash": "0x697ca3d2731f2eca7e1725353ce5b07f30fc4577a6e9250e2232a0f90f97a877",
-    "typeHash": "0x98870bb4f49768bbd5bcf48b7cd189ab8a2cf2649869715c00a5d3cedd9db86b",
+    "code_hash": "0x98870bb4f49768bbd5bcf48b7cd189ab8a2cf2649869715c00a5d3cedd9db86b",
+    "hash_type": "type",
     "cellDeps": [
       {
-        "depType": "code",
+        "dep_type": "code",
         "outPoint": {
-          "txHash": "0x3fae7df1db56ae21edfd98054995bbbf7331aaebad66c3e1632b84eb50904531",
+          "tx_hash": "0x3fae7df1db56ae21edfd98054995bbbf7331aaebad66c3e1632b84eb50904531",
           "index": "0x0"
         }
       }

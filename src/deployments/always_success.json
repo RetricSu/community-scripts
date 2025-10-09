@@ -1,29 +1,29 @@
 {
   "name": "always_success",
   "description": "Always success script",
-  "sourceUrl": "https://github.com/nervosnetwork/ckb-production-scripts/blob/master/c/always_success.c",
+  "sourceUrl": "https://github.com/ckb-devrel/ckb-proxy-locks?tab=readme-ov-file#always-success",
   "scriptType": "both",
   "mainnet": {
-    "dataHash": "0x3b521cc4b552f109d092d8cc468a8048acb53c5952dbe769d2b2f9cf6e47f7f1",
-    "typeHash": "0x",
+    "code_hash": "0x3b521cc4b552f109d092d8cc468a8048acb53c5952dbe769d2b2f9cf6e47f7f1",
+    "hash_type": "type",
     "cellDeps": [
       {
-        "depType": "code",
+        "dep_type": "code",
         "outPoint": {
-          "txHash": "0x10d63a996157d32c01078058000052674ca58d15f921bec7f1dcdac2160eb66b",
+          "tx_hash": "0x10d63a996157d32c01078058000052674ca58d15f921bec7f1dcdac2160eb66b",
           "index": "0x0"
         }
       }
     ]
   },
   "testnet": {
-    "dataHash": "0x3b521cc4b552f109d092d8cc468a8048acb53c5952dbe769d2b2f9cf6e47f7f1",
-    "typeHash": "0x",
+    "code_hash": "0x3b521cc4b552f109d092d8cc468a8048acb53c5952dbe769d2b2f9cf6e47f7f1",
+    "hash_type": "type",
     "cellDeps": [
       {
-        "depType": "code",
+        "dep_type": "code",
         "outPoint": {
-          "txHash": "0xb4f171c9c9caf7401f54a8e56225ae21d95032150a87a4678eac3f66a3137b93",
+          "tx_hash": "0xb4f171c9c9caf7401f54a8e56225ae21d95032150a87a4678eac3f66a3137b93",
           "index": "0x0"
         }
       }
