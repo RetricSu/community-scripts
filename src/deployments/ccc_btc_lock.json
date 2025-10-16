@@ -1,7 +1,7 @@
 {
   "name": "ccc_btc_lock",
   "description": "CCC BTC lock script",
-  "sourceUrl": "https://github.com/ckb-devrel/ccc-locks/blob/master/docs/btc.md",
+  "sourceUrl": "https://github.com/ckb-devrel/ccc-locks/blob/master/deployment/testnet/btc-lock/migrations/2024-08-02-064528.json",
   "scriptType": "lock",
   "testnet": {
     "dataHash": "0x3fa562b394f65aac8c2649b6d7d1dea25c677ccfcd4d912e63b272b78bbacb14",

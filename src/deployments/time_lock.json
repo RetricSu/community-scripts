@@ -1,11 +1,11 @@
 {
   "name": "time_lock",
   "description": "Time lock script",
-  "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/time_lock.c",
+  "sourceUrl": "https://github.com/ckb-devrel/ckb-proxy-locks?tab=readme-ov-file#time-lock",
   "scriptType": "lock",
   "mainnet": {
     "dataHash": "0x6fac4b2e89360a1e692efcddcb3a28656d8446549fb83da6d896db8b714f4451",
-    "typeHash": "",
+    "typeHash": "0x",
     "cellDeps": [
       {
         "depType": "code",
@@ -18,7 +18,7 @@
   },
   "testnet": {
     "dataHash": "0x6fac4b2e89360a1e692efcddcb3a28656d8446549fb83da6d896db8b714f4451",
-    "typeHash": "",
+    "typeHash": "0x",
     "cellDeps": [
       {
         "depType": "code",

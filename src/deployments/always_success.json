@@ -1,11 +1,11 @@
 {
   "name": "always_success",
   "description": "Always success script",
-  "sourceUrl": "https://github.com/nervosnetwork/ckb-production-scripts/blob/master/c/always_success.c",
+  "sourceUrl": "https://github.com/ckb-devrel/ckb-proxy-locks?tab=readme-ov-file#always-success",
   "scriptType": "both",
   "mainnet": {
     "dataHash": "0x3b521cc4b552f109d092d8cc468a8048acb53c5952dbe769d2b2f9cf6e47f7f1",
-    "typeHash": "0x",
+    "typeHash": "type",
     "cellDeps": [
       {
         "depType": "code",
@@ -18,7 +18,7 @@
   },
   "testnet": {
     "dataHash": "0x3b521cc4b552f109d092d8cc468a8048acb53c5952dbe769d2b2f9cf6e47f7f1",
-    "typeHash": "0x",
+    "typeHash": "type",
     "cellDeps": [
       {
         "depType": "code",

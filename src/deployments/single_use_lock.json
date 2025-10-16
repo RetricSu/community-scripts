@@ -1,7 +1,7 @@
 {
   "name": "single_use_lock",
   "description": "Single use lock script",
-  "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/single_use_lock.c",
+  "sourceUrl": "https://github.com/ckb-devrel/ckb-proxy-locks?tab=readme-ov-file#single-use-lock",
   "scriptType": "lock",
   "mainnet": {
     "dataHash": "0x8290467a512e5b9a6b816469b0edabba1f4ac474e28ffdd604c2a7c76446bbaf",
@@ -18,7 +18,7 @@
   },
   "testnet": {
     "dataHash": "0x8290467a512e5b9a6b816469b0edabba1f4ac474e28ffdd604c2a7c76446bbaf",
-    "typeHash": "",
+    "typeHash": "0x",
     "cellDeps": [
       {
         "depType": "code",

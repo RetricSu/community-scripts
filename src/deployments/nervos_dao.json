@@ -1,10 +1,10 @@
 {
   "name": "nervos_dao",
   "description": "Nervos DAO script",
-  "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/dao.c",
+  "sourceUrl": "https://github.com/nervosnetwork/rfcs/blob/master/rfcs/0024-ckb-genesis-script-list/0024-ckb-genesis-script-list.md#nervos-dao",
   "scriptType": "type",
   "mainnet": {
-    "dataHash": "",
+    "dataHash": "0x",
     "typeHash": "0x82d76d1b75fe2fd9a27dfbaa65a039221a380d76c926f378d3f81cf3e7e13f2e",
     "cellDeps": [
       {
@@ -17,13 +17,13 @@
     ]
   },
   "testnet": {
-    "dataHash": "",
+    "dataHash": "0x",
     "typeHash": "0x82d76d1b75fe2fd9a27dfbaa65a039221a380d76c926f378d3f81cf3e7e13f2e",
     "cellDeps": [
       {
         "depType": "code",
         "outPoint": {
-          "txHash": "0x8f8c635ebd3267ad8608585848c4f0ae7c65fbaf12c1b2d0c4388aacb842b17e",
+          "txHash": "0x8f8c79eb6671709633fe6a46de93c0fedc9c1b8a6527a18d3983879542635c9f",
           "index": "0x2"
         }
       }

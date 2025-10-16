@@ -1,11 +1,11 @@
 {
   "name": "type_burn_lock",
   "description": "Type burn lock script",
-  "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/type_burn_lock.c",
+  "sourceUrl": "https://github.com/ckb-devrel/ckb-proxy-locks?tab=readme-ov-file#type-burn-lock",
   "scriptType": "lock",
   "mainnet": {
     "dataHash": "0xff78bae0abf17d7a404c0be0f9ad9c9185b3f88dcc60403453d5ba8e1f22f53a",
-    "typeHash": "",
+    "typeHash": "0x",
     "cellDeps": [
       {
         "depType": "code",
@@ -18,7 +18,7 @@
   },
   "testnet": {
     "dataHash": "0xff78bae0abf17d7a404c0be0f9ad9c9185b3f88dcc60403453d5ba8e1f22f53a",
-    "typeHash": "",
+    "typeHash": "0x",
     "cellDeps": [
       {
         "depType": "code",
