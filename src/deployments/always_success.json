@@ -5,7 +5,7 @@
   "scriptType": "both",
   "mainnet": {
     "dataHash": "0x3b521cc4b552f109d092d8cc468a8048acb53c5952dbe769d2b2f9cf6e47f7f1",
-    "typeHash": "type",
+    "typeHash": "0x",
     "cellDeps": [
       {
         "depType": "code",
@@ -18,7 +18,7 @@
   },
   "testnet": {
     "dataHash": "0x3b521cc4b552f109d092d8cc468a8048acb53c5952dbe769d2b2f9cf6e47f7f1",
-    "typeHash": "type",
+    "typeHash": "0x",
     "cellDeps": [
       {
         "depType": "code",
