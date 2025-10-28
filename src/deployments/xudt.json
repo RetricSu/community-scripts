@@ -1,11 +1,11 @@
 {
   "name": "xudt",
   "description": "Extended UDT script",
-  "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/xudt.c",
+  "sourceUrl": "https://github.com/nervosnetwork/rfcs/blob/master/rfcs/0052-extensible-udt/0052-extensible-udt.md#deployment",
   "scriptType": "type",
   "mainnet": {
     "dataHash": "0x50bd8d6680b8b9cf98b73f3c08faf8b2a21914311954118ad6609be6e78a1b95",
-    "typeHash": "",
+    "typeHash": "0x",
     "cellDeps": [
       {
         "depType": "code",
@@ -18,7 +18,7 @@
   },
   "testnet": {
     "dataHash": "0x50bd8d6680b8b9cf98b73f3c08faf8b2a21914311954118ad6609be6e78a1b95",
-    "typeHash": "",
+    "typeHash": "0x",
     "cellDeps": [
       {
         "depType": "code",
@@ -28,5 +28,5 @@
         }
       }
     ]
-  }
+  },
 }

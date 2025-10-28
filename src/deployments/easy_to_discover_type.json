@@ -1,11 +1,11 @@
 {
   "name": "easy_to_discover_type",
   "description": "Easy to discover type",
-  "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/easy_to_discover_type.c",
+  "sourceUrl": "https://github.com/ckb-devrel/ckb-proxy-locks?tab=readme-ov-file#easy-to-discover-type",
   "scriptType": "type",
   "mainnet": {
     "dataHash": "0xaba4430cc7110d699007095430a1faa72973edf2322ddbfd4d1d219cacf237af",
-    "typeHash": "",
+    "typeHash": "0x",
     "cellDeps": [
       {
         "depType": "code",
@@ -18,7 +18,7 @@
   },
   "testnet": {
     "dataHash": "0xaba4430cc7110d699007095430a1faa72973edf2322ddbfd4d1d219cacf237af",
-    "typeHash": "",
+    "typeHash": "0x",
     "cellDeps": [
       {
         "depType": "code",

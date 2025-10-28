@@ -1,11 +1,11 @@
 {
   "name": "spore_cluster",
   "description": "Spore cluster",
-  "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/spore_cluster.c",
+  "sourceUrl": "https://github.com/sporeprotocol/spore-contract/tree/master/deployment/migration",
   "scriptType": "type",
   "mainnet": {
     "dataHash": "0x7366a61534fa7c7e6225ecc0d828ea3b5366adec2b58206f2ee84995fe030075",
-    "typeHash": "",
+    "typeHash": "0x",
     "cellDeps": [
       {
         "depType": "code",
@@ -18,7 +18,7 @@
   },
   "testnet": {
     "dataHash": "0x0bbe768b519d8ea7b96d58f1182eb7e6ef96c541fbd9526975077ee09f049058",
-    "typeHash": "",
+    "typeHash": "0xc11dd38a124e544722bb6f473cb1224022f39919960dbddc364fc0e71ace3c5e",
     "cellDeps": [
       {
         "depType": "code",

@@ -1,10 +1,10 @@
 {
   "name": "nostr_binding",
   "description": "Nostr binding script",
-  "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/nostr_binding.c",
+  "sourceUrl": "https://github.com/cryptape/nostr-binding/blob/main/docs/nostr-binding-type-script.md",
   "scriptType": "type",
   "mainnet": {
-    "dataHash": "",
+    "dataHash": "0x",
     "typeHash": "0xb56ea08c4b10b454ed3389bb0e504ecfc57dcfe3089a5030654525a2def2108e",
     "cellDeps": [
       {
@@ -17,7 +17,7 @@
     ]
   },
   "testnet": {
-    "dataHash": "",
+    "dataHash": "0x",
     "typeHash": "0x4105801324b70b3a1508ded8958aba66a6faf68cab26f863b4902b50dfb8b9ab",
     "cellDeps": [
       {

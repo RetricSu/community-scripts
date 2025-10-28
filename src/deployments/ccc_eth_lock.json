@@ -1,7 +1,7 @@
 {
   "name": "ccc_eth_lock",
   "description": "CCC ETH lock script",
-  "sourceUrl": "https://github.com/ckb-devrel/ccc-locks/blob/master/docs/eth.md",
+  "sourceUrl": "https://github.com/ckb-devrel/ccc-locks/blob/master/deployment/testnet/eth-lock/migrations/2024-08-02-064738.json",
   "scriptType": "lock",
   "testnet": {
     "dataHash": "0x66be3ce5f50be813bc583e733583db33bc1757b462006258471e52e358aced50",

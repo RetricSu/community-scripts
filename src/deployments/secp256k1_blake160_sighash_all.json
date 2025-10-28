@@ -1,10 +1,10 @@
 {
   "name": "secp256k1_blake160_sighash_all",
   "description": "Default single-signature lock script on CKB",
-  "sourceUrl": "https://github.com/nervosnetwork/ckb-system-scripts/blob/master/c/secp256k1_blake160_sighash_all.c",
+  "sourceUrl": "https://github.com/nervosnetwork/rfcs/blob/master/rfcs/0024-ckb-genesis-script-list/0024-ckb-genesis-script-list.md#secp256k1blake160",
   "scriptType": "lock",
   "mainnet": {
-    "dataHash": "",
+    "dataHash": "0x",
     "typeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
     "cellDeps": [
       {
@@ -17,7 +17,7 @@
     ]
   },
   "testnet": {
-    "dataHash": "",
+    "dataHash": "0x",
     "typeHash": "0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8",
     "cellDeps": [
       {
