@@ -192,7 +192,7 @@ export interface VerificationMismatch {
 ### Milestone 2：链上 Type ID 升级追踪器与多渠道告警（2 ~ 3 天）
 - [x] 实现 `UpgradeTracker`：当 OutPoint 死亡时，反查消费交易，提取新 Cell 与新旧 DataHash Diff。
 - [x] 实现通知器分发框架 `src/notifier/`，支持 Telegram Bot 与飞书 Webhook。
-- [x] 配置 GitHub Actions 定时任务（每 30 分钟自动化执行一次）。
+- [x] 配置 GitHub Actions 定时任务（每天自动化执行一次）。
 
 ### Milestone 3：文档站与 Explorer 适配器对接（2 ~ 3 天）
 - [x] 实现 `DocsAdapter`：解析 CKB 文档站关键 Markdown 页面，建立别名转换表。

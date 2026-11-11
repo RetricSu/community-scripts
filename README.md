@@ -206,9 +206,9 @@ const reports = await tester.testAllSDKs(['ckb-sdk-js', 'another-sdk']);
 4. **一致性比对**：与规范基线中的 `codeHash`、`hashType`、`cellDeps` 进行比对。
 5. **产出报告**：输出控制台统计并在 `results/` 生成 `validation-results-*.json` 与 `validation-summary-*.json`。
 
-### GitHub Actions 日常验证
+### GitHub Actions 持续集成
 
-项目包含针对 SDK 兼容性的定时工作流（`.github/workflows/`），每日定时执行 SDK 校验，并在发生破坏性变更时生成报告构件与 PR 评论。
+项目的 `.github/workflows/ci.yml` 会在 Pull Request 和 master push 时执行依赖安装、TypeScript 构建、Biome Lint 与单元测试，作为常规代码质量检查。
 
 ---
 
