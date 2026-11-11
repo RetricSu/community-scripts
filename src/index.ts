@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import { DailyTestRunner } from './testing/daily-test-runner';
-import { NPMSDKDiscoverer } from './discovery/npm-sdk-discoverer';
-import { DynamicSDKTester } from './testing/dynamic-sdk-tester';
 import { writeFileSync } from 'fs';
 import { version } from '../package.json';
+import { registerMonitorCommands } from './cli/monitor';
+import { NPMSDKDiscoverer } from './discovery/npm-sdk-discoverer';
+import { DailyTestRunner } from './testing/daily-test-runner';
+import { DynamicSDKTester } from './testing/dynamic-sdk-tester';
 import { SDK_PACKAGE_NAMES } from './validate';
 
 const program = new Command();
@@ -37,6 +38,8 @@ program
   .action(async () => {
     await runDailyTests();
   });
+
+registerMonitorCommands(program);
 
 // Add default action to avoid exit code 1 when no command is provided
 program.action(() => {

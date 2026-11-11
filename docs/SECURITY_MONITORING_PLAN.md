@@ -184,22 +184,30 @@ export interface VerificationMismatch {
 ## 七、 实施里程碑规划（Milestones）
 
 ### Milestone 1：架构重构与链上真值适配器（1 ~ 2 天）
-- [ ] 创建 `src/types/adapter.ts` 与 `src/types/report.ts`。
-- [ ] 实现 `OnChainAdapter`：基于 `@ckb-ccc/core` 轮询现有 23+ 个合约的 OutPoint 活跃度与 DataHash 校验。
-- [ ] 实现核心校验引擎 `CrossVerifier`：支持基准库与链上状态的交叉校验。
-- [ ] 重构现有 `CCCValidator` 为 `CccSdkAdapter`，验证原有 SDK 测试功能不受影响。
+- [x] 创建 `src/types/adapter.ts` 与 `src/types/report.ts`。
+- [x] 实现 `OnChainAdapter`：基于 `@ckb-ccc/core` 轮询现有 23+ 个合约的 OutPoint 活跃度与 DataHash 校验。
+- [x] 实现核心校验引擎 `CrossVerifier`：支持基准库与链上状态的交叉校验。
+- [x] 重构现有 `CCCValidator` 为 `CccSdkAdapter`，验证原有 SDK 测试功能不受影响。
 
 ### Milestone 2：链上 Type ID 升级追踪器与多渠道告警（2 ~ 3 天）
-- [ ] 实现 `UpgradeTracker`：当 OutPoint 死亡时，反查消费交易，提取新 Cell 与新旧 DataHash Diff。
-- [ ] 实现通知器分发框架 `src/notifier/`，支持 Telegram Bot 与飞书 Webhook。
-- [ ] 配置 GitHub Actions 定时任务（每 30 分钟自动化执行一次）。
+- [x] 实现 `UpgradeTracker`：当 OutPoint 死亡时，反查消费交易，提取新 Cell 与新旧 DataHash Diff。
+- [x] 实现通知器分发框架 `src/notifier/`，支持 Telegram Bot 与飞书 Webhook。
+- [x] 配置 GitHub Actions 定时任务（每 30 分钟自动化执行一次）。
 
 ### Milestone 3：文档站与 Explorer 适配器对接（2 ~ 3 天）
-- [ ] 实现 `DocsAdapter`：解析 CKB 文档站关键 Markdown 页面，建立别名转换表。
-- [ ] 实现 `ExplorerAdapter`：对接 CKB Explorer 数据接口。
-- [ ] 联调四方交叉比对（基准库 ⟷ 链上 ⟷ 文档站 ⟷ Explorer ⟷ SDK）。
+- [x] 实现 `DocsAdapter`：解析 CKB 文档站关键 Markdown 页面，建立别名转换表。
+- [x] 实现 `ExplorerAdapter`：对接 CKB Explorer 数据接口。
+- [x] 联调四方交叉比对（基准库 ⟷ 链上 ⟷ 文档站 ⟷ Explorer ⟷ SDK）。
 
 ### Milestone 4：自动化运维与报告交付（1 ~ 2 天）
-- [ ] 编写 CLI 命令：`pnpm run monitor`、`pnpm run monitor:upgrade`。
-- [ ] 自动化 PR 生成能力：链上升级后，可一键生成基线库更新 PR。
-- [ ] 完善测试用例与文档，完成整体交付。
+- [x] 编写 CLI 命令：`pnpm run monitor`、`pnpm run monitor:upgrade`。
+- [x] 自动化 PR 生成能力：链上升级后，可一键生成基线库更新 PR。
+- [x] 完善测试用例与文档，完成整体交付。
+
+## 实现备注（对原计划的必要澄清）
+
+- `dep_group` Cell 的数据是 OutPointVec 而不是合约字节码；实现先解析成员，再定位匹配 DataHash/TypeHash 的代码 Cell，避免对组 Cell 错误做代码哈希比较。
+- CKB RPC 没有直接查询“谁消费了某 OutPoint”的接口；实现通过 Indexer 按 Type Script 优先、Lock Script 兜底，并逐笔检查 input，且支持多 hop。
+- 外部源可能包含合法的辅助 CellDep（例如 CCC 的 secp256k1 dep group），因此辅助组与直接错误代码 Cell 分开定级，减少误报。
+- 通知状态、连续失败次数和白名单均不写入部署基线；白名单可通过 `UPGRADE_WHITELIST_FILE` 注入。
+- 非 Type ID Cell 消费后无法可靠证明 successor，系统只报警并要求人工审计，不自动改写基线。

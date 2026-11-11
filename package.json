@@ -14,10 +14,12 @@
     "check": "npx @biomejs/biome check --write src",
     "fmt": "npx @biomejs/biome format --write src",
     "lint": "npx @biomejs/biome lint --write src",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --require ts-node/register/transpile-only --test tests/*.test.ts",
     "start": "ts-node --transpile-only src/index.ts",
     "discover": "node dist/src/index.js discover",
-    "daily": "node dist/src/index.js daily"
+    "daily": "node dist/src/index.js daily",
+    "monitor": "node dist/src/index.js monitor",
+    "monitor:upgrade": "node dist/src/index.js monitor upgrade"
   },
   "keywords": [
     "ckb",

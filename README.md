@@ -56,7 +56,29 @@ const tester = new DynamicSDKTester();
 const reports = await tester.testAllSDKs(['ckb-sdk-js', 'another-sdk']);
 ```
 
-## How It Works
+## Security monitoring
+
+The repository also implements the CKB core-contract anti-tampering and upgrade
+monitor described in [`docs/SECURITY_MONITORING_PLAN.md`](docs/SECURITY_MONITORING_PLAN.md).
+See [`docs/SECURITY_MONITORING.md`](docs/SECURITY_MONITORING.md) for the full
+configuration and alert-channel reference.
+
+```bash
+pnpm run build
+# One pass over mainnet + testnet, all sources
+pnpm run monitor -- --no-notify
+# Trace upgrades and apply only whitelisted changes to the working tree
+pnpm run monitor:upgrade -- --network mainnet --apply --no-notify
+# Offline unit tests
+pnpm test
+```
+
+The monitor cross-checks canonical `src/deployments/*.json` records against
+live CKB RPC cells, docs.nervos.org, Nervos RFCs, CKB Explorer and CCC. It
+reports P0/P1/P2/P3 findings, traces Type ID upgrades through the CKB indexer,
+and can send Telegram, Feishu, Discord, generic webhook and deduplicated
+GitHub Issue alerts.
+
 
 ### 1. SDK Discovery
 The tool searches npm for packages matching patterns like:
