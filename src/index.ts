@@ -3,6 +3,7 @@
 import { Command } from 'commander';
 import { writeFileSync } from 'fs';
 import { version } from '../package.json';
+import { normalizeCliArgv } from './cli/argv';
 import { registerMonitorCommands } from './cli/monitor';
 import { NPMSDKDiscoverer } from './discovery/npm-sdk-discoverer';
 import { DailyTestRunner } from './testing/daily-test-runner';
@@ -46,7 +47,7 @@ program.action(() => {
   program.help();
 });
 
-program.parse();
+program.parse(normalizeCliArgv(process.argv));
 
 async function runDiscovery() {
   console.log('🔍 Running SDK discovery...');
