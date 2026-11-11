@@ -25,9 +25,9 @@ pnpm run monitor:upgrade -- --network mainnet --apply --no-notify
 
 报告写入 `results/`：
 
-- `monitor-<timestamp>.json`：完整差异、风险级别、升級 hop、签名 Lock 和 Witness 大小。
-- `latest-report.json`：最近一次完整报告。
-- `latest-status.json`：给状态页 / CI 使用的摘要。
+- `monitor-<timestamp>.json`：每一次巡检（含 `monitor upgrade`）都会写一份带时间戳的报告。
+- `latest-report.json`：最近一次**完整**多源巡检报告。`pnpm run monitor:upgrade` 只写时间戳文件，不会覆盖它。
+- `latest-status.json`：给状态页 / CI 使用的摘要，同样只由完整巡检更新。
 - `monitor-state.json`：来源连续失败次数和通知去重状态。
 
 默认 `--fail-on P0`，发现 P0 时进程返回非零；可用 `--fail-on P1`、`P2` 或 `none` 调整。巡检过程中单个来源失败会被记录为 P2，不会阻断其他来源。
@@ -89,7 +89,15 @@ pnpm run monitor:upgrade -- --network mainnet --apply --no-notify
 | GitHub Issue | `GITHUB_TOKEN`, `GITHUB_REPOSITORY=owner/repo` | P1 |
 | 通用 Webhook（短信/电话网关） | `ALERT_WEBHOOK_URL`, 可选 `ALERT_WEBHOOK_BEARER_TOKEN` | P0 |
 
-可用 `TELEGRAM_MIN_LEVEL`、`FEISHU_MIN_LEVEL`、`DISCORD_MIN_LEVEL`、`GITHUB_ISSUE_MIN_LEVEL`、`ALERT_WEBHOOK_MIN_LEVEL` 覆盖阈值。GitHub Issue 使用 `ckb-monitor` 标签和正文指纹去重；生产环境建议使用专门的告警仓库。
+可用 `TELEGRAM_MIN_LEVEL`、`FEISHU_MIN_LEVEL`、`DISCORD_MIN_LEVEL`、`GITHUB_ISSUE_MIN_LEVEL`、`ALERT_WEBHOOK_MIN_LEVEL` 覆盖阈值。GitHub Issue 按「网络 + 脚本 + 根因」合并开票，正文仍写入每条 finding 的稳定指纹。已有的开放 ticket 不会被修改或关闭；只要其中一条旧指纹（或新的分组标记）还在开放 issue 里，同一组就不会再开新票。
+
+根因分组（开票用，不改变 finding 本身的 fingerprint 或风险等级）：
+
+- `hash-mismatch`：哈希 / hash_type / dep_type 不一致
+- `celldep-or-record-gap`：死 Cell、缺失或额外的 cellDep、仍活着的替代部署
+- `unknown-code`：指向不匹配代码的活 Cell（与普通替代部署分开）
+- `upgrade-or-destruction`：Type ID 升級或无 Type ID successor 的消费
+- `baseline` / `source`：基线完整性与来源可用性
 
 RPC 和文档源可配置：
 
@@ -100,7 +108,10 @@ RPC 和文档源可配置：
 
 ## 风险口径与已知边界
 
-- 外部源的 `code_hash` 与链上实际哈希不一致按 P0 报疑似投毒；引用死 Cell 按 P1，因为交易会失败。
+- 若 UpgradeTracker 沿 Type ID 找到活的 successor，外部源比对使用 successor 的 data/type hash，而不是已死基线 Cell 的旧哈希。这只修正比对极性，不视为授权，也不丢弃 hop / 旧 OutPoint 证据。未在白名单中的升級仍报 `UPGRADE_UNAUTHORIZED`。
+- 外部源的 `code_hash` 与链上实际哈希不一致仍按 P0 报告。文案区分「发现」（哈希不同）和「推断」（投毒、过期目录、历史替代部署都需要确认）。不会因为替代部署仍然活着或签名 Lock 碰巧相同就自动降级。
+- 无 Type ID successor 的 `DEPLOYMENT_DESTROYED` 仍是 P0，但文案不再自动写成「已确认安全事件 / 立刻轮换密钥」。官方无 Type ID 重部署是一种待确认解释；相同官方 Lock 本身不能当作授权或良性重部署的证明。无法解释的消费仍按高严重度未知变更处理。
+- 引用死 Cell 按 P1，因为交易会失败。
 - 不同但仍活着的部署 Cell 单独报告为 drift；直接指向不匹配代码的 `code` Cell 报 P0，额外辅助 dep group 报 P2，避免把 CCC 的 secp256k1 依赖误报为 Omnilock 恶意代码。
 - 基线中 `dataHash` / `typeHash` 为 `"0x"` 或空字符串表示尚未记录，不参与相等判断，只产生补全提示。
 - 公共 RPC、Explorer 和文档仓本身都是外部信任边界；高安全环境应使用自建节点 / 多 RPC 交叉验证，并人工复核 P0。

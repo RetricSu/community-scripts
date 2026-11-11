@@ -16,7 +16,11 @@ import { errorMessage } from '../utils/normalize';
 import { Baseline } from './baseline';
 import { RiskEvaluator } from './risk-evaluator';
 import { UpgradeTracker } from './upgrade-tracker';
-import { CrossVerifier, makeTruthMap } from './verifier';
+import {
+  applyLiveSuccessorHashes,
+  CrossVerifier,
+  makeTruthMap,
+} from './verifier';
 
 export interface MonitorRunOptions {
   networks: Network[];
@@ -46,6 +50,7 @@ export class MonitorRunner {
 
     for (const network of options.networks) {
       let truths: NormalizedScriptInfo[] = [];
+      let networkUpgrades: UpgradeEvent[] = [];
       const onchainStart = Date.now();
       try {
         truths = await withRetry(() => options.onchain.fetchScripts(network), {
@@ -65,7 +70,8 @@ export class MonitorRunner {
 
         const baselineResult = await verifier.verifyBaseline(truths);
         mismatches.push(...baselineResult.mismatches);
-        upgrades.push(...baselineResult.upgrades);
+        networkUpgrades = baselineResult.upgrades;
+        upgrades.push(...networkUpgrades);
       } catch (error) {
         const status: SourceStatus = {
           id: options.onchain.id,
@@ -95,7 +101,9 @@ export class MonitorRunner {
         );
       }
 
-      const truthMap = makeTruthMap(truths);
+      const truthMap = makeTruthMap(
+        applyLiveSuccessorHashes(truths, networkUpgrades)
+      );
       for (const adapter of options.adapters) {
         if (adapter.type === 'onchain') continue;
         if (adapter instanceof Object && 'supports' in adapter) {

@@ -27,6 +27,42 @@ function truthKey(name: string, network: Network): string {
   return `${network}:${name}`;
 }
 
+/**
+ * When a Type ID successor is found, compare external sources against the
+ * live tip's data/type hashes. This corrects polarity (a catalog that already
+ * lists the tip is not a hash mismatch) but does not authorize the upgrade
+ * or discard historical evidence on the baseline cells / upgrade hops.
+ */
+export function applyLiveSuccessorHashes(
+  truths: NormalizedScriptInfo[],
+  upgrades: UpgradeEvent[]
+): NormalizedScriptInfo[] {
+  const tips = new Map<string, UpgradeEvent>();
+  for (const event of upgrades) {
+    if (event.status !== 'upgraded' || !event.latestOutPoint) continue;
+    if (!event.latestDataHash && !event.latestTypeHash) continue;
+    tips.set(truthKey(event.scriptName, event.network), event);
+  }
+  if (tips.size === 0) return truths;
+  return truths.map((truth) => {
+    const event = tips.get(truthKey(truth.canonicalName, truth.network));
+    if (!event) return truth;
+    const note =
+      'Hash comparison uses the live Type ID successor; this does not authorize the upgrade.';
+    return {
+      ...truth,
+      metadata: {
+        ...truth.metadata,
+        fetchedAt: truth.metadata?.fetchedAt ?? 0,
+        actualDataHash: event.latestDataHash ?? truth.metadata?.actualDataHash,
+        actualTypeHash: event.latestTypeHash ?? truth.metadata?.actualTypeHash,
+        latestOutPoint: event.latestOutPoint ?? truth.metadata?.latestOutPoint,
+        note: [truth.metadata?.note, note].filter(Boolean).join(' '),
+      },
+    };
+  });
+}
+
 function allMembers(status: CellDepStatus): CellDepStatus[] {
   return status.cellDep.depType === 'dep_group'
     ? (status.members ?? [])
@@ -259,12 +295,7 @@ export class CrossVerifier {
     const latest = event.latestOutPoint
       ? formatOutPoint(event.latestOutPoint)
       : 'no successor cell';
-    const description =
-      event.status === 'upgraded'
-        ? `${event.authorized ? 'Whitelisted' : 'Unregistered'} upgrade of ${event.scriptName}: ${formatOutPoint(event.oldOutPoint)} -> ${latest}`
-        : event.status === 'destroyed'
-          ? `Deployment cell ${formatOutPoint(event.oldOutPoint)} was consumed without a successor carrying the same Type ID`
-          : `Deployment cell ${formatOutPoint(event.oldOutPoint)} is dead and its spending transaction could not be traced`;
+    const description = upgradeFindingDescription(event, latest);
     return this.risk.createMismatch({
       scriptName: event.scriptName,
       network: event.network,
@@ -274,10 +305,7 @@ export class CrossVerifier {
       expected: event.oldOutPoint,
       actual: event,
       description: `${description}${event.error ? ` (${event.error})` : ''}`,
-      actionRequired:
-        kind === 'UPGRADE_AUTHORIZED'
-          ? `Update baseline, docs, Explorer and SDK references to ${latest}; review the upgrade transaction.`
-          : 'Treat as a security incident: verify the consuming transaction, signer locks and witnesses, and rotate keys if unauthorized.',
+      actionRequired: upgradeFindingAction(kind, latest),
       fingerprintSuffix: outPointKey(event.oldOutPoint),
     });
   }
@@ -411,7 +439,7 @@ export class CrossVerifier {
           actual: info.codeHash,
           description: `${sourceId} code_hash for ${info.canonicalName} differs from live on-chain ${info.hashType} hash`,
           actionRequired:
-            'Potential developer-entry poisoning: do not use this configuration; investigate the source immediately.',
+            'Finding: the source hash differs from the on-chain value used for comparison. That may be poisoning, a stale catalog, or a live historical alternative — those are inferences to confirm, not conclusions. Do not use this configuration until the discrepancy is explained.',
         })
       );
     }
@@ -437,7 +465,7 @@ export class CrossVerifier {
             actual,
             description: `${sourceId} declared ${field} differs from the on-chain value`,
             actionRequired:
-              'Investigate the Explorer record and its source of truth.',
+              'Finding: the declared hash differs from the on-chain value used for comparison. Confirm whether this is a catalog error, a live historical alternative, or an unexplained change before calling it poisoning or benign.',
           })
         );
       }
@@ -631,6 +659,63 @@ export class CrossVerifier {
       fingerprintSuffix: outPointKey(dep.outPoint),
     });
   }
+}
+
+function upgradeFindingDescription(
+  event: UpgradeEvent,
+  latest: string
+): string {
+  if (event.status === 'upgraded') {
+    const label = event.authorized ? 'Whitelisted' : 'Unregistered';
+    return (
+      `Finding: ${label} Type ID upgrade of ${event.scriptName}: ` +
+      `${formatOutPoint(event.oldOutPoint)} -> ${latest}. ` +
+      (event.authorized
+        ? 'The consuming transaction is on the upgrade whitelist.'
+        : 'The consuming transaction is not on the upgrade whitelist. ' +
+          'Agreement with Explorer, docs or SDK is not authorization.')
+    );
+  }
+  if (event.status === 'destroyed') {
+    return (
+      `Finding: deployment cell ${formatOutPoint(event.oldOutPoint)} was ` +
+      'consumed and no successor carrying the same Type ID was found. ' +
+      'Official non-Type-ID redeployment is one possible explanation, ' +
+      'not a conclusion. A matching deployment lock on the consuming ' +
+      'transaction is not by itself authorization or proof of a benign redeploy.'
+    );
+  }
+  return (
+    `Finding: deployment cell ${formatOutPoint(event.oldOutPoint)} is dead ` +
+    'and its spending transaction could not be traced.'
+  );
+}
+
+function upgradeFindingAction(
+  kind: 'DEPLOYMENT_DESTROYED' | 'UPGRADE_AUTHORIZED' | 'UPGRADE_UNAUTHORIZED',
+  latest: string
+): string {
+  if (kind === 'UPGRADE_AUTHORIZED') {
+    return (
+      `Update baseline, docs, Explorer and SDK references to ${latest}; ` +
+      'review the upgrade transaction.'
+    );
+  }
+  if (kind === 'DEPLOYMENT_DESTROYED') {
+    return (
+      'Confirm the consuming transaction, signer locks and whether an ' +
+      'official replacement cell exists. Do not treat this as a confirmed ' +
+      'compromise, and do not treat a matching official lock as authorization. ' +
+      'If the spend remains unexplained, investigate it as a high-severity ' +
+      'unknown change and consider key rotation.'
+    );
+  }
+  return (
+    'Verify the consuming transaction, hops, signer locks and witnesses ' +
+    'against official announcements. Do not treat Explorer, docs or SDK ' +
+    'agreement as authorization. If the upgrade remains unexplained, treat ' +
+    'it as a high-severity unknown change and consider key rotation.'
+  );
 }
 
 export function makeTruthMap(
