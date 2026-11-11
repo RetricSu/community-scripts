@@ -108,7 +108,7 @@ RPC 和文档源可配置：
 
 ## 自动化
 
-`.github/workflows/security-monitor.yml` 每 30 分钟运行一次，上传报告并缓存通知状态。若 `monitor upgrade --apply` 产生经过白名单校验的基线变更，工作流通过 `create-pull-request` 生成审核 PR，不会直接推送 master。
+`.github/workflows/security-monitor.yml` 每天 UTC 02:00（北京时间 10:00）运行一次，上传报告并缓存通知状态。若 `monitor upgrade --apply` 产生经过白名单校验的基线变更，工作流通过 `create-pull-request` 生成审核 PR，不会直接推送 master。
 
 单元测试：
 
