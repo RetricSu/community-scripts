@@ -69,6 +69,14 @@ pnpm run monitor:upgrade -- --network mainnet --apply --no-notify
 
 **白名单必须基于官方公告和人工审计填写，不要把未知升級直接加入。** `--force` 仅供人工确认后的紧急情况使用。
 
+报告中的每个升级事件都包含首笔消费交易的 `upgradedAt`（ISO 时间）、`upgradedBlock`、`consumingTxHash`、`oldLock`、`newLock` 和 `signerLocks`；控制台摘要也会简短打印这些字段。多 hop 的完整细节仍在 `hops` 中。
+
+已根据官方仓库 migration 记录核对并加入白名单的 Nostr 主网迁移：
+
+- `nostr_binding`：2026-01-14 05:10:21 UTC（区块 18373321），交易 `0x86d21ad7…`，migration `2026-01-14-050950.json`。
+- `nostr_lock`：2026-01-14 05:17:51 UTC（区块 18373370），交易 `0x99b116dd…`，migration `2026-01-14-051715.json`。
+- 两者官方记录均为 `cryptape/nostr-binding` 仓库 `deployment/mainnet/*/migrations/` 下的文件；旧 Cell 和新 Cell 的 multisig Lock args 分别为 `0xd4ade5100cf112c9cd3e8da12ae5fc6153293087` 与 `0x269ca034aa160f5265b65318123047bee882f244`。
+
 ## 通知渠道
 
 通过环境变量启用，未配置的渠道自动跳过；同一指纹默认 24 小时内不重复通知，风险级别变化会立即再次通知。

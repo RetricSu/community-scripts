@@ -42,6 +42,24 @@ export const DEFAULT_UPGRADE_WHITELIST: readonly PlannedUpgrade[] = [
       '0x768f306681da232ceb0b94f436c5f813377179762a831c5ad8797bd4fd2d118d',
     note: 'Official Omnilock mainnet upgrade (block 12017064)',
   },
+  {
+    scriptName: 'nostr_binding',
+    network: 'mainnet',
+    txHash:
+      '0x86d21ad7d41c5b16e18f6e74a1a603ec398ca03b9d604d46e406f9acca88e7bd',
+    newDataHash:
+      '0xee39c944c5bea6857d1b55fc1d4ff9fc1e22e59fd89d1a0fed8e6eabc08dda66',
+    note: 'Official migration 2026-01-14: https://github.com/cryptape/nostr-binding/blob/main/deployment/mainnet/nostr-binding-type-script/migrations/2026-01-14-050950.json',
+  },
+  {
+    scriptName: 'nostr_lock',
+    network: 'mainnet',
+    txHash:
+      '0x99b116dd1e4f1fa903b70112ae672c18bb34241d3d03a9ad555cd2a611be7327',
+    newDataHash:
+      '0x2effea19ff3024b5b0fb4c0c59c379e7610110e7e3fe7ae003247b1115e59795',
+    note: 'Official migration 2026-01-14: https://github.com/cryptape/nostr-binding/blob/main/deployment/mainnet/nostr-lock-script/migrations/2026-01-14-051715.json',
+  },
 ];
 
 export function loadUpgradeWhitelist(
@@ -100,6 +118,30 @@ export class UpgradeTracker {
   }
 
   async trace(
+    scriptName: string,
+    network: Network,
+    deadOutPoint: NormalizedOutPoint
+  ): Promise<UpgradeEvent> {
+    const event = await this.traceInternal(scriptName, network, deadOutPoint);
+    const first = event.hops.find((hop) => hop.consumingTxHash);
+    const lastWithSuccessor = [...event.hops]
+      .reverse()
+      .find((hop) => hop.newOutPoint);
+    return {
+      ...event,
+      upgradedAt:
+        first?.timestamp !== undefined
+          ? new Date(first.timestamp).toISOString()
+          : undefined,
+      upgradedBlock: first?.blockNumber,
+      consumingTxHash: first?.consumingTxHash,
+      oldLock: first?.oldLock,
+      newLock: lastWithSuccessor?.newLock,
+      signerLocks: first?.signerLocks,
+    };
+  }
+
+  private async traceInternal(
     scriptName: string,
     network: Network,
     deadOutPoint: NormalizedOutPoint
@@ -217,6 +259,7 @@ export class UpgradeTracker {
       consumedOutPoint: consumed,
       oldDataHash: cellStatus.dataHash,
       oldSize: cellStatus.dataSize,
+      oldLock: cellStatus.lock,
     };
 
     const spendTx = await this.findConsumingTransaction(
@@ -262,6 +305,7 @@ export class UpgradeTracker {
       });
       hop.newDataHash = ccc.hashCkb(data).toLowerCase();
       hop.newSize = (data.length - 2) / 2;
+      hop.newLock = toNormalizedScript(outputs[matchIndex].lock);
     }
     return hop;
   }

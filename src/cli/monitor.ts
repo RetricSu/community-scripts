@@ -16,7 +16,11 @@ import { GithubIssueNotifier } from '../notifier/github-issue';
 import { Notifier } from '../notifier/notifier';
 import { TelegramNotifier } from '../notifier/telegram';
 import { WebhookNotifier } from '../notifier/webhook';
-import type { Network, ScriptSourceAdapter } from '../types/adapter';
+import type {
+  Network,
+  NormalizedScript,
+  ScriptSourceAdapter,
+} from '../types/adapter';
 import {
   isAtLeast,
   type MonitorReport,
@@ -105,6 +109,18 @@ function writeReport(report: MonitorReport, outDir: string): string {
   return file;
 }
 
+function formatLock(lock?: NormalizedScript): string {
+  if (!lock) return 'unknown';
+  const names: Record<string, string> = {
+    '0x5c5069eb0857efc65e1bca0c07df34c31663b3622fd3876c876320fc9634e2a8':
+      'secp256k1_multisig',
+    '0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8':
+      'secp256k1_sighash',
+  };
+  const name = names[lock.codeHash] ?? 'lock';
+  return `${name}(${lock.codeHash.slice(0, 12)}…), args=${lock.args}`;
+}
+
 function printReport(report: MonitorReport, file: string): void {
   console.log('\n📊 CKB security monitor summary');
   console.log('='.repeat(60));
@@ -139,6 +155,24 @@ function printReport(report: MonitorReport, file: string): void {
       console.log(
         `  ${event.network}/${event.scriptName}: ${event.status}, authorized=${event.authorized}, latest=${event.latestOutPoint?.txHash ?? 'none'}`
       );
+      if (event.upgradedAt || event.consumingTxHash) {
+        console.log(
+          `    time=${event.upgradedAt ?? 'unknown'} block=${event.upgradedBlock ?? 'unknown'} tx=${event.consumingTxHash ?? 'unknown'}`
+        );
+      }
+      if (event.oldLock || event.newLock) {
+        console.log(
+          `    cell lock: ${formatLock(event.oldLock)} -> ${formatLock(event.newLock)}`
+        );
+      }
+      if (event.signerLocks?.length) {
+        console.log(
+          `    input locks: ${event.signerLocks.map(formatLock).join('; ')}`
+        );
+      }
+      if (event.whitelistNote) {
+        console.log(`    whitelist: ${event.whitelistNote}`);
+      }
     }
   }
   console.log(`\n📝 Full report: ${file}`);

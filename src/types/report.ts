@@ -100,6 +100,10 @@ export interface UpgradeHop {
   newDataHash?: string;
   oldSize?: number;
   newSize?: number;
+  /** lock on the consumed deployment cell */
+  oldLock?: NormalizedScript;
+  /** lock on the successor deployment cell, if one was found */
+  newLock?: NormalizedScript;
   /** distinct lock scripts of the consuming transaction's inputs (who signed) */
   signerLocks?: NormalizedScript[];
   /** witness sizes (bytes) of the consuming transaction, a cheap multisig hint */
@@ -114,6 +118,13 @@ export interface UpgradeEvent {
   oldOutPoint: NormalizedOutPoint;
   status: UpgradeStatus;
   hops: UpgradeHop[];
+  /** convenient first-hop summary for reports and alert channels */
+  upgradedAt?: string;
+  upgradedBlock?: number;
+  consumingTxHash?: string;
+  oldLock?: NormalizedScript;
+  newLock?: NormalizedScript;
+  signerLocks?: NormalizedScript[];
   latestOutPoint?: NormalizedOutPoint;
   latestDataHash?: string;
   latestTypeHash?: string;
