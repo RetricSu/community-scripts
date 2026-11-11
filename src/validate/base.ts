@@ -1,10 +1,11 @@
+import * as fs from 'fs';
+import * as path from 'path';
+import { resolveDeploymentsDir } from '../engine/baseline';
 import {
   HashType,
   type ScriptDeployment,
   type ScriptInfo,
-} from '../type/deployment';
-import * as fs from 'fs';
-import * as path from 'path';
+} from '../types/deployment';
 
 export interface ValidationResult {
   scriptName: string;
@@ -24,9 +25,7 @@ export abstract class SDKValidator {
   private deployments: Map<string, ScriptDeployment> = new Map();
 
   constructor(deploymentsDir?: string) {
-    // When running from dist/, we need to go up to the root and then to src/deployments
-    const defaultPath = path.join(process.cwd(), 'src', 'deployments');
-    this.loadDeployments(deploymentsDir || defaultPath);
+    this.loadDeployments(resolveDeploymentsDir(deploymentsDir));
   }
 
   private loadDeployments(deploymentsDir: string): void {
