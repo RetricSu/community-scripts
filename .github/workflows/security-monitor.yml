@@ -2,7 +2,7 @@ name: CKB Contract Security Monitor
 
 on:
   schedule:
-    - cron: '*/30 * * * *'
+    - cron: '0 2 * * *'  # Daily at 2 AM UTC
   workflow_dispatch:
 
 permissions:
