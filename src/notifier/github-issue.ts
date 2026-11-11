@@ -4,6 +4,7 @@ import {
   type VerificationMismatch,
 } from '../types/report';
 import { fetchJson } from '../utils/http';
+import { groupsToOpen, issueBody, issueTitle } from './issue-grouping';
 import { minLevelFromEnv, type NotificationChannel } from './notifier';
 
 interface GithubIssue {
@@ -57,47 +58,18 @@ export class GithubIssueNotifier implements NotificationChannel {
       { headers: this.headers() }
     );
     const openBodies = existing.map((i) => i.body ?? '');
+    const groups = groupsToOpen(report, mismatches, openBodies, this.minLevel);
 
-    for (const mismatch of mismatches) {
-      const marker = `<!-- ckb-monitor:${mismatch.fingerprint} -->`;
-      if (openBodies.some((body) => body.includes(marker))) continue;
-      const title = `[${mismatch.riskLevel}] ${mismatch.network}/${mismatch.scriptName}: ${mismatch.kind}`;
-      const body = [
-        marker,
-        '## CKB contract security monitor finding',
-        '',
-        `- **Network:** ${mismatch.network}`,
-        `- **Script:** ${mismatch.scriptName}`,
-        `- **Source:** ${mismatch.sourceId}`,
-        `- **Field:** ${mismatch.field}`,
-        `- **Risk:** ${mismatch.riskLevel}`,
-        `- **Fingerprint:** \`${mismatch.fingerprint}\``,
-        '',
-        mismatch.description,
-        '',
-        '### Action required',
-        mismatch.actionRequired,
-        '',
-        '### Expected',
-        '```json',
-        JSON.stringify(mismatch.expected, null, 2)?.slice(0, 4000),
-        '```',
-        '### Actual',
-        '```json',
-        JSON.stringify(mismatch.actual, null, 2)?.slice(0, 6000),
-        '```',
-        '',
-        `Report generated at ${report.finishedAt}.`,
-      ].join('\n');
+    for (const group of groups) {
       await fetchJson<GithubIssue>(
         `https://api.github.com/repos/${this.repository}/issues`,
         {
           method: 'POST',
           headers: this.headers(),
           body: JSON.stringify({
-            title,
-            body,
-            labels: ['ckb-monitor', mismatch.riskLevel.toLowerCase()],
+            title: issueTitle(group),
+            body: issueBody(report, group),
+            labels: ['ckb-monitor', group.highestRisk.toLowerCase()],
           }),
         }
       );

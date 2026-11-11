@@ -24,9 +24,9 @@ pnpm run monitor -- --network both --no-notify --fail-on none
 
 巡检完成后，结果将保存在 `results/` 目录下：
 
-- **`results/latest-report.json`**：最近一次完整巡检报告，包含各来源比对差异、P0-P3 风险事件详情、Type ID 升级溯源链路及签名 Lock 信息。
-- **`results/latest-status.json`**：精简版状态摘要，提供给状态监控看板、健康检查探针或 CI 门禁直接消费。
-- **`results/monitor-<timestamp>.json`**：每次巡检生成的带时间戳历史归档报告。
+- **`results/latest-report.json`**：最近一次完整多源巡检报告，包含各来源比对差异、P0-P3 风险事件详情、Type ID 升级溯源链路及签名 Lock 信息。`monitor upgrade` 不会覆盖此文件。
+- **`results/latest-status.json`**：精简版状态摘要，提供给状态监控看板、健康检查探针或 CI 门禁直接消费，同样只由完整巡检更新。
+- **`results/monitor-<timestamp>.json`**：每次巡检（含 upgrade 子命令）生成的带时间戳历史归档报告。
 - **`results/monitor-state.json`**：记录数据源连续失败计数与通知指纹去重状态。
 
 ---
