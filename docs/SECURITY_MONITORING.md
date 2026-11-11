@@ -77,6 +77,11 @@ pnpm run monitor:upgrade -- --network mainnet --apply --no-notify
 - `nostr_lock`：2026-01-14 05:17:51 UTC（区块 18373370），交易 `0x99b116dd…`，migration `2026-01-14-051715.json`。
 - 两者官方记录均为 `cryptape/nostr-binding` 仓库 `deployment/mainnet/*/migrations/` 下的文件；旧 Cell 和新 Cell 的 multisig Lock args 分别为 `0xd4ade5100cf112c9cd3e8da12ae5fc6153293087` 与 `0x269ca034aa160f5265b65318123047bee882f244`。
 
+已根据 Lumos SDK 配置记录核对并加入白名单的 Omnilock 测试网两跳升级。这些是 SDK 配置升级记录，不是合约作者签署的公告：
+
+- 第一跳消费交易 `0x7d9c9ccd12f40eebe508bbbf24b0d746c991e055f2f1b61c6fe8ca60467ae750`，新 dataHash `0x3f303aa87238dbc34a81a1c42109e07aad9c8e4ab3e8741d87fffca43851b2d7`，记录见 https://github.com/ckb-js/lumos/pull/665 。
+- 第二跳消费交易 `0xec18bf0d857c981c3d1f4e17999b9b90c484b303378e94de1a57b0872f5d4602`，新 dataHash `0x6b29b6f10346b43c540e53806ba88ba0fe3a0c3a29d7448ef555840c8f8318fa`，记录见 https://github.com/ckb-js/lumos/pull/669 。
+
 ## 通知渠道
 
 通过环境变量启用，未配置的渠道自动跳过；同一指纹默认 24 小时内不重复通知，风险级别变化会立即再次通知。
