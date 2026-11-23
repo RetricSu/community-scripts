@@ -1,0 +1,96 @@
+name: CKB Contract Hub Portal
+
+# Builds the unified portal (security posture + flow specs + tx decoder) and
+# publishes it to GitHub Pages. Runs after every security monitor pass and on
+# any change to portal source data. Build and deploy are separate jobs so the
+# vendored generator never runs with write permissions.
+
+on:
+  workflow_run:
+    workflows: ['CKB Contract Security Monitor']
+    types: [completed]
+  push:
+    branches: [master]
+    paths:
+      - 'flow/**'
+      - 'scripts/**'
+      - 'src/deployments/**'
+      - '.github/workflows/portal.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read # download monitor artifacts from previous runs
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '20'
+
+      # The monitor uploads results/ as workflow artifacts (never committed).
+      # For monitor-triggered runs, take that exact run's report; otherwise
+      # fall back to the latest artifact on master.
+      - name: Download monitor report from triggering run
+        if: github.event_name == 'workflow_run'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: ckb-security-monitor-${{ github.event.workflow_run.id }}
+          path: results/
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download latest monitor report (non-monitor triggers)
+        if: github.event_name != 'workflow_run'
+        continue-on-error: true
+        uses: dawidd6/action-download-artifact@bf251b5aa9c2f7eeb574a96ee720e24f801b7c11
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow: security-monitor.yml
+          branch: master
+          name: ckb-security-monitor-
+          name_is_regexp: true
+          path: results/
+
+      # A monitor-triggered build must embed the fresh report; refuse to
+      # publish a posture-less portal instead of silently wiping the data.
+      - name: Verify report for monitor-triggered builds
+        if: github.event_name == 'workflow_run'
+        run: test -f results/latest-report.json
+
+      - name: Sync baseline -> flow meta projection
+        continue-on-error: true
+        run: node scripts/gen-flow-meta.js --all --rpc-mainnet https://mainnet.ckb.dev/rpc --rpc-testnet https://testnet.ckb.dev/rpc
+
+      - name: Build portal
+        run: node flow/gen.js --all portal && node scripts/build-portal.js
+
+      - name: Upload portal artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ckb-contract-hub
+          path: portal/
+          retention-days: 7
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # only this job may publish
+    steps:
+      - name: Download portal artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: ckb-contract-hub
+          path: portal/
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@329bcc8f12caed2cefe5a5b80781499a6f3b361b
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./portal
