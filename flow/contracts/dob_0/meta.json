@@ -1,0 +1,58 @@
+{
+  "tags": [
+    "type"
+  ],
+  "contributors": [],
+  "source": {
+    "repo": "https://github.com/sporeprotocol/spore-dob-0",
+    "commit": null,
+    "paths": [],
+    "binary": {
+      "status": "unverified",
+      "per": [],
+      "note": "generated from community-scripts baseline; provenance not yet verified"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "hash_type": "data1",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x71023885a2178648be6a7f138ee49379000a82cda98dd8adabee99eaaca42fde"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x71023885a2178648be6a7f138ee49379000a82cda98dd8adabee99eaaca42fde"
+      },
+      "data_hash": "0x13cac78ad8482202f18f9df4ea707611c35f994375fa03ae79121312dda9925c",
+      "deploy_tx": "0x71023885a2178648be6a7f138ee49379000a82cda98dd8adabee99eaaca42fde",
+      "deploy_block": 13315126,
+      "code_hash": "0x13cac78ad8482202f18f9df4ea707611c35f994375fa03ae79121312dda9925c"
+    },
+    {
+      "network": "testnet",
+      "hash_type": "data1",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0xf6ebcf3881b9ffe64e94f4ee2f643cfc69515faba1dadf4a9e4a7d3f9ecc4094"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0xf6ebcf3881b9ffe64e94f4ee2f643cfc69515faba1dadf4a9e4a7d3f9ecc4094"
+      },
+      "data_hash": "0x13cac78ad8482202f18f9df4ea707611c35f994375fa03ae79121312dda9925c",
+      "deploy_tx": "0xf6ebcf3881b9ffe64e94f4ee2f643cfc69515faba1dadf4a9e4a7d3f9ecc4094",
+      "deploy_block": 13560289,
+      "code_hash": "0x13cac78ad8482202f18f9df4ea707611c35f994375fa03ae79121312dda9925c"
+    }
+  ],
+  "checked_at": "2026-11-23",
+  "generated_from": "src/deployments/dob_0.json"
+}
