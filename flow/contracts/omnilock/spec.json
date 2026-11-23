@@ -1,0 +1,342 @@
+{
+  "title": {
+    "zh": "Omnilock（lock）约束",
+    "en": "Omnilock (lock) Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：nervosnetwork/omnilock / c/omni_lock.c + ckb_identity.h　·　mainnet 0x9b81…6f26 / testnet 0xf329…52cb，hash_type type（RFC 0042）",
+    "en": "Source: nervosnetwork/omnilock / c/omni_lock.c + ckb_identity.h　·　mainnet 0x9b81…6f26 / testnet 0xf329…52cb, hash_type type (RFC 0042)"
+  },
+  "transitions": [
+    {
+      "tag": "A",
+      "title": {
+        "zh": "普通解锁（auth 签名）",
+        "en": "Normal unlock (auth signature)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "input（同一 Omnilock group）",
+            "en": "input (same Omnilock group)"
+          },
+          "body": "Cell{\n  lock: { codeHash: OMNILOCK,\n          args: {{auth(21B)}} ‖ {{omnilock flags 1B}} ‖ {{optional fields}} }\n}"
+        },
+        {
+          "label": {
+            "zh": "witness[group 第 1 个]",
+            "en": "witness[group's first]"
+          },
+          "body": {
+            "zh": "WitnessArgs{\n  lock: OmniLockWitnessLock{\n    signature: {{Some(sig)}},\n    omni_identity: None,\n    preimage: None/Some\n  }\n}",
+            "en": "WitnessArgs{\n  lock: OmniLockWitnessLock{\n    signature: {{Some(sig)}},\n    omni_identity: None,\n    preimage: None/Some\n  }\n}"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "outputs：任意",
+            "en": "outputs: any"
+          },
+          "body": {
+            "zh": "Cell{ lock: 任意, type: 任意 }",
+            "en": "Cell{ lock: any, type: any }"
+          }
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "args 字节布局",
+            "en": "args byte layout"
+          },
+          "layout": [
+            {
+              "name": "auth flag",
+              "size": "1B",
+              "role": {
+                "zh": "0 CKB / 1 ETH / 2 EOS / 3 Tron / 4 BTC / 5 Doge / 6 multisig / 0x12 ETH显示 / 0xFC owner lock / 0xFD exec / 0xFE dl",
+                "en": "0 CKB / 1 ETH / 2 EOS / 3 Tron / 4 BTC / 5 Doge / 6 multisig / 0x12 ETH-displaying / 0xFC owner lock / 0xFD exec / 0xFE dl"
+              },
+              "cons": {
+                "zh": "已知取值",
+                "en": "known value"
+              },
+              "err": "CKB_INVALID_DATA",
+              "color": 0
+            },
+            {
+              "name": "auth content",
+              "size": "20B",
+              "role": {
+                "zh": "pubkey hash / 地址 / multisig script hash / lock script hash[0..20]",
+                "en": "pubkey hash / address / multisig script hash / lock script hash[0..20]"
+              },
+              "cons": {
+                "zh": "与签名恢复结果一致",
+                "en": "matches the recovered signer"
+              },
+              "err": "-31",
+              "color": 1,
+              "flex": 3
+            },
+            {
+              "name": "omnilock flags",
+              "size": "1B",
+              "role": {
+                "zh": "bit0 管理员(omni_root) · bit1 ACP · bit2 time-lock · bit3 supply",
+                "en": "bit0 admin (omni_root) · bit1 ACP · bit2 time-lock · bit3 supply"
+              },
+              "cons": {
+                "zh": "决定后续字段",
+                "en": "selects the optional fields"
+              },
+              "err": "87",
+              "color": 2
+            },
+            {
+              "name": "omni_root?",
+              "size": "32B",
+              "role": {
+                "zh": "RC cell 的 type_id（bit0）",
+                "en": "RC cell type_id (bit0)"
+              },
+              "cons": "—",
+              "err": "87",
+              "color": 3,
+              "flex": 2
+            },
+            {
+              "name": "acp min?",
+              "size": "2B",
+              "role": {
+                "zh": "CKB / UDT 最小转入（10^n）（bit1）",
+                "en": "min CKB / UDT payment as 10^n (bit1)"
+              },
+              "cons": "—",
+              "err": "87",
+              "color": 4
+            },
+            {
+              "name": "since?",
+              "size": "8B",
+              "role": {
+                "zh": "time-lock（bit2）",
+                "en": "time-lock (bit2)"
+              },
+              "cons": "—",
+              "err": "87",
+              "color": 5
+            },
+            {
+              "name": "info_cell?",
+              "size": "32B",
+              "role": {
+                "zh": "supply info cell type hash（bit3）",
+                "en": "supply info cell type hash (bit3)"
+              },
+              "cons": "—",
+              "err": "87",
+              "color": 6,
+              "flex": 2
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "长度 = 22 + 所选可选字段，多一字节少一字节都不行",
+            "en": "length = 22 + chosen optional fields, exactly"
+          },
+          "err": "87"
+        },
+        {
+          "field": "signature",
+          "cond": {
+            "zh": "auth flag 0–5 / 0x12：恰 65 字节",
+            "en": "auth flag 0–5 / 0x12: exactly 65 bytes"
+          },
+          "err": "71"
+        },
+        {
+          "field": "signature",
+          "cond": {
+            "zh": "恢复出的地址 = auth content",
+            "en": "recovered signer = auth content"
+          },
+          "err": "-31"
+        },
+        {
+          "field": "auth flag 6",
+          "cond": {
+            "zh": "multisig 规则同 secp multisig",
+            "en": "multisig rules as in secp multisig"
+          },
+          "err": "-41…-52"
+        },
+        {
+          "field": "auth flag 0xFC",
+          "cond": {
+            "zh": "某个 input 的 lock hash 前 20B = auth content",
+            "en": "some input lock hash[0..20] = auth content"
+          },
+          "err": "70"
+        },
+        {
+          "field": "since（bit2）",
+          "cond": {
+            "zh": "每个 group input 的 since flags 相同且 ≥ args.since",
+            "en": "each group input since has same flags and ≥ args.since"
+          },
+          "err": "-23 / -24"
+        },
+        {
+          "field": "supply（bit3）",
+          "cond": {
+            "zh": "info cell 供应量不超上限、不得 burn 等",
+            "en": "info cell supply ≤ max, no burn, etc."
+          },
+          "err": "90 / 91 / 92 / 93"
+        }
+      ]
+    },
+    {
+      "tag": "B",
+      "title": {
+        "zh": "ACP 模式（bit1 且无签名）",
+        "en": "ACP mode (bit1, no signature)"
+      },
+      "inputs": [
+        {
+          "label": "input",
+          "body": "Cell{\n  lock: OMNILOCK(args flags bit1),\n  capacity: C, data: {{udt amount}}?\n}"
+        },
+        {
+          "label": "witness",
+          "body": {
+            "zh": "signature: None",
+            "en": "signature: None"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "同 lock 输出",
+            "en": "output with the same lock"
+          },
+          "body": "Cell{\n  lock: same,\n  capacity: {{≥ C + 10^ckb_min}},\n  udt: {{≥ + 10^udt_min}}\n}"
+        }
+      ],
+      "limits": [
+        {
+          "field": "pairing",
+          "cond": {
+            "zh": "每个输入 lock 必须有唯一对应输出",
+            "en": "each input lock pairs with exactly one output"
+          },
+          "err": "-44 / -45 / -46"
+        },
+        {
+          "field": "amount",
+          "cond": {
+            "zh": "CKB 与 UDT 均不减少，且增加不少于最小值",
+            "en": "CKB and UDT don't decrease and grow by at least the minimum"
+          },
+          "err": "-42"
+        },
+        {
+          "field": "type",
+          "cond": {
+            "zh": "最多 32 种 type hash",
+            "en": "at most 32 type hashes"
+          },
+          "err": "-43"
+        }
+      ]
+    },
+    {
+      "tag": "C",
+      "title": {
+        "zh": "管理员模式（omni_identity）",
+        "en": "Administrator mode (omni_identity)"
+      },
+      "inputs": [
+        {
+          "label": "witness",
+          "body": "OmniLockWitnessLock{\n  signature: Some,\n  omni_identity: {{Some(Identity{identity 21B, proofs})}}\n}"
+        },
+        {
+          "label": {
+            "zh": "cell_deps",
+            "en": "cell_deps"
+          },
+          "body": {
+            "zh": "RC cell（type_id = omni_root），含白名单 SMT root",
+            "en": "RC cell (type_id = omni_root) with whitelist SMT root"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "outputs",
+          "body": {
+            "zh": "任意；since / supply / ACP 均不生效",
+            "en": "any; since / supply / ACP don't apply"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "必须带 omni_root（bit0）",
+            "en": "must have omni_root (bit0)"
+          },
+          "err": "47"
+        },
+        {
+          "field": "omni_identity",
+          "cond": {
+            "zh": "必须带 proofs",
+            "en": "must include proofs"
+          },
+          "err": "47"
+        },
+        {
+          "field": "RC rules",
+          "cond": {
+            "zh": "至少一条，且为白名单",
+            "en": "at least one rule, whitelist"
+          },
+          "err": "82 / 83"
+        },
+        {
+          "field": "proof",
+          "cond": {
+            "zh": "证明条数 = rule 数，identity 在白名单 SMT 中",
+            "en": "proof count = rule count, identity in whitelist SMT"
+          },
+          "err": "81 / 59"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码：80 UNKNOWN_FLAGS · 81 PROOF_LENGTH_MISMATCHED · 82 NO_OMNIRULE · 83 NO_WHITE_LIST · 84 INVALID_IDENTITY_ID · 85 INVALID_OMNI_LOCK_ARGS · 86 ISO9796_2_VERIFY · 87 ARGS_FORMAT；70–75 identity 错误（70 LOCK_SCRIPT_HASH_NOT_FOUND, 71 WRONG_ARGS）；40–63 来自 rce.h",
+      "en": "Error codes: 80 UNKNOWN_FLAGS · 81 PROOF_LENGTH_MISMATCHED · 82 NO_OMNIRULE · 83 NO_WHITE_LIST · 84 INVALID_IDENTITY_ID · 85 INVALID_OMNI_LOCK_ARGS · 86 ISO9796_2_VERIFY · 87 ARGS_FORMAT; 70–75 identity errors (70 LOCK_SCRIPT_HASH_NOT_FOUND, 71 WRONG_ARGS); 40–63 from rce.h"
+    },
+    {
+      "zh": "签名消息与 secp256k1_blake160 相同（sighash_all），ETH/BTC 等再按各链格式包装",
+      "en": "Signing message is the same sighash_all as secp256k1_blake160, then wrapped per chain format for ETH/BTC/etc."
+    },
+    {
+      "zh": "witness 缺失不会立即失败（owner lock 模式可不需要 witness）",
+      "en": "A missing witness doesn't fail immediately (owner-lock mode may need none)"
+    }
+  ]
+}

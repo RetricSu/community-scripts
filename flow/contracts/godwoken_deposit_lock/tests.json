@@ -1,0 +1,1 @@
+[{"tx":"0x9c0b66a180af81fb4d41ec6be2bc3762cebd8e9df1888a233ac46f9ed8dcd0d4","net":"mainnet","name":"deposit cell spent","expect":["godwoken_deposit_lock"]},{"tx":"0xad1b87ed3af41aa38af7a99b4cbbbe58a80d44df33fab171a2bbb46200090265","net":"testnet","name":"testnet deposit spent","expect":["godwoken_deposit_lock"]}]

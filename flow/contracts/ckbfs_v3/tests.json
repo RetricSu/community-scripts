@@ -1,0 +1,22 @@
+[
+  {
+    "tx": "0x5c42e55ba7a52d5f2c4d1d3ca3d169c6ccd2bc5369dd322ffd955c8586548ebe",
+    "net": "mainnet",
+    "name": "CKBFS V3 publish"
+  },
+  {
+    "tx": "0xfcf438982dde4df3b95e8c8433aee6347d112f8450a9b0b6fb2c756e4fb47dab",
+    "net": "mainnet",
+    "name": "CKBFS V3 append"
+  },
+  {
+    "tx": "0x074c7080c8d17ac4f3e45028908b8508861b33dd3ab91940c285f7deabbbeb7a",
+    "net": "testnet",
+    "name": "CKBFS V3 publish (testnet)"
+  },
+  {
+    "tx": "0x18e2d5a1a0cd1606da55c6d06a3cf1ae7dadf7c1b100cb1bffac0e16a60a8cd9",
+    "net": "testnet",
+    "name": "CKBFS V3 update (testnet)"
+  }
+]

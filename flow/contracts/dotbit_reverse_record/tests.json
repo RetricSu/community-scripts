@@ -1,0 +1,22 @@
+[
+  {
+    "tx": "0xd5d5dff69d7614ebaa34b6340406c7f602c617074d3c782c05ae4866df957931",
+    "net": "mainnet",
+    "name": "retract_reverse_record"
+  },
+  {
+    "tx": "0x0bd0b37688d273aaa4131284e85796951f3fe4ab6a2c3e9eec9a966a1b8d8396",
+    "net": "mainnet",
+    "name": "retract_reverse_record (2)"
+  },
+  {
+    "tx": "0x4ff7807e8bf28a1b1d9a5e1ff5255f6321533a812a264b007fbd30cdaf543f23",
+    "net": "testnet",
+    "name": "retract_reverse_record (testnet)"
+  },
+  {
+    "tx": "0x04bbb81d774d40c332eddeec7bbedea0ec3091dda0df24b707b1df78699bd477",
+    "net": "testnet",
+    "name": "declare_reverse_record (older binary, not checked)"
+  }
+]

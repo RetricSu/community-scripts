@@ -1,0 +1,76 @@
+{
+  "tags": [
+    "proxy",
+    "nervos",
+    "open-source",
+    "p-proxy-locks"
+  ],
+  "contributors": [
+    "ashuralyk"
+  ],
+  "source": {
+    "repo": "https://github.com/ckb-devrel/ckb-proxy-locks",
+    "commit": "38b7e1df19828f2203c01b30340be26691b70d7a",
+    "paths": [
+      "contracts/type-burn-lock/src/entry.rs"
+    ],
+    "commit_note": "default-branch HEAD recorded at backfill 2026-10-21; spec/plugin were written from the default branch shortly before (exact read commit not recorded)",
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0xff78bae0abf17d7a404c0be0f9ad9c9185b3f88dcc60403453d5ba8e1f22f53a",
+          "evidence": [],
+          "matches_commit": false
+        }
+      ],
+      "note": "no binary or checksum at the recorded commit matched the deployed data hash (reproducible build not attempted)"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0xff78bae0abf17d7a404c0be0f9ad9c9185b3f88dcc60403453d5ba8e1f22f53a",
+      "hash_type": "data1",
+      "constant_source": "ckb-devrel/ckb-proxy-locks contracts/type-burn-lock (mainnet and testnet)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x5",
+          "tx_hash": "0x10d63a996157d32c01078058000052674ca58d15f921bec7f1dcdac2160eb66b"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x5",
+        "tx_hash": "0x10d63a996157d32c01078058000052674ca58d15f921bec7f1dcdac2160eb66b"
+      },
+      "type_script": null,
+      "data_hash": "0xff78bae0abf17d7a404c0be0f9ad9c9185b3f88dcc60403453d5ba8e1f22f53a",
+      "deploy_tx": "0x10d63a996157d32c01078058000052674ca58d15f921bec7f1dcdac2160eb66b",
+      "deploy_block": 13589704
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0xff78bae0abf17d7a404c0be0f9ad9c9185b3f88dcc60403453d5ba8e1f22f53a",
+      "hash_type": "data1",
+      "constant_source": "ckb-devrel/ckb-proxy-locks contracts/type-burn-lock (mainnet and testnet)",
+      "cell_dep": {
+        "out_point": {
+          "tx_hash": "0xb4f171c9c9caf7401f54a8e56225ae21d95032150a87a4678eac3f66a3137b93",
+          "index": "0x5"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "tx_hash": "0xb4f171c9c9caf7401f54a8e56225ae21d95032150a87a4678eac3f66a3137b93",
+        "index": "0x5"
+      },
+      "type_script": null,
+      "data_hash": "0xff78bae0abf17d7a404c0be0f9ad9c9185b3f88dcc60403453d5ba8e1f22f53a",
+      "deploy_tx": "0xb4f171c9c9caf7401f54a8e56225ae21d95032150a87a4678eac3f66a3137b93",
+      "deploy_block": 14025090,
+      "via": "documented cell dep"
+    }
+  ],
+  "checked_at": "2026-10-20"
+}

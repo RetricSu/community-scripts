@@ -1,0 +1,18 @@
+[
+  {
+    "tx": "0xc3993e2a363c745e7cb323da5858aa77dcc35e4ba4cc8894e540215458d9a8a2",
+    "net": "testnet",
+    "name": "SHRINCS stateful signature (324B)",
+    "expect": [
+      "shrincs_lock"
+    ]
+  },
+  {
+    "tx": "0x18aa3568176d3ec7942ee0b889ef242c7ab80104f4cd97d9af039090b2e9393b",
+    "net": "testnet",
+    "name": "SHRINCS stateless signature (2568B)",
+    "expect": [
+      "shrincs_lock"
+    ]
+  }
+]

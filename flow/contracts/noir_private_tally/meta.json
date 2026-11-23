@@ -1,0 +1,57 @@
+{
+  "tags": [
+    "zk",
+    "open-source",
+    "community"
+  ],
+  "contributors": [
+    "wamimi"
+  ],
+  "source": {
+    "repo": "https://github.com/wamimi/noir-ckb-verifier",
+    "commit": "e4ba787626031a8bed92beaa567a87fe51a6b5f8",
+    "paths": [
+      "contracts/crates/private-tally/src/main.rs",
+      "contracts/crates/private-tally/build.rs",
+      "docs/private-tally-v2-spec.md"
+    ],
+    "commit_note": "commit read when writing this spec (default-branch HEAD 2026-11-10). Deployment + compiled-in policy values from evidence/private-tally-testnet/deployment.json and evidence/private-tally-testnet.md (deploy tx 0x39ef90b8…b1f9: type :0, VK :1, guard :2). wire-decode / verifier-core pinned at CECILIA-MULANDI/groth16-ckb@d64c769 (read; differs from e969ad1 only by formatting in wire-decode).",
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0x3cc448db51cdc14453fff7bdf2c3d39e1dd7a238091b982069d20e169e8337d1",
+          "evidence": [
+            "listed in evidence/private-tally-testnet/deployment.json"
+          ],
+          "matches_commit": false
+        }
+      ],
+      "note": "hash appears in the repo only as a deployment record or doc, which does not prove the recorded commit builds this binary (reproducible build not attempted)"
+    }
+  },
+  "deployments": [
+    {
+      "network": "testnet",
+      "code_hash": "0x3cc448db51cdc14453fff7bdf2c3d39e1dd7a238091b982069d20e169e8337d1",
+      "hash_type": "data1",
+      "constant_source": "noir-ckb-verifier evidence/private-tally-testnet/deployment.json (artifacts.type.data_hash) + evidence/private-tally-testnet.md",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x39ef90b8e6a882af3a658dc5c01cf17476e39907741541358d7155954547b1f9"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x39ef90b8e6a882af3a658dc5c01cf17476e39907741541358d7155954547b1f9"
+      },
+      "type_script": null,
+      "data_hash": "0x3cc448db51cdc14453fff7bdf2c3d39e1dd7a238091b982069d20e169e8337d1",
+      "deploy_tx": "0x39ef90b8e6a882af3a658dc5c01cf17476e39907741541358d7155954547b1f9",
+      "deploy_block": 22966804
+    }
+  ],
+  "checked_at": "2026-11-12"
+}

@@ -1,0 +1,215 @@
+{
+  "title": {
+    "zh": "Spore Cluster（type）约束",
+    "en": "Spore Cluster (type) Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：sporeprotocol/spore-contract / contracts/cluster/src/entry.rs　·　mainnet 0x7366…0075（data1）/ testnet v2 0x0bbe…9058、v1 0x598d…6080（data1）（spore-sdk）",
+    "en": "Source: sporeprotocol/spore-contract / contracts/cluster/src/entry.rs　·　mainnet 0x7366…0075 (data1) / testnet v2 0x0bbe…9058, v1 0x598d…6080 (data1) (spore-sdk)"
+  },
+  "transitions": [
+    {
+      "tag": "0 → 1",
+      "title": {
+        "zh": "创建",
+        "en": "Create"
+      },
+      "inputs": [
+        {
+          "label": "tx.inputs[0]",
+          "body": {
+            "zh": "任意 cell（用于计算 cluster_id）",
+            "en": "any cell (used to derive cluster_id)"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "cluster cell",
+          "body": "Cell{\n  type: { codeHash: CLUSTER, hashType: data1,\n          args: {{cluster_id = type_id(inputs[0], i)}} },\n  data: ClusterData{ name: {{non-empty}}, description, mutant_id? }\n}"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "data：ClusterData（molecule table）",
+            "en": "data: ClusterData (molecule table)"
+          },
+          "layout": [
+            {
+              "name": "name",
+              "size": "Bytes",
+              "role": {
+                "zh": "名称",
+                "en": "name"
+              },
+              "cons": {
+                "zh": "非空",
+                "en": "non-empty"
+              },
+              "err": "52",
+              "color": 1,
+              "flex": 2
+            },
+            {
+              "name": "description",
+              "size": "Bytes",
+              "role": {
+                "zh": "描述",
+                "en": "description"
+              },
+              "cons": "—",
+              "err": "5",
+              "color": 3,
+              "flex": 3
+            },
+            {
+              "name": "mutant_id? (v2)",
+              "size": "BytesOpt",
+              "role": {
+                "zh": "要求 spore 使用的 Lua 扩展",
+                "en": "Lua extension spores must apply"
+              },
+              "cons": {
+                "zh": "扩展 cell 在 cell_deps",
+                "en": "extension cell in cell_deps"
+              },
+              "err": "54",
+              "color": 4,
+              "flex": 2
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "group",
+          "cond": {
+            "zh": "输入、输出各 ≤ 1",
+            "en": "inputs and outputs ≤ 1 each"
+          },
+          "err": "50"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "合法 ClusterData（v1 两字段兼容）",
+            "en": "valid ClusterData (2-field v1 accepted)"
+          },
+          "err": "5"
+        },
+        {
+          "field": "name",
+          "cond": {
+            "zh": "非空",
+            "en": "non-empty"
+          },
+          "err": "52"
+        },
+        {
+          "field": "args[0..32]",
+          "cond": {
+            "zh": "= type_id(inputs[0], 输出序号)",
+            "en": "= type_id(inputs[0], output index)"
+          },
+          "err": "53"
+        },
+        {
+          "field": "mutant_id",
+          "cond": {
+            "zh": "对应扩展在 cell_deps",
+            "en": "extension is in cell_deps"
+          },
+          "err": "54"
+        },
+        {
+          "field": "witness",
+          "cond": {
+            "zh": "co-build Message 中恰有一个 MintCluster / TransferCluster Action 且字段一致（HEAD 源码，未核实部署版本）",
+            "en": "exactly one MintCluster / TransferCluster Action in the co-build Message with matching fields (HEAD source, deployed version unverified)"
+          },
+          "err": "8–13"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 1",
+      "title": {
+        "zh": "转移 / 授权铸造 spore",
+        "en": "Transfer / authorize a spore mint"
+      },
+      "inputs": [
+        {
+          "label": "cluster",
+          "body": "Cell{ type: CLUSTER({{id}}), data: D }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "cluster",
+          "body": "Cell{ type: CLUSTER({{id}}), data: {{D}} }"
+        }
+      ],
+      "limits": [
+        {
+          "field": "data",
+          "cond": {
+            "zh": "字节完全相同",
+            "en": "byte-identical"
+          },
+          "err": "51"
+        },
+        {
+          "field": "witness",
+          "cond": {
+            "zh": "co-build Message 中恰有一个 MintCluster / TransferCluster Action 且字段一致（HEAD 源码，未核实部署版本）",
+            "en": "exactly one MintCluster / TransferCluster Action in the co-build Message with matching fields (HEAD source, deployed version unverified)"
+          },
+          "err": "8–13"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 0",
+      "title": {
+        "zh": "销毁（禁止）",
+        "en": "Destroy (forbidden)"
+      },
+      "inputs": [
+        {
+          "label": "cluster",
+          "body": "Cell{ type: CLUSTER({{id}}) }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "outputs",
+          "body": {
+            "zh": "无该 cluster",
+            "en": "no such cluster"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "group",
+          "cond": {
+            "zh": "cluster 永远不能销毁",
+            "en": "a cluster can never be destroyed"
+          },
+          "err": "50"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码：5 InvalidClusterData · 50 InvalidClusterOperation · 51 ModifyClusterPermanentField · 52 EmptyName · 53 InvalidClusterID · 54 MutantNotInDeps；8–13 co-build",
+      "en": "Error codes: 5 InvalidClusterData · 50 InvalidClusterOperation · 51 ModifyClusterPermanentField · 52 EmptyName · 53 InvalidClusterID · 54 MutantNotInDeps; 8–13 co-build"
+    },
+    {
+      "zh": "Cluster Proxy / Agent（错误码 30–33 / 40–47）只在 testnet 由 spore-sdk 列出，暂未加入",
+      "en": "Cluster Proxy / Agent (errors 30–33 / 40–47) are only listed for testnet in spore-sdk and are not added yet"
+    }
+  ]
+}

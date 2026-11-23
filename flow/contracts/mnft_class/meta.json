@@ -1,0 +1,114 @@
+{
+  "tags": [
+    "nft",
+    "community",
+    "open-source"
+  ],
+  "contributors": [
+    "duanyytop"
+  ],
+  "source": {
+    "repo": "https://github.com/nervina-labs/ckb-nft-scripts",
+    "commit": "b5af002e78eb2ff375ce098cde24d77ff414822c",
+    "paths": [
+      "contracts/class-type/src/entry.rs",
+      "contracts/script-utils/src/class.rs",
+      "contracts/script-utils/src/issuer.rs",
+      "contracts/script-utils/src/helper.rs",
+      "contracts/script-utils/src/error.rs"
+    ],
+    "commit_note": "deployment commit named on the wiki page Lina-Mainnet-deployment; the Aggron testnet deployment commit d0a844def34df6b05b7b8e260a6225a477f1bf39 differs only in helper.rs CLASS_TYPE_CODE_HASH",
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0xc9aa394982bf0b7b1f8b19fbbbae42a5437516f8d908c84e87778eb19cd95125",
+          "evidence": [],
+          "matches_commit": false
+        },
+        {
+          "data_hash": "0x682a109037de36b54bbc4595c137a0ce644ea9efc2118b3b15e6bf24be12a9d3",
+          "evidence": [],
+          "matches_commit": false
+        }
+      ],
+      "note": "no binary or checksum at the recorded commit matched the deployed data hash (reproducible build not attempted)"
+    },
+    "upstream_review": {
+      "repo": "https://github.com/nervina-labs/ckb-nft-scripts",
+      "base_commit": "b5af002e78eb2ff375ce098cde24d77ff414822c",
+      "commit": "88caddde5489ce019fab3e5f811eb4f869d7f139",
+      "paths": [
+        "contracts/class-type/src/entry.rs",
+        "contracts/script-utils/src/class.rs",
+        "contracts/script-utils/src/issuer.rs",
+        "contracts/script-utils/src/helper.rs",
+        "contracts/script-utils/src/error.rs"
+      ],
+      "disposition": "retain-deployed-version",
+      "reason": {
+        "zh": "官方 wiki 仍固定 Lina=b5af002、Aggron=d0a844d；与 HEAD 的差异为格式/导入整理及 helper 内 CLASS_TYPE_CODE_HASH 从 Lina 改为 Aggron。不能用 Aggron 常量替换主网；维持按网络选择 class hash，数据布局、转换和错误码不变。",
+        "en": "Official wiki still pins Lina=b5af002 and Aggron=d0a844d. HEAD differs by formatting/import cleanup and switching helper CLASS_TYPE_CODE_HASH from Lina to Aggron. Do not replace the mainnet constant with Aggron; retain network-specific class hashes, layouts, transitions and errors."
+      },
+      "evidence": [
+        "https://github.com/nervina-labs/ckb-nft-scripts/wiki/Lina-Mainnet-deployment",
+        "https://github.com/nervina-labs/ckb-nft-scripts/wiki/Aggron-Testnet-deployment",
+        "https://github.com/nervina-labs/ckb-nft-scripts/compare/b5af002e78eb2ff375ce098cde24d77ff414822c...88caddde5489ce019fab3e5f811eb4f869d7f139"
+      ],
+      "reviewed_at": "2026-11-19"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0xd51e6eaf48124c601f41abe173f1da550b4cbca9c6a166781906a287abbb3d9a",
+      "hash_type": "type",
+      "constant_source": "ckb-nft-scripts wiki Lina-Mainnet-deployment (tx 0x5dce8aca…:1)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x1",
+          "tx_hash": "0x5dce8acab1750d4790059f22284870216db086cb32ba118ee5e08b97dc21d471"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x1",
+        "tx_hash": "0x5dce8acab1750d4790059f22284870216db086cb32ba118ee5e08b97dc21d471"
+      },
+      "type_script": {
+        "args": "0x9b645aade5a5103a3a2808660193e7b4b274c28fa2594820d2243940727430f9",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0xc9aa394982bf0b7b1f8b19fbbbae42a5437516f8d908c84e87778eb19cd95125",
+      "deploy_tx": "0x5dce8acab1750d4790059f22284870216db086cb32ba118ee5e08b97dc21d471",
+      "deploy_block": 5913754
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0x095b8c0b4e51a45f953acd1fcd1e39489f2675b4bc94e7af27bb38958790e3fc",
+      "hash_type": "type",
+      "constant_source": "ckb-nft-scripts wiki Aggron-Testnet-deployment (tx 0xf11ccb60…:1)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x1",
+          "tx_hash": "0xf11ccb6079c1a4b3d86abe2c574c5db8d2fd3505fdc1d5970b69b31864a4bd1c"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x1",
+        "tx_hash": "0xf11ccb6079c1a4b3d86abe2c574c5db8d2fd3505fdc1d5970b69b31864a4bd1c"
+      },
+      "type_script": {
+        "args": "0x72236511c07cf52b9aec6a6e5bb955431d46acb91a01f5fc2f5524108da464fd",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x682a109037de36b54bbc4595c137a0ce644ea9efc2118b3b15e6bf24be12a9d3",
+      "deploy_tx": "0xf11ccb6079c1a4b3d86abe2c574c5db8d2fd3505fdc1d5970b69b31864a4bd1c",
+      "deploy_block": 3463076
+    }
+  ],
+  "checked_at": "2026-11-06"
+}

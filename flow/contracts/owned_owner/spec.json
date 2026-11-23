@@ -1,0 +1,154 @@
+{
+  "title": {
+    "zh": "iCKB owned_owner（lock + type）约束",
+    "en": "iCKB owned_owner (lock + type) Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：ickb/contracts / scripts/contracts/owned_owner/src　·　mainnet code_hash 0xacc7…1bd0（data1）",
+    "en": "Source: ickb/contracts / scripts/contracts/owned_owner/src　·　mainnet code_hash 0xacc7…1bd0 (data1)"
+  },
+  "transitions": [
+    {
+      "tag": "0 → 2",
+      "title": {
+        "zh": "创建：取款请求 + owner 凭证",
+        "en": "Create: withdrawal request + owner token"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "iCKB 存款等",
+            "en": "iCKB deposit etc."
+          },
+          "body": "Cell{ lock: ICKB_LOGIC, type: NERVOS_DAO }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "owned（第 i 个输出）",
+            "en": "owned (output i)"
+          },
+          "body": "Cell{\n  lock: {{OWNED_OWNER}},\n  type: NERVOS_DAO, data: {{block number ≠ 0}}\n}"
+        },
+        {
+          "label": {
+            "zh": "owner（第 j 个输出）",
+            "en": "owner (output j)"
+          },
+          "body": "Cell{\n  lock: user,\n  type: {{OWNED_OWNER}},\n  data: owned_distance = {{i − j}} (i32)\n}"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "owner data：OwnedOwnerData（struct 4B）",
+            "en": "owner data: OwnedOwnerData (struct 4B)"
+          },
+          "layout": [
+            {
+              "name": "owned_distance",
+              "size": "4B",
+              "role": {
+                "zh": "owned cell 相对 owner cell 的序号偏移 i32 LE",
+                "en": "index offset of the owned cell relative to the owner i32 LE"
+              },
+              "cons": {
+                "zh": "恰好指向一个 owned cell",
+                "en": "points to exactly one owned cell"
+              },
+              "err": "8",
+              "color": 2
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "owned",
+          "cond": {
+            "zh": "lock = 本脚本的 cell 必须是 DAO 取款请求",
+            "en": "a cell locked by this script must be a DAO withdrawal request"
+          },
+          "err": "6"
+        },
+        {
+          "field": "cell",
+          "cond": {
+            "zh": "不能同时 lock = type = 本脚本",
+            "en": "not both lock and type = this script"
+          },
+          "err": "7"
+        },
+        {
+          "field": "pairing",
+          "cond": {
+            "zh": "输出中每个 owned 恰有一个 owner 指向它（序号 + distance）",
+            "en": "in outputs each owned has exactly one owner pointing to it (index + distance)"
+          },
+          "err": "8"
+        }
+      ]
+    },
+    {
+      "tag": "2 → 0",
+      "title": {
+        "zh": "领取：用 owner 解锁取款请求",
+        "en": "Claim: unlock the withdrawal request with the owner"
+      },
+      "inputs": [
+        {
+          "label": "owned",
+          "body": "Cell{ lock: OWNED_OWNER, type: NERVOS_DAO }  @ OutPoint(tx, i)"
+        },
+        {
+          "label": "owner",
+          "body": {
+            "zh": "Cell{ lock: user（签名）, type: OWNED_OWNER, data: distance }  @ OutPoint(tx, j)",
+            "en": "Cell{ lock: user (signs), type: OWNED_OWNER, data: distance }  @ OutPoint(tx, j)"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "提取的 CKB",
+            "en": "withdrawn CKB"
+          },
+          "body": {
+            "zh": "任意（DAO 规则另行检查）",
+            "en": "any (DAO rules checked separately)"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "pairing",
+          "cond": {
+            "zh": "输入中按 OutPoint：owned 的 (tx, i) = owner 的 (tx, j + distance)，一一对应",
+            "en": "in inputs by OutPoint: owned (tx, i) = owner (tx, j + distance), one to one"
+          },
+          "err": "8"
+        },
+        {
+          "field": "owner data",
+          "cond": {
+            "zh": "≥ 4 字节",
+            "en": "≥ 4 bytes"
+          },
+          "err": "4"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码：1–4 系统 · 5 NotEmptyArgs · 6 NotWithdrawalRequest · 7 ScriptMisuse · 8 Mismatch",
+      "en": "Error codes: 1–4 syscall · 5 NotEmptyArgs · 6 NotWithdrawalRequest · 7 ScriptMisuse · 8 Mismatch"
+    },
+    {
+      "zh": "作用：让任何人都能代用户发起 DAO 取款，而只有 owner cell 的持有者能领取",
+      "en": "Purpose: anyone can create a DAO withdrawal for a user, but only the owner-cell holder can claim it"
+    }
+  ]
+}

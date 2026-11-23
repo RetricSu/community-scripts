@@ -1,0 +1,182 @@
+{
+  "tags": [
+    "nft",
+    "community",
+    "open-source",
+    "p-spore"
+  ],
+  "contributors": [
+    "ashuralyk"
+  ],
+  "source": {
+    "repo": "https://github.com/sporeprotocol/spore-contract",
+    "commit": "9a6010e43ffd09ac9e6fe7ee389cc915e3e4f999",
+    "paths": [
+      "contracts/spore/src/entry.rs",
+      "lib/utils",
+      "lib/errors/src/error.rs"
+    ],
+    "commit_note": "default-branch HEAD recorded at backfill 2026-10-21; spec/plugin were written from the default branch shortly before (exact read commit not recorded)",
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0x4a4dce1df3dffff7f8b2cd7dff7303df3b6150c9788cb75dcf6747247132b9f5",
+          "evidence": [
+            "listed in deployment/migration/mainnet/spore/2024-01-25-0.2.2-beta.1.json"
+          ],
+          "matches_commit": false
+        },
+        {
+          "data_hash": "0x685a60219309029d01310311dba953d67029170ca4848a4ff638e57002130a0d",
+          "evidence": [
+            "listed in deployment/migration/testnet/spore/2024-03-16-0.2.2-beta.2.json"
+          ],
+          "matches_commit": false
+        },
+        {
+          "data_hash": "0xbbad126377d45f90a8ee120da988a2d7332c78ba8fd679aab478a19d6c133494",
+          "evidence": [
+            "listed in deployment/frozen/testnet.toml"
+          ],
+          "matches_commit": false
+        },
+        {
+          "data_hash": "0x45721f0b3b48458087f4316410c4118d4d58b20b9de408073f8f59c745e1d6cd",
+          "evidence": [],
+          "matches_commit": false
+        },
+        {
+          "data_hash": "0x076696859964804a0c984062d9c3bfe983f8632e084d9e230cb84a012aa75927",
+          "evidence": [],
+          "matches_commit": false
+        }
+      ],
+      "note": "no binary or checksum at the recorded commit matched the deployed data hash (reproducible build not attempted)"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0x4a4dce1df3dffff7f8b2cd7dff7303df3b6150c9788cb75dcf6747247132b9f5",
+      "hash_type": "data1",
+      "constant_source": "spore-sdk predefined.ts (Spore v2)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x96b198fb5ddbd1eed57ed667068f1f1e55d07907b4c0dbd38675a69ea1b69824"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x96b198fb5ddbd1eed57ed667068f1f1e55d07907b4c0dbd38675a69ea1b69824"
+      },
+      "type_script": null,
+      "data_hash": "0x4a4dce1df3dffff7f8b2cd7dff7303df3b6150c9788cb75dcf6747247132b9f5",
+      "deploy_tx": "0x96b198fb5ddbd1eed57ed667068f1f1e55d07907b4c0dbd38675a69ea1b69824",
+      "deploy_block": 12042082
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0x685a60219309029d01310311dba953d67029170ca4848a4ff638e57002130a0d",
+      "hash_type": "data1",
+      "constant_source": "spore-sdk predefined.ts (Spore v2 preview)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x5e8d2a517d50fd4bb4d01737a7952a1f1d35c8afc77240695bb569cd7d9d5a1f"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x5e8d2a517d50fd4bb4d01737a7952a1f1d35c8afc77240695bb569cd7d9d5a1f"
+      },
+      "type_script": {
+        "args": "0xff279a6debd8f916dae75f91a45454526c0c9b937a29ca7746023033a234428a",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x685a60219309029d01310311dba953d67029170ca4848a4ff638e57002130a0d",
+      "deploy_tx": "0x5e8d2a517d50fd4bb4d01737a7952a1f1d35c8afc77240695bb569cd7d9d5a1f",
+      "deploy_block": 12606776
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0xbbad126377d45f90a8ee120da988a2d7332c78ba8fd679aab478a19d6c133494",
+      "hash_type": "data1",
+      "constant_source": "spore-sdk predefined.ts (Spore v1)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0xfd694382e621f175ddf81ce91ce2ecf8bfc027d53d7d31b8438f7d26fc37fd19"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0xfd694382e621f175ddf81ce91ce2ecf8bfc027d53d7d31b8438f7d26fc37fd19"
+      },
+      "type_script": {
+        "args": "0x4b4e91f74472967cc4bd8e802a978796c4e152b6c494c8e2b331cc52e0dae6fe",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0xbbad126377d45f90a8ee120da988a2d7332c78ba8fd679aab478a19d6c133494",
+      "deploy_tx": "0xfd694382e621f175ddf81ce91ce2ecf8bfc027d53d7d31b8438f7d26fc37fd19",
+      "deploy_block": 10228288
+    },
+    {
+      "network": "mainnet",
+      "code_hash": "0xcfba73b58b6f30e70caed8a999748781b164ef9a1e218424a6fb55ebf641cb33",
+      "hash_type": "type",
+      "constant_source": "spore-sdk predefined.ts (Spore v2, tag did — dotbit deployment)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0xb88032a061bf5f4834b7b709ad17f745413ddc049cdf88482405a38d3d960c6d"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0xb88032a061bf5f4834b7b709ad17f745413ddc049cdf88482405a38d3d960c6d"
+      },
+      "type_script": {
+        "args": "0x62312cd846659e188b05da11dc3f080b083c27371ea701d6026e11e713e0e3de",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x45721f0b3b48458087f4316410c4118d4d58b20b9de408073f8f59c745e1d6cd",
+      "deploy_tx": "0xb88032a061bf5f4834b7b709ad17f745413ddc049cdf88482405a38d3d960c6d",
+      "deploy_block": 15198802
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0x0b1f412fbae26853ff7d082d422c2bdd9e2ff94ee8aaec11240a5b34cc6e890f",
+      "hash_type": "type",
+      "constant_source": "spore-sdk predefined.ts (Spore v2, tag did — dotbit deployment)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x306961e0eb04ed972c60cb89a0aed1b0ef065d96d2fc0000c62db5275e32dc6f"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x306961e0eb04ed972c60cb89a0aed1b0ef065d96d2fc0000c62db5275e32dc6f"
+      },
+      "type_script": {
+        "args": "0x80f0d4bf6b3951911aa6b98cc609d477a8a10b903b35cfd528d098e95c36f680",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x076696859964804a0c984062d9c3bfe983f8632e084d9e230cb84a012aa75927",
+      "deploy_tx": "0x306961e0eb04ed972c60cb89a0aed1b0ef065d96d2fc0000c62db5275e32dc6f",
+      "deploy_block": 14415430
+    }
+  ],
+  "checked_at": "2026-10-20"
+}

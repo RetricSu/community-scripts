@@ -1,0 +1,68 @@
+{
+  "tags": [
+    "nft",
+    "community",
+    "no-source"
+  ],
+  "contributors": [],
+  "source": {
+    "status": "no-source",
+    "note": "No public source found, unconfirmed with maintainer",
+    "binary": {
+      "status": "no-source"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0x90ca618be6c15f5857d3cbd09f9f24ca6770af047ba9ee70989ec3b229419ac7",
+      "hash_type": "type",
+      "constant_source": "nervosnetwork/ckb-explorer-frontend src/constants/scripts.ts @39f93f2; nervosnetwork/ckb-explorer lib/tasks/migration/fill_contracts_info.rake @0634b74",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0xabaa25237554f0d6c586dc010e7e85e6870bcfd9fb8773257ecacfbe1fd738a0"
+        },
+        "dep_type": "dep_group"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x668921df2836e5ce4b3c41c626aab1ee3ef9bccfa4b527abcf28a61b166837ab"
+      },
+      "type_script": {
+        "args": "0x8b8c859723698f5fd38372b6eadb8f1b4aaa823169baec7c203ed9b269953f0b",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x63d7d30b877bbe94692825e0ba587a44ac3a404655b5191110ac0cdee598aa7e",
+      "deploy_tx": "0x668921df2836e5ce4b3c41c626aab1ee3ef9bccfa4b527abcf28a61b166837ab",
+      "deploy_block": 9455255
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0x9302db6cc1344b81a5efee06962abcb40427ecfcbe69d471b01b2658ed948075",
+      "hash_type": "type",
+      "constant_source": "nervosnetwork/ckb-explorer-frontend src/constants/scripts.ts @39f93f2; nervosnetwork/ckb-explorer lib/tasks/migration/fill_contracts_info.rake @0634b74",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x636a786001f87cb615acfcf408be0f9a1f077001f0bbc75ca54eadfe7e221713"
+        },
+        "dep_type": "dep_group"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x03ce5eabf7631c974efd4ec6a92e47024f266512eed91046f25f25bd4c91b3d7"
+      },
+      "type_script": {
+        "args": "0x9abd4d12620abeef1bac3bcf8e328cdb8d1d7fb8320bb2ee01d62250868794b0",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x07f7a67b58ab7ffef08fd0d33fd6f0a1286081486963ac6181f21802949f0b4f",
+      "deploy_tx": "0x03ce5eabf7631c974efd4ec6a92e47024f266512eed91046f25f25bd4c91b3d7",
+      "deploy_block": 7572768
+    }
+  ],
+  "checked_at": "2026-11-06"
+}

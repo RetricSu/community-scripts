@@ -1,0 +1,1 @@
+[{"tx":"0x53a0519e06fc4aac3eca2606e12fc19849919a226af872f687dfb3209a0470fd","net":"mainnet","name":"name cell spent under account-lock (transfer)","expect":["cells_account_lock"]}]

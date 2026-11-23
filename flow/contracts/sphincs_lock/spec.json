@@ -1,0 +1,416 @@
+{
+  "title": {
+    "zh": "抗量子 SPHINCS+ Lock 约束",
+    "en": "Quantum-resistant SPHINCS+ Lock Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：cryptape/quantum-resistant-lock-script / contracts/c-sphincs-all-in-one-lock/ckb-sphincsplus-root-lock.c、docs/advanced.md　·　mainnet 0x302d…cedf (type) / testnet 0x147e…7eaf (data1)　·　部署见 README.md",
+    "en": "Source: cryptape/quantum-resistant-lock-script / contracts/c-sphincs-all-in-one-lock/ckb-sphincsplus-root-lock.c, docs/advanced.md　·　mainnet 0x302d…cedf (type) / testnet 0x147e…7eaf (data1)　·　deployments in README.md"
+  },
+  "transitions": [
+    {
+      "tag": "A",
+      "title": {
+        "zh": "M-of-N SPHINCS+（SLH-DSA, FIPS 205）多签解锁；单签是 1-of-1 特例",
+        "en": "M-of-N SPHINCS+ (SLH-DSA, FIPS 205) multisig unlock; single key is the 1-of-1 case"
+      },
+      "inputs": [
+        {
+          "label": "input",
+          "body": "Cell{ lock: { codeHash: SPHINCS_LOCK, args: {{config_hash 32B}} } }"
+        },
+        {
+          "label": "witness",
+          "body": "WitnessArgs{ lock: S ‖ R ‖ M ‖ N ‖ PWOS × N }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "outputs：任意",
+            "en": "outputs: any"
+          },
+          "body": {
+            "zh": "任意",
+            "en": "any"
+          }
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "args = blake2b(personal \"ckb-sphincs+-sct\", multisig 配置)，32 字节",
+            "en": "args = blake2b(personal \"ckb-sphincs+-sct\", multisig configuration), 32 bytes"
+          },
+          "layout": [
+            {
+              "name": "S",
+              "size": "1B",
+              "role": {
+                "zh": "保留，固定 0x80",
+                "en": "reserved, fixed 0x80"
+              },
+              "cons": {
+                "zh": "= 0x80",
+                "en": "= 0x80"
+              },
+              "err": "103",
+              "color": 5,
+              "flex": 1
+            },
+            {
+              "name": "R",
+              "size": "1B",
+              "role": {
+                "zh": "前 R 个公钥必须签名",
+                "en": "first R pubkeys must sign"
+              },
+              "cons": {
+                "zh": "R ≤ M",
+                "en": "R ≤ M"
+              },
+              "err": "103",
+              "color": 1,
+              "flex": 1
+            },
+            {
+              "name": "M",
+              "size": "1B",
+              "role": {
+                "zh": "阈值",
+                "en": "threshold"
+              },
+              "cons": {
+                "zh": "0 < M ≤ N",
+                "en": "0 < M ≤ N"
+              },
+              "err": "103",
+              "color": 2,
+              "flex": 1
+            },
+            {
+              "name": "N",
+              "size": "1B",
+              "role": {
+                "zh": "公钥个数",
+                "en": "number of pubkeys"
+              },
+              "cons": {
+                "zh": "> 0",
+                "en": "> 0"
+              },
+              "err": "103",
+              "color": 3,
+              "flex": 1
+            },
+            {
+              "name": "param flag",
+              "size": "1B",
+              "role": {
+                "zh": "高 7 位 param ID，最低位（签名标志）为 0",
+                "en": "high 7 bits param ID, lowest bit (signature flag) 0"
+              },
+              "cons": {
+                "zh": "48–59",
+                "en": "48–59"
+              },
+              "err": "106",
+              "color": 6,
+              "flex": 2
+            },
+            {
+              "name": "pubkey",
+              "size": "32/48/64B",
+              "role": {
+                "zh": "SPHINCS+ 公钥",
+                "en": "SPHINCS+ public key"
+              },
+              "cons": {
+                "zh": "长度由 param ID 决定",
+                "en": "length set by param ID"
+              },
+              "err": "106",
+              "color": 4,
+              "flex": 3
+            },
+            {
+              "name": "… × N",
+              "size": "",
+              "role": {
+                "zh": "",
+                "en": ""
+              },
+              "cons": {
+                "zh": "",
+                "en": ""
+              },
+              "err": "",
+              "color": 7,
+              "flex": 1
+            }
+          ]
+        },
+        {
+          "label": {
+            "zh": "witness.lock 布局",
+            "en": "witness.lock layout"
+          },
+          "layout": [
+            {
+              "name": "S",
+              "size": "1B",
+              "role": {
+                "zh": "保留，固定 0x80",
+                "en": "reserved, fixed 0x80"
+              },
+              "cons": {
+                "zh": "= 0x80",
+                "en": "= 0x80"
+              },
+              "err": "103",
+              "color": 5,
+              "flex": 1
+            },
+            {
+              "name": "R",
+              "size": "1B",
+              "role": {
+                "zh": "前 R 个公钥必须签名",
+                "en": "first R pubkeys must sign"
+              },
+              "cons": {
+                "zh": "R ≤ M",
+                "en": "R ≤ M"
+              },
+              "err": "103",
+              "color": 1,
+              "flex": 1
+            },
+            {
+              "name": "M",
+              "size": "1B",
+              "role": {
+                "zh": "阈值",
+                "en": "threshold"
+              },
+              "cons": {
+                "zh": "0 < M ≤ N",
+                "en": "0 < M ≤ N"
+              },
+              "err": "103",
+              "color": 2,
+              "flex": 1
+            },
+            {
+              "name": "N",
+              "size": "1B",
+              "role": {
+                "zh": "公钥个数",
+                "en": "number of pubkeys"
+              },
+              "cons": {
+                "zh": "> 0",
+                "en": "> 0"
+              },
+              "err": "103",
+              "color": 3,
+              "flex": 1
+            },
+            {
+              "name": "param flag",
+              "size": "1B",
+              "role": {
+                "zh": "param ID ≪ 1 | 有签名",
+                "en": "param ID ≪ 1 | has signature"
+              },
+              "cons": {
+                "zh": "—",
+                "en": "—"
+              },
+              "err": "106",
+              "color": 6,
+              "flex": 2
+            },
+            {
+              "name": "pubkey",
+              "size": "32/48/64B",
+              "role": {
+                "zh": "公钥",
+                "en": "public key"
+              },
+              "cons": {
+                "zh": "—",
+                "en": "—"
+              },
+              "err": "106",
+              "color": 4,
+              "flex": 2
+            },
+            {
+              "name": "signature?",
+              "size": "7856–49856B",
+              "role": {
+                "zh": "有签名标志时存在",
+                "en": "present when the flag is set"
+              },
+              "cons": {
+                "zh": "恰 M 个",
+                "en": "exactly M"
+              },
+              "err": "107",
+              "color": 2,
+              "flex": 4
+            },
+            {
+              "name": "… × N",
+              "size": "",
+              "role": {
+                "zh": "按配置中公钥顺序",
+                "en": "in configuration order"
+              },
+              "cons": {
+                "zh": "",
+                "en": ""
+              },
+              "err": "",
+              "color": 7,
+              "flex": 1
+            }
+          ]
+        },
+        {
+          "label": {
+            "zh": "param ID（crates/ckb-fips205-utils/src/lib.rs；尺寸取自 FIPS 205 表 2）",
+            "en": "param ID (crates/ckb-fips205-utils/src/lib.rs; sizes from FIPS 205 Table 2)"
+          },
+          "layout": [
+            {
+              "name": "48 / 49",
+              "size": "",
+              "role": {
+                "zh": "SHA2-128f / 128s",
+                "en": "SHA2-128f / 128s"
+              },
+              "cons": {
+                "zh": "pk 32B；sig 17088 / 7856",
+                "en": "pk 32B; sig 17088 / 7856"
+              },
+              "err": "",
+              "color": 1,
+              "flex": 2
+            },
+            {
+              "name": "50 / 51",
+              "size": "",
+              "role": {
+                "zh": "SHA2-192f / 192s",
+                "en": "SHA2-192f / 192s"
+              },
+              "cons": {
+                "zh": "pk 48B；sig 35664 / 16224",
+                "en": "pk 48B; sig 35664 / 16224"
+              },
+              "err": "",
+              "color": 2,
+              "flex": 2
+            },
+            {
+              "name": "52 / 53",
+              "size": "",
+              "role": {
+                "zh": "SHA2-256f / 256s",
+                "en": "SHA2-256f / 256s"
+              },
+              "cons": {
+                "zh": "pk 64B；sig 49856 / 29792",
+                "en": "pk 64B; sig 49856 / 29792"
+              },
+              "err": "",
+              "color": 3,
+              "flex": 2
+            },
+            {
+              "name": "54–59",
+              "size": "",
+              "role": {
+                "zh": "SHAKE 同上顺序",
+                "en": "SHAKE, same order"
+              },
+              "cons": {
+                "zh": "尺寸同 SHA2",
+                "en": "sizes as SHA2"
+              },
+              "err": "",
+              "color": 4,
+              "flex": 2
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "恰为 32 字节",
+            "en": "exactly 32 bytes"
+          },
+          "err": "104"
+        },
+        {
+          "field": "witness",
+          "cond": {
+            "zh": "第一个 group witness 是 WitnessArgs，lock 非空",
+            "en": "first group witness is WitnessArgs with non-empty lock"
+          },
+          "err": "106"
+        },
+        {
+          "field": "header",
+          "cond": {
+            "zh": "S = 0x80，N > 0，0 < M ≤ N，R ≤ M",
+            "en": "S = 0x80, N > 0, 0 < M ≤ N, R ≤ M"
+          },
+          "err": "103"
+        },
+        {
+          "field": "PWOS",
+          "cond": {
+            "zh": "N 个；param ID 合法；前 R 个必须有签名；恰好 M 个签名；之后无多余字节",
+            "en": "N of them; valid param ID; first R must be signed; exactly M signatures; no trailing bytes"
+          },
+          "err": "106"
+        },
+        {
+          "field": "config hash",
+          "cond": {
+            "zh": "blake2b(\"ckb-sphincs+-sct\", S‖R‖M‖N‖(flag & 0xFE ‖ pubkey)×N) = args",
+            "en": "blake2b(\"ckb-sphincs+-sct\", S‖R‖M‖N‖(flag & 0xFE ‖ pubkey)×N) = args"
+          },
+          "err": "105"
+        },
+        {
+          "field": "signature",
+          "cond": {
+            "zh": "每个签名覆盖 CKB_TX_MESSAGE_ALL（blake2b personal \"ckb-sphincs+-msg\"），由 leaf lock 经 exec/spawn 验证（未检查）",
+            "en": "each signature covers CKB_TX_MESSAGE_ALL (blake2b personal \"ckb-sphincs+-msg\"), verified by the leaf lock via exec/spawn (not checked)"
+          },
+          "err": "102 / 107 / 111"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码（ckb-sphincsplus-common.h）：101 ARGUMENTS_LEN · 102 MESSAGE · 103 ENCODING · 104 ARGS · 105 MULTISIG_HASH · 106 WITNESS · 107 VERIFY · 108 ARGV · 109 PARAMS · 110 UNEXPECTED · 111 LEAF_VERIFY",
+      "en": "Error codes (ckb-sphincsplus-common.h): 101 ARGUMENTS_LEN · 102 MESSAGE · 103 ENCODING · 104 ARGS · 105 MULTISIG_HASH · 106 WITNESS · 107 VERIFY · 108 ARGV · 109 PARAMS · 110 UNEXPECTED · 111 LEAF_VERIFY"
+    },
+    {
+      "zh": "部署的是纯 C 版本（deployment/mainnet/deployment.toml 指向 build/release/c-sphincs-all-in-one-lock）；Rust 版与混合版仅作对比，未部署",
+      "en": "The deployed build is the pure C one (deployment/mainnet/deployment.toml points at build/release/c-sphincs-all-in-one-lock); the Rust and hybrid versions are comparisons, not deployed"
+    },
+    {
+      "zh": "mainnet 升级由 3-of-5 multisig 控制（deployment/mainnet/README.md）",
+      "en": "Mainnet upgrades are controlled by a 3-of-5 multisig (deployment/mainnet/README.md)"
+    }
+  ]
+}

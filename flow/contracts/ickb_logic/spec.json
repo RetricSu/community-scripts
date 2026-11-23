@@ -1,0 +1,221 @@
+{
+  "title": {
+    "zh": "iCKB logic（lock + type）约束",
+    "en": "iCKB logic (lock + type) Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：ickb/contracts / scripts/contracts/ickb_logic/src　·　mainnet code_hash 0x2a81…3bd3（data1，由 release 二进制计算并在链上确认）",
+    "en": "Source: ickb/contracts / scripts/contracts/ickb_logic/src　·　mainnet code_hash 0x2a81…3bd3 (data1, computed from the release binary and confirmed on-chain)"
+  },
+  "transitions": [
+    {
+      "tag": "Phase 1",
+      "title": {
+        "zh": "CKB 存入 → 存款 + 回执",
+        "en": "Deposit CKB → deposit + receipt"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "任意 CKB",
+            "en": "any CKB"
+          },
+          "body": "Cell{ lock: user }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "DAO 存款（N 个，金额相同）",
+            "en": "DAO deposits (N, same amount)"
+          },
+          "body": {
+            "zh": "Cell{\n  lock: {{ICKB_LOGIC (args 空)}},\n  type: NERVOS_DAO, data: 0x0000000000000000,\n  unoccupied: {{1,000 – 1,000,000 CKB}}\n}",
+            "en": "Cell{\n  lock: {{ICKB_LOGIC (empty args)}},\n  type: NERVOS_DAO, data: 0x0000000000000000,\n  unoccupied: {{1,000 – 1,000,000 CKB}}\n}"
+          }
+        },
+        {
+          "label": {
+            "zh": "回执",
+            "en": "receipt"
+          },
+          "body": "Cell{\n  lock: user,\n  type: {{ICKB_LOGIC}},\n  data: ReceiptData{ quantity: {{N}}, amount: {{unoccupied}} }\n}"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "回执 data：ReceiptData（struct 12B）",
+            "en": "receipt data: ReceiptData (struct 12B)"
+          },
+          "layout": [
+            {
+              "name": "deposit_quantity",
+              "size": "4B",
+              "role": {
+                "zh": "存款个数 u32 LE",
+                "en": "number of deposits u32 LE"
+              },
+              "cons": "> 0",
+              "err": "9",
+              "color": 2
+            },
+            {
+              "name": "deposit_amount",
+              "size": "8B",
+              "role": {
+                "zh": "单个存款的 unoccupied capacity（shannon）",
+                "en": "unoccupied capacity of one deposit (shannons)"
+              },
+              "cons": {
+                "zh": "与输出存款匹配",
+                "en": "matches the output deposits"
+              },
+              "err": "10",
+              "color": 1,
+              "flex": 2
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "deposit",
+          "cond": {
+            "zh": "unoccupied ≥ 1,000 CKB",
+            "en": "unoccupied ≥ 1,000 CKB"
+          },
+          "err": "7"
+        },
+        {
+          "field": "deposit",
+          "cond": {
+            "zh": "unoccupied ≤ 1,000,000 CKB",
+            "en": "unoccupied ≤ 1,000,000 CKB"
+          },
+          "err": "8"
+        },
+        {
+          "field": "receipt",
+          "cond": {
+            "zh": "quantity > 0",
+            "en": "quantity > 0"
+          },
+          "err": "9"
+        },
+        {
+          "field": "accounting",
+          "cond": {
+            "zh": "每种金额：输出存款个数 = 回执 quantity 之和",
+            "en": "per amount: output deposit count = Σ receipt quantity"
+          },
+          "err": "10"
+        }
+      ]
+    },
+    {
+      "tag": "Phase 2",
+      "title": {
+        "zh": "回执 → iCKB（xUDT）",
+        "en": "Receipt → iCKB (xUDT)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "回执",
+            "en": "receipt"
+          },
+          "body": {
+            "zh": "Cell{ type: ICKB_LOGIC, data: {quantity, amount} }\n// header_deps: 回执所在块",
+            "en": "Cell{ type: ICKB_LOGIC, data: {quantity, amount} }\n// header_deps: the receipt's block"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "iCKB xUDT",
+          "body": "Cell{\n  type: xUDT( args = {{hash(ICKB_LOGIC) ‖ 0x00000080}} ),\n  data: {{u128 amount}}\n}"
+        }
+      ],
+      "limits": [
+        {
+          "field": "value",
+          "cond": {
+            "zh": "iCKB = amount × AR₀ / AR_m（AR₀ = 10¹⁶），超过 100,000 iCKB 的部分打 9 折",
+            "en": "iCKB = amount × AR₀ / AR_m (AR₀ = 10¹⁶), 10% off above 100,000 iCKB per deposit"
+          },
+          "err": "11"
+        },
+        {
+          "field": "balance",
+          "cond": {
+            "zh": "Σ输入 UDT + Σ输入回执价值 = Σ输出 UDT + Σ输入存款价值",
+            "en": "Σ input UDT + Σ input receipt value = Σ output UDT + Σ input deposit value"
+          },
+          "err": "11"
+        },
+        {
+          "field": "udt",
+          "cond": {
+            "zh": "输出单个 UDT 数量 ≤ u64::MAX",
+            "en": "each output UDT amount ≤ u64::MAX"
+          },
+          "err": "12"
+        }
+      ]
+    },
+    {
+      "tag": "Burn",
+      "title": {
+        "zh": "iCKB 换回存款",
+        "en": "iCKB → withdraw a deposit"
+      },
+      "inputs": [
+        {
+          "label": "iCKB xUDT",
+          "body": "Cell{ type: iCKB xUDT, data: amount }"
+        },
+        {
+          "label": {
+            "zh": "任一 iCKB 存款",
+            "en": "any iCKB deposit"
+          },
+          "body": "Cell{ lock: ICKB_LOGIC, type: NERVOS_DAO }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "DAO 取款请求（通常由 owned_owner 锁定）",
+            "en": "DAO withdrawal request (usually locked by owned_owner)"
+          },
+          "body": "Cell{ lock: OWNED_OWNER, type: NERVOS_DAO, data: {{block number}} }"
+        }
+      ],
+      "limits": [
+        {
+          "field": "balance",
+          "cond": {
+            "zh": "销毁的 iCKB = 存款按其区块 AR 计算的价值",
+            "en": "burned iCKB = deposit value at its block AR"
+          },
+          "err": "11"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "误用检查（6 ScriptMisuse，输入输出全部 cell）：DAO 存款或 iCKB xUDT 不能做 lock；ICKB_LOGIC lock 必须配 DAO 存款 type",
+      "en": "Misuse (6 ScriptMisuse, all cells): a DAO deposit or iCKB xUDT can never be a lock; an ICKB_LOGIC lock must carry a DAO deposit type"
+    },
+    {
+      "zh": "错误码：1–4 系统 · 5 NotEmptyArgs · 6 ScriptMisuse · 7 DepositTooSmall · 8 DepositTooBig · 9 EmptyReceipt · 10 ReceiptMismatch · 11 AmountMismatch · 12 AmountUnreasonablyBig",
+      "en": "Error codes: 1–4 syscall · 5 NotEmptyArgs · 6 ScriptMisuse · 7 DepositTooSmall · 8 DepositTooBig · 9 EmptyReceipt · 10 ReceiptMismatch · 11 AmountMismatch · 12 AmountUnreasonablyBig"
+    },
+    {
+      "zh": "args 必须为空，且输出中不能出现同 code 但 args 非空的 lock（5）",
+      "en": "args must be empty, and no output lock with the same code but other args may exist (5)"
+    }
+  ]
+}

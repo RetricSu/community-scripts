@@ -1,0 +1,144 @@
+{
+  "title": {
+    "zh": "secp256k1_blake160_sighash_all（lock）约束",
+    "en": "secp256k1_blake160_sighash_all (lock) Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：ckb-system-scripts / c/secp256k1_blake160_sighash_all.c + c/common.h　·　code_hash 0x9bd7…cce8，hash_type type（RFC 0024）",
+    "en": "Source: ckb-system-scripts / c/secp256k1_blake160_sighash_all.c + c/common.h　·　code_hash 0x9bd7…cce8, hash_type type (RFC 0024)"
+  },
+  "transitions": [
+    {
+      "tag": "1 → N",
+      "title": {
+        "zh": "解锁花费",
+        "en": "Unlock & spend"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "input（同一 lock 的 script group）",
+            "en": "input (script group of the same lock)"
+          },
+          "body": "Cell{\n  lock: { codeHash: SECP256K1_BLAKE160,\n          args: {{blake160(pubkey) 20B}} }\n}"
+        },
+        {
+          "label": {
+            "zh": "witness[group 第 1 个 input 的位置]",
+            "en": "witness[at the group's first input index]"
+          },
+          "body": {
+            "zh": "WitnessArgs{\n  lock: {{signature 65B}}\n}\n// 签名时 lock 置为 65 字节 0",
+            "en": "WitnessArgs{\n  lock: {{signature 65B}}\n}\n// lock is zero-filled (65B) while signing"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "outputs：任意 cell",
+            "en": "outputs: any cells"
+          },
+          "body": {
+            "zh": "Cell{\n  lock: 任意,\n  type: 任意\n}",
+            "en": "Cell{\n  lock: any,\n  type: any\n}"
+          }
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "witness.lock 字节布局",
+            "en": "witness.lock byte layout"
+          },
+          "layout": [
+            {
+              "name": "r‖s",
+              "size": "64B",
+              "role": {
+                "zh": "secp256k1 紧凑签名",
+                "en": "secp256k1 compact signature"
+              },
+              "cons": {
+                "zh": "可解析",
+                "en": "parsable"
+              },
+              "err": "-14",
+              "color": 5,
+              "flex": 4
+            },
+            {
+              "name": "recid",
+              "size": "1B",
+              "role": {
+                "zh": "恢复 id（lock[64]）",
+                "en": "recovery id (lock[64])"
+              },
+              "cons": {
+                "zh": "可恢复公钥 / 可序列化",
+                "en": "pubkey recoverable / serializable"
+              },
+              "err": "-11 / -15",
+              "color": 2
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "恰为 20 字节",
+            "en": "exactly 20 bytes"
+          },
+          "err": "-1"
+        },
+        {
+          "field": "witness",
+          "cond": {
+            "zh": "≤ 32KB",
+            "en": "≤ 32KB"
+          },
+          "err": "-22"
+        },
+        {
+          "field": "witness",
+          "cond": {
+            "zh": "合法 WitnessArgs 且 lock 非空",
+            "en": "valid WitnessArgs with non-empty lock"
+          },
+          "err": "-2"
+        },
+        {
+          "field": "witness.lock",
+          "cond": {
+            "zh": "恰为 65 字节",
+            "en": "exactly 65 bytes"
+          },
+          "err": "-1"
+        },
+        {
+          "field": {
+            "zh": "签名",
+            "en": "signature"
+          },
+          "cond": {
+            "zh": "恢复出的 blake160(压缩公钥) = args",
+            "en": "recovered blake160(compressed pubkey) = args"
+          },
+          "err": "-31"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "签名消息 = blake2b(tx_hash ‖ len(w0) ‖ w0(lock 置 0) ‖ 本 group 其余 witness 的 len‖内容 ‖ 超出 inputs 数量部分的 witness 的 len‖内容)；len 为 u64 LE",
+      "en": "signing message = blake2b(tx_hash ‖ len(w0) ‖ w0 (lock zeroed) ‖ len‖content of the group's other witnesses ‖ len‖content of witnesses beyond the inputs count); len is u64 LE"
+    },
+    {
+      "zh": "其他错误码：-3 ERROR_SYSCALL，-21 ERROR_SCRIPT_TOO_LONG",
+      "en": "Other error codes: -3 ERROR_SYSCALL, -21 ERROR_SCRIPT_TOO_LONG"
+    }
+  ]
+}

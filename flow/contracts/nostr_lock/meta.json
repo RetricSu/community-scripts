@@ -1,0 +1,86 @@
+{
+  "tags": [
+    "identity",
+    "nervos",
+    "open-source"
+  ],
+  "contributors": [
+    "XuJiandong"
+  ],
+  "source": {
+    "repo": "https://github.com/nervosnetwork/nostr-binding",
+    "commit": "eef134e0a09dd07ccc367eb4eca84c1a5a73fb8b",
+    "paths": [
+      "contracts/nostr-lock/src"
+    ],
+    "commit_note": "default-branch HEAD recorded at backfill 2026-10-21; spec/plugin were written from the default branch shortly before (exact read commit not recorded)",
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0x2effea19ff3024b5b0fb4c0c59c379e7610110e7e3fe7ae003247b1115e59795",
+          "evidence": [
+            "listed in deployment/mainnet/nostr-lock-script/migrations/2024-07-18-010412.json",
+            "listed in deployment/mainnet/nostr-lock-script/migrations/2026-01-14-051715.json",
+            "listed in deployment/testnet/nostr-lock-script/migrations/2024-07-03-014310.json"
+          ],
+          "matches_commit": false
+        }
+      ],
+      "note": "hash appears in the repo only as a deployment record or doc, which does not prove the recorded commit builds this binary (reproducible build not attempted)"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0x641a89ad2f77721b803cd50d01351c1f308444072d5fa20088567196c0574c68",
+      "hash_type": "type",
+      "constant_source": "ccc KnownScript.NostrLock",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x99b116dd1e4f1fa903b70112ae672c18bb34241d3d03a9ad555cd2a611be7327"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x99b116dd1e4f1fa903b70112ae672c18bb34241d3d03a9ad555cd2a611be7327"
+      },
+      "type_script": {
+        "args": "0xfad8cb75eb0bb01718e2336002064568bc05887af107f74ed5dd501829e192f8",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x2effea19ff3024b5b0fb4c0c59c379e7610110e7e3fe7ae003247b1115e59795",
+      "deploy_tx": "0x99b116dd1e4f1fa903b70112ae672c18bb34241d3d03a9ad555cd2a611be7327",
+      "deploy_block": 18373370
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0x6ae5ee0cb887b2df5a9a18137315b9bdc55be8d52637b2de0624092d5f0c91d5",
+      "hash_type": "type",
+      "constant_source": "ccc KnownScript.NostrLock",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0xa2a434dcdbe280b9ed75bb7d6c7d68186a842456aba0fc506657dc5ed7c01d68"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0xa2a434dcdbe280b9ed75bb7d6c7d68186a842456aba0fc506657dc5ed7c01d68"
+      },
+      "type_script": {
+        "args": "0x8dc56c6f35f0c535e23ded1629b1f20535477a1b43e59f14617d11e32c50e0aa",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x2effea19ff3024b5b0fb4c0c59c379e7610110e7e3fe7ae003247b1115e59795",
+      "deploy_tx": "0xa2a434dcdbe280b9ed75bb7d6c7d68186a842456aba0fc506657dc5ed7c01d68",
+      "deploy_block": 13783286
+    }
+  ],
+  "checked_at": "2026-10-20"
+}

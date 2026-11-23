@@ -1,0 +1,26 @@
+[
+ {
+  "tx": "0x282adf8e8a25bef1bde96d285856c96c1fd7d1f4ff7d28da3e67669879a12b67",
+  "net": "testnet",
+  "name": "Receipt created with a pledge (campaign update, pledge, receipt; block 22946820)",
+  "expect": [
+   "crowdcell_receipt"
+  ]
+ },
+ {
+  "tx": "0xa2e7acc7f95cf88c42f462ee470502e5d26934356c52fa30d37f444096c07d25",
+  "net": "testnet",
+  "name": "Receipt destroyed, campaign Failed (status 2 in cell_deps); receipt from the tx above",
+  "expect": [
+   "crowdcell_receipt"
+  ]
+ },
+ {
+  "tx": "0xf949c08a5d8060ae98499f3aba053ce7efcf809cf7bb9f2acf87398ada218176",
+  "net": "testnet",
+  "name": "Receipt destroyed alone, campaign Success (status 1 in cell_deps)",
+  "expect": [
+   "crowdcell_receipt"
+  ]
+ }
+]

@@ -1,0 +1,159 @@
+{
+  "title": {
+    "zh": "Fiber Funding Lock 约束",
+    "en": "Fiber Funding Lock Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：nervosnetwork/fiber-scripts / contracts/funding-lock/src/main.rs　·　部署：nervosnetwork/fiber config/mainnet|testnet/config.yml　·　mainnet 0xe45b…f4f1 / testnet 0x6c67…6d7c (type)",
+    "en": "Source: nervosnetwork/fiber-scripts / contracts/funding-lock/src/main.rs　·　deployments: nervosnetwork/fiber config/mainnet|testnet/config.yml　·　mainnet 0xe45b…f4f1 / testnet 0x6c67…6d7c (type)"
+  },
+  "transitions": [
+    {
+      "tag": "A",
+      "title": {
+        "zh": "通道资金 → 承诺交易（双方 2-of-2 Schnorr 聚合签名）",
+        "en": "Channel funding → commitment tx (2-of-2 aggregated Schnorr)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "funding cell（唯一 group 输入）",
+            "en": "funding cell (the only group input)"
+          },
+          "body": "Cell{ lock: { codeHash: FUNDING_LOCK, args: {{pubkey_hash 20B}} },\n      type: xUDT?, capacity }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "commitment cell",
+            "en": "commitment cell"
+          },
+          "body": "Cell{ lock: COMMITMENT_LOCK(...) }"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "args 字节布局",
+            "en": "args byte layout"
+          },
+          "layout": [
+            {
+              "name": "pubkey_hash",
+              "size": "20B",
+              "role": {
+                "zh": "blake160(双方 x-only 聚合公钥)",
+                "en": "blake160(x-only aggregated pubkey of both parties)"
+              },
+              "cons": {
+                "zh": "ckb-auth 比对",
+                "en": "checked by ckb-auth"
+              },
+              "err": "8",
+              "color": 1,
+              "flex": 4
+            }
+          ]
+        },
+        {
+          "label": {
+            "zh": "witness 字节布局（112 字节，非 WitnessArgs）",
+            "en": "witness byte layout (112 bytes, not WitnessArgs)"
+          },
+          "layout": [
+            {
+              "name": "empty_witness_args",
+              "size": "16B",
+              "role": {
+                "zh": "空 WitnessArgs 占位，兼容 xUDT",
+                "en": "empty WitnessArgs placeholder for xUDT compatibility"
+              },
+              "cons": {
+                "zh": "= 0x10000000…10000000",
+                "en": "= 0x10000000…10000000"
+              },
+              "err": "7",
+              "color": 5,
+              "flex": 2
+            },
+            {
+              "name": "pubkey",
+              "size": "32B",
+              "role": {
+                "zh": "x-only 聚合公钥（Schnorr 无法恢复公钥）",
+                "en": "x-only aggregated pubkey (Schnorr cannot recover it)"
+              },
+              "cons": {
+                "zh": "blake160 = args",
+                "en": "blake160 = args"
+              },
+              "err": "8",
+              "color": 2,
+              "flex": 3
+            },
+            {
+              "name": "signature",
+              "size": "64B",
+              "role": {
+                "zh": "MuSig2 聚合签名",
+                "en": "MuSig2 aggregated signature"
+              },
+              "cons": {
+                "zh": "覆盖 blake2b(raw tx 去掉 cell_deps)",
+                "en": "over blake2b(raw tx without cell_deps)"
+              },
+              "err": "8",
+              "color": 3,
+              "flex": 4
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "inputs",
+          "cond": {
+            "zh": "group 中只能有 1 个输入",
+            "en": "exactly 1 input in the group"
+          },
+          "err": "5"
+        },
+        {
+          "field": "witness",
+          "cond": {
+            "zh": "长度恰为 112 = 16 + 32 + 64",
+            "en": "length exactly 112 = 16 + 32 + 64"
+          },
+          "err": "6"
+        },
+        {
+          "field": "witness[0..16]",
+          "cond": {
+            "zh": "= 空 WitnessArgs 占位",
+            "en": "= empty WitnessArgs placeholder"
+          },
+          "err": "7"
+        },
+        {
+          "field": "signature",
+          "cond": {
+            "zh": "exec ckb-auth（Schnorr，算法 7），消息 = blake2b(raw tx 去掉 cell_deps)（未检查）",
+            "en": "exec ckb-auth (Schnorr, algorithm 7), message = blake2b(raw tx without cell_deps) (not checked)"
+          },
+          "err": "8"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码（main.rs Error）：1 IndexOutOfBound · 2 ItemMissing · 3 LengthNotEnough · 4 Encoding · 5 MultipleInputs · 6 WitnessLenError · 7 EmptyWitnessArgsError · 8 AuthError",
+      "en": "Error codes (main.rs Error): 1 IndexOutOfBound · 2 ItemMissing · 3 LengthNotEnough · 4 Encoding · 5 MultipleInputs · 6 WitnessLenError · 7 EmptyWitnessArgsError · 8 AuthError"
+    },
+    {
+      "zh": "消息不含 cell_deps，因此可在不重签的情况下替换依赖（例如合约升级后）",
+      "en": "The message omits cell_deps, so deps can be swapped without re-signing (e.g. after an upgrade)"
+    }
+  ]
+}

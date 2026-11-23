@@ -1,0 +1,147 @@
+{
+  "title": {
+    "zh": "BTC time lock 约束",
+    "en": "BTC time lock Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：utxostack/rgbpp / contracts/btc-time-lock/src/main.rs　·　mainnet 0x70d6…5a62 / testnet3 0x00cd…9326 / signet 0x80a0…5b55，hash_type type（rgbpp-sdk）",
+    "en": "Source: utxostack/rgbpp / contracts/btc-time-lock/src/main.rs　·　mainnet 0x70d6…5a62 / testnet3 0x00cd…9326 / signet 0x80a0…5b55, hash_type type (rgbpp-sdk)"
+  },
+  "transitions": [
+    {
+      "tag": "1 → 1",
+      "title": {
+        "zh": "BTC 确认足够后释放到 CKB 地址",
+        "en": "Release to a CKB lock after enough BTC confirmations"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "BTC time lock cell（来自 RGB++ leap）",
+            "en": "BTC time lock cell (from an RGB++ leap)"
+          },
+          "body": "Cell{\n  lock: { codeHash: BTC_TIME_LOCK,\n          args: BTCTimeLock{ {{lock_script}}, {{after}}, {{btc_txid}} } },\n  capacity: C, type: T, data: D\n}"
+        },
+        {
+          "label": "witness[group 0].lock",
+          "body": "BTCTimeUnlock{ btc_tx_proof: {{SPV proof}} }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "同一序号的输出",
+            "en": "output at the same index"
+          },
+          "body": "Cell{\n  lock: {{lock_script}},\n  capacity: {{C}}, type: {{T}}, data: {{D}}\n}"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "args：BTCTimeLock（molecule table）",
+            "en": "args: BTCTimeLock (molecule table)"
+          },
+          "layout": [
+            {
+              "name": "lock_script",
+              "size": "Script",
+              "role": {
+                "zh": "到期后的接收 lock",
+                "en": "the lock to release to"
+              },
+              "cons": {
+                "zh": "= 同序号输出的 lock",
+                "en": "= lock of the output at the same index"
+              },
+              "err": "0x40 (64)",
+              "color": 1,
+              "flex": 4
+            },
+            {
+              "name": "after",
+              "size": "4B",
+              "role": {
+                "zh": "所需 BTC 确认数 u32",
+                "en": "required BTC confirmations u32"
+              },
+              "cons": {
+                "zh": "RGB++ lock 创建时要求 ≥ 6",
+                "en": "RGB++ lock requires ≥ 6 at creation"
+              },
+              "err": "0x41",
+              "color": 2
+            },
+            {
+              "name": "btc_txid",
+              "size": "32B",
+              "role": {
+                "zh": "触发 leap 的 BTC 交易",
+                "en": "the BTC tx that triggered the leap"
+              },
+              "cons": {
+                "zh": "在轻客户端中确认 ≥ after",
+                "en": "≥ after confirmations in the light client"
+              },
+              "err": "0x22",
+              "color": 3,
+              "flex": 3
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "合法 BTCTimeLock（否则合约 panic）",
+            "en": "valid BTCTimeLock (otherwise the script panics)"
+          },
+          "err": "panic"
+        },
+        {
+          "field": "outputs[i]",
+          "cond": {
+            "zh": "对每个本 lock 的输入 i：outputs[i].lock = lock_script，capacity、type、data 完全相同",
+            "en": "for each input i with this lock: outputs[i].lock = lock_script and capacity, type, data are identical"
+          },
+          "err": "0x40"
+        },
+        {
+          "field": "witness",
+          "cond": {
+            "zh": "group 第一个 witness.lock 为 BTCTimeUnlock",
+            "en": "group first witness.lock is a BTCTimeUnlock"
+          },
+          "err": "0x02 / 0x35"
+        },
+        {
+          "field": "config",
+          "cond": {
+            "zh": "cell_deps 中有 BTCTimeLock config cell",
+            "en": "BTCTimeLock config cell in cell_deps"
+          },
+          "err": "0x10 / 0x11"
+        },
+        {
+          "field": "SPV",
+          "cond": {
+            "zh": "btc_txid 已有 ≥ after 个确认",
+            "en": "btc_txid has ≥ after confirmations"
+          },
+          "err": "0x20–0x23"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码同 RGB++ lock（crates/core/src/error.rs）",
+      "en": "Error codes are shared with RGB++ lock (crates/core/src/error.rs)"
+    },
+    {
+      "zh": "没有签名：任何人都可以在确认足够后提交释放交易",
+      "en": "No signature: anyone can submit the release once confirmed"
+    }
+  ]
+}

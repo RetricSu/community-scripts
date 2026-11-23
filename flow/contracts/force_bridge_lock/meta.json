@@ -1,0 +1,91 @@
+{
+  "tags": [
+    "token",
+    "nervos",
+    "open-source"
+  ],
+  "contributors": [
+    "JacobDenver007"
+  ],
+  "source": {
+    "repo": "https://github.com/nervosnetwork/force-bridge",
+    "commit": "f3d7df767eff27b58e58bedd7b0990392ca8066a",
+    "paths": [
+      "ckb-contracts/contracts/bridge-lockscript/src/main.rs",
+      "ckb-contracts/lib/bridge-lockscript-lib/src/lib.rs",
+      "ckb-contracts/lib/bridge-lockscript-lib/src/adapter.rs",
+      "ckb-contracts/types/schemas/force_bridge_lockscript.mol",
+      "ckb-contracts/contracts-helper/src/entry.rs"
+    ],
+    "commit_note": "default-branch HEAD read 2026-11-06 (bridge-lockscript last changed 2abe679, 2021-06-16)",
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0xfd8264c1d3595b873eaa674bfbbde4c1db51ac36fa897e13fc09bc792617e871",
+          "evidence": [],
+          "matches_commit": false
+        },
+        {
+          "data_hash": "0x3ad1982c4f22f7fd4ebd5cf5c869f9ffaf1b3dad29157bef2a0dd85e3bae3b28",
+          "evidence": [],
+          "matches_commit": false
+        }
+      ],
+      "note": "no binary or checksum at the recorded commit matched the deployed data hash (reproducible build not attempted)"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0x93bc7a915d3d8f8b9678bc6c7a1751738c99ce6e66bba4dfab56672f6d691789",
+      "hash_type": "type",
+      "constant_source": "nervosnetwork/force-bridge devops/mainnet-verifier.config.example (ckb.deps.bridgeLock)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x3f9fd8ba3b47bd2617171d18d02c23c6f9a9e6178ebb5e1d73e99201322d0441"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x3f9fd8ba3b47bd2617171d18d02c23c6f9a9e6178ebb5e1d73e99201322d0441"
+      },
+      "type_script": {
+        "args": "0x32cf6f895f30cb27b15d7bd0523c57b539e5a083fbb3f0a19743e6d0bd9cf770",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0xfd8264c1d3595b873eaa674bfbbde4c1db51ac36fa897e13fc09bc792617e871",
+      "deploy_tx": "0x3f9fd8ba3b47bd2617171d18d02c23c6f9a9e6178ebb5e1d73e99201322d0441",
+      "deploy_block": 5483659
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0x2170ffdb67574651c7bc51455d98f29394f2ee134a306c84533732f52e0eb50e",
+      "hash_type": "type",
+      "constant_source": "nervosnetwork/force-bridge devops/verifier-testnet-docker/force-bridge/force_bridge.json (ckb.deps.bridgeLock)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x9b76017d200be714f5da85e8218d89d6e262c41f874f72f232941eb66b45814b"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x9b76017d200be714f5da85e8218d89d6e262c41f874f72f232941eb66b45814b"
+      },
+      "type_script": {
+        "args": "0xa899df4e89b005df5fa1cf4b2696cd15aaaa344a53fe040c89996f6ac51d651e",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x3ad1982c4f22f7fd4ebd5cf5c869f9ffaf1b3dad29157bef2a0dd85e3bae3b28",
+      "deploy_tx": "0x9b76017d200be714f5da85e8218d89d6e262c41f874f72f232941eb66b45814b",
+      "deploy_block": 2277171
+    }
+  ],
+  "checked_at": "2026-11-06"
+}

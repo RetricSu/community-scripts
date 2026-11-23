@@ -1,0 +1,4 @@
+[{"tx":"0xb1c468e47a507425814fea33402ed50fe800899d975875033f992a9cb19419b7","net":"mainnet","name":"Omnilock V1"},
+ {"tx":"0x9cdda31eb12bc63d0acbf833dc955ef1440feef8b054076518d62d0fa328c8c6","net":"mainnet","name":"Omnilock V1 (2)"},
+ {"tx":"0x87a52bde77820449f35b5ab63248c08e29774e3f79d210eddc6e71e36fddf58c","net":"testnet","name":"Omnilock V1 testnet"},
+ {"tx":"0x0392d425a531608670db14f48c54ebba97b27c4ed521c7ca85047490a6f8c3ed","net":"mainnet","name":"Force Bridge pre-release Omnilock"}]

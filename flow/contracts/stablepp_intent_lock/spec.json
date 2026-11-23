@@ -1,0 +1,57 @@
+{
+  "title": {
+    "zh": "Stable++ Intent Lock（无公开源码）",
+    "en": "Stable++ Intent Lock (no public source)"
+  },
+  "subtitle": {
+    "zh": "未找到公开源码，尚未向维护方确认　·　mainnet 0x56fb…9733 (type)",
+    "en": "No public source found, unconfirmed with maintainer　·　mainnet 0x56fb…9733 (type)"
+  },
+  "transitions": [
+    {
+      "tag": "?",
+      "title": {
+        "zh": "仅识别：链上可核实的事实",
+        "en": "Identification only: facts verifiable on chain"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "被该 lock 锁定的 input",
+            "en": "input locked by this script"
+          },
+          "body": "Cell{\n  lock: { codeHash: {{0x56fb…9733}},\n          hashType: type,\n          args: … }\n}"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "验证规则",
+            "en": "validation rules"
+          },
+          "body": {
+            "zh": "未知：无公开源码，本页不列任何规则或错误码",
+            "en": "unknown: no public source, this page lists no rules or error codes"
+          }
+        }
+      ],
+      "extras": [
+        {
+          "zh": "CKB Explorer 注册表描述（原文英文）：“Stable++ Lock hosting pledge”。与 Stable++ Asset 在同一笔部署交易 0x8ec1081b…8977 中部署（index 1）。仅主网。",
+          "en": "CKB Explorer registry description: \"Stable++ Lock hosting pledge\". Deployed in the same tx as Stable++ Asset, 0x8ec1081b…8977 (index 1). Mainnet only."
+        }
+      ],
+      "limits": []
+    }
+  ],
+  "notes": [
+    {
+      "zh": "未找到公开源码，尚未向维护方确认",
+      "en": "No public source found, unconfirmed with maintainer"
+    },
+    {
+      "zh": "部署（code cell / cell_dep / data hash）由 scripts/check-deployments.js 从链上解析，见下方来源卡片",
+      "en": "Deployment (code cell / cell_dep / data hash) resolved from chain by scripts/check-deployments.js; see the provenance card below"
+    }
+  ]
+}

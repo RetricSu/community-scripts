@@ -1,0 +1,748 @@
+{
+  "title": {
+    "zh": "Cobuild OTX Lock 约束",
+    "en": "Cobuild OTX Lock Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：xcshuan/cobuild-otx-contracts @f18eeaf contracts/cobuild-otx-lock/src、crates/cobuild-core/src、crates/cobuild-types/schemas　·　无官方部署（参考实现，测试夹具用 data2）",
+    "en": "Source: xcshuan/cobuild-otx-contracts @f18eeaf contracts/cobuild-otx-lock/src, crates/cobuild-core/src, crates/cobuild-types/schemas　·　no official deployment (reference implementation; fixtures use data2)"
+  },
+  "transitions": [
+    {
+      "tag": "A",
+      "title": {
+        "zh": "交易级解锁：SighashAll / SighashAllOnly（无 OTX，或本 lock 有输入在 OTX 范围外）",
+        "en": "Tx-level unlock: SighashAll / SighashAllOnly (no OTX, or this lock has inputs outside the OTX range)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "本 lock 的输入",
+            "en": "inputs with this lock"
+          },
+          "body": "Cell{ lock: COBUILD_OTX_LOCK{ args: {{identity 20B}} } }"
+        },
+        {
+          "label": {
+            "zh": "witness[group 第一个输入]（carrier）",
+            "en": "witness[group's first input] (carrier)"
+          },
+          "body": "{{SighashAll{ seal, message } | SighashAllOnly{ seal }}}"
+        },
+        {
+          "label": {
+            "zh": "witness[group 其他输入]",
+            "en": "witness[other group inputs]"
+          },
+          "body": {
+            "zh": "{{必须为空}}",
+            "en": "{{must be empty}}"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "outputs：任意",
+            "en": "outputs: any"
+          },
+          "body": {
+            "zh": "由签名 hash 覆盖",
+            "en": "covered by the signing hash"
+          }
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "lock.args（20B）",
+            "en": "lock.args (20B)"
+          },
+          "layout": [
+            {
+              "name": "identity",
+              "size": "20B",
+              "color": 0,
+              "flex": 1,
+              "role": {
+                "zh": "blake2b-256(压缩 secp256k1 公钥)[0..20]（ckb-default-hash）",
+                "en": "blake2b-256(compressed secp256k1 pubkey)[0..20] (ckb-default-hash)"
+              },
+              "cons": {
+                "zh": "长度 = 20",
+                "en": "length = 20"
+              },
+              "err": "20"
+            }
+          ]
+        },
+        {
+          "label": {
+            "zh": "witness = WitnessLayout（molecule union，item id）",
+            "en": "witness = WitnessLayout (molecule union, item id)"
+          },
+          "layout": [
+            {
+              "name": "SighashAll",
+              "size": "0xff000001",
+              "color": 0,
+              "flex": 1,
+              "role": {
+                "zh": "{ seal, message }：交易级签名 + Message",
+                "en": "{ seal, message }: tx-level signature + Message"
+              },
+              "cons": {
+                "zh": "全交易至多 1 个",
+                "en": "at most one per tx"
+              },
+              "err": "33"
+            },
+            {
+              "name": "SighashAllOnly",
+              "size": "0xff000002",
+              "color": 1,
+              "flex": 1,
+              "role": {
+                "zh": "{ seal }：交易级签名",
+                "en": "{ seal }: tx-level signature"
+              },
+              "err": ""
+            },
+            {
+              "name": "Otx",
+              "size": "0xff000003",
+              "color": 2,
+              "flex": 1,
+              "role": {
+                "zh": "一个 OTX：message、append_permissions、base_*、append_segments、base_seals",
+                "en": "one OTX: message, append_permissions, base_*, append_segments, base_seals"
+              },
+              "cons": {
+                "zh": "必须紧跟 OtxStart 或上一个 Otx",
+                "en": "must directly follow OtxStart or the previous Otx"
+              },
+              "err": "31"
+            },
+            {
+              "name": "OtxStart",
+              "size": "0xff000004",
+              "color": 3,
+              "flex": 1,
+              "role": {
+                "zh": "{ start_input_cell, start_output_cell, start_cell_deps, start_header_deps }",
+                "en": "{ start_input_cell, start_output_cell, start_cell_deps, start_header_deps }"
+              },
+              "cons": {
+                "zh": "至多 1 个，后面至少 1 个 Otx",
+                "en": "at most one, followed by ≥ 1 Otx"
+              },
+              "err": "31"
+            }
+          ],
+          "note": {
+            "zh": "不带 cobuild id 的 witness 视为 legacy；带保留 id 但 molecule 不合法 → 31 / 30",
+            "en": "witnesses without a cobuild id are legacy; a reserved id with invalid molecule → 31 / 30"
+          }
+        },
+        {
+          "label": {
+            "zh": "seal（65B，可恢复 secp256k1 签名）",
+            "en": "seal (65B, recoverable secp256k1 signature)"
+          },
+          "layout": [
+            {
+              "name": "r ‖ s",
+              "size": "64B",
+              "color": 0,
+              "flex": 4,
+              "role": {
+                "zh": "ECDSA 签名",
+                "en": "ECDSA signature"
+              },
+              "cons": {
+                "zh": "可解析",
+                "en": "parses"
+              },
+              "err": "50"
+            },
+            {
+              "name": "rec_id",
+              "size": "1B",
+              "color": 1,
+              "flex": 1,
+              "role": {
+                "zh": "恢复 ID（k256 RecoveryId）",
+                "en": "recovery id (k256 RecoveryId)"
+              },
+              "cons": {
+                "zh": "0–3，恢复出的公钥 hash 前 20B = args",
+                "en": "0–3; recovered pubkey hash[0..20] = args"
+              },
+              "err": "50"
+            }
+          ],
+          "note": {
+            "zh": "长度 ≠ 65 也返回 50（VerifyFailure）",
+            "en": "length ≠ 65 also returns 50 (VerifyFailure)"
+          }
+        },
+        {
+          "label": {
+            "zh": "签名 hash（blake2b-256，personal 16B）",
+            "en": "signing hash (blake2b-256, 16B personal)"
+          },
+          "layout": [
+            {
+              "name": "personal",
+              "size": "16B",
+              "color": 0,
+              "flex": 2,
+              "role": {
+                "zh": "有 Message：\"ckbcb_twm_core1\\0\"；无：\"ckbcb_tnm_core1\\0\"",
+                "en": "with Message: \"ckbcb_twm_core1\\0\"; without: \"ckbcb_tnm_core1\\0\""
+              },
+              "err": ""
+            },
+            {
+              "name": "message",
+              "size": "var",
+              "color": 1,
+              "flex": 1,
+              "role": {
+                "zh": "唯一的 SighashAll.message（若有）",
+                "en": "the unique SighashAll.message (if any)"
+              },
+              "err": "30"
+            },
+            {
+              "name": "tx_hash",
+              "size": "32B",
+              "color": 2,
+              "flex": 1,
+              "role": {
+                "zh": "交易哈希",
+                "en": "tx hash"
+              },
+              "err": "61"
+            },
+            {
+              "name": "inputs",
+              "size": "Σ",
+              "color": 3,
+              "flex": 2,
+              "role": {
+                "zh": "每个输入：CellOutput ‖ u32 len ‖ data",
+                "en": "each input: CellOutput ‖ u32 len ‖ data"
+              },
+              "err": "62"
+            },
+            {
+              "name": "extra witnesses",
+              "size": "Σ",
+              "color": 4,
+              "flex": 2,
+              "role": {
+                "zh": "下标 ≥ 输入数的 witness：u32 len ‖ w",
+                "en": "witnesses beyond input count: u32 len ‖ w"
+              },
+              "cons": {
+                "zh": "长度 ≤ u32::MAX",
+                "en": "length ≤ u32::MAX"
+              },
+              "err": "63"
+            }
+          ]
+        },
+        {
+          "label": {
+            "zh": "Action（Message.actions 的元素）",
+            "en": "Action (element of Message.actions)"
+          },
+          "layout": [
+            {
+              "name": "script_info_hash",
+              "size": "32B",
+              "color": 0,
+              "flex": 2,
+              "role": {
+                "zh": "脚本信息 hash",
+                "en": "script info hash"
+              },
+              "err": ""
+            },
+            {
+              "name": "script_role",
+              "size": "1B",
+              "color": 1,
+              "flex": 1,
+              "role": {
+                "zh": "0 InputLock / 1 InputType / 2 OutputType",
+                "en": "0 InputLock / 1 InputType / 2 OutputType"
+              },
+              "cons": {
+                "zh": "∈ {0,1,2}",
+                "en": "∈ {0,1,2}"
+              },
+              "err": "32"
+            },
+            {
+              "name": "script_hash",
+              "size": "32B",
+              "color": 2,
+              "flex": 2,
+              "role": {
+                "zh": "目标脚本 hash",
+                "en": "target script hash"
+              },
+              "cons": {
+                "zh": "交易中存在该角色的脚本",
+                "en": "a script with that role exists in the tx"
+              },
+              "err": "32"
+            },
+            {
+              "name": "data",
+              "size": "Bytes",
+              "color": 3,
+              "flex": 2,
+              "role": {
+                "zh": "应用数据",
+                "en": "application data"
+              },
+              "err": ""
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "script.args",
+          "cond": {
+            "zh": "长度 = 20",
+            "en": "length = 20"
+          },
+          "err": "20"
+        },
+        {
+          "field": "witnesses",
+          "cond": {
+            "zh": "每个带 cobuild id 的 witness 都能按 WitnessLayout 解析",
+            "en": "every witness carrying a cobuild id parses as WitnessLayout"
+          },
+          "err": "30 / 31"
+        },
+        {
+          "field": "SighashAll",
+          "cond": {
+            "zh": "全交易至多 1 个 SighashAll（带 Message）",
+            "en": "at most one SighashAll (with Message) in the tx"
+          },
+          "err": "33"
+        },
+        {
+          "field": "carrier witness",
+          "cond": {
+            "zh": "group 第一个输入处的 witness 为 SighashAll 或 SighashAllOnly",
+            "en": "witness at the group's first input is SighashAll or SighashAllOnly"
+          },
+          "err": "39"
+        },
+        {
+          "field": {
+            "zh": "group 其他 witness",
+            "en": "other group witnesses"
+          },
+          "cond": {
+            "zh": "必须为空",
+            "en": "must be empty"
+          },
+          "err": "39"
+        },
+        {
+          "field": "message.actions",
+          "cond": {
+            "zh": "每个 action 的 (script_role, script_hash) 指向交易中的脚本",
+            "en": "each action's (script_role, script_hash) points to a script in the tx"
+          },
+          "err": "32"
+        },
+        {
+          "field": "seal",
+          "cond": {
+            "zh": "65B，恢复出的公钥 blake160 = args",
+            "en": "65B, recovered pubkey blake160 = args"
+          },
+          "err": "50"
+        },
+        {
+          "field": {
+            "zh": "签名要求",
+            "en": "signature requirements"
+          },
+          "cond": {
+            "zh": "至少 1 个（否则说明本 lock 无需签名）",
+            "en": "at least one (otherwise nothing authorizes this lock)"
+          },
+          "err": "40"
+        }
+      ]
+    },
+    {
+      "tag": "B",
+      "title": {
+        "zh": "OTX 解锁：base_seals / append segment seals（本 lock 输入全部在 OTX 范围内）",
+        "en": "OTX unlock: base_seals / append-segment seals (all of this lock's inputs inside the OTX range)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "OTX 范围内的本 lock 输入",
+            "en": "this lock's inputs inside the OTX range"
+          },
+          "body": "Cell{ lock: COBUILD_OTX_LOCK{ args: {{identity}} } }"
+        },
+        {
+          "label": "witnesses",
+          "body": {
+            "zh": "… ‖ {{OtxStart}} ‖ {{Otx_1}} ‖ … ‖ {{Otx_n}}（连续） ‖ …",
+            "en": "… ‖ {{OtxStart}} ‖ {{Otx_1}} ‖ … ‖ {{Otx_n}} (contiguous) ‖ …"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "OTX base / append outputs",
+            "en": "OTX base / append outputs"
+          },
+          "body": {
+            "zh": "按 base_output_masks 与 append segment 覆盖签名",
+            "en": "signed per base_output_masks and append segments"
+          }
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "Otx（molecule table）",
+            "en": "Otx (molecule table)"
+          },
+          "layout": [
+            {
+              "name": "message",
+              "size": "Message",
+              "color": 0,
+              "flex": 2,
+              "role": {
+                "zh": "OTX 的 actions",
+                "en": "OTX actions"
+              },
+              "cons": {
+                "zh": "action 目标合法",
+                "en": "action targets valid"
+              },
+              "err": "32"
+            },
+            {
+              "name": "append_permissions",
+              "size": "1B",
+              "color": 1,
+              "flex": 1,
+              "role": {
+                "zh": "bit0 inputs、bit1 outputs、bit2 cell_deps、bit3 header_deps",
+                "en": "bit0 inputs, bit1 outputs, bit2 cell_deps, bit3 header_deps"
+              },
+              "cons": {
+                "zh": "高 4 位为 0；追加类别须被允许",
+                "en": "upper 4 bits zero; appended kinds must be permitted"
+              },
+              "err": "31"
+            },
+            {
+              "name": "base_input_cells",
+              "size": "u32",
+              "color": 2,
+              "flex": 1,
+              "role": {
+                "zh": "base 输入数",
+                "en": "base input count"
+              },
+              "cons": {
+                "zh": "≥ 1",
+                "en": "≥ 1"
+              },
+              "err": "31"
+            },
+            {
+              "name": "base_*_masks",
+              "size": "Bytes",
+              "color": 3,
+              "flex": 2,
+              "role": {
+                "zh": "输入 2 bit/个、输出 4 bit/个、cell_dep / header_dep 1 bit/个",
+                "en": "inputs 2 bits each, outputs 4 bits each, cell_deps / header_deps 1 bit each"
+              },
+              "cons": {
+                "zh": "长度 = ceil(bits/8)，未用高位为 0",
+                "en": "length = ceil(bits/8), unused high bits zero"
+              },
+              "err": "31"
+            },
+            {
+              "name": "append_segments",
+              "size": "vec",
+              "color": 4,
+              "flex": 2,
+              "role": {
+                "zh": "每段：segment_flags、各类数量、seals",
+                "en": "each: segment_flags, counts, seals"
+              },
+              "cons": {
+                "zh": "flags ⊆ {0x01 允许后续段, 0x02 覆盖前段}；非最后一段须有 0x01",
+                "en": "flags ⊆ {0x01 allow-more, 0x02 cover-previous}; non-last segments need 0x01"
+              },
+              "err": "31"
+            },
+            {
+              "name": "base_seals",
+              "size": "LockSealVec",
+              "color": 5,
+              "flex": 2,
+              "role": {
+                "zh": "{ script_hash, seal } 列表",
+                "en": "list of { script_hash, seal }"
+              },
+              "cons": {
+                "zh": "本 lock hash 恰好 1 个",
+                "en": "exactly one for this lock hash"
+              },
+              "err": "35 / 36"
+            }
+          ]
+        },
+        {
+          "label": {
+            "zh": "OTX 签名 hash",
+            "en": "OTX signing hashes"
+          },
+          "layout": [
+            {
+              "name": "base",
+              "size": "\"ckbcb_otb_core1\\0\"",
+              "color": 0,
+              "flex": 2,
+              "role": {
+                "zh": "message ‖ append_permissions ‖ base 输入/输出/cell_dep/header_dep（按 mask）",
+                "en": "message ‖ append_permissions ‖ base inputs/outputs/cell_deps/header_deps (by mask)"
+              },
+              "err": ""
+            },
+            {
+              "name": "segment",
+              "size": "\"ckbcb_ots_core1\\0\"",
+              "color": 1,
+              "flex": 2,
+              "role": {
+                "zh": "base_hash ‖（0x02 时：前序段数 + 各段）‖ flags ‖ 本段实体",
+                "en": "base_hash ‖ (with 0x02: previous count + segments) ‖ flags ‖ this segment's entities"
+              },
+              "err": ""
+            }
+          ]
+        },
+        {
+          "label": {
+            "zh": "seal（65B，可恢复 secp256k1 签名）",
+            "en": "seal (65B, recoverable secp256k1 signature)"
+          },
+          "layout": [
+            {
+              "name": "r ‖ s",
+              "size": "64B",
+              "color": 0,
+              "flex": 4,
+              "role": {
+                "zh": "ECDSA 签名",
+                "en": "ECDSA signature"
+              },
+              "cons": {
+                "zh": "可解析",
+                "en": "parses"
+              },
+              "err": "50"
+            },
+            {
+              "name": "rec_id",
+              "size": "1B",
+              "color": 1,
+              "flex": 1,
+              "role": {
+                "zh": "恢复 ID（k256 RecoveryId）",
+                "en": "recovery id (k256 RecoveryId)"
+              },
+              "cons": {
+                "zh": "0–3，恢复出的公钥 hash 前 20B = args",
+                "en": "0–3; recovered pubkey hash[0..20] = args"
+              },
+              "err": "50"
+            }
+          ],
+          "note": {
+            "zh": "长度 ≠ 65 也返回 50（VerifyFailure）",
+            "en": "length ≠ 65 also returns 50 (VerifyFailure)"
+          }
+        },
+        {
+          "label": {
+            "zh": "lock.args（20B）",
+            "en": "lock.args (20B)"
+          },
+          "layout": [
+            {
+              "name": "identity",
+              "size": "20B",
+              "color": 0,
+              "flex": 1,
+              "role": {
+                "zh": "blake2b-256(压缩 secp256k1 公钥)[0..20]（ckb-default-hash）",
+                "en": "blake2b-256(compressed secp256k1 pubkey)[0..20] (ckb-default-hash)"
+              },
+              "cons": {
+                "zh": "长度 = 20",
+                "en": "length = 20"
+              },
+              "err": "20"
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "script.args",
+          "cond": {
+            "zh": "长度 = 20",
+            "en": "length = 20"
+          },
+          "err": "20"
+        },
+        {
+          "field": "witnesses",
+          "cond": {
+            "zh": "每个带 cobuild id 的 witness 都能按 WitnessLayout 解析",
+            "en": "every witness carrying a cobuild id parses as WitnessLayout"
+          },
+          "err": "30 / 31"
+        },
+        {
+          "field": "SighashAll",
+          "cond": {
+            "zh": "全交易至多 1 个 SighashAll（带 Message）",
+            "en": "at most one SighashAll (with Message) in the tx"
+          },
+          "err": "33"
+        },
+        {
+          "field": "OtxStart",
+          "cond": {
+            "zh": "至多 1 个；其后紧跟 ≥ 1 个连续 Otx；Otx 不得出现在 OtxStart 之前",
+            "en": "at most one; followed by ≥ 1 contiguous Otx; no Otx before OtxStart"
+          },
+          "err": "31"
+        },
+        {
+          "field": {
+            "zh": "OTX 范围",
+            "en": "OTX ranges"
+          },
+          "cond": {
+            "zh": "从 OtxStart 起依次累加 base / append 数量，结束位置 ≤ 交易对应数量",
+            "en": "base / append counts accumulate from OtxStart; end ≤ the tx counts"
+          },
+          "err": "31"
+        },
+        {
+          "field": "Otx",
+          "cond": {
+            "zh": "base_input_cells ≥ 1；append_permissions / segment_flags / masks 合法",
+            "en": "base_input_cells ≥ 1; append_permissions / segment_flags / masks valid"
+          },
+          "err": "31"
+        },
+        {
+          "field": "message.actions",
+          "cond": {
+            "zh": "action 目标存在",
+            "en": "action targets exist"
+          },
+          "err": "32"
+        },
+        {
+          "field": {
+            "zh": "base 输入含本 lock",
+            "en": "base inputs contain this lock"
+          },
+          "cond": {
+            "zh": "base_seals 中 script_hash = 本 lock hash 恰好 1 个",
+            "en": "exactly one base_seals entry with script_hash = this lock hash"
+          },
+          "err": "35 / 36"
+        },
+        {
+          "field": {
+            "zh": "append 段输入含本 lock",
+            "en": "append segment inputs contain this lock"
+          },
+          "cond": {
+            "zh": "该段 seals 中本 lock hash 恰好 1 个",
+            "en": "exactly one entry for this lock hash in that segment's seals"
+          },
+          "err": "35 / 36"
+        },
+        {
+          "field": {
+            "zh": "覆盖",
+            "en": "coverage"
+          },
+          "cond": {
+            "zh": "只有 OTX 签名时，本 lock 所有输入都在 OTX 输入总范围内",
+            "en": "with only OTX signatures, every input of this lock lies in the aggregate OTX input range"
+          },
+          "err": "34"
+        },
+        {
+          "field": "seal",
+          "cond": {
+            "zh": "每个签名要求：65B 可恢复签名，公钥 blake160 = args",
+            "en": "each requirement: 65B recoverable signature, pubkey blake160 = args"
+          },
+          "err": "50"
+        },
+        {
+          "field": {
+            "zh": "签名要求",
+            "en": "signature requirements"
+          },
+          "cond": {
+            "zh": "至少 1 个",
+            "en": "at least one"
+          },
+          "err": "40"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码来自 contracts/cobuild-otx-lock/src/error.rs（Error::code）：1–10 ckb-std SysError，20 InvalidArgs，30 MalformedCobuild，31 InvalidOtxLayout，32 InvalidMessageTarget，33 DuplicateSighashAll，34 MissingLockGroupCoverage，35 MissingLockSeal，36 DuplicateLockSeal，38 DuplicateMatchingAction，39 InvalidLockGroupWitness，40 LockSemanticFailure，41 ActionNotFound，50 VerifyFailure，60 InternalFailure，61 InvalidContextInput，62 MissingHashInput，63 HashInputTooLarge。38、41、60 在 lock 主流程中不出现（供 type 脚本 / 辅助 API 使用）。",
+      "en": "Error codes from contracts/cobuild-otx-lock/src/error.rs (Error::code): 1–10 ckb-std SysError, 20 InvalidArgs, 30 MalformedCobuild, 31 InvalidOtxLayout, 32 InvalidMessageTarget, 33 DuplicateSighashAll, 34 MissingLockGroupCoverage, 35 MissingLockSeal, 36 DuplicateLockSeal, 38 DuplicateMatchingAction, 39 InvalidLockGroupWitness, 40 LockSemanticFailure, 41 ActionNotFound, 50 VerifyFailure, 60 InternalFailure, 61 InvalidContextInput, 62 MissingHashInput, 63 HashInputTooLarge. 38, 41 and 60 do not occur in the lock flow (they serve type scripts / helper APIs)."
+    },
+    {
+      "zh": "同一 lock 可同时需要交易级签名和多个 OTX 签名（base + 每个包含其输入的 append 段），每个都必须通过。没有任何 cobuild witness 时不产生交易级要求 → 40。mask 的具体含义（哪些字段参与签名）见设计文档 docs/superpowers/specs/2026-06-22-otx-mask-default-value-signing-design.md，本页只列代码中的长度规则。",
+      "en": "One lock may need a tx-level signature and several OTX signatures at once (base + every append segment containing its inputs); each must pass. With no cobuild witness at all there is no tx-level requirement → 40. What the masks select for signing is described in docs/superpowers/specs/2026-06-22-otx-mask-default-value-signing-design.md; this page lists only the length rules in the code."
+    },
+    {
+      "zh": "无官方部署、无链上交易：插件 match 为空，仅静态页。README 说明测试夹具使用 ScriptHashType::Data2。",
+      "en": "No official deployment and no on-chain txs: the plugin match is empty (static page only). The README says test fixtures use ScriptHashType::Data2."
+    }
+  ]
+}

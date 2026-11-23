@@ -1,0 +1,2 @@
+[{"tx":"0xd77bbbc904afa4dfbeb826138c09baee3902ccf84937d8bce4d8e30ba0e7b251","net":"mainnet","name":"price cell creation","expect":["cells_price_type"]},
+ {"tx":"0x9b9e31c549433b71cda56bc7b55d1f1c43148726037258f1d85cc12c95a3aff0","net":"mainnet","name":"price cell update","expect":["cells_price_type"]}]

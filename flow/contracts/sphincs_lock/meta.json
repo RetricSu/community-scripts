@@ -1,0 +1,89 @@
+{
+  "tags": [
+    "quantum",
+    "identity",
+    "cryptape",
+    "open-source"
+  ],
+  "contributors": [
+    "xxuejie"
+  ],
+  "source": {
+    "repo": "https://github.com/cryptape/quantum-resistant-lock-script",
+    "commit": "082c0a19ce4e0b2c0b00f7b46f423f59a30afc71",
+    "paths": [
+      "contracts/c-sphincs-all-in-one-lock/ckb-sphincsplus-root-lock.c",
+      "docs/advanced.md"
+    ],
+    "commit_note": "commit read when writing this spec",
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0x49417a0ed39196e8d90d0088ca98bf6b881966ba1c2ea12160ca42141787565e",
+          "evidence": [
+            "listed in deployment/mainnet/migrations/2026-01-13-005758.json"
+          ],
+          "matches_commit": false
+        },
+        {
+          "data_hash": "0x147ecbb5c5127d982ee1362d2c2bb4267803da2eb006d150e88af6caaa0a7eaf",
+          "evidence": [
+            "listed in README.md"
+          ],
+          "matches_commit": false
+        }
+      ],
+      "note": "hash appears in the repo only as a deployment record or doc, which does not prove the recorded commit builds this binary (reproducible build not attempted)"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0x302d35982f865ebcbedb9a9360e40530ed32adb8e10b42fbbe70d8312ff7cedf",
+      "hash_type": "type",
+      "constant_source": "cryptape/quantum-resistant-lock-script README.md (mainnet, dep 0x4598d00d…500a:0)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x4598d00df2f3dc8bc40eee38689a539c94f6cc3720b7a2a6746736daa60f500a"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x4598d00df2f3dc8bc40eee38689a539c94f6cc3720b7a2a6746736daa60f500a"
+      },
+      "type_script": {
+        "args": "0xf75c922a8abc94895eecf172b9efcea049f4a9f666f9be3c9f6494fa71c7c25b",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x49417a0ed39196e8d90d0088ca98bf6b881966ba1c2ea12160ca42141787565e",
+      "deploy_tx": "0x4598d00df2f3dc8bc40eee38689a539c94f6cc3720b7a2a6746736daa60f500a",
+      "deploy_block": 18363853
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0x147ecbb5c5127d982ee1362d2c2bb4267803da2eb006d150e88af6caaa0a7eaf",
+      "hash_type": "data1",
+      "constant_source": "cryptape/quantum-resistant-lock-script README.md (testnet, dep 0x631d9a60…b106:0)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x631d9a6049fb1fc3790e89d9daf35abe535b5e754cd8c3404319319710f0b106"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x631d9a6049fb1fc3790e89d9daf35abe535b5e754cd8c3404319319710f0b106"
+      },
+      "type_script": null,
+      "data_hash": "0x147ecbb5c5127d982ee1362d2c2bb4267803da2eb006d150e88af6caaa0a7eaf",
+      "deploy_tx": "0x631d9a6049fb1fc3790e89d9daf35abe535b5e754cd8c3404319319710f0b106",
+      "deploy_block": 19249395
+    }
+  ],
+  "checked_at": "2026-10-20"
+}

@@ -1,0 +1,58 @@
+{
+  "title": {
+    "zh": "Cells 名字 lock（account-lock）约束",
+    "en": "Cells name lock (account-lock) Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：LusoCryptoLabs/cells-contracts @34dad3c / contracts/account-lock/src/main.rs　·　主网 0x9f0f…71ab / 测试网 0xede6…4afd（type，cellula-sdk）",
+    "en": "Source: LusoCryptoLabs/cells-contracts @34dad3c / contracts/account-lock/src/main.rs　·　mainnet 0x9f0f…71ab / testnet 0xede6…4afd (type, cellula-sdk)"
+  },
+  "transitions": [
+    {
+      "tag": "A",
+      "title": {
+        "zh": "任意解锁",
+        "en": "Unlock by anyone"
+      },
+      "inputs": [
+        {
+          "label": "name cell",
+          "body": "Cell{ lock: { codeHash: ACCOUNT_LOCK, hashType: type, args: 0x },\n      type: ACCOUNT_TYPE … }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "outputs：任意",
+            "en": "outputs: any"
+          },
+          "body": {
+            "zh": "由 account-cell-type 约束",
+            "en": "constrained by account-cell-type"
+          }
+        }
+      ],
+      "layouts": [],
+      "limits": [
+        {
+          "field": "—",
+          "cond": {
+            "zh": "program_entry 恒返回 0",
+            "en": "program_entry always returns 0"
+          },
+          "err": "0"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码：无",
+      "en": "Error codes: none"
+    },
+    {
+      "zh": "有意为之：所有名字共享同一 lock hash，全部授权在 account-cell-type 中（decision 0002）。不要把它用在没有守护 type 的 cell 上。",
+      "en": "Intentional: every name shares one lock hash and all authorization lives in account-cell-type (decision 0002). Never use it on a cell without a guarding type."
+    }
+  ]
+}

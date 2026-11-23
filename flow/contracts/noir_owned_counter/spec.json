@@ -1,0 +1,664 @@
+{
+  "title": {
+    "zh": "Noir owned counter（type）约束",
+    "en": "Noir owned counter (type) Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：wamimi/noir-ckb-verifier @ bf09ccf / contracts/crates/owned-counter/src/main.rs　·　testnet 0x79d7…0a88 (data1)　·　研究软件，仅测试网，单方 trusted setup",
+    "en": "Source: wamimi/noir-ckb-verifier @ bf09ccf / contracts/crates/owned-counter/src/main.rs　·　testnet 0x79d7…0a88 (data1)　·　research software, testnet only, single-party setup"
+  },
+  "transitions": [
+    {
+      "tag": "0 → 1",
+      "title": {
+        "zh": "创建计数器（count = 0）",
+        "en": "Create counter (count = 0)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "inputs[0]：任意（通常是 owner 的资金 cell）",
+            "en": "inputs[0]: any (usually the owner's funding cell)"
+          },
+          "body": {
+            "zh": "Cell{\n  lock: {{与输出 counter 的 lock 相同}}\n}\n（不含 counter type）",
+            "en": "Cell{\n  lock: {{same lock as the output counter}}\n}\n(no counter type)"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "counter cell（唯一）",
+            "en": "counter cell (exactly one)"
+          },
+          "body": {
+            "zh": "Cell{\n  lock: {{secp256k1_blake160(owner 20B)}},\n  type: { codeHash: OWNED_COUNTER (data1),\n          args: {{0x01 ‖ type_id 32B}} },\n  data: {{0x01 ‖ 0u64 LE}}\n}",
+            "en": "Cell{\n  lock: {{secp256k1_blake160(owner 20B)}},\n  type: { codeHash: OWNED_COUNTER (data1),\n          args: {{0x01 ‖ type_id 32B}} },\n  data: {{0x01 ‖ 0u64 LE}}\n}"
+          }
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "type.args 字节布局（33B）",
+            "en": "type.args byte layout (33B)"
+          },
+          "layout": [
+            {
+              "name": "ver",
+              "size": "1B",
+              "role": {
+                "zh": "版本",
+                "en": "version"
+              },
+              "cons": {
+                "zh": "必须 = 0x01",
+                "en": "must be 0x01"
+              },
+              "err": "41",
+              "color": 0,
+              "flex": 1
+            },
+            {
+              "name": "type_id",
+              "size": "32B",
+              "role": {
+                "zh": "type-id（ckb-std validate_type_id）",
+                "en": "type-id (ckb-std validate_type_id)"
+              },
+              "cons": {
+                "zh": "创建时 = blake2b(inputs[0] ‖ 输出序号)；更新时不变",
+                "en": "on create = blake2b(inputs[0] ‖ output index); unchanged on update"
+              },
+              "err": "44",
+              "color": 1,
+              "flex": 6
+            }
+          ],
+          "hex": [
+            [
+              "ver",
+              "0x01"
+            ],
+            [
+              "type_id",
+              "0x6037891531ed72328710ac5a8e6c8341c05039af411f473eaecd83144b4f4740"
+            ]
+          ],
+          "note": {
+            "zh": "script.hash_type 必须是 data1（否则 41）",
+            "en": "script.hash_type must be data1 (else 41)"
+          }
+        },
+        {
+          "label": {
+            "zh": "cell data 字节布局（9B）",
+            "en": "cell data byte layout (9B)"
+          },
+          "layout": [
+            {
+              "name": "ver",
+              "size": "1B",
+              "role": {
+                "zh": "版本",
+                "en": "version"
+              },
+              "cons": {
+                "zh": "必须 = 0x01",
+                "en": "must be 0x01"
+              },
+              "err": "43",
+              "color": 0,
+              "flex": 1
+            },
+            {
+              "name": "count",
+              "size": "8B",
+              "role": {
+                "zh": "计数 u64 LE",
+                "en": "counter u64 LE"
+              },
+              "cons": {
+                "zh": "创建时必须 = 0（53）；更新时 new = old + 1 由证明保证",
+                "en": "must be 0 on create (53); new = old + 1 is enforced by the proof"
+              },
+              "err": "43 / 53",
+              "color": 2,
+              "flex": 3
+            }
+          ],
+          "hex": [
+            [
+              "ver",
+              "0x01"
+            ],
+            [
+              "count",
+              "0x0100000000000000 (=1)"
+            ]
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "args 长度 = 33、args[0] = 0x01、hash_type = data1",
+            "en": "args length 33, args[0] = 0x01, hash_type = data1"
+          },
+          "err": "41"
+        },
+        {
+          "field": "tx",
+          "cond": {
+            "zh": "inputs / outputs / cell_deps 任一数量 ≥ 64",
+            "en": "any of inputs / outputs / cell_deps count ≥ 64"
+          },
+          "err": "52"
+        },
+        {
+          "field": "tx",
+          "cond": {
+            "zh": "全交易中同 code_hash+hash_type 的输入 ≤ 1、输出 = 1，且 group 输出 = 1、group 输入 = 该输入数（不可销毁、不可分裂、不可合并）",
+            "en": "across the whole tx: inputs with the same code_hash+hash_type ≤ 1, outputs = 1; group outputs = 1, group inputs = that input count (no burn, split or merge)"
+          },
+          "err": "42"
+        },
+        {
+          "field": "args",
+          "cond": {
+            "zh": "ckb-std validate_type_id(args[1..])",
+            "en": "ckb-std validate_type_id(args[1..])"
+          },
+          "err": "44"
+        },
+        {
+          "field": "output.data",
+          "cond": {
+            "zh": "恰好 9 字节且 data[0] = 0x01",
+            "en": "exactly 9 bytes and data[0] = 0x01"
+          },
+          "err": "43"
+        },
+        {
+          "field": "output.lock",
+          "cond": {
+            "zh": "code_hash = secp256k1_blake160 (0x9bd7…cce8)、hash_type = type、args 20B；cell_deps（展开后）中恰好 1 个 type hash = 0x9bd7…cce8 的 cell，且其 data hash = 0x709f…8649",
+            "en": "code_hash = secp256k1_blake160 (0x9bd7…cce8), hash_type = type, args 20B; exactly one cell_dep (after expansion) with type hash 0x9bd7…cce8 and its data hash = 0x709f…8649"
+          },
+          "err": "45"
+        },
+        {
+          "field": "syscall",
+          "cond": {
+            "zh": "任何 syscall 加载失败",
+            "en": "any syscall load failure"
+          },
+          "err": "40"
+        },
+        {
+          "field": "output.data",
+          "cond": {
+            "zh": "data[1..9] 必须全 0",
+            "en": "data[1..9] must be all zero"
+          },
+          "err": "53"
+        },
+        {
+          "field": "inputs[0].lock",
+          "cond": {
+            "zh": "交易第一个输入（不是 group 输入）的 lock hash = 输出 counter 的 lock hash",
+            "en": "lock hash of the tx's first input (not a group input) = output counter lock hash"
+          },
+          "err": "46"
+        }
+      ],
+      "note": {
+        "zh": "创建时不需要证明，也不检查 witness；capacity 不受限制",
+        "en": "No proof and no witness on create; capacity unrestricted"
+      }
+    },
+    {
+      "tag": "1 → 1",
+      "title": {
+        "zh": "证明授权的更新（count + 1）",
+        "en": "Proof-authorized update (count + 1)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "旧 counter cell（group 输入）",
+            "en": "old counter cell (group input)"
+          },
+          "body": {
+            "zh": "Cell{\n  capacity: C,\n  lock: L,\n  type: OWNED_COUNTER(args),\n  data: {{0x01 ‖ old u64}}\n}",
+            "en": "Cell{\n  capacity: C,\n  lock: L,\n  type: OWNED_COUNTER(args),\n  data: {{0x01 ‖ old u64}}\n}"
+          }
+        },
+        {
+          "label": {
+            "zh": "witness[group 第一个输入位置]",
+            "en": "witness[at the group's first input]"
+          },
+          "body": {
+            "zh": "WitnessArgs{\n  lock: owner secp256k1 签名（由 lock 检查）,\n  input_type: {{Groth16Witness(proof, public)}}\n}\n总长 ≤ 512B",
+            "en": "WitnessArgs{\n  lock: owner secp256k1 signature (checked by the lock),\n  input_type: {{Groth16Witness(proof, public)}}\n}\ntotal ≤ 512B"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "新 counter cell（唯一）",
+            "en": "new counter cell (exactly one)"
+          },
+          "body": {
+            "zh": "Cell{\n  capacity: {{= C}},\n  lock: {{= L（lock hash 相同）}},\n  type: OWNED_COUNTER(args 不变),\n  data: {{0x01 ‖ new u64}}\n}",
+            "en": "Cell{\n  capacity: {{= C}},\n  lock: {{= L (same lock hash)}},\n  type: OWNED_COUNTER(args unchanged),\n  data: {{0x01 ‖ new u64}}\n}"
+          }
+        }
+      ],
+      "extras": [
+        "cell_deps: [ secp256k1 dep_group, OWNED_COUNTER code, {{VK cell (data hash 0x685b…58fe)}} ]"
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "cell data 字节布局（9B）",
+            "en": "cell data byte layout (9B)"
+          },
+          "layout": [
+            {
+              "name": "ver",
+              "size": "1B",
+              "role": {
+                "zh": "版本",
+                "en": "version"
+              },
+              "cons": {
+                "zh": "必须 = 0x01",
+                "en": "must be 0x01"
+              },
+              "err": "43",
+              "color": 0,
+              "flex": 1
+            },
+            {
+              "name": "count",
+              "size": "8B",
+              "role": {
+                "zh": "计数 u64 LE",
+                "en": "counter u64 LE"
+              },
+              "cons": {
+                "zh": "创建时必须 = 0（53）；更新时 new = old + 1 由证明保证",
+                "en": "must be 0 on create (53); new = old + 1 is enforced by the proof"
+              },
+              "err": "43 / 53",
+              "color": 2,
+              "flex": 3
+            }
+          ],
+          "hex": [
+            [
+              "ver",
+              "0x01"
+            ],
+            [
+              "count",
+              "0x0100000000000000 (=1)"
+            ]
+          ]
+        },
+        {
+          "label": {
+            "zh": "witness.input_type 字节布局（Groth16Witness，290B）",
+            "en": "witness.input_type byte layout (Groth16Witness, 290B)"
+          },
+          "layout": [
+            {
+              "name": "hdr",
+              "size": "12B",
+              "role": {
+                "zh": "molecule table 头：total_size + 2 个 offset",
+                "en": "molecule table header: total_size + 2 offsets"
+              },
+              "cons": {
+                "zh": "可解码",
+                "en": "must decode"
+              },
+              "err": "48",
+              "color": 0,
+              "flex": 1
+            },
+            {
+              "name": "version",
+              "size": "2B",
+              "role": {
+                "zh": "wire 版本 Uint16 LE",
+                "en": "wire version Uint16 LE"
+              },
+              "cons": {
+                "zh": "由 wire-decode 校验",
+                "en": "checked by wire-decode"
+              },
+              "err": "48",
+              "color": 1,
+              "flex": 1
+            },
+            {
+              "name": "union id",
+              "size": "4B",
+              "role": {
+                "zh": "WitnessContent union 序号（0 = Bn254Witness）",
+                "en": "WitnessContent union id (0 = Bn254Witness)"
+              },
+              "cons": {
+                "zh": "由 wire-decode 校验",
+                "en": "checked by wire-decode"
+              },
+              "err": "48",
+              "color": 2,
+              "flex": 1
+            },
+            {
+              "name": "bn hdr",
+              "size": "12B",
+              "role": {
+                "zh": "Bn254Witness table 头",
+                "en": "Bn254Witness table header"
+              },
+              "cons": {
+                "zh": "可解码",
+                "en": "must decode"
+              },
+              "err": "48",
+              "color": 0,
+              "flex": 1
+            },
+            {
+              "name": "proof",
+              "size": "128B",
+              "role": {
+                "zh": "A(G1 32B) ‖ B(G2 64B) ‖ C(G1 32B)，arkworks 压缩",
+                "en": "A(G1 32B) ‖ B(G2 64B) ‖ C(G1 32B), arkworks compressed"
+              },
+              "cons": {
+                "zh": "Groth16 验证通过",
+                "en": "Groth16 verify must pass"
+              },
+              "err": "51",
+              "color": 3,
+              "flex": 4
+            },
+            {
+              "name": "public",
+              "size": "132B",
+              "role": {
+                "zh": "FrVec：count u32 LE(=4) ‖ old ‖ new ‖ ctx_lo ‖ ctx_hi（各 32B LE）",
+                "en": "FrVec: count u32 LE(=4) ‖ old ‖ new ‖ ctx_lo ‖ ctx_hi (32B LE each)"
+              },
+              "cons": {
+                "zh": "必须逐字节等于合约重建的 expected",
+                "en": "must equal the contract-rebuilt expected byte for byte"
+              },
+              "err": "49",
+              "color": 4,
+              "flex": 4
+            }
+          ],
+          "hex": [
+            [
+              "header",
+              "0x220100000c0000000e000000"
+            ],
+            [
+              "version",
+              "0x0100"
+            ],
+            [
+              "union id",
+              "0x00000000"
+            ],
+            [
+              "bn hdr",
+              "0x100100000c0000008c000000"
+            ],
+            [
+              "public[0..4]",
+              "0x04000000"
+            ]
+          ],
+          "note": {
+            "zh": "整个 WitnessArgs ≤ 512B（读入固定缓冲区，超出即 48）；lock 字段可同时携带 owner 的 secp256k1 签名。wire 格式字段名取自 crates/artifact-adapter/src/wire.rs，具体解码在外部 crate groth16-ckb@d64c769 wire-decode（未逐行阅读）",
+            "en": "Whole WitnessArgs ≤ 512B (fixed buffer, else 48); the lock field may carry the owner's secp256k1 signature. Field names from crates/artifact-adapter/src/wire.rs; decoding lives in the external crate groth16-ckb@d64c769 wire-decode (not read line by line)"
+          }
+        },
+        {
+          "label": {
+            "zh": "expected public inputs（132B，合约重建）",
+            "en": "expected public inputs (132B, rebuilt by the contract)"
+          },
+          "layout": [
+            {
+              "name": "n",
+              "size": "4B",
+              "role": {
+                "zh": "4u32 LE",
+                "en": "4 as u32 LE"
+              },
+              "cons": {
+                "zh": "= 4",
+                "en": "= 4"
+              },
+              "err": "49",
+              "color": 0,
+              "flex": 1
+            },
+            {
+              "name": "old",
+              "size": "32B",
+              "role": {
+                "zh": "old.count u64 LE，其余补 0",
+                "en": "old.count u64 LE, zero-padded"
+              },
+              "cons": {
+                "zh": "= 输入 cell data[1..9]",
+                "en": "= input cell data[1..9]"
+              },
+              "err": "49",
+              "color": 1,
+              "flex": 2
+            },
+            {
+              "name": "new",
+              "size": "32B",
+              "role": {
+                "zh": "new.count u64 LE，其余补 0",
+                "en": "new.count u64 LE, zero-padded"
+              },
+              "cons": {
+                "zh": "= 输出 cell data[1..9]",
+                "en": "= output cell data[1..9]"
+              },
+              "err": "49",
+              "color": 2,
+              "flex": 2
+            },
+            {
+              "name": "ctx_lo",
+              "size": "32B",
+              "role": {
+                "zh": "digest[0..16]，其余补 0",
+                "en": "digest[0..16], zero-padded"
+              },
+              "cons": {
+                "zh": "digest 见下方",
+                "en": "digest see below"
+              },
+              "err": "49",
+              "color": 3,
+              "flex": 2
+            },
+            {
+              "name": "ctx_hi",
+              "size": "32B",
+              "role": {
+                "zh": "digest[16..32]，其余补 0",
+                "en": "digest[16..32], zero-padded"
+              },
+              "cons": {
+                "zh": "digest 见下方",
+                "en": "digest see below"
+              },
+              "err": "49",
+              "color": 4,
+              "flex": 2
+            }
+          ],
+          "note": {
+            "zh": "digest = blake2b_ckb(\"noir-ckb/owned-counter/context/v1\\0\" ‖ NETWORK_DOMAIN(测试网 genesis 哈希) ‖ blake2b_ckb(\"noir-ckb/owned-counter/v1\") ‖ 本 type script hash ‖ args[1..33] ‖ 0x01 ‖ 被消耗 cell 的 OutPoint(36B) ‖ old data 9B ‖ new data 9B ‖ 输出 lock hash ‖ 输出 capacity u64 LE)",
+            "en": "digest = blake2b_ckb(\"noir-ckb/owned-counter/context/v1\\0\" ‖ NETWORK_DOMAIN (testnet genesis hash) ‖ blake2b_ckb(\"noir-ckb/owned-counter/v1\") ‖ this type script hash ‖ args[1..33] ‖ 0x01 ‖ consumed cell OutPoint (36B) ‖ old data 9B ‖ new data 9B ‖ output lock hash ‖ output capacity u64 LE)"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "args 长度 = 33、args[0] = 0x01、hash_type = data1",
+            "en": "args length 33, args[0] = 0x01, hash_type = data1"
+          },
+          "err": "41"
+        },
+        {
+          "field": "tx",
+          "cond": {
+            "zh": "inputs / outputs / cell_deps 任一数量 ≥ 64",
+            "en": "any of inputs / outputs / cell_deps count ≥ 64"
+          },
+          "err": "52"
+        },
+        {
+          "field": "tx",
+          "cond": {
+            "zh": "全交易中同 code_hash+hash_type 的输入 ≤ 1、输出 = 1，且 group 输出 = 1、group 输入 = 该输入数（不可销毁、不可分裂、不可合并）",
+            "en": "across the whole tx: inputs with the same code_hash+hash_type ≤ 1, outputs = 1; group outputs = 1, group inputs = that input count (no burn, split or merge)"
+          },
+          "err": "42"
+        },
+        {
+          "field": "args",
+          "cond": {
+            "zh": "ckb-std validate_type_id(args[1..])",
+            "en": "ckb-std validate_type_id(args[1..])"
+          },
+          "err": "44"
+        },
+        {
+          "field": "output.data",
+          "cond": {
+            "zh": "恰好 9 字节且 data[0] = 0x01",
+            "en": "exactly 9 bytes and data[0] = 0x01"
+          },
+          "err": "43"
+        },
+        {
+          "field": "output.lock",
+          "cond": {
+            "zh": "code_hash = secp256k1_blake160 (0x9bd7…cce8)、hash_type = type、args 20B；cell_deps（展开后）中恰好 1 个 type hash = 0x9bd7…cce8 的 cell，且其 data hash = 0x709f…8649",
+            "en": "code_hash = secp256k1_blake160 (0x9bd7…cce8), hash_type = type, args 20B; exactly one cell_dep (after expansion) with type hash 0x9bd7…cce8 and its data hash = 0x709f…8649"
+          },
+          "err": "45"
+        },
+        {
+          "field": "syscall",
+          "cond": {
+            "zh": "任何 syscall 加载失败",
+            "en": "any syscall load failure"
+          },
+          "err": "40"
+        },
+        {
+          "field": "input.data",
+          "cond": {
+            "zh": "旧 cell data 恰好 9 字节且 data[0] = 0x01",
+            "en": "old cell data exactly 9 bytes and data[0] = 0x01"
+          },
+          "err": "43"
+        },
+        {
+          "field": "lock",
+          "cond": {
+            "zh": "输入与输出的 lock hash 相同（不可转让）",
+            "en": "input and output lock hash equal (non-transferable)"
+          },
+          "err": "46"
+        },
+        {
+          "field": "capacity",
+          "cond": {
+            "zh": "输出 capacity = 输入 capacity",
+            "en": "output capacity = input capacity"
+          },
+          "err": "47"
+        },
+        {
+          "field": "witness",
+          "cond": {
+            "zh": "witness 缺失 / 超 512B / 非 WitnessArgs / 无 input_type / wire 解码失败",
+            "en": "witness missing / > 512B / not WitnessArgs / no input_type / wire decode fails"
+          },
+          "err": "48"
+        },
+        {
+          "field": "public",
+          "cond": {
+            "zh": "证明中的 public inputs ≠ 重建的 expected（132B）",
+            "en": "proof public inputs ≠ rebuilt expected (132B)"
+          },
+          "err": "49"
+        },
+        {
+          "field": "cell_deps",
+          "cond": {
+            "zh": "data hash = VK_DATA_HASH 的 cell_dep 必须恰好 1 个，读入 ≤ 512B 且可解码",
+            "en": "exactly one cell_dep with data hash = VK_DATA_HASH, ≤ 512B and decodable"
+          },
+          "err": "50"
+        },
+        {
+          "field": "proof",
+          "cond": {
+            "zh": "Groth16(BN254) 验证失败",
+            "en": "Groth16 (BN254) verification fails"
+          },
+          "err": "51"
+        }
+      ],
+      "note": {
+        "zh": "new = old + 1 不在合约代码里比较，而是由 Noir 电路（circuits/owned-counter-v1）断言，经证明强制（非本合约直接检查）",
+        "en": "new = old + 1 is not compared in the script code; the Noir circuit (circuits/owned-counter-v1) asserts it and the proof enforces it (not a direct script check)"
+      }
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码（main.rs）：40 LOAD · 41 ARGS · 42 SHAPE · 43 STATE · 44 ID · 45 OWNER · 46 OWNER_CHANGED · 47 CAPACITY · 48 WITNESS · 49 PUBLIC · 50 VK · 51 PROOF · 52 LIMIT · 53 INIT",
+      "en": "Error codes (main.rs): 40 LOAD · 41 ARGS · 42 SHAPE · 43 STATE · 44 ID · 45 OWNER · 46 OWNER_CHANGED · 47 CAPACITY · 48 WITNESS · 49 PUBLIC · 50 VK · 51 PROOF · 52 LIMIT · 53 INIT"
+    },
+    {
+      "zh": "NETWORK_DOMAIN / OWNER_CODE_HASH / OWNER_DATA_HASH / VK_DATA_HASH 是编译期常量（build.rs 从环境变量写入）；测试网部署值见 releases/owned-counter-v1-testnet/manifest.json",
+      "en": "NETWORK_DOMAIN / OWNER_CODE_HASH / OWNER_DATA_HASH / VK_DATA_HASH are build-time constants (build.rs reads env vars); testnet values in releases/owned-counter-v1-testnet/manifest.json"
+    },
+    {
+      "zh": "没有销毁路径：任何交易都必须恰好输出 1 个 counter cell（42）",
+      "en": "No burn path: every tx must output exactly one counter cell (42)"
+    },
+    {
+      "zh": "同仓库的 capsule-binding（早期示例）与 private-tally（v2，设计已定未部署）未收录：无官方部署",
+      "en": "capsule-binding (earlier example) and private-tally (v2, designed, not deployed) in the same repo are not included: no official deployment"
+    }
+  ]
+}

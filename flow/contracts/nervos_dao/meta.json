@@ -1,0 +1,83 @@
+{
+  "tags": [
+    "system",
+    "defi",
+    "nervos",
+    "open-source"
+  ],
+  "contributors": [
+    "xxuejie"
+  ],
+  "source": {
+    "repo": "https://github.com/nervosnetwork/ckb-system-scripts",
+    "commit": "72eb92fca090700dcb398cd8cad8fbd8bad40355",
+    "paths": [
+      "c/dao.c"
+    ],
+    "commit_note": "default-branch HEAD recorded at backfill 2026-10-21; spec/plugin were written from the default branch shortly before (exact read commit not recorded)",
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0x32064a14ce10d95d4b7343054cc19d73b25b16ae61a6c681011ca781a60c7923",
+          "evidence": [],
+          "matches_commit": false
+        }
+      ],
+      "note": "no binary or checksum at the recorded commit matched the deployed data hash (reproducible build not attempted)"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0x82d76d1b75fe2fd9a27dfbaa65a039221a380d76c926f378d3f81cf3e7e13f2e",
+      "hash_type": "type",
+      "constant_source": "RFC 0024 (Lina & Aggron)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x2",
+          "tx_hash": "0xe2fb199810d49a4d8beec56718ba2593b665db9d52299a0f9e6e75416d73ff5c"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x2",
+        "tx_hash": "0xe2fb199810d49a4d8beec56718ba2593b665db9d52299a0f9e6e75416d73ff5c"
+      },
+      "type_script": {
+        "args": "0xb2a8500929d6a1294bf9bf1bf565f549fa4a5f1316a3306ad3d4783e64bcf626",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x32064a14ce10d95d4b7343054cc19d73b25b16ae61a6c681011ca781a60c7923",
+      "deploy_tx": "0xe2fb199810d49a4d8beec56718ba2593b665db9d52299a0f9e6e75416d73ff5c",
+      "deploy_block": 0
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0x82d76d1b75fe2fd9a27dfbaa65a039221a380d76c926f378d3f81cf3e7e13f2e",
+      "hash_type": "type",
+      "constant_source": "RFC 0024 (Lina & Aggron)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x2",
+          "tx_hash": "0x8f8c79eb6671709633fe6a46de93c0fedc9c1b8a6527a18d3983879542635c9f"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x2",
+        "tx_hash": "0x8f8c79eb6671709633fe6a46de93c0fedc9c1b8a6527a18d3983879542635c9f"
+      },
+      "type_script": {
+        "args": "0xb2a8500929d6a1294bf9bf1bf565f549fa4a5f1316a3306ad3d4783e64bcf626",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x32064a14ce10d95d4b7343054cc19d73b25b16ae61a6c681011ca781a60c7923",
+      "deploy_tx": "0x8f8c79eb6671709633fe6a46de93c0fedc9c1b8a6527a18d3983879542635c9f",
+      "deploy_block": 0
+    }
+  ],
+  "checked_at": "2026-10-20"
+}

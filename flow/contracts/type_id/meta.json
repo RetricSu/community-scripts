@@ -1,0 +1,41 @@
+{
+  "tags": [
+    "system",
+    "nervos",
+    "open-source"
+  ],
+  "contributors": [
+    "TheWaWaR"
+  ],
+  "source": {
+    "repo": "https://github.com/nervosnetwork/ckb",
+    "commit": "426736a4816e4cda0dfa4ebdf7ba3b4f46e3ecb9",
+    "paths": [
+      "script/src/type_id.rs"
+    ],
+    "commit_note": "default-branch HEAD recorded at backfill 2026-10-21; spec/plugin were written from the default branch shortly before (exact read commit not recorded)",
+    "binary": {
+      "status": "builtin",
+      "note": "no code cell (built into CKB)"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+      "hash_type": "type",
+      "constant_source": "ckb script/src/type_id.rs (built-in, both networks)",
+      "builtin": true,
+      "note": "built into CKB (no code cell)"
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+      "hash_type": "type",
+      "constant_source": "ckb script/src/type_id.rs (built-in, both networks)",
+      "builtin": true,
+      "note": "built into CKB (no code cell)"
+    }
+  ],
+  "checked_at": "2026-10-20"
+}

@@ -1,0 +1,171 @@
+{
+  "title": {
+    "zh": ".bit Time Index State Type 约束",
+    "en": ".bit Time Index State Type Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：dotbitHQ/ckb-time-script @37343ab contracts/index-state-type",
+    "en": "Source: dotbitHQ/ckb-time-script @37343ab contracts/index-state-type"
+  },
+  "transitions": [
+    {
+      "tag": "0 → 1",
+      "title": {
+        "zh": "创建",
+        "en": "Create"
+      },
+      "inputs": [],
+      "outputs": [
+        {
+          "label": "Index State Cell",
+          "body": "Cell{\n  type: { codeHash: {{INDEX_STATE}}, args: {{any}} },\n  data: {{index u8}} ‖ {{sum u8 = 12}}\n}"
+        }
+      ],
+      "limits": [
+        {
+          "field": "data",
+          "cond": {
+            "zh": "2 字节",
+            "en": "2 bytes"
+          },
+          "err": "7"
+        },
+        {
+          "field": "index",
+          "cond": "< 12",
+          "err": "9"
+        },
+        {
+          "field": "sum",
+          "cond": "= 12",
+          "err": "8"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 1",
+      "title": {
+        "zh": "更新：index 前进一格",
+        "en": "Update: index advances one"
+      },
+      "inputs": [
+        {
+          "label": "Index State Cell",
+          "body": "data: {{i}} ‖ 12"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "Index State Cell",
+          "body": "data: {{i+1 (or 0 when i ≥ 11)}} ‖ 12"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "data 字节布局",
+            "en": "data byte layout"
+          },
+          "layout": [
+            {
+              "name": "index",
+              "size": "1B",
+              "role": {
+                "zh": "最新 Info cell 的序号",
+                "en": "index of the newest Info cell"
+              },
+              "cons": "< 12",
+              "err": "9 · 10",
+              "color": 1,
+              "flex": 1
+            },
+            {
+              "name": "sum",
+              "size": "1B",
+              "role": {
+                "zh": "Info cell 总数",
+                "en": "number of Info cells"
+              },
+              "cons": "= 12",
+              "err": "8",
+              "color": 2,
+              "flex": 1
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "output",
+          "cond": {
+            "zh": "组里第一个输入和输出都存在",
+            "en": "the group has a first input and output"
+          },
+          "err": "6"
+        },
+        {
+          "field": "output data",
+          "cond": {
+            "zh": "同创建",
+            "en": "as in create"
+          },
+          "err": "7 · 8 · 9"
+        },
+        {
+          "field": "index",
+          "cond": {
+            "zh": "输入 index ≥ 11 → 0，否则 +1（不检查输入 data 的其他部分）",
+            "en": "input index ≥ 11 → 0, else +1 (the rest of input data is not checked)"
+          },
+          "err": "10"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 0",
+      "title": {
+        "zh": "回收",
+        "en": "Recycle"
+      },
+      "inputs": [
+        {
+          "label": "Index State Cell",
+          "body": "Cell{ type: {{INDEX_STATE}} }"
+        }
+      ],
+      "outputs": [],
+      "limits": [
+        {
+          "field": "—",
+          "cond": {
+            "zh": "输出里没有同 code hash 的 type 即通过",
+            "en": "passes when no output has a type with this code hash"
+          },
+          "err": "—"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "这两个脚本组成 .bit 的链上时间 / 区块高度预言机：1 个 Index State cell 指向 12 个 Info cell 中最新的一个，每次更新同时改 Index State 和一个 Info cell。",
+      "en": "The two scripts form the .bit on-chain time / block-number oracle: one Index State cell points to the newest of 12 Info cells; each update rewrites the Index State and one Info cell."
+    },
+    {
+      "zh": "“输入里是否已有本脚本”只比较 code_hash，不比较 args：输入有、输出没有就当作回收直接通过，任何持有 lock 的人都能销毁。",
+      "en": "\"Is this script already in the inputs\" compares code_hash only, not args: present in inputs but absent from outputs is treated as recycling and always passes; whoever holds the lock can destroy the cell."
+    },
+    {
+      "zh": "合约没有检查谁能更新：权限完全来自 cell 的 lock。",
+      "en": "The scripts do not check who may update; authority comes entirely from the lock of the cells."
+    },
+    {
+      "zh": "部署：哈希来自仓库 migrations（主网 2021-08-24、测试网 2021-08-09-103746），链上 code cell 已核对；二进制没有可复现构建。",
+      "en": "Deployment: hashes from the repo migrations (mainnet 2021-08-24, testnet 2021-08-09-103746), checked on chain; no reproducible build of the binary."
+    },
+    {
+      "zh": "错误码：1–4 syscall · 6 IndexStateTypeNotExist · 7 IndexStateDataLenError · 8 InfoAmountError · 9 IndexStateOutOfBound · 10 IndexIncreaseError",
+      "en": "Error codes: 1–4 syscall · 6 IndexStateTypeNotExist · 7 IndexStateDataLenError · 8 InfoAmountError · 9 IndexStateOutOfBound · 10 IndexIncreaseError"
+    }
+  ]
+}

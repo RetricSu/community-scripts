@@ -1,0 +1,68 @@
+{
+  "tags": [
+    "defi",
+    "community",
+    "no-source"
+  ],
+  "contributors": [],
+  "source": {
+    "status": "no-source",
+    "note": "No public source found, unconfirmed with maintainer",
+    "binary": {
+      "status": "no-source"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0x3547c9aa563804e47ba3ebd37e6012e447c91a238f7aa71b1a75319f11df060e",
+      "hash_type": "type",
+      "constant_source": "on chain: lock of the user intent cell consumed together with the Pool Cell (UTXOSwap docs tx layout, mainnet)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x5292c77c62f108e3a33e54ed3bdcc4457a9d7d88be0c6ef3c1811f473394e2f7"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x5292c77c62f108e3a33e54ed3bdcc4457a9d7d88be0c6ef3c1811f473394e2f7"
+      },
+      "type_script": {
+        "args": "0xec95c7af1ec752c01282df5a94c756b617070be0d72a685ad8faa7e58650fbe5",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x6fb9173d1dae0d686030ec24889c754d15f18c7e87c7d92c4a1431621054e7b9",
+      "deploy_tx": "0x5292c77c62f108e3a33e54ed3bdcc4457a9d7d88be0c6ef3c1811f473394e2f7",
+      "deploy_block": 13363511
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0x4e9c30c8d6ce275740fbe69eae49c3d8c213578c5bd066f4938fe3c7dec6e101",
+      "hash_type": "type",
+      "constant_source": "on chain: lock of the user intent cell consumed together with the Pool Cell (UTXOSwap docs tx layout, testnet)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0xad80b3b20c1ce63f2b0863c1ef697a98184dfee1158e623de6a132d271f01e76"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0xad80b3b20c1ce63f2b0863c1ef697a98184dfee1158e623de6a132d271f01e76"
+      },
+      "type_script": {
+        "args": "0x490d25dc5e63d7bde3702b3d82ed867ba6d8bf418fd2a6e2e17ebff8e8e75540",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x04a2dd40c570d9cbfb8ed71550830d92e2b39b713c1ad2e30d5ad4d1e2f8a72b",
+      "deploy_tx": "0xad80b3b20c1ce63f2b0863c1ef697a98184dfee1158e623de6a132d271f01e76",
+      "deploy_block": 13407059
+    }
+  ],
+  "checked_at": "2026-11-06"
+}

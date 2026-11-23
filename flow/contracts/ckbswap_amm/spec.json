@@ -1,0 +1,1366 @@
+{
+  "title": {
+    "zh": "CKBSwap 恒定乘积 AMM 约束",
+    "en": "CKBSwap Constant-product AMM Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：ckbswap/contracts @b7cd845 contracts/swap/src/main.rs、crates/protocol/src/lib.rs　·　一个二进制、三种角色（args[0]）　·　仓库未公布部署",
+    "en": "Source: ckbswap/contracts @b7cd845 contracts/swap/src/main.rs, crates/protocol/src/lib.rs　·　one binary, three roles (args[0])　·　no deployment published"
+  },
+  "transitions": [
+    {
+      "tag": "0 → State",
+      "title": {
+        "zh": "创建池（genesis）",
+        "en": "Create a pool (genesis)"
+      },
+      "inputs": [
+        {
+          "label": "inputs[0]",
+          "body": {
+            "zh": "任意 cell；其 CellInput 决定 pool_id",
+            "en": "any cell; its CellInput determines pool_id"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "output 0：State",
+            "en": "output 0: State"
+          },
+          "body": "Cell{\n  lock: SWAP{ args: 0x01 ‖ pool_id },\n  type: SWAP{ args: 0x00 ‖ pool_id },\n  capacity: {{500 CKB}},\n  data: CSWP\\x01 ‖ {{nonce 0}} ‖ asset0 ‖ asset1 ‖ {{0 ‖ 0 ‖ 0}}\n}"
+        },
+        {
+          "label": {
+            "zh": "output 1..：每个 xUDT 资产的 reserve",
+            "en": "outputs 1..: one reserve per xUDT asset"
+          },
+          "body": "Cell{\n  lock: SWAP{ args: 0x02 ‖ pool_id ‖ asset },\n  type: xUDT{ args: … ‖ 00000000 },\n  capacity: 200 CKB,\n  data: {{0u128}}\n}"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "script.args（三种角色共用 code_hash）",
+            "en": "script.args (three roles share one code_hash)"
+          },
+          "layout": [
+            {
+              "name": "role",
+              "size": "1B",
+              "color": 0,
+              "flex": 1,
+              "role": {
+                "zh": "0 = state type、1 = state lock、2 = xUDT reserve lock",
+                "en": "0 = state type, 1 = state lock, 2 = xUDT reserve lock"
+              },
+              "cons": {
+                "zh": "0 / 1 → 共 33B；2 → 共 65B",
+                "en": "0 / 1 → 33B total; 2 → 65B total"
+              },
+              "err": "5"
+            },
+            {
+              "name": "pool_id",
+              "size": "32B",
+              "color": 1,
+              "flex": 3,
+              "role": {
+                "zh": "ckb_hash(创建交易 inputs[0] ‖ u64 LE 0)",
+                "en": "ckb_hash(creating tx inputs[0] ‖ u64 LE 0)"
+              },
+              "cons": {
+                "zh": "genesis 时校验",
+                "en": "checked at genesis"
+              },
+              "err": "14"
+            },
+            {
+              "name": "asset",
+              "size": "32B (role 2)",
+              "color": 2,
+              "flex": 3,
+              "role": {
+                "zh": "该 reserve 的 xUDT type hash",
+                "en": "the reserve’s xUDT type hash"
+              },
+              "err": "5"
+            }
+          ],
+          "hex": [
+            [
+              "role",
+              "0x00"
+            ],
+            [
+              "pool_id",
+              "0x… (32B)"
+            ]
+          ]
+        },
+        {
+          "label": {
+            "zh": "State cell data（恰好 125B，LE）",
+            "en": "State cell data (exactly 125B, LE)"
+          },
+          "layout": [
+            {
+              "name": "magic",
+              "size": "5B",
+              "color": 0,
+              "flex": 1,
+              "role": {
+                "zh": "\"CSWP\" ‖ 0x01",
+                "en": "\"CSWP\" ‖ 0x01"
+              },
+              "cons": {
+                "zh": "完全相等",
+                "en": "exact"
+              },
+              "err": "5"
+            },
+            {
+              "name": "nonce",
+              "size": "8B u64",
+              "color": 1,
+              "flex": 1,
+              "role": {
+                "zh": "每次动作 +1",
+                "en": "+1 per action"
+              },
+              "err": "9"
+            },
+            {
+              "name": "asset0",
+              "size": "32B",
+              "color": 2,
+              "flex": 2,
+              "role": {
+                "zh": "CKB = 全零，否则 xUDT type hash",
+                "en": "CKB = all zero, else xUDT type hash"
+              },
+              "cons": {
+                "zh": "asset0 < asset1（字节序）",
+                "en": "asset0 < asset1 (byte order)"
+              },
+              "err": "9"
+            },
+            {
+              "name": "asset1",
+              "size": "32B",
+              "color": 3,
+              "flex": 2,
+              "err": "9"
+            },
+            {
+              "name": "reserve0",
+              "size": "16B u128",
+              "color": 4,
+              "flex": 1,
+              "cons": {
+                "zh": "≤ 2^112 − 1",
+                "en": "≤ 2^112 − 1"
+              },
+              "err": "9"
+            },
+            {
+              "name": "reserve1",
+              "size": "16B u128",
+              "color": 5,
+              "flex": 1,
+              "cons": {
+                "zh": "≤ 2^112 − 1",
+                "en": "≤ 2^112 − 1"
+              },
+              "err": "9"
+            },
+            {
+              "name": "total_lp",
+              "size": "16B u128",
+              "color": 6,
+              "flex": 1,
+              "role": {
+                "zh": "含永久锁定的 1000",
+                "en": "includes the permanently locked 1000"
+              },
+              "cons": {
+                "zh": "0 ⇒ 储备为 0；否则 ≥ 1000 且储备 > 0",
+                "en": "0 ⇒ reserves 0; else ≥ 1000 and reserves > 0"
+              },
+              "err": "9"
+            }
+          ],
+          "hex": [
+            [
+              "magic",
+              "0x4353575001"
+            ],
+            [
+              "nonce",
+              "0x0100000000000000"
+            ],
+            [
+              "asset0",
+              "0x00…00 (CKB)"
+            ],
+            [
+              "asset1",
+              "0x0101…01"
+            ],
+            [
+              "reserve0",
+              "0x40420f00000000000000000000000000 (1 000 000)"
+            ],
+            [
+              "reserve1",
+              "0x80841e00000000000000000000000000 (2 000 000)"
+            ],
+            [
+              "total_lp",
+              "0x45941500000000000000000000000000 (1 414 213)"
+            ]
+          ],
+          "note": {
+            "zh": "示例为协议单元测试 pool()（首次 ADD 1 000 000 / 2 000 000 之后）构造的值，非链上数据",
+            "en": "Example values are built from the protocol unit test pool() (after the first ADD 1 000 000 / 2 000 000), not on-chain data"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "type args",
+          "cond": {
+            "zh": "role 0 ‖ pool_id，共 33B；role/长度组合非法 → 5",
+            "en": "role 0 ‖ pool_id, 33B; invalid role/length combination → 5"
+          },
+          "err": "5"
+        },
+        {
+          "field": {
+            "zh": "结构",
+            "en": "structure"
+          },
+          "cond": {
+            "zh": "同 type 输出恰好在 output 0；同 type 输入 ≤ 1；同 code_hash 的 state 输出全交易恰好 1 个，state 输入数 = 本 pool 输入数",
+            "en": "same-type outputs are exactly [0]; ≤ 1 same-type input; exactly one state output tx-wide for this code_hash, and state input count = this pool’s input count"
+          },
+          "err": "11"
+        },
+        {
+          "field": "output 0",
+          "cond": {
+            "zh": "lock = role 1 ‖ pool_id；capacity = 500 CKB + (asset0 为 CKB 时 reserve0)",
+            "en": "lock = role 1 ‖ pool_id; capacity = 500 CKB + (reserve0 if asset0 is CKB)"
+          },
+          "err": "12"
+        },
+        {
+          "field": {
+            "zh": "reserve 输出",
+            "en": "reserve outputs"
+          },
+          "cond": {
+            "zh": "每个 xUDT 资产恰好一个 role 2 lock 的 cell，依资产顺序位于 output 1、2；全交易该 pool 的 role 2 cell 数 = xUDT 资产数",
+            "en": "one role-2 cell per xUDT asset, at outputs 1, 2 in asset order; tx-wide role-2 cell count for the pool = number of xUDT assets"
+          },
+          "err": "11"
+        },
+        {
+          "field": {
+            "zh": "reserve cell",
+            "en": "reserve cell"
+          },
+          "cond": {
+            "zh": "type 为规范 xUDT（code_hash 0x50bd…1b95、hash_type data1、36B args 以 4 个 0 结尾）、hash = asset、≠ LP token、data 恰好 16B = reserve、capacity = 200 CKB",
+            "en": "type is canonical xUDT (code_hash 0x50bd…1b95, hash_type data1, 36B args ending in four zero bytes), hash = asset, ≠ LP token, data exactly 16B = reserve, capacity = 200 CKB"
+          },
+          "err": "13"
+        },
+        {
+          "field": "LP",
+          "cond": {
+            "zh": "asset0 / asset1 都不能是本 pool 的 LP token",
+            "en": "neither asset may be the pool’s own LP token"
+          },
+          "err": "13"
+        },
+        {
+          "field": "pool_id",
+          "cond": {
+            "zh": "= ckb_hash(序列化 inputs[0] ‖ u64 LE 0)",
+            "en": "= ckb_hash(serialized inputs[0] ‖ u64 LE 0)"
+          },
+          "err": "14"
+        },
+        {
+          "field": "state",
+          "cond": {
+            "zh": "= State::new(asset0, asset1)：nonce、储备、total_lp 全 0",
+            "en": "= State::new(asset0, asset1): nonce, reserves, total_lp all 0"
+          },
+          "err": "14"
+        },
+        {
+          "field": "LP",
+          "cond": {
+            "zh": "输入与输出中本 pool 的 LP token 总量均为 0",
+            "en": "total LP token of this pool is 0 in both inputs and outputs"
+          },
+          "err": "14"
+        },
+        {
+          "field": "state data",
+          "cond": {
+            "zh": "125B、magic、asset0 < asset1 等合法性",
+            "en": "125B, magic, asset0 < asset1 and other validity"
+          },
+          "err": "5 / 9"
+        }
+      ]
+    },
+    {
+      "tag": "State → State (ADD)",
+      "title": {
+        "zh": "添加流动性",
+        "en": "Add liquidity"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "State + reserve（同一前序交易，reserve 索引 1、2）",
+            "en": "State + reserves (same previous tx, reserve indices 1, 2)"
+          },
+          "body": "Cell{\n  lock: SWAP{ args: 0x01 ‖ pool_id },\n  type: SWAP{ args: 0x00 ‖ pool_id },\n  capacity: 500 CKB + reserve0?,\n  data: … ‖ reserve0 ‖ reserve1 ‖ total_lp\n}"
+        },
+        {
+          "label": "actor",
+          "body": {
+            "zh": "Cell{ lock: {{hash = actor}} } + 存入的资产",
+            "en": "Cell{ lock: {{hash = actor}} } + deposited assets"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "output 0：State",
+            "en": "output 0: State"
+          },
+          "body": "Cell{\n  lock: SWAP{ args: 0x01 ‖ pool_id },\n  type: SWAP{ args: 0x00 ‖ pool_id },\n  capacity: {{+ in0 (CKB pool)}},\n  data: {{nonce + 1}} ‖ … ‖ {{reserve0 + in0}} ‖ {{reserve1 + in1}} ‖ {{total_lp + lp_mint}}\n}"
+        },
+        {
+          "label": {
+            "zh": "reserve",
+            "en": "reserves"
+          },
+          "body": "Cell{\n  lock: SWAP{ args: 0x02 ‖ pool_id ‖ asset },\n  type: xUDT{ args: … ‖ 00000000 },\n  capacity: 200 CKB,\n  data: {{reserve + in}}\n}"
+        },
+        {
+          "label": "actor",
+          "body": {
+            "zh": "{{LP token + lp_mint}}",
+            "en": "{{LP token + lp_mint}}"
+          }
+        }
+      ],
+      "extras": [
+        {
+          "zh": "witness[state 输入].input_type = {{Action{ op: 0 ADD }}}",
+          "en": "witness[state input].input_type = {{Action{ op: 0 ADD }}}"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "witness[state 输入].input_type = Action（恰好 114B，LE）",
+            "en": "witness[state input].input_type = Action (exactly 114B, LE)"
+          },
+          "layout": [
+            {
+              "name": "op",
+              "size": "1B",
+              "color": 0,
+              "flex": 1,
+              "role": {
+                "zh": "0 ADD、1 REMOVE、2 SWAP_IN、3 SWAP_OUT",
+                "en": "0 ADD, 1 REMOVE, 2 SWAP_IN, 3 SWAP_OUT"
+              },
+              "err": "5"
+            },
+            {
+              "name": "side",
+              "size": "1B",
+              "color": 1,
+              "flex": 1,
+              "role": {
+                "zh": "swap 方向：0 = 0→1，1 = 1→0；流动性动作须为 0",
+                "en": "swap direction: 0 = 0→1, 1 = 1→0; liquidity actions require 0"
+              },
+              "cons": {
+                "zh": "≤ 1",
+                "en": "≤ 1"
+              },
+              "err": "5 / 7"
+            },
+            {
+              "name": "actor",
+              "size": "32B",
+              "color": 2,
+              "flex": 2,
+              "role": {
+                "zh": "动作方 lock hash",
+                "en": "actor lock hash"
+              },
+              "cons": {
+                "zh": "出现在输入中",
+                "en": "appears among inputs"
+              },
+              "err": "10"
+            },
+            {
+              "name": "amount0",
+              "size": "16B u128",
+              "color": 3,
+              "flex": 1,
+              "err": "7"
+            },
+            {
+              "name": "amount1",
+              "size": "16B u128",
+              "color": 4,
+              "flex": 1,
+              "err": "7"
+            },
+            {
+              "name": "min0",
+              "size": "16B u128",
+              "color": 5,
+              "flex": 1,
+              "err": "8"
+            },
+            {
+              "name": "min1",
+              "size": "16B u128",
+              "color": 6,
+              "flex": 1,
+              "err": "8"
+            },
+            {
+              "name": "min_lp",
+              "size": "16B u128",
+              "color": 7,
+              "flex": 1,
+              "err": "8"
+            }
+          ],
+          "hex": [
+            [
+              "op",
+              "0x02 (SWAP_IN)"
+            ],
+            [
+              "side",
+              "0x00"
+            ],
+            [
+              "actor",
+              "0x0303…03"
+            ],
+            [
+              "amount0",
+              "0x10270000000000000000000000000000 (10 000)"
+            ],
+            [
+              "amount1 / min0 / min1 / min_lp",
+              "0x00…"
+            ]
+          ],
+          "note": {
+            "zh": "示例：单元测试 fee_stays_in_pool 的 SWAP_IN 10 000 → out1 = 19 743",
+            "en": "Example: unit test fee_stays_in_pool, SWAP_IN 10 000 → out1 = 19 743"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "type args",
+          "cond": {
+            "zh": "role 0 ‖ pool_id，共 33B；role/长度组合非法 → 5",
+            "en": "role 0 ‖ pool_id, 33B; invalid role/length combination → 5"
+          },
+          "err": "5"
+        },
+        {
+          "field": {
+            "zh": "结构",
+            "en": "structure"
+          },
+          "cond": {
+            "zh": "同 type 输出恰好在 output 0；同 type 输入 ≤ 1；同 code_hash 的 state 输出全交易恰好 1 个，state 输入数 = 本 pool 输入数",
+            "en": "same-type outputs are exactly [0]; ≤ 1 same-type input; exactly one state output tx-wide for this code_hash, and state input count = this pool’s input count"
+          },
+          "err": "11"
+        },
+        {
+          "field": "output 0",
+          "cond": {
+            "zh": "lock = role 1 ‖ pool_id；capacity = 500 CKB + (asset0 为 CKB 时 reserve0)",
+            "en": "lock = role 1 ‖ pool_id; capacity = 500 CKB + (reserve0 if asset0 is CKB)"
+          },
+          "err": "12"
+        },
+        {
+          "field": {
+            "zh": "reserve 输出",
+            "en": "reserve outputs"
+          },
+          "cond": {
+            "zh": "每个 xUDT 资产恰好一个 role 2 lock 的 cell，依资产顺序位于 output 1、2；全交易该 pool 的 role 2 cell 数 = xUDT 资产数",
+            "en": "one role-2 cell per xUDT asset, at outputs 1, 2 in asset order; tx-wide role-2 cell count for the pool = number of xUDT assets"
+          },
+          "err": "11"
+        },
+        {
+          "field": {
+            "zh": "reserve cell",
+            "en": "reserve cell"
+          },
+          "cond": {
+            "zh": "type 为规范 xUDT（code_hash 0x50bd…1b95、hash_type data1、36B args 以 4 个 0 结尾）、hash = asset、≠ LP token、data 恰好 16B = reserve、capacity = 200 CKB",
+            "en": "type is canonical xUDT (code_hash 0x50bd…1b95, hash_type data1, 36B args ending in four zero bytes), hash = asset, ≠ LP token, data exactly 16B = reserve, capacity = 200 CKB"
+          },
+          "err": "13"
+        },
+        {
+          "field": "LP",
+          "cond": {
+            "zh": "asset0 / asset1 都不能是本 pool 的 LP token",
+            "en": "neither asset may be the pool’s own LP token"
+          },
+          "err": "13"
+        },
+        {
+          "field": {
+            "zh": "输入 state",
+            "en": "input state"
+          },
+          "cond": {
+            "zh": "lock = role 1、capacity 公式；reserve 输入与 state 来自同一 tx，索引 1、2",
+            "en": "lock = role 1, capacity formula; reserve inputs come from the same tx as the state, at indices 1, 2"
+          },
+          "err": "12 / 11"
+        },
+        {
+          "field": "witness",
+          "cond": {
+            "zh": "state 输入索引处的 WitnessArgs.input_type 存在且恰好 114B",
+            "en": "WitnessArgs.input_type at the state input index exists and is exactly 114B"
+          },
+          "err": "5"
+        },
+        {
+          "field": "actor",
+          "cond": {
+            "zh": "lock hash 出现在输入中",
+            "en": "lock hash appears among inputs"
+          },
+          "err": "10"
+        },
+        {
+          "field": {
+            "zh": "数量",
+            "en": "amounts"
+          },
+          "cond": {
+            "zh": "side = 0，amount0 / amount1 ∈ (0, 2^112)",
+            "en": "side = 0, amount0 / amount1 ∈ (0, 2^112)"
+          },
+          "err": "7"
+        },
+        {
+          "field": {
+            "zh": "首次",
+            "en": "first deposit"
+          },
+          "cond": {
+            "zh": "root = ⌊√(a0·a1)⌋ > 1000；lp_mint = root − 1000；total_lp = root",
+            "en": "root = ⌊√(a0·a1)⌋ > 1000; lp_mint = root − 1000; total_lp = root"
+          },
+          "err": "7"
+        },
+        {
+          "field": {
+            "zh": "后续",
+            "en": "later deposits"
+          },
+          "cond": {
+            "zh": "按储备比例取 (in0, in1)；lp_mint = min(in0·L/r0, in1·L/r1) > 0",
+            "en": "take (in0, in1) at the reserve ratio; lp_mint = min(in0·L/r0, in1·L/r1) > 0"
+          },
+          "err": "7"
+        },
+        {
+          "field": {
+            "zh": "滑点",
+            "en": "slippage"
+          },
+          "cond": {
+            "zh": "in0 ≥ min0、in1 ≥ min1、lp_mint ≥ min_lp",
+            "en": "in0 ≥ min0, in1 ≥ min1, lp_mint ≥ min_lp"
+          },
+          "err": "8"
+        },
+        {
+          "field": {
+            "zh": "状态",
+            "en": "state"
+          },
+          "cond": {
+            "zh": "输出 state = apply(输入 state, action)",
+            "en": "output state = apply(input state, action)"
+          },
+          "err": "9"
+        },
+        {
+          "field": {
+            "zh": "actor 余额",
+            "en": "actor balances"
+          },
+          "cond": {
+            "zh": "xUDT：新 + in = 旧 + out；CKB：新 + in + 手续费 ≥ 旧 + out",
+            "en": "xUDT: new + in = old + out; CKB: new + in + fee ≥ old + out"
+          },
+          "err": "13 / 12"
+        },
+        {
+          "field": "LP",
+          "cond": {
+            "zh": "全交易与 actor：新 + burn = 旧 + mint",
+            "en": "tx-wide and for the actor: new + burn = old + mint"
+          },
+          "err": "13"
+        },
+        {
+          "field": {
+            "zh": "算术",
+            "en": "arithmetic"
+          },
+          "cond": {
+            "zh": "溢出 / 除零",
+            "en": "overflow / divide by zero"
+          },
+          "err": "6"
+        }
+      ]
+    },
+    {
+      "tag": "State → State (REMOVE)",
+      "title": {
+        "zh": "移除流动性",
+        "en": "Remove liquidity"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "State + reserve",
+            "en": "State + reserves"
+          },
+          "body": "Cell{\n  lock: SWAP{ args: 0x01 ‖ pool_id },\n  type: SWAP{ args: 0x00 ‖ pool_id },\n  capacity: …,\n  data: … ‖ reserve0 ‖ reserve1 ‖ total_lp\n}"
+        },
+        {
+          "label": "actor",
+          "body": {
+            "zh": "Cell{ lock: {{hash = actor}} } + LP token",
+            "en": "Cell{ lock: {{hash = actor}} } + LP token"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "output 0：State",
+            "en": "output 0: State"
+          },
+          "body": "Cell{\n  lock: SWAP{ args: 0x01 ‖ pool_id },\n  type: SWAP{ args: 0x00 ‖ pool_id },\n  capacity: …,\n  data: {{nonce + 1}} ‖ … ‖ {{reserve0 − out0}} ‖ {{reserve1 − out1}} ‖ {{total_lp − burn}}\n}"
+        },
+        {
+          "label": "actor",
+          "body": {
+            "zh": "{{+ out0、+ out1；LP − burn}}",
+            "en": "{{+ out0, + out1; LP − burn}}"
+          }
+        }
+      ],
+      "extras": [
+        {
+          "zh": "witness[state 输入].input_type = {{Action{ op: 1 REMOVE, amount0: burn }}}",
+          "en": "witness[state input].input_type = {{Action{ op: 1 REMOVE, amount0: burn }}}"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "witness[state 输入].input_type = Action（恰好 114B，LE）",
+            "en": "witness[state input].input_type = Action (exactly 114B, LE)"
+          },
+          "layout": [
+            {
+              "name": "op",
+              "size": "1B",
+              "color": 0,
+              "flex": 1,
+              "role": {
+                "zh": "0 ADD、1 REMOVE、2 SWAP_IN、3 SWAP_OUT",
+                "en": "0 ADD, 1 REMOVE, 2 SWAP_IN, 3 SWAP_OUT"
+              },
+              "err": "5"
+            },
+            {
+              "name": "side",
+              "size": "1B",
+              "color": 1,
+              "flex": 1,
+              "role": {
+                "zh": "swap 方向：0 = 0→1，1 = 1→0；流动性动作须为 0",
+                "en": "swap direction: 0 = 0→1, 1 = 1→0; liquidity actions require 0"
+              },
+              "cons": {
+                "zh": "≤ 1",
+                "en": "≤ 1"
+              },
+              "err": "5 / 7"
+            },
+            {
+              "name": "actor",
+              "size": "32B",
+              "color": 2,
+              "flex": 2,
+              "role": {
+                "zh": "动作方 lock hash",
+                "en": "actor lock hash"
+              },
+              "cons": {
+                "zh": "出现在输入中",
+                "en": "appears among inputs"
+              },
+              "err": "10"
+            },
+            {
+              "name": "amount0",
+              "size": "16B u128",
+              "color": 3,
+              "flex": 1,
+              "err": "7"
+            },
+            {
+              "name": "amount1",
+              "size": "16B u128",
+              "color": 4,
+              "flex": 1,
+              "err": "7"
+            },
+            {
+              "name": "min0",
+              "size": "16B u128",
+              "color": 5,
+              "flex": 1,
+              "err": "8"
+            },
+            {
+              "name": "min1",
+              "size": "16B u128",
+              "color": 6,
+              "flex": 1,
+              "err": "8"
+            },
+            {
+              "name": "min_lp",
+              "size": "16B u128",
+              "color": 7,
+              "flex": 1,
+              "err": "8"
+            }
+          ],
+          "hex": [
+            [
+              "op",
+              "0x02 (SWAP_IN)"
+            ],
+            [
+              "side",
+              "0x00"
+            ],
+            [
+              "actor",
+              "0x0303…03"
+            ],
+            [
+              "amount0",
+              "0x10270000000000000000000000000000 (10 000)"
+            ],
+            [
+              "amount1 / min0 / min1 / min_lp",
+              "0x00…"
+            ]
+          ],
+          "note": {
+            "zh": "示例：单元测试 fee_stays_in_pool 的 SWAP_IN 10 000 → out1 = 19 743",
+            "en": "Example: unit test fee_stays_in_pool, SWAP_IN 10 000 → out1 = 19 743"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "type args",
+          "cond": {
+            "zh": "role 0 ‖ pool_id，共 33B；role/长度组合非法 → 5",
+            "en": "role 0 ‖ pool_id, 33B; invalid role/length combination → 5"
+          },
+          "err": "5"
+        },
+        {
+          "field": {
+            "zh": "结构",
+            "en": "structure"
+          },
+          "cond": {
+            "zh": "同 type 输出恰好在 output 0；同 type 输入 ≤ 1；同 code_hash 的 state 输出全交易恰好 1 个，state 输入数 = 本 pool 输入数",
+            "en": "same-type outputs are exactly [0]; ≤ 1 same-type input; exactly one state output tx-wide for this code_hash, and state input count = this pool’s input count"
+          },
+          "err": "11"
+        },
+        {
+          "field": "output 0",
+          "cond": {
+            "zh": "lock = role 1 ‖ pool_id；capacity = 500 CKB + (asset0 为 CKB 时 reserve0)",
+            "en": "lock = role 1 ‖ pool_id; capacity = 500 CKB + (reserve0 if asset0 is CKB)"
+          },
+          "err": "12"
+        },
+        {
+          "field": {
+            "zh": "reserve 输出",
+            "en": "reserve outputs"
+          },
+          "cond": {
+            "zh": "每个 xUDT 资产恰好一个 role 2 lock 的 cell，依资产顺序位于 output 1、2；全交易该 pool 的 role 2 cell 数 = xUDT 资产数",
+            "en": "one role-2 cell per xUDT asset, at outputs 1, 2 in asset order; tx-wide role-2 cell count for the pool = number of xUDT assets"
+          },
+          "err": "11"
+        },
+        {
+          "field": {
+            "zh": "reserve cell",
+            "en": "reserve cell"
+          },
+          "cond": {
+            "zh": "type 为规范 xUDT（code_hash 0x50bd…1b95、hash_type data1、36B args 以 4 个 0 结尾）、hash = asset、≠ LP token、data 恰好 16B = reserve、capacity = 200 CKB",
+            "en": "type is canonical xUDT (code_hash 0x50bd…1b95, hash_type data1, 36B args ending in four zero bytes), hash = asset, ≠ LP token, data exactly 16B = reserve, capacity = 200 CKB"
+          },
+          "err": "13"
+        },
+        {
+          "field": "LP",
+          "cond": {
+            "zh": "asset0 / asset1 都不能是本 pool 的 LP token",
+            "en": "neither asset may be the pool’s own LP token"
+          },
+          "err": "13"
+        },
+        {
+          "field": {
+            "zh": "参数",
+            "en": "parameters"
+          },
+          "cond": {
+            "zh": "side = 0、amount1 = 0、min_lp = 0、0 < burn ≤ total_lp − 1000",
+            "en": "side = 0, amount1 = 0, min_lp = 0, 0 < burn ≤ total_lp − 1000"
+          },
+          "err": "7"
+        },
+        {
+          "field": {
+            "zh": "返还",
+            "en": "returns"
+          },
+          "cond": {
+            "zh": "out_i = ⌊burn · r_i / total_lp⌋ > 0",
+            "en": "out_i = ⌊burn · r_i / total_lp⌋ > 0"
+          },
+          "err": "7"
+        },
+        {
+          "field": {
+            "zh": "滑点",
+            "en": "slippage"
+          },
+          "cond": {
+            "zh": "out0 ≥ min0、out1 ≥ min1",
+            "en": "out0 ≥ min0, out1 ≥ min1"
+          },
+          "err": "8"
+        },
+        {
+          "field": {
+            "zh": "状态 / 余额",
+            "en": "state / balances"
+          },
+          "cond": {
+            "zh": "同 ADD：apply 相等、actor 与 LP 余额守恒",
+            "en": "as ADD: apply equality, actor and LP balance conservation"
+          },
+          "err": "9 / 12 / 13"
+        },
+        {
+          "field": "actor",
+          "cond": {
+            "zh": "lock hash 出现在输入中",
+            "en": "lock hash appears among inputs"
+          },
+          "err": "10"
+        }
+      ]
+    },
+    {
+      "tag": "State → State (SWAP)",
+      "title": {
+        "zh": "兑换（SWAP_IN 固定输入 / SWAP_OUT 固定输出）",
+        "en": "Swap (SWAP_IN exact input / SWAP_OUT exact output)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "State + reserve",
+            "en": "State + reserves"
+          },
+          "body": "Cell{\n  lock: SWAP{ args: 0x01 ‖ pool_id },\n  type: SWAP{ args: 0x00 ‖ pool_id },\n  capacity: …,\n  data: … ‖ r_in ‖ r_out ‖ total_lp\n}"
+        },
+        {
+          "label": "actor",
+          "body": {
+            "zh": "Cell{ lock: {{hash = actor}} } + 输入资产",
+            "en": "Cell{ lock: {{hash = actor}} } + input asset"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "output 0：State",
+            "en": "output 0: State"
+          },
+          "body": "Cell{\n  lock: SWAP{ args: 0x01 ‖ pool_id },\n  type: SWAP{ args: 0x00 ‖ pool_id },\n  capacity: …,\n  data: {{nonce + 1}} ‖ … ‖ {{r_in + input}} ‖ {{r_out − output}} ‖ total_lp\n}"
+        },
+        {
+          "label": "actor",
+          "body": {
+            "zh": "{{+ output}}",
+            "en": "{{+ output}}"
+          }
+        }
+      ],
+      "extras": [
+        {
+          "zh": "witness[state 输入].input_type = {{Action{ op: 2 | 3, side }}}",
+          "en": "witness[state input].input_type = {{Action{ op: 2 | 3, side }}}"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "witness[state 输入].input_type = Action（恰好 114B，LE）",
+            "en": "witness[state input].input_type = Action (exactly 114B, LE)"
+          },
+          "layout": [
+            {
+              "name": "op",
+              "size": "1B",
+              "color": 0,
+              "flex": 1,
+              "role": {
+                "zh": "0 ADD、1 REMOVE、2 SWAP_IN、3 SWAP_OUT",
+                "en": "0 ADD, 1 REMOVE, 2 SWAP_IN, 3 SWAP_OUT"
+              },
+              "err": "5"
+            },
+            {
+              "name": "side",
+              "size": "1B",
+              "color": 1,
+              "flex": 1,
+              "role": {
+                "zh": "swap 方向：0 = 0→1，1 = 1→0；流动性动作须为 0",
+                "en": "swap direction: 0 = 0→1, 1 = 1→0; liquidity actions require 0"
+              },
+              "cons": {
+                "zh": "≤ 1",
+                "en": "≤ 1"
+              },
+              "err": "5 / 7"
+            },
+            {
+              "name": "actor",
+              "size": "32B",
+              "color": 2,
+              "flex": 2,
+              "role": {
+                "zh": "动作方 lock hash",
+                "en": "actor lock hash"
+              },
+              "cons": {
+                "zh": "出现在输入中",
+                "en": "appears among inputs"
+              },
+              "err": "10"
+            },
+            {
+              "name": "amount0",
+              "size": "16B u128",
+              "color": 3,
+              "flex": 1,
+              "err": "7"
+            },
+            {
+              "name": "amount1",
+              "size": "16B u128",
+              "color": 4,
+              "flex": 1,
+              "err": "7"
+            },
+            {
+              "name": "min0",
+              "size": "16B u128",
+              "color": 5,
+              "flex": 1,
+              "err": "8"
+            },
+            {
+              "name": "min1",
+              "size": "16B u128",
+              "color": 6,
+              "flex": 1,
+              "err": "8"
+            },
+            {
+              "name": "min_lp",
+              "size": "16B u128",
+              "color": 7,
+              "flex": 1,
+              "err": "8"
+            }
+          ],
+          "hex": [
+            [
+              "op",
+              "0x02 (SWAP_IN)"
+            ],
+            [
+              "side",
+              "0x00"
+            ],
+            [
+              "actor",
+              "0x0303…03"
+            ],
+            [
+              "amount0",
+              "0x10270000000000000000000000000000 (10 000)"
+            ],
+            [
+              "amount1 / min0 / min1 / min_lp",
+              "0x00…"
+            ]
+          ],
+          "note": {
+            "zh": "示例：单元测试 fee_stays_in_pool 的 SWAP_IN 10 000 → out1 = 19 743",
+            "en": "Example: unit test fee_stays_in_pool, SWAP_IN 10 000 → out1 = 19 743"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "type args",
+          "cond": {
+            "zh": "role 0 ‖ pool_id，共 33B；role/长度组合非法 → 5",
+            "en": "role 0 ‖ pool_id, 33B; invalid role/length combination → 5"
+          },
+          "err": "5"
+        },
+        {
+          "field": {
+            "zh": "结构",
+            "en": "structure"
+          },
+          "cond": {
+            "zh": "同 type 输出恰好在 output 0；同 type 输入 ≤ 1；同 code_hash 的 state 输出全交易恰好 1 个，state 输入数 = 本 pool 输入数",
+            "en": "same-type outputs are exactly [0]; ≤ 1 same-type input; exactly one state output tx-wide for this code_hash, and state input count = this pool’s input count"
+          },
+          "err": "11"
+        },
+        {
+          "field": "output 0",
+          "cond": {
+            "zh": "lock = role 1 ‖ pool_id；capacity = 500 CKB + (asset0 为 CKB 时 reserve0)",
+            "en": "lock = role 1 ‖ pool_id; capacity = 500 CKB + (reserve0 if asset0 is CKB)"
+          },
+          "err": "12"
+        },
+        {
+          "field": {
+            "zh": "reserve 输出",
+            "en": "reserve outputs"
+          },
+          "cond": {
+            "zh": "每个 xUDT 资产恰好一个 role 2 lock 的 cell，依资产顺序位于 output 1、2；全交易该 pool 的 role 2 cell 数 = xUDT 资产数",
+            "en": "one role-2 cell per xUDT asset, at outputs 1, 2 in asset order; tx-wide role-2 cell count for the pool = number of xUDT assets"
+          },
+          "err": "11"
+        },
+        {
+          "field": {
+            "zh": "reserve cell",
+            "en": "reserve cell"
+          },
+          "cond": {
+            "zh": "type 为规范 xUDT（code_hash 0x50bd…1b95、hash_type data1、36B args 以 4 个 0 结尾）、hash = asset、≠ LP token、data 恰好 16B = reserve、capacity = 200 CKB",
+            "en": "type is canonical xUDT (code_hash 0x50bd…1b95, hash_type data1, 36B args ending in four zero bytes), hash = asset, ≠ LP token, data exactly 16B = reserve, capacity = 200 CKB"
+          },
+          "err": "13"
+        },
+        {
+          "field": "LP",
+          "cond": {
+            "zh": "asset0 / asset1 都不能是本 pool 的 LP token",
+            "en": "neither asset may be the pool’s own LP token"
+          },
+          "err": "13"
+        },
+        {
+          "field": {
+            "zh": "参数",
+            "en": "parameters"
+          },
+          "cond": {
+            "zh": "min1 = 0、min_lp = 0；SWAP_IN 还要求 amount1 = 0；SWAP_OUT 要求 min0 = 0",
+            "en": "min1 = 0, min_lp = 0; SWAP_IN also needs amount1 = 0; SWAP_OUT needs min0 = 0"
+          },
+          "err": "5"
+        },
+        {
+          "field": "SWAP_IN",
+          "cond": {
+            "zh": "output = ⌊in·997·r_out / (r_in·1000 + in·997)⌋，0 < output < r_out，in ≤ 2^112 − 1",
+            "en": "output = ⌊in·997·r_out / (r_in·1000 + in·997)⌋, 0 < output < r_out, in ≤ 2^112 − 1"
+          },
+          "err": "7"
+        },
+        {
+          "field": "SWAP_IN",
+          "cond": {
+            "zh": "output ≥ min0",
+            "en": "output ≥ min0"
+          },
+          "err": "8"
+        },
+        {
+          "field": "SWAP_OUT",
+          "cond": {
+            "zh": "input = ⌊r_in·out·1000 / ((r_out − out)·997)⌋ + 1 ≤ 2^112 − 1，0 < out < r_out",
+            "en": "input = ⌊r_in·out·1000 / ((r_out − out)·997)⌋ + 1 ≤ 2^112 − 1, 0 < out < r_out"
+          },
+          "err": "7"
+        },
+        {
+          "field": "SWAP_OUT",
+          "cond": {
+            "zh": "input ≤ amount1（最大输入）",
+            "en": "input ≤ amount1 (max input)"
+          },
+          "err": "8"
+        },
+        {
+          "field": {
+            "zh": "不变式",
+            "en": "invariant"
+          },
+          "cond": {
+            "zh": "(r0′·1000 − in0·3)(r1′·1000 − in1·3) ≥ r0·r1·10^6（0.3% 费用留在池内）",
+            "en": "(r0′·1000 − in0·3)(r1′·1000 − in1·3) ≥ r0·r1·10^6 (0.3% fee stays in the pool)"
+          },
+          "err": "9"
+        },
+        {
+          "field": {
+            "zh": "状态 / 余额",
+            "en": "state / balances"
+          },
+          "cond": {
+            "zh": "apply 相等、actor 余额守恒；total_lp 不变",
+            "en": "apply equality, actor balance conservation; total_lp unchanged"
+          },
+          "err": "9 / 12 / 13"
+        },
+        {
+          "field": "actor",
+          "cond": {
+            "zh": "lock hash 出现在输入中",
+            "en": "lock hash appears among inputs"
+          },
+          "err": "10"
+        }
+      ]
+    },
+    {
+      "tag": "lock roles",
+      "title": {
+        "zh": "State lock（role 1）与 reserve lock（role 2）",
+        "en": "State lock (role 1) and reserve lock (role 2)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "role 1 lock 组",
+            "en": "role 1 lock group"
+          },
+          "body": "Cell{ lock: SWAP{ args: 0x01 ‖ pool_id }, type: {{SWAP{ 0x00 ‖ pool_id }}} }"
+        },
+        {
+          "label": {
+            "zh": "role 2 lock 组",
+            "en": "role 2 lock group"
+          },
+          "body": "Cell{ lock: SWAP{ args: 0x02 ‖ pool_id ‖ asset } }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "由 state type 约束",
+            "en": "constrained by the state type"
+          },
+          "body": {
+            "zh": "lock 本身不检查输出",
+            "en": "the locks check no outputs"
+          }
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "script.args（三种角色共用 code_hash）",
+            "en": "script.args (three roles share one code_hash)"
+          },
+          "layout": [
+            {
+              "name": "role",
+              "size": "1B",
+              "color": 0,
+              "flex": 1,
+              "role": {
+                "zh": "0 = state type、1 = state lock、2 = xUDT reserve lock",
+                "en": "0 = state type, 1 = state lock, 2 = xUDT reserve lock"
+              },
+              "cons": {
+                "zh": "0 / 1 → 共 33B；2 → 共 65B",
+                "en": "0 / 1 → 33B total; 2 → 65B total"
+              },
+              "err": "5"
+            },
+            {
+              "name": "pool_id",
+              "size": "32B",
+              "color": 1,
+              "flex": 3,
+              "role": {
+                "zh": "ckb_hash(创建交易 inputs[0] ‖ u64 LE 0)",
+                "en": "ckb_hash(creating tx inputs[0] ‖ u64 LE 0)"
+              },
+              "cons": {
+                "zh": "genesis 时校验",
+                "en": "checked at genesis"
+              },
+              "err": "14"
+            },
+            {
+              "name": "asset",
+              "size": "32B (role 2)",
+              "color": 2,
+              "flex": 3,
+              "role": {
+                "zh": "该 reserve 的 xUDT type hash",
+                "en": "the reserve’s xUDT type hash"
+              },
+              "err": "5"
+            }
+          ],
+          "hex": [
+            [
+              "role",
+              "0x00"
+            ],
+            [
+              "pool_id",
+              "0x… (32B)"
+            ]
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "role 1",
+          "cond": {
+            "zh": "args 33B；group 恰好 1 个输入，且其 type = role 0 ‖ 同 pool_id",
+            "en": "args 33B; exactly 1 group input whose type = role 0 ‖ same pool_id"
+          },
+          "err": "11"
+        },
+        {
+          "field": "role 2",
+          "cond": {
+            "zh": "args 65B；交易输入中恰好 1 个 cell 的 type = role 0 ‖ pool_id",
+            "en": "args 65B; exactly 1 tx input has type = role 0 ‖ pool_id"
+          },
+          "err": "10"
+        },
+        {
+          "field": "args",
+          "cond": {
+            "zh": "其他 role / 长度组合",
+            "en": "any other role / length combination"
+          },
+          "err": "5"
+        },
+        {
+          "field": {
+            "zh": "签名",
+            "en": "signature"
+          },
+          "cond": {
+            "zh": "两个 lock 都不检查签名或 witness；安全性完全来自 state type 的校验",
+            "en": "neither lock checks a signature or witness; safety comes entirely from the state type checks"
+          },
+          "err": "—"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码（crates/protocol/src/lib.rs Error）：5 Encoding、6 Arithmetic、7 Amount、8 Slippage、9 Invariant、10 Authorization、11 Structure、12 Capacity、13 Token、14 Genesis。所有 syscall 失败经 sys() 映射为 11 Structure。",
+      "en": "Error codes (crates/protocol/src/lib.rs Error): 5 Encoding, 6 Arithmetic, 7 Amount, 8 Slippage, 9 Invariant, 10 Authorization, 11 Structure, 12 Capacity, 13 Token, 14 Genesis. Every syscall failure is mapped to 11 Structure by sys()."
+    },
+    {
+      "zh": "没有销毁池的路径：state type 要求同 type 输出恰好为 [0]，池一旦创建只能继续更新。全交易只允许一个 state 输出（同 code_hash），所以多个池不能在同一交易中更新。",
+      "en": "There is no pool-destruction path: the state type requires same-type outputs to be exactly [0], so a pool can only be updated after creation. Only one state output (same code_hash) is allowed per tx, so several pools cannot be updated in one transaction."
+    },
+    {
+      "zh": "LP token = xUDT（code_hash 0x50bd…1b95、data1），args = hash(role 1 state lock) ‖ 00000000；铸造依赖 xUDT owner 模式（state cell 在输入中）。XUDT_CODE_HASH 写死在协议 crate 中。",
+      "en": "LP token = xUDT (code_hash 0x50bd…1b95, data1), args = hash(role 1 state lock) ‖ 00000000; minting relies on xUDT owner mode (the state cell is an input). XUDT_CODE_HASH is hard-coded in the protocol crate."
+    },
+    {
+      "zh": "部署：README 明确说明仓库不含部署配置、交易构造器或 CKB-VM 集成测试；未找到官方 code_hash，因此本页 match 为空、无测试交易。plugin 在 JS 中重算 apply（已用协议单元测试的数值核对），并标注余额与 reserve 布局为未检查。",
+      "en": "Deployment: the README says the repo contains no deployment configuration, transaction builder or CKB-VM integration tests; no official code_hash was found, so match is empty and there are no test txs. The plugin recomputes apply in JS (cross-checked against the protocol unit-test values) and marks balances and reserve layout as not checked."
+    }
+  ]
+}

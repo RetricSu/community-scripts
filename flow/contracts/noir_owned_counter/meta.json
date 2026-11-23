@@ -1,0 +1,59 @@
+{
+  "tags": [
+    "zk",
+    "open-source",
+    "community"
+  ],
+  "contributors": [
+    "wamimi"
+  ],
+  "source": {
+    "repo": "https://github.com/wamimi/noir-ckb-verifier",
+    "commit": "bf09ccfa8bf2e474b98d47a23440a6ed29a1af07",
+    "paths": [
+      "contracts/crates/owned-counter/src/main.rs",
+      "contracts/crates/owned-counter/build.rs",
+      "crates/artifact-adapter/src/wire.rs",
+      "circuits/owned-counter-v1/src/main.nr"
+    ],
+    "commit_note": "commit read when writing this spec; deployment constants from releases/owned-counter-v1-testnet/manifest.json and evidence/week-15-testnet.md",
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0x79d7e7614ff1689cb6c6fbbd376ab2fa959dc92394abea35cbafb1bd2b7d0a88",
+          "evidence": [
+            "listed in evidence/week-15-public/deployment.json",
+            "committed release binary releases/owned-counter-v1-testnet/owned-counter hashes (blake2b ckb) to this data hash"
+          ],
+          "matches_commit": false
+        }
+      ],
+      "note": "the committed release binary at this commit matches the deployed data hash, but building it from source (with the pinned policy env + VK) was not reproduced, so status stays unverified"
+    }
+  },
+  "deployments": [
+    {
+      "network": "testnet",
+      "code_hash": "0x79d7e7614ff1689cb6c6fbbd376ab2fa959dc92394abea35cbafb1bd2b7d0a88",
+      "hash_type": "data1",
+      "constant_source": "noir-ckb-verifier releases/owned-counter-v1-testnet/manifest.json (artifacts.type.data_hash) + evidence/week-15-testnet.md",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x0ee39d547101eb348bc72a93f9a08b301353267487f3061f54a0070c44f27ad1"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x0ee39d547101eb348bc72a93f9a08b301353267487f3061f54a0070c44f27ad1"
+      },
+      "type_script": null,
+      "data_hash": "0x79d7e7614ff1689cb6c6fbbd376ab2fa959dc92394abea35cbafb1bd2b7d0a88",
+      "deploy_tx": "0x0ee39d547101eb348bc72a93f9a08b301353267487f3061f54a0070c44f27ad1",
+      "deploy_block": 22664421
+    }
+  ],
+  "checked_at": "2026-10-29"
+}

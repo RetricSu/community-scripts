@@ -1,0 +1,341 @@
+{
+  "title": {
+    "zh": "Bitcoin SPV Type Lock 约束（主网 btc-mainnet-v0.1.0）",
+    "en": "Bitcoin SPV Type Lock Constraints (mainnet btc-mainnet-v0.1.0)"
+  },
+  "subtitle": {
+    "zh": "来源：ckb-cell/ckb-bitcoin-spv-contracts @f3e3ba8（tag btc-mainnet-v0.1.0）contracts/ckb-bitcoin-spv-type-lock + ckb-bitcoin-spv verifier @a3c43fd　·　mainnet 0xa76e…741d (type)",
+    "en": "Source: ckb-cell/ckb-bitcoin-spv-contracts @f3e3ba8 (tag btc-mainnet-v0.1.0) contracts/ckb-bitcoin-spv-type-lock + ckb-bitcoin-spv verifier @a3c43fd　·　mainnet 0xa76e…741d (type)"
+  },
+  "transitions": [
+    {
+      "tag": "0 → 1 + n",
+      "title": {
+        "zh": "创建 SPV 实例",
+        "en": "Create an SPV instance"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "inputs[0]：任意",
+            "en": "inputs[0]: any"
+          },
+          "body": "CellInput{ since, previous_output }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "Info cell",
+          "body": "Cell{ type: { codeHash: {{SPV_TYPE_LOCK}}, args: SpvTypeArgs }, data: SpvInfo { tip_client_id: {{0}} } }"
+        },
+        {
+          "label": "Client cell × n",
+          "body": "Cell{ type: same type,\n  data: SpvClient { id: {{0..n-1}}, tip_block_hash, headers_mmr_root, target_adjust_info } }"
+        },
+        {
+          "label": "witness[info]",
+          "body": "WitnessArgs{ output_type: SpvBootstrap { height, header 80B } }"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "args（SpvTypeArgs，34 字节）",
+            "en": "args (SpvTypeArgs, 34 bytes)"
+          },
+          "layout": [
+            {
+              "name": "type_id",
+              "size": "32B",
+              "role": {
+                "zh": "实例唯一 ID",
+                "en": "instance id"
+              },
+              "cons": {
+                "zh": "= blake2b(inputs[0] ‖ 输出数量 u64)",
+                "en": "= blake2b(inputs[0] ‖ output count u64)"
+              },
+              "err": "0x23",
+              "color": 1,
+              "flex": 4
+            },
+            {
+              "name": "clients_count",
+              "size": "1B",
+              "role": {
+                "zh": "client cell 数",
+                "en": "number of client cells"
+              },
+              "cons": {
+                "zh": "输出数 = 1 + 它",
+                "en": "outputs = 1 + it"
+              },
+              "err": "0x22",
+              "color": 2,
+              "flex": 1
+            },
+            {
+              "name": "flags",
+              "size": "1B",
+              "role": {
+                "zh": "0x80 = 跳过难度 / PoW 检查",
+                "en": "0x80 = skip difficulty / PoW checks"
+              },
+              "cons": "—",
+              "err": "—",
+              "color": 3,
+              "flex": 1
+            }
+          ]
+        },
+        {
+          "label": {
+            "zh": "SpvClient data（113 字节）",
+            "en": "SpvClient data (113 bytes)"
+          },
+          "layout": [
+            {
+              "name": "id",
+              "size": "1B",
+              "role": "client id",
+              "cons": {
+                "zh": "0..n-1 环形",
+                "en": "0..n-1 ring"
+              },
+              "err": "0x32",
+              "color": 1,
+              "flex": 1
+            },
+            {
+              "name": "tip_block_hash",
+              "size": "32B",
+              "role": {
+                "zh": "最新 BTC 区块哈希（内部字节序）",
+                "en": "latest BTC block hash (internal byte order)"
+              },
+              "cons": {
+                "zh": "= 最后一个 header 的 sha256d",
+                "en": "= sha256d of the last header"
+              },
+              "err": "0x7a",
+              "color": 2,
+              "flex": 3
+            },
+            {
+              "name": "headers_mmr_root",
+              "size": "72B",
+              "role": "HeaderDigest { min_height, max_height, partial_chain_work U256 LE, children_hash }",
+              "cons": {
+                "zh": "MMR 增量证明",
+                "en": "incremental MMR proof"
+              },
+              "err": "0x71/0x72",
+              "color": 3,
+              "flex": 5
+            },
+            {
+              "name": "target_adjust_info",
+              "size": "8B",
+              "role": "start_time ‖ next_compact_target",
+              "cons": {
+                "zh": "按难度周期更新",
+                "en": "updated per difficulty period"
+              },
+              "err": "0x7d",
+              "color": 4,
+              "flex": 1
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "outputs",
+          "cond": {
+            "zh": "本实例输出 ≥ 4、连续排列、数量 = 1 + clients_count",
+            "en": "instance outputs ≥ 4, contiguous, count = 1 + clients_count"
+          },
+          "err": "0x20 / 0x21 / 0x22"
+        },
+        {
+          "field": "type_id",
+          "cond": {
+            "zh": "blake2b(第一个 CellInput ‖ 输出数量 u64)",
+            "en": "blake2b(first CellInput ‖ output count u64)"
+          },
+          "err": "0x23"
+        },
+        {
+          "field": "info",
+          "cond": {
+            "zh": "第一个输出 = SpvInfo，tip = 0",
+            "en": "first output = SpvInfo with tip 0"
+          },
+          "err": "0x24 / 0x25"
+        },
+        {
+          "field": "clients",
+          "cond": {
+            "zh": "都等于由 bootstrap 计算的 client，id 依次递增",
+            "en": "all equal the client derived from the bootstrap, ids increasing"
+          },
+          "err": "0x26–0x28"
+        }
+      ]
+    },
+    {
+      "tag": "2 → 2",
+      "title": {
+        "zh": "更新：覆盖最旧的 client",
+        "en": "Update: overwrite the oldest client"
+      },
+      "inputs": [
+        {
+          "label": "Info cell",
+          "body": "SpvInfo { tip_client_id: t }"
+        },
+        {
+          "label": "Client cell",
+          "body": "SpvClient { id: {{next(t)}} } // oldest"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "Info cell",
+          "body": "SpvInfo { tip_client_id: {{next(t)}} }"
+        },
+        {
+          "label": "Client cell",
+          "body": "SpvClient { id: next(t), tip_block_hash: {{new tip}}, … }"
+        },
+        {
+          "label": "witness[info]",
+          "body": "WitnessArgs{ output_type: SpvUpdate { headers, new_headers_mmr_proof } }"
+        }
+      ],
+      "extras": [
+        {
+          "zh": "cell_deps 中放当前 tip client（id = t）；新 client 是在它上面接上 headers 的结果。",
+          "en": "The current tip client (id = t) goes in cell_deps; the new client is that client extended by the headers."
+        }
+      ],
+      "limits": [
+        {
+          "field": "inputs / outputs",
+          "cond": {
+            "zh": "各是一个 SpvInfo + 一个 SpvClient；输入 client id = next(t)；输出 info = next(t)",
+            "en": "one SpvInfo + one SpvClient each; input client id = next(t); output info = next(t)"
+          },
+          "err": "0x30–0x35"
+        },
+        {
+          "field": "cell_deps",
+          "cond": {
+            "zh": "恰一个本实例 client，id = t",
+            "en": "exactly one client of this instance, id = t"
+          },
+          "err": "0x36–0x39"
+        },
+        {
+          "field": "headers",
+          "cond": {
+            "zh": "非空；与 tip 连续；bits = 期望难度；PoW；MMR 证明；新 client 的 id、tip、高度、target_adjust_info 正确",
+            "en": "non-empty; continue the tip; bits = expected difficulty; PoW; MMR proof; new client id, tip, heights, target_adjust_info correct"
+          },
+          "err": "0x3a / 0x69–0x7d"
+        }
+      ]
+    },
+    {
+      "tag": "m → m",
+      "title": {
+        "zh": "重组（m > 2）",
+        "en": "Reorg (m > 2)"
+      },
+      "inputs": [
+        {
+          "label": "Info cell",
+          "body": "SpvInfo { tip_client_id: t }"
+        },
+        {
+          "label": "Client cells × (m−1)",
+          "body": "SpvClient { id ∈ {t, prev(t), …} }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "Info cell",
+          "body": "SpvInfo { tip_client_id: {{oldest rolled-back id}} }"
+        },
+        {
+          "label": "Client cells × (m−1)",
+          "body": "SpvClient { identical except id }"
+        }
+      ],
+      "limits": [
+        {
+          "field": "inputs",
+          "cond": {
+            "zh": "一个 info + ≥ 2 个 client，id 是从 tip 往回连续的一段",
+            "en": "one info + ≥ 2 clients whose ids are a consecutive run back from tip"
+          },
+          "err": "0x41–0x47"
+        },
+        {
+          "field": "outputs",
+          "cond": {
+            "zh": "同一组 id；所有 client 相同；info 指向最旧的那个",
+            "en": "same id set; all clients identical; info points at the oldest"
+          },
+          "err": "0x48–0x4d / 0x35"
+        },
+        {
+          "field": "chain work",
+          "cond": {
+            "zh": "新 partial_chain_work > 旧 tip",
+            "en": "new partial_chain_work > old tip"
+          },
+          "err": "0x40"
+        },
+        {
+          "field": "cell_deps / headers",
+          "cond": {
+            "zh": "cell_dep 为分叉点 client；headers 同更新规则",
+            "en": "cell_dep is the fork-point client; headers follow the update rules"
+          },
+          "err": "0x4e–0x51 / 0x69–0x7d"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "版本：链上主网 code cell（0x1dc9a535…:0，type id 可升级，至今未升级）数据的 sha256 = 481b173c…，等于 tag btc-mainnet-v0.1.0（= origin/production = f3e3ba8）checksums.txt 中的 ckb-bitcoin-spv-type-lock。",
+      "en": "Version: the sha256 of the on-chain mainnet code cell data (0x1dc9a535…:0, type-id upgradable, never upgraded so far) is 481b173c…, equal to the ckb-bitcoin-spv-type-lock line in checksums.txt at tag btc-mainnet-v0.1.0 (= origin/production = f3e3ba8)."
+    },
+    {
+      "zh": "code hash 来源：RGB++ lock 配置 cell（0x04c5c3e6…:1）中的 btc_lc_type_hash = 0x00a2…c6f7，对应 cell_dep 0xd6b2fcb7…:1 的 type，其 code_hash 即本合约。",
+      "en": "Code hash source: btc_lc_type_hash in the RGB++ lock config cell (0x04c5c3e6…:1) is 0x00a2…c6f7, the type of cell_dep 0xd6b2fcb7…:1, whose code_hash is this script."
+    },
+    {
+      "zh": "测试网未收录：BTC testnet3 实例 0xc8a3…6d28 当前二进制 sha256 043f7318… 不在任何 tag 的 checksums.txt 中；signet 实例 0x73d9…e25e = tag v0.2.0（启用了销毁且 flags 含义改变），与本页规则不同。",
+      "en": "Testnet not included: the BTC testnet3 instance 0xc8a3…6d28 currently runs a binary (sha256 043f7318…) not listed in any tag's checksums.txt; the signet instance 0x73d9…e25e is tag v0.2.0 (destroy enabled, flags redefined), whose rules differ from this page."
+    },
+    {
+      "zh": "此版本 entry.rs 注释掉了销毁分支，所以 (n, 0) 走 UnknownOperation 0x10。",
+      "en": "This version comments out the destroy branch in entry.rs, so (n, 0) falls to UnknownOperation 0x10."
+    },
+    {
+      "zh": "解码器会计算每个 header 的 sha256d、检查内部连续性、PoW 与新 tip；与 cell_dep 中 tip client 相关的部分（接续、期望难度、MMR、高度、target_adjust_info）无法检查。",
+      "en": "The decoder computes each header sha256d and checks internal continuity, PoW and the new tip; everything tied to the tip client in cell_deps (continuation, expected difficulty, MMR, heights, target_adjust_info) cannot be checked."
+    },
+    {
+      "zh": "错误码（error.rs）：0x01–0x05 syscall · 0x10 UnknownOperation · 0x20–0x28 创建 · 0x2f DestroyNotEnoughCells · 0x30–0x3a 更新 · 0x40–0x51 重组 · 0x60 + BootstrapError / UpdateError（0x69 EmptyHeaders · 0x6a UncontinuousHeaders · 0x6b Difficulty · 0x6c Pow · 0x71 Mmr · 0x72 HeadersMmrProof · 0x79 ClientId · 0x7a ClientTipBlockHash · 0x7b/0x7c 高度 · 0x7d ClientTargetAdjustInfo）",
+      "en": "Error codes (error.rs): 0x01–0x05 syscall · 0x10 UnknownOperation · 0x20–0x28 create · 0x2f DestroyNotEnoughCells · 0x30–0x3a update · 0x40–0x51 reorg · 0x60 + BootstrapError / UpdateError (0x69 EmptyHeaders · 0x6a UncontinuousHeaders · 0x6b Difficulty · 0x6c Pow · 0x71 Mmr · 0x72 HeadersMmrProof · 0x79 ClientId · 0x7a ClientTipBlockHash · 0x7b/0x7c heights · 0x7d ClientTargetAdjustInfo)"
+    },
+    {
+      "zh": "2026-11-19 上游审阅（非链上升级声明）：主网 production 分支及 btc-mainnet-v0.1.0 仍为 f3e3ba8；master 新增销毁、testnet reset、操作分类和 verifier 变更，checksum 也不同，不能直接套到现有主网部署。",
+      "en": "2026-11-19 upstream review (not an on-chain upgrade claim): Mainnet production and btc-mainnet-v0.1.0 still point to f3e3ba8. Master adds destroy, testnet reset, operation-dispatch and verifier changes and has a different checksum; these must not be applied to the existing mainnet deployment."
+    }
+  ]
+}
