@@ -1,0 +1,136 @@
+{
+  "tags": [
+    "proxy",
+    "community",
+    "open-source"
+  ],
+  "contributors": [
+    "code-tsao"
+  ],
+  "source": {
+    "repo": "https://github.com/code-monad/ckbfs",
+    "commit": "4ee6689bf7ec2515df95311a05a9cdc709f358cb",
+    "paths": [
+      "contracts/ckbfs/src/entry.rs",
+      "contracts/ckbfs/src/error.rs",
+      "contracts/ckbfs/src/hash.rs",
+      "contracts/ckb-adler32/src/process.rs",
+      "contracts/ckb-adler32/src/utils.rs"
+    ],
+    "commit_note": "tag v3 / master HEAD read 2026-11-06. Repo has no record of data hash 0xb5d1…d695; chosen because the deployed dep_group adler32 hash 0xbd94…1db1 equals hash.rs from 3776e2a onward (exact build commit unproven). Data schema: crates.io ckbfs-types 0.3.0",
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0xb5d13ffe0547c78021c01fe24dce2e959a1ed8edbca3cb93dd2e9f57fb56d695",
+          "evidence": [],
+          "matches_commit": false
+        }
+      ],
+      "note": "no binary or checksum at the recorded commit matched the deployed data hash (reproducible build not attempted)"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0xb5d13ffe0547c78021c01fe24dce2e959a1ed8edbca3cb93dd2e9f57fb56d695",
+      "hash_type": "data1",
+      "constant_source": "CKB Explorer registry \"CKBFS V3\" code cell data hash (mainnet 0xd25f2c32…:1, testnet 0x1488b592…:0), data1",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x03deba7f8206c81981d6f6a2d61b67dde75b4df91cbcfaf2e2fb041ba50c4719"
+        },
+        "dep_type": "dep_group"
+      },
+      "code_cell": {
+        "tx_hash": "0xd25f2c32f56c28c630d4f91955f1b3c9cd53e26fa0745d540d934e8e3d3c2853",
+        "index": "0x1"
+      },
+      "type_script": {
+        "args": "0xf5d1b146e7a8cd668dbfde5d08d788ab6fb1c3487f6b3b16b9c0efbc5421a529",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0xb5d13ffe0547c78021c01fe24dce2e959a1ed8edbca3cb93dd2e9f57fb56d695",
+      "deploy_tx": "0xd25f2c32f56c28c630d4f91955f1b3c9cd53e26fa0745d540d934e8e3d3c2853",
+      "deploy_block": 17071377
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0xb5d13ffe0547c78021c01fe24dce2e959a1ed8edbca3cb93dd2e9f57fb56d695",
+      "hash_type": "data1",
+      "constant_source": "CKB Explorer registry \"CKBFS V3\" code cell data hash (mainnet 0xd25f2c32…:1, testnet 0x1488b592…:0), data1",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x47cfa8d554cccffe7796f93b58437269de1f98f029d0a52b6b146381f3e95e61"
+        },
+        "dep_type": "dep_group"
+      },
+      "code_cell": {
+        "tx_hash": "0x1488b592b0946589730c906c6d9a46fb82c1181156fc1a4251adce14002a9cfb",
+        "index": "0x0"
+      },
+      "type_script": {
+        "args": "0x55f1932d3084fbca84c04205eea2e9662e60f7777b9ec4865f360d4e6c4a5249",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0xb5d13ffe0547c78021c01fe24dce2e959a1ed8edbca3cb93dd2e9f57fb56d695",
+      "deploy_tx": "0x1488b592b0946589730c906c6d9a46fb82c1181156fc1a4251adce14002a9cfb",
+      "deploy_block": 18252964
+    },
+    {
+      "network": "mainnet",
+      "code_hash": "0xcc5411e8b70e551d7a3dd806256533cff6bc12118b48dd7b2d5d2292c3651add",
+      "hash_type": "type",
+      "constant_source": "type hash of the mainnet V3 code cell 0xd25f2c32…:1",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x03deba7f8206c81981d6f6a2d61b67dde75b4df91cbcfaf2e2fb041ba50c4719"
+        },
+        "dep_type": "dep_group"
+      },
+      "code_cell": {
+        "index": "0x1",
+        "tx_hash": "0xd25f2c32f56c28c630d4f91955f1b3c9cd53e26fa0745d540d934e8e3d3c2853"
+      },
+      "type_script": {
+        "args": "0xf5d1b146e7a8cd668dbfde5d08d788ab6fb1c3487f6b3b16b9c0efbc5421a529",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0xb5d13ffe0547c78021c01fe24dce2e959a1ed8edbca3cb93dd2e9f57fb56d695",
+      "deploy_tx": "0xd25f2c32f56c28c630d4f91955f1b3c9cd53e26fa0745d540d934e8e3d3c2853",
+      "deploy_block": 17071377
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0xaebf5a7b541da9603c2066a9768d3d18fea2e7f3c1943821611545155fecc671",
+      "hash_type": "type",
+      "constant_source": "CKB Explorer registry \"CKBFS V3\" (testnet type id) = type hash of 0x1488b592…:0",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x47cfa8d554cccffe7796f93b58437269de1f98f029d0a52b6b146381f3e95e61"
+        },
+        "dep_type": "dep_group"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x1488b592b0946589730c906c6d9a46fb82c1181156fc1a4251adce14002a9cfb"
+      },
+      "type_script": {
+        "args": "0x55f1932d3084fbca84c04205eea2e9662e60f7777b9ec4865f360d4e6c4a5249",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0xb5d13ffe0547c78021c01fe24dce2e959a1ed8edbca3cb93dd2e9f57fb56d695",
+      "deploy_tx": "0x1488b592b0946589730c906c6d9a46fb82c1181156fc1a4251adce14002a9cfb",
+      "deploy_block": 18252964
+    }
+  ],
+  "checked_at": "2026-11-06"
+}

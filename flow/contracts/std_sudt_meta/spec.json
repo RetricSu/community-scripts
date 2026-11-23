@@ -1,0 +1,705 @@
+{
+  "title": {
+    "zh": "standard-udt sUDT 元数据 Type Script 约束",
+    "en": "standard-udt sUDT Metadata Type Script Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：xcshuan/ckb-standard-udt-contracts @d6e6da0 contracts/sudt-meta/src、lib/script-utils、lib/types　·　仓库未公布部署（SUDT_CODE_HASH 为构建期常量）",
+    "en": "Source: xcshuan/ckb-standard-udt-contracts @d6e6da0 contracts/sudt-meta/src, lib/script-utils, lib/types　·　no deployment published (SUDT_CODE_HASH is a build-time constant)"
+  },
+  "transitions": [
+    {
+      "tag": "0 → Meta",
+      "title": {
+        "zh": "创建元数据（可同时首次铸造）",
+        "en": "Create metadata (optionally with the initial mint)"
+      },
+      "inputs": [
+        {
+          "label": "inputs[0]",
+          "body": {
+            "zh": "任意 cell；决定 type id",
+            "en": "any cell; determines the type id"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "元数据 cell",
+            "en": "metadata cell"
+          },
+          "body": "Cell{\n  lock: ALWAYS_SUCCESS (data2),\n  type: SUDT_META{ args: {{type_id}} },\n  data: SudtMeta{ config_flags, {{current_supply}}, … }\n}"
+        },
+        {
+          "label": {
+            "zh": "sUDT（可选）",
+            "en": "sUDT (optional)"
+          },
+          "body": "Cell{\n  type: SUDT{ args: meta_type_hash } (data2),\n  data: {{amount}}\n}"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "元数据 cell data = SudtMeta（molecule table，9 字段）",
+            "en": "Metadata cell data = SudtMeta (molecule table, 9 fields)"
+          },
+          "layout": [
+            {
+              "name": "header",
+              "size": "4 + 9×4 B",
+              "color": 0,
+              "flex": 1,
+              "role": {
+                "zh": "molecule table 头",
+                "en": "molecule table header"
+              },
+              "cons": {
+                "zh": "结构合法",
+                "en": "well-formed"
+              },
+              "err": "30 / 40"
+            },
+            {
+              "name": "config_flags",
+              "size": "1B",
+              "color": 1,
+              "flex": 1,
+              "role": {
+                "zh": "bit0 = SUPPLY_TRACKED；sUDT 只允许此位",
+                "en": "bit0 = SUPPLY_TRACKED; sUDT allows only this bit"
+              },
+              "cons": {
+                "zh": "⊆ 0x01",
+                "en": "⊆ 0x01"
+              },
+              "err": "30 / 40"
+            },
+            {
+              "name": "current_supply",
+              "size": "16B u128 LE",
+              "color": 2,
+              "flex": 1,
+              "role": {
+                "zh": "跟踪的总供应",
+                "en": "tracked total supply"
+              },
+              "cons": {
+                "zh": "未跟踪时必须为 0",
+                "en": "must be 0 when untracked"
+              },
+              "err": "31"
+            },
+            {
+              "name": "decimals",
+              "size": "1B",
+              "color": 3,
+              "flex": 1,
+              "err": ""
+            },
+            {
+              "name": "name / symbol / uri / extra_data",
+              "size": "Bytes × 4",
+              "color": 4,
+              "flex": 3,
+              "role": {
+                "zh": "上限 1024 / 128 / 2048 / 16384 B",
+                "en": "limits 1024 / 128 / 2048 / 16384 B"
+              },
+              "err": "30 / 40"
+            },
+            {
+              "name": "mint_authority",
+              "size": "AuthorityOpt",
+              "color": 5,
+              "flex": 2,
+              "role": {
+                "zh": "Authority{ type 0 InputLock | 1 InputType | 2 OutputType | 3 DynamicLinking | 4 Spawn, script_hash 32B, script: ScriptOpt }",
+                "en": "Authority{ type 0 InputLock | 1 InputType | 2 OutputType | 3 DynamicLinking | 4 Spawn, script_hash 32B, script: ScriptOpt }"
+              },
+              "cons": {
+                "zh": "0–2 时 script = None；3–4 时 script 的 hash = script_hash",
+                "en": "script = None for 0–2; for 3–4 the script hashes to script_hash"
+              },
+              "err": "30 / 40"
+            },
+            {
+              "name": "metadata_authority",
+              "size": "AuthorityOpt",
+              "color": 6,
+              "flex": 2,
+              "err": "30 / 40"
+            }
+          ],
+          "hex": [
+            [
+              "header",
+              "0x82000000 28000000 29000000 39000000 3a000000 42000000 49000000 4d000000 51000000 82000000"
+            ],
+            [
+              "config_flags",
+              "0x01"
+            ],
+            [
+              "current_supply",
+              "0x0010a5d4e8000000…00 (1 000 000 000 000)"
+            ],
+            [
+              "decimals",
+              "0x08"
+            ],
+            [
+              "name / symbol",
+              "0x0400000054657374 (\"Test\") ‖ 0x03000000545354 (\"TST\")"
+            ],
+            [
+              "uri / extra_data",
+              "0x00000000 ‖ 0x00000000"
+            ],
+            [
+              "mint_authority",
+              "0x31000000 10000000 11000000 31000000 00 ‖ abab…ab ‖ (None)"
+            ],
+            [
+              "metadata_authority",
+              "(None, 0 B)"
+            ]
+          ],
+          "note": {
+            "zh": "示例为按 metadata.mol 手工编码的 130B 值（tracked、InputLock 授权），非链上数据",
+            "en": "Example is a hand-encoded 130B value following metadata.mol (tracked, InputLock authority), not on-chain data"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "= 32B",
+            "en": "= 32B"
+          },
+          "err": "20"
+        },
+        {
+          "field": {
+            "zh": "组",
+            "en": "group"
+          },
+          "cond": {
+            "zh": "输入、输出各 ≤ 1 个；不能都为空",
+            "en": "≤ 1 per side; not both empty"
+          },
+          "err": "21 / 20"
+        },
+        {
+          "field": "output lock",
+          "cond": {
+            "zh": "hash_type = data2 且 code_hash = 0x3b521cc4…f7f1（always-success 白名单）",
+            "en": "hash_type = data2 and code_hash = 0x3b521cc4…f7f1 (always-success whitelist)"
+          },
+          "err": "20"
+        },
+        {
+          "field": "SudtMeta",
+          "cond": {
+            "zh": "Molecule、长度上限、config_flags ⊆ 0x01、Authority 形状",
+            "en": "Molecule, size limits, config_flags ⊆ 0x01, Authority shape"
+          },
+          "err": "30"
+        },
+        {
+          "field": "type id",
+          "cond": {
+            "zh": "args = blake2b(inputs[0] ‖ 输出序号 u64 LE)",
+            "en": "args = blake2b(inputs[0] ‖ output index u64 LE)"
+          },
+          "err": "10"
+        },
+        {
+          "field": "current_supply",
+          "cond": {
+            "zh": "tracked：= 输出中绑定 sUDT 总量；untracked：= 0",
+            "en": "tracked: = total bound sUDT in outputs; untracked: = 0"
+          },
+          "err": "31"
+        },
+        {
+          "field": {
+            "zh": "授权",
+            "en": "authority"
+          },
+          "cond": {
+            "zh": "创建不检查任何 authority",
+            "en": "creation checks no authority"
+          },
+          "err": "—"
+        }
+      ]
+    },
+    {
+      "tag": "Meta → Meta",
+      "title": {
+        "zh": "更新元数据 / 记账铸造与协议销毁",
+        "en": "Update metadata / account mints and protocol burns"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "元数据 cell",
+            "en": "metadata cell"
+          },
+          "body": "Cell{\n  lock: ALWAYS_SUCCESS (data2),\n  type: SUDT_META{ args: type_id },\n  data: SudtMeta{ supply, mint_authority, metadata_authority, … }\n}"
+        },
+        {
+          "label": {
+            "zh": "授权 + sUDT",
+            "en": "authority + sUDT"
+          },
+          "body": {
+            "zh": "满足 Authority 的 cell；被铸造 / 销毁的 sUDT",
+            "en": "cells satisfying the Authority; sUDT being minted / burned"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "元数据 cell",
+            "en": "metadata cell"
+          },
+          "body": "Cell{\n  lock: ALWAYS_SUCCESS (data2),\n  type: SUDT_META{ args: type_id },\n  data: SudtMeta{ {{supply ± Δ}}, {{…changed fields}} }\n}"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "元数据 cell data = SudtMeta（molecule table，9 字段）",
+            "en": "Metadata cell data = SudtMeta (molecule table, 9 fields)"
+          },
+          "layout": [
+            {
+              "name": "header",
+              "size": "4 + 9×4 B",
+              "color": 0,
+              "flex": 1,
+              "role": {
+                "zh": "molecule table 头",
+                "en": "molecule table header"
+              },
+              "cons": {
+                "zh": "结构合法",
+                "en": "well-formed"
+              },
+              "err": "30 / 40"
+            },
+            {
+              "name": "config_flags",
+              "size": "1B",
+              "color": 1,
+              "flex": 1,
+              "role": {
+                "zh": "bit0 = SUPPLY_TRACKED；sUDT 只允许此位",
+                "en": "bit0 = SUPPLY_TRACKED; sUDT allows only this bit"
+              },
+              "cons": {
+                "zh": "⊆ 0x01",
+                "en": "⊆ 0x01"
+              },
+              "err": "30 / 40"
+            },
+            {
+              "name": "current_supply",
+              "size": "16B u128 LE",
+              "color": 2,
+              "flex": 1,
+              "role": {
+                "zh": "跟踪的总供应",
+                "en": "tracked total supply"
+              },
+              "cons": {
+                "zh": "未跟踪时必须为 0",
+                "en": "must be 0 when untracked"
+              },
+              "err": "31"
+            },
+            {
+              "name": "decimals",
+              "size": "1B",
+              "color": 3,
+              "flex": 1,
+              "err": ""
+            },
+            {
+              "name": "name / symbol / uri / extra_data",
+              "size": "Bytes × 4",
+              "color": 4,
+              "flex": 3,
+              "role": {
+                "zh": "上限 1024 / 128 / 2048 / 16384 B",
+                "en": "limits 1024 / 128 / 2048 / 16384 B"
+              },
+              "err": "30 / 40"
+            },
+            {
+              "name": "mint_authority",
+              "size": "AuthorityOpt",
+              "color": 5,
+              "flex": 2,
+              "role": {
+                "zh": "Authority{ type 0 InputLock | 1 InputType | 2 OutputType | 3 DynamicLinking | 4 Spawn, script_hash 32B, script: ScriptOpt }",
+                "en": "Authority{ type 0 InputLock | 1 InputType | 2 OutputType | 3 DynamicLinking | 4 Spawn, script_hash 32B, script: ScriptOpt }"
+              },
+              "cons": {
+                "zh": "0–2 时 script = None；3–4 时 script 的 hash = script_hash",
+                "en": "script = None for 0–2; for 3–4 the script hashes to script_hash"
+              },
+              "err": "30 / 40"
+            },
+            {
+              "name": "metadata_authority",
+              "size": "AuthorityOpt",
+              "color": 6,
+              "flex": 2,
+              "err": "30 / 40"
+            }
+          ],
+          "hex": [
+            [
+              "header",
+              "0x82000000 28000000 29000000 39000000 3a000000 42000000 49000000 4d000000 51000000 82000000"
+            ],
+            [
+              "config_flags",
+              "0x01"
+            ],
+            [
+              "current_supply",
+              "0x0010a5d4e8000000…00 (1 000 000 000 000)"
+            ],
+            [
+              "decimals",
+              "0x08"
+            ],
+            [
+              "name / symbol",
+              "0x0400000054657374 (\"Test\") ‖ 0x03000000545354 (\"TST\")"
+            ],
+            [
+              "uri / extra_data",
+              "0x00000000 ‖ 0x00000000"
+            ],
+            [
+              "mint_authority",
+              "0x31000000 10000000 11000000 31000000 00 ‖ abab…ab ‖ (None)"
+            ],
+            [
+              "metadata_authority",
+              "(None, 0 B)"
+            ]
+          ],
+          "note": {
+            "zh": "示例为按 metadata.mol 手工编码的 130B 值（tracked、InputLock 授权），非链上数据",
+            "en": "Example is a hand-encoded 130B value following metadata.mol (tracked, InputLock authority), not on-chain data"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "output lock",
+          "cond": {
+            "zh": "always-success 白名单",
+            "en": "always-success whitelist"
+          },
+          "err": "20"
+        },
+        {
+          "field": "SudtMeta",
+          "cond": {
+            "zh": "输入输出都可解析",
+            "en": "input and output parse"
+          },
+          "err": "30 / 31"
+        },
+        {
+          "field": "config_flags",
+          "cond": {
+            "zh": "SUPPLY_TRACKED 位不可改",
+            "en": "SUPPLY_TRACKED bit immutable"
+          },
+          "err": "32"
+        },
+        {
+          "field": "current_supply",
+          "cond": {
+            "zh": "untracked：= 0；tracked：= 旧值 + Σ输出 − Σ输入（交易内所有绑定 sUDT）",
+            "en": "untracked: = 0; tracked: = old + Σout − Σin (all bound sUDT in the tx)"
+          },
+          "err": "31"
+        },
+        {
+          "field": {
+            "zh": "授权",
+            "en": "authority"
+          },
+          "cond": {
+            "zh": "metadata_authority 通过；缺失或失败时回退 mint_authority",
+            "en": "metadata_authority passes; falls back to mint_authority when missing or failing"
+          },
+          "err": "50 / 51"
+        },
+        {
+          "field": {
+            "zh": "授权",
+            "en": "authority"
+          },
+          "cond": {
+            "zh": "current_supply 或 mint_authority 变化时还需 mint_authority",
+            "en": "current_supply or mint_authority changed ⇒ mint_authority also required"
+          },
+          "err": "50 / 51"
+        },
+        {
+          "field": {
+            "zh": "空操作",
+            "en": "no-op"
+          },
+          "cond": {
+            "zh": "消费元数据 cell 即使不改字段也需要授权",
+            "en": "spending the metadata cell needs authority even for a no-op"
+          },
+          "err": "50 / 51"
+        }
+      ]
+    },
+    {
+      "tag": "Meta → 0",
+      "title": {
+        "zh": "销毁元数据（回收 CKB）",
+        "en": "Destroy metadata (reclaim CKB)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "元数据 cell",
+            "en": "metadata cell"
+          },
+          "body": "Cell{\n  lock: ALWAYS_SUCCESS (data2),\n  type: SUDT_META{ args: type_id },\n  data: SudtMeta{ {{tracked}}, {{current_supply = 0}} }\n}"
+        },
+        {
+          "label": {
+            "zh": "mint 授权",
+            "en": "mint authority"
+          },
+          "body": {
+            "zh": "满足 mint_authority 的 cell",
+            "en": "cells satisfying mint_authority"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "无元数据输出",
+            "en": "no metadata output"
+          },
+          "body": {
+            "zh": "且没有绑定本元数据的 sUDT 输出",
+            "en": "and no sUDT outputs bound to it"
+          }
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "元数据 cell data = SudtMeta（molecule table，9 字段）",
+            "en": "Metadata cell data = SudtMeta (molecule table, 9 fields)"
+          },
+          "layout": [
+            {
+              "name": "header",
+              "size": "4 + 9×4 B",
+              "color": 0,
+              "flex": 1,
+              "role": {
+                "zh": "molecule table 头",
+                "en": "molecule table header"
+              },
+              "cons": {
+                "zh": "结构合法",
+                "en": "well-formed"
+              },
+              "err": "30 / 40"
+            },
+            {
+              "name": "config_flags",
+              "size": "1B",
+              "color": 1,
+              "flex": 1,
+              "role": {
+                "zh": "bit0 = SUPPLY_TRACKED；sUDT 只允许此位",
+                "en": "bit0 = SUPPLY_TRACKED; sUDT allows only this bit"
+              },
+              "cons": {
+                "zh": "⊆ 0x01",
+                "en": "⊆ 0x01"
+              },
+              "err": "30 / 40"
+            },
+            {
+              "name": "current_supply",
+              "size": "16B u128 LE",
+              "color": 2,
+              "flex": 1,
+              "role": {
+                "zh": "跟踪的总供应",
+                "en": "tracked total supply"
+              },
+              "cons": {
+                "zh": "未跟踪时必须为 0",
+                "en": "must be 0 when untracked"
+              },
+              "err": "31"
+            },
+            {
+              "name": "decimals",
+              "size": "1B",
+              "color": 3,
+              "flex": 1,
+              "err": ""
+            },
+            {
+              "name": "name / symbol / uri / extra_data",
+              "size": "Bytes × 4",
+              "color": 4,
+              "flex": 3,
+              "role": {
+                "zh": "上限 1024 / 128 / 2048 / 16384 B",
+                "en": "limits 1024 / 128 / 2048 / 16384 B"
+              },
+              "err": "30 / 40"
+            },
+            {
+              "name": "mint_authority",
+              "size": "AuthorityOpt",
+              "color": 5,
+              "flex": 2,
+              "role": {
+                "zh": "Authority{ type 0 InputLock | 1 InputType | 2 OutputType | 3 DynamicLinking | 4 Spawn, script_hash 32B, script: ScriptOpt }",
+                "en": "Authority{ type 0 InputLock | 1 InputType | 2 OutputType | 3 DynamicLinking | 4 Spawn, script_hash 32B, script: ScriptOpt }"
+              },
+              "cons": {
+                "zh": "0–2 时 script = None；3–4 时 script 的 hash = script_hash",
+                "en": "script = None for 0–2; for 3–4 the script hashes to script_hash"
+              },
+              "err": "30 / 40"
+            },
+            {
+              "name": "metadata_authority",
+              "size": "AuthorityOpt",
+              "color": 6,
+              "flex": 2,
+              "err": "30 / 40"
+            }
+          ],
+          "hex": [
+            [
+              "header",
+              "0x82000000 28000000 29000000 39000000 3a000000 42000000 49000000 4d000000 51000000 82000000"
+            ],
+            [
+              "config_flags",
+              "0x01"
+            ],
+            [
+              "current_supply",
+              "0x0010a5d4e8000000…00 (1 000 000 000 000)"
+            ],
+            [
+              "decimals",
+              "0x08"
+            ],
+            [
+              "name / symbol",
+              "0x0400000054657374 (\"Test\") ‖ 0x03000000545354 (\"TST\")"
+            ],
+            [
+              "uri / extra_data",
+              "0x00000000 ‖ 0x00000000"
+            ],
+            [
+              "mint_authority",
+              "0x31000000 10000000 11000000 31000000 00 ‖ abab…ab ‖ (None)"
+            ],
+            [
+              "metadata_authority",
+              "(None, 0 B)"
+            ]
+          ],
+          "note": {
+            "zh": "示例为按 metadata.mol 手工编码的 130B 值（tracked、InputLock 授权），非链上数据",
+            "en": "Example is a hand-encoded 130B value following metadata.mol (tracked, InputLock authority), not on-chain data"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "config_flags",
+          "cond": {
+            "zh": "必须 tracked",
+            "en": "must be tracked"
+          },
+          "err": "31"
+        },
+        {
+          "field": "current_supply",
+          "cond": {
+            "zh": "= 0",
+            "en": "= 0"
+          },
+          "err": "31"
+        },
+        {
+          "field": {
+            "zh": "输出",
+            "en": "outputs"
+          },
+          "cond": {
+            "zh": "不得有绑定 sUDT（data2、SUDT_CODE_HASH、args = 本 type hash）",
+            "en": "no bound sUDT (data2, SUDT_CODE_HASH, args = this type hash)"
+          },
+          "err": "31"
+        },
+        {
+          "field": {
+            "zh": "授权",
+            "en": "authority"
+          },
+          "cond": {
+            "zh": "mint_authority 必须存在且通过",
+            "en": "mint_authority must exist and pass"
+          },
+          "err": "50 / 51"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码（contracts/sudt-meta/src/error.rs）：1–9 SysError、10 SysTypeIdError、11 SyscallUnknown、20 InvalidArgs、21 DuplicateMetaCell、30 InvalidMetaData、31 InvalidSupply、32 ImmutableSupplyMode、50 AuthorityMissing、51 AuthorityFailed（UnsupportedAuthorityLocation 也映射到 51）。类型层 InvalidSupply → 31，其他解析错误 → 30。",
+      "en": "Error codes (contracts/sudt-meta/src/error.rs): 1–9 SysError, 10 SysTypeIdError, 11 SyscallUnknown, 20 InvalidArgs, 21 DuplicateMetaCell, 30 InvalidMetaData, 31 InvalidSupply, 32 ImmutableSupplyMode, 50 AuthorityMissing, 51 AuthorityFailed (UnsupportedAuthorityLocation also maps to 51). Types-layer InvalidSupply → 31, other parse errors → 30."
+    },
+    {
+      "zh": "授权方式：InputLock / InputType = 输入中有该 lock / type hash；OutputType = 输出中有该 type hash；DynamicLinking 调用 udt_authorize；Spawn 退出码 0",
+      "en": "Authority: InputLock / InputType = an input has that lock / type hash; OutputType = an output has that type hash; DynamicLinking calls udt_authorize; Spawn must exit 0"
+    },
+    {
+      "zh": "元数据 cell 的 lock 被限定为 always-success（data2 0x3b521cc4…f7f1，debug 构建另允许 ckb-testtool 的 always-success），所有安全性来自本 type script 与 authority。",
+      "en": "The metadata cell lock is restricted to always-success (data2 0x3b521cc4…f7f1; debug builds also allow the ckb-testtool always-success), so all safety comes from this type script and its authorities."
+    },
+    {
+      "zh": "部署：仓库未公布 code_hash，SUDT_CODE_HASH 在构建时注入；本页 match 为空、无测试交易。checksums.txt 只有 release 二进制的 sha256。",
+      "en": "Deployment: no code_hash is published and SUDT_CODE_HASH is injected at build time; match is empty and there is no test tx. checksums.txt only lists sha256 of release binaries."
+    }
+  ]
+}

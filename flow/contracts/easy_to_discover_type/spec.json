@@ -1,0 +1,90 @@
+{
+  "title": {
+    "zh": "易发现 Type 约束",
+    "en": "Easy-to-discover Type Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：ckb-devrel/ckb-proxy-locks / contracts/easy-to-discover-type/src/entry.rs　·　0xaba4…37af (data1，主网与测试网相同)",
+    "en": "Source: ckb-devrel/ckb-proxy-locks / contracts/easy-to-discover-type/src/entry.rs　·　0xaba4…37af (data1, same on mainnet and testnet)"
+  },
+  "transitions": [
+    {
+      "tag": "A",
+      "title": {
+        "zh": "按 data hash 索引的 cell",
+        "en": "A cell indexed by its data hash"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "inputs：不检查",
+            "en": "inputs: not checked"
+          },
+          "body": {
+            "zh": "任意",
+            "en": "any"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "output",
+          "body": "Cell{ type: { codeHash: EASY, args: {{data_hash 32B}} }, data: D }"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "args 字节布局",
+            "en": "args byte layout"
+          },
+          "layout": [
+            {
+              "name": "data_hash",
+              "size": "32B",
+              "role": {
+                "zh": "blake2b(data)",
+                "en": "blake2b(data)"
+              },
+              "cons": {
+                "zh": "每个 group 输出必须相等",
+                "en": "every group output must match"
+              },
+              "err": "6",
+              "color": 1,
+              "flex": 4
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "≥ 32 字节",
+            "en": "≥ 32 bytes"
+          },
+          "err": "5"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "每个 group 输出 blake2b(data) = args[0..32]",
+            "en": "every group output blake2b(data) = args[0..32]"
+          },
+          "err": "6"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码（error.rs）：1 IndexOutOfBound · 2 ItemMissing · 3 LengthNotEnough · 4 Encoding · 5 InsufficientArgsLength · 6 DataHashNotMatch",
+      "en": "Error codes (error.rs): 1 IndexOutOfBound · 2 ItemMissing · 3 LengthNotEnough · 4 Encoding · 5 InsufficientArgsLength · 6 DataHashNotMatch"
+    },
+    {
+      "zh": "不检查任何签名：安全性完全来自 args 指向的其他脚本",
+      "en": "No signature is checked: security comes entirely from the script that args points to"
+    }
+  ]
+}

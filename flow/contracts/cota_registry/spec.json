@@ -1,0 +1,61 @@
+{
+  "title": {
+    "zh": "CoTA Registry（已废弃）（无公开源码）",
+    "en": "CoTA Registry (deprecated) (no public source)"
+  },
+  "subtitle": {
+    "zh": "未找到公开源码，尚未向维护方确认　·　mainnet 0x90ca…9ac7 (type) · testnet 0x9302…8075 (type)",
+    "en": "No public source found, unconfirmed with maintainer　·　mainnet 0x90ca…9ac7 (type) · testnet 0x9302…8075 (type)"
+  },
+  "transitions": [
+    {
+      "tag": "?",
+      "title": {
+        "zh": "仅识别：链上可核实的事实",
+        "en": "Identification only: facts verifiable on chain"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "带该 type 的 cell",
+            "en": "cell carrying this type"
+          },
+          "body": "Cell{\n  type: { codeHash: {{0x90ca…9ac7}},\n          hashType: type,\n          args: … }\n}"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "验证规则",
+            "en": "validation rules"
+          },
+          "body": {
+            "zh": "未知：无公开源码，本页不列任何规则或错误码",
+            "en": "unknown: no public source, this page lists no rules or error codes"
+          }
+        }
+      ],
+      "extras": [
+        {
+          "zh": "CKB Explorer 注册表描述（原文英文）：“A Compact Token Aggregator Standard for Extremely Low Cost NFTs and FTs.” 官网 https://www.cotadev.io；与 CoTA type（已收录为 cota）共用同一 dep_group。",
+          "en": "CKB Explorer registry description: \"A Compact Token Aggregator Standard for Extremely Low Cost NFTs and FTs.\" Website https://www.cotadev.io; shares its dep_group with the CoTA type (already added as cota)."
+        },
+        {
+          "zh": "nervina-labs/cota-smt 只是 SMT 库，不是本 type script 的源码。",
+          "en": "nervina-labs/cota-smt is only the SMT library, not this type script's source."
+        }
+      ],
+      "limits": []
+    }
+  ],
+  "notes": [
+    {
+      "zh": "未找到公开源码，尚未向维护方确认",
+      "en": "No public source found, unconfirmed with maintainer"
+    },
+    {
+      "zh": "部署（code cell / cell_dep / data hash）由 scripts/check-deployments.js 从链上解析，见下方来源卡片",
+      "en": "Deployment (code cell / cell_dep / data hash) resolved from chain by scripts/check-deployments.js; see the provenance card below"
+    }
+  ]
+}

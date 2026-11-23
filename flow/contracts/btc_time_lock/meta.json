@@ -1,0 +1,114 @@
+{
+  "tags": [
+    "btc",
+    "community",
+    "open-source",
+    "p-rgbpp"
+  ],
+  "contributors": [
+    "jjyr"
+  ],
+  "source": {
+    "repo": "https://github.com/utxostack/rgbpp",
+    "commit": "4abd216dbd5d25b8f59e843de39643f9b7513f9d",
+    "paths": [
+      "contracts/btc-time-lock/src/main.rs",
+      "crates/core"
+    ],
+    "commit_note": "default-branch HEAD recorded at backfill 2026-10-21; spec/plugin were written from the default branch shortly before (exact read commit not recorded)",
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0xfac2c0484baf71419420c6abcbd4a54c4f6061eb34fe703e8f254dbeb0439699",
+          "evidence": [],
+          "matches_commit": false
+        },
+        {
+          "data_hash": "0xd3db94edf2a2d040fb4f0fc93f21e721ef181719717384598c536fd1cfc3ad58",
+          "evidence": [],
+          "matches_commit": false
+        }
+      ],
+      "note": "no binary or checksum at the recorded commit matched the deployed data hash (reproducible build not attempted)"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0x70d64497a075bd651e98ac030455ea200637ee325a12ad08aff03f1a117e5a62",
+      "hash_type": "type",
+      "constant_source": "rgbpp-sdk packages/ckb/src/constants",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x3d1c26b966504b09253ad84173bf3baa7b8135c5ff520c32cf70b631c1d08b9b"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x3d1c26b966504b09253ad84173bf3baa7b8135c5ff520c32cf70b631c1d08b9b"
+      },
+      "type_script": {
+        "args": "0x44b8253ae18e913a2845b0d548eaf6b3ba1099ed26835888932a754194028a8a",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0xfac2c0484baf71419420c6abcbd4a54c4f6061eb34fe703e8f254dbeb0439699",
+      "deploy_tx": "0x3d1c26b966504b09253ad84173bf3baa7b8135c5ff520c32cf70b631c1d08b9b",
+      "deploy_block": 17659452
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0x00cdf8fab0f8ac638758ebf5ea5e4052b1d71e8a77b9f43139718621f6849326",
+      "hash_type": "type",
+      "constant_source": "rgbpp-sdk (BTC testnet3)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x8fb747ff0416a43e135c583b028f98c7b81d3770551b196eb7ba1062dd9acc94"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x8fb747ff0416a43e135c583b028f98c7b81d3770551b196eb7ba1062dd9acc94"
+      },
+      "type_script": {
+        "args": "0xc9828585e6dd2afacb9e6e8ca7deb0975121aabee5c7983178a45509ffaec984",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0xd3db94edf2a2d040fb4f0fc93f21e721ef181719717384598c536fd1cfc3ad58",
+      "deploy_tx": "0x8fb747ff0416a43e135c583b028f98c7b81d3770551b196eb7ba1062dd9acc94",
+      "deploy_block": 18311895
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0x80a09eca26d77cea1f5a69471c59481be7404febf40ee90f886c36a948385b55",
+      "hash_type": "type",
+      "constant_source": "rgbpp-sdk (BTC signet)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x5364b3535965e9eac9a35dd7af8e9e45a61d30a16e115923c032f80b28783e21"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x5364b3535965e9eac9a35dd7af8e9e45a61d30a16e115923c032f80b28783e21"
+      },
+      "type_script": {
+        "args": "0x32fc8c70a6451a1439fd91e214bba093f9cdd9276bc4ab223430dab5940aff92",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0xd3db94edf2a2d040fb4f0fc93f21e721ef181719717384598c536fd1cfc3ad58",
+      "deploy_tx": "0x5364b3535965e9eac9a35dd7af8e9e45a61d30a16e115923c032f80b28783e21",
+      "deploy_block": 13560123
+    }
+  ],
+  "checked_at": "2026-10-20"
+}

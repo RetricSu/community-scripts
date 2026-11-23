@@ -1,0 +1,4 @@
+[{"tx":"0xe2fced3a5d73059465f0b9400acdf0cba3fc27e441b82d1faebcbe44b1b20a8b","net":"testnet","name":"Session spend of exactly max_per_tx (100 CKB), session key only","expect":["session_lock"]},
+ {"tx":"0xe53e4ada7f76d847b7e1883115c9b31851d8962e195cc2eb1fdaeb53e6b07653","net":"testnet","name":"Rate-limited cell spent with since = 3 relative blocks","expect":["session_lock"]},
+ {"tx":"0xa8d1d98f8fd5b22cab9fd989b58a39995171e7099b1df5df46292c6ca8f94a88","net":"testnet","name":"Token session, recipient-scoped: 3 units to the creator","expect":["session_lock"]},
+ {"tx":"0x8019404b3708050660b921201ec534cc7f20ef68fa1e836012d33f531066bae5","net":"testnet","name":"Owner sweep ignoring the scope","expect":["session_lock"]}]

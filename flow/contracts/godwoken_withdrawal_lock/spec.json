@@ -1,0 +1,335 @@
+{
+  "title": {
+    "zh": "Godwoken 提款（withdrawal-lock）约束",
+    "en": "Godwoken withdrawal (withdrawal-lock) Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：godwokenrises/godwoken @c2b1f85 / gwos/contracts/withdrawal-lock/src/entry.rs + gw-utils/src/withdrawal.rs　·　部署：godwoken-info @8ce6390 mainnet_v1 / testnet_v1_1",
+    "en": "Source: godwokenrises/godwoken @c2b1f85 / gwos/contracts/withdrawal-lock/src/entry.rs + gw-utils/src/withdrawal.rs　·　deployments: godwoken-info @8ce6390 mainnet_v1 / testnet_v1_1"
+  },
+  "transitions": [
+    {
+      "tag": "1 → 1",
+      "title": {
+        "zh": "终结后领取 UnlockWithdrawalViaFinalize",
+        "en": "Claim after finality (UnlockWithdrawalViaFinalize)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "input[i] withdrawal cell",
+            "en": "input[i] withdrawal cell"
+          },
+          "body": "Cell{\n  since: {{timestamp timepoint: absolute timestamp ≥ finalized ts}},\n  capacity: W,\n  lock: WITHDRAWAL_LOCK(rollup_type_hash ‖ args ‖ owner_lock),\n  type: null | sUDT,\n  data: …\n}"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "output[i]（同序号）",
+            "en": "output[i] (same index)"
+          },
+          "body": "Cell{\n  capacity: {{= W}},\n  lock: {{owner_lock}},\n  type: {{same as input}},\n  data: {{same as input}}\n}\n// if any withdrawal input lacks such an output, an input under owner_lock_hash is required instead (8)"
+        }
+      ],
+      "sections": [
+        {
+          "title": {
+            "zh": "cell_deps",
+            "en": "cell_deps"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "cell_dep：WITHDRAWAL_LOCK 代码",
+                "en": "cell_dep: WITHDRAWAL_LOCK code"
+              },
+              "body": "code cell (see deployments)\n// needed by CKB to run the script"
+            },
+            {
+              "label": {
+                "zh": "cell_dep：rollup cell + RollupConfig（区块号 timepoint 时）",
+                "en": "cell_dep: rollup cell + RollupConfig (block-number timepoint)"
+              },
+              "body": "rollup cell (type hash = rollup_type_hash; may be an input instead) → GlobalState\nRollupConfig by data hash → is_finalized()"
+            }
+          ]
+        },
+        {
+          "title": {
+            "zh": "witnesses（WitnessArgs）",
+            "en": "witnesses (WitnessArgs)"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "witnesses[组首输入]",
+                "en": "witnesses[first group input]"
+              },
+              "body": "{ lock: {{UnlockWithdrawalWitness::UnlockWithdrawalViaFinalize{}}}  // 0x00000000 + empty table }"
+            }
+          ]
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "args = rollup_type_hash ‖ WithdrawalLockArgs（104B struct）‖ owner_lock_len（u32 BE）‖ owner_lock（Script）",
+            "en": "args = rollup_type_hash ‖ WithdrawalLockArgs (104B struct) ‖ owner_lock_len (u32 BE) ‖ owner_lock (Script)"
+          },
+          "layout": [
+            {
+              "name": "rollup_type_hash",
+              "size": "32B",
+              "role": {
+                "zh": "rollup cell type hash",
+                "en": "rollup cell type hash"
+              },
+              "color": 1,
+              "flex": 2,
+              "err": "5"
+            },
+            {
+              "name": "withdrawal_block_hash",
+              "size": "32B",
+              "role": {
+                "zh": "包含该提款的 L2 区块",
+                "en": "L2 block containing the withdrawal"
+              },
+              "color": 2,
+              "flex": 2,
+              "err": "29"
+            },
+            {
+              "name": "withdrawal_finalized_timepoint",
+              "size": "8B",
+              "role": {
+                "zh": "终结 Timepoint",
+                "en": "finalized Timepoint"
+              },
+              "color": 3,
+              "flex": 1,
+              "err": "45"
+            },
+            {
+              "name": "account_script_hash",
+              "size": "32B",
+              "role": {
+                "zh": "L2 账户脚本 hash",
+                "en": "L2 account script hash"
+              },
+              "color": 4,
+              "flex": 2
+            },
+            {
+              "name": "owner_lock_hash",
+              "size": "32B",
+              "role": {
+                "zh": "L1 收款 lock hash",
+                "en": "L1 recipient lock hash"
+              },
+              "color": 5,
+              "flex": 2,
+              "cons": "= hash(owner_lock)",
+              "err": "5"
+            },
+            {
+              "name": "owner_lock_len",
+              "size": "4B BE",
+              "role": {
+                "zh": "owner_lock 字节数（大端！）",
+                "en": "owner_lock byte length (big-endian!)"
+              },
+              "color": 6,
+              "flex": 1,
+              "cons": {
+                "zh": "= 剩余长度",
+                "en": "= remaining length"
+              },
+              "err": "5"
+            },
+            {
+              "name": "owner_lock",
+              "size": "Script",
+              "role": {
+                "zh": "L1 收款 lock 脚本",
+                "en": "L1 recipient lock script"
+              },
+              "color": 1,
+              "flex": 2,
+              "err": "5"
+            }
+          ],
+          "hex": [
+            [
+              "owner_lock_len",
+              "0x{{00000049}}  ← 73 bytes (secp256k1 script, BE)"
+            ]
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "长度 ≥ 32+104+4，owner_lock 长度吻合，hash = owner_lock_hash",
+            "en": "length ≥ 32+104+4; owner_lock length matches; hash = owner_lock_hash"
+          },
+          "err": "5"
+        },
+        {
+          "field": "witness.lock",
+          "cond": {
+            "zh": "合法 UnlockWithdrawalWitness",
+            "en": "valid UnlockWithdrawalWitness"
+          },
+          "err": "11"
+        },
+        {
+          "field": {
+            "zh": "区块号",
+            "en": "block number"
+          },
+          "cond": {
+            "zh": "rollup cell（deps 或 inputs）存在且已终结",
+            "en": "rollup cell (deps or inputs) exists and finalized"
+          },
+          "err": "9 / 10 / 45"
+        },
+        {
+          "field": {
+            "zh": "时间戳",
+            "en": "timestamp"
+          },
+          "cond": {
+            "zh": "since 为绝对时间戳且 ≥ timepoint",
+            "en": "since is an absolute timestamp ≥ timepoint"
+          },
+          "err": "6 / 45"
+        },
+        {
+          "field": {
+            "zh": "输出",
+            "en": "outputs"
+          },
+          "cond": {
+            "zh": "每个同 lock 输入 i：output[i] capacity / data / type 相同且 lock = owner_lock；否则需 owner 输入",
+            "en": "each same-lock input i: output[i] same capacity / data / type and lock = owner_lock; else an owner input"
+          },
+          "err": "8"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 1",
+      "title": {
+        "zh": "区块回滚 UnlockWithdrawalViaRevert",
+        "en": "Block reverted (UnlockWithdrawalViaRevert)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "input[0] rollup cell",
+            "en": "input[0] rollup cell"
+          },
+          "body": "Cell{\n  capacity: R,\n  lock: rollup lock (mainnet: omni_lock deployment),\n  type: { codeHash: STATE_VALIDATOR, hashType: type, args: type_id 32B },\n  data: GlobalState (190B)\n}"
+        },
+        {
+          "label": {
+            "zh": "input[1] withdrawal cell",
+            "en": "input[1] withdrawal cell"
+          },
+          "body": "Cell{\n  capacity: W,\n  lock: WITHDRAWAL_LOCK(…),\n  type: …,\n  data: …\n}"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "output[0] rollup cell′",
+            "en": "output[0] rollup cell′"
+          },
+          "body": "Cell{\n  capacity: R,\n  lock: rollup lock (mainnet: omni_lock deployment),\n  type: { codeHash: STATE_VALIDATOR, hashType: type, args: type_id 32B },\n  data: GlobalState …\n}\n// witness RollupSubmitBlock: {{reverted_block_hashes ∋ withdrawal_block_hash}}"
+        },
+        {
+          "label": {
+            "zh": "output[k] custodian cell",
+            "en": "output[k] custodian cell"
+          },
+          "body": "Cell{\n  capacity: {{= W}},\n  lock: { codeHash: {{config.custodian_script_type_hash}}, hashType: type,\n          args: rollup_type_hash ‖ {{deposit_block_hash = 0, timepoint = 0}} ‖ … },\n  type: {{same}},\n  data: {{same}}\n}"
+        }
+      ],
+      "sections": [
+        {
+          "title": {
+            "zh": "cell_deps",
+            "en": "cell_deps"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "cell_dep：RollupConfig cell",
+                "en": "cell_dep: RollupConfig cell"
+              },
+              "body": "Cell{ data: RollupConfig (molecule) }\n// load_rollup_config(): found by {{data hash == GlobalState.rollup_config_hash}} → else 10"
+            }
+          ]
+        },
+        {
+          "title": {
+            "zh": "witnesses（WitnessArgs）",
+            "en": "witnesses (WitnessArgs)"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "witnesses[组首输入]",
+                "en": "witnesses[first group input]"
+              },
+              "body": "{ lock: {{UnlockWithdrawalViaRevert{ custodian_lock_hash 32B }}}  // item id 1 }"
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "rollup",
+          "cond": {
+            "zh": "输出有 rollup cell 且动作为 SubmitBlock，回滚列表含 withdrawal_block_hash",
+            "en": "a rollup output whose action is SubmitBlock and whose reverted list contains withdrawal_block_hash"
+          },
+          "err": "9 / 29"
+        },
+        {
+          "field": "custodian",
+          "cond": {
+            "zh": "有 lock hash = custodian_lock_hash 的输出；args[0..32] = rollup_type_hash",
+            "en": "an output with lock hash = custodian_lock_hash; args[0..32] = rollup_type_hash"
+          },
+          "err": "7 / 5"
+        },
+        {
+          "field": "custodian",
+          "cond": {
+            "zh": "code_hash = config.custodian_script_type_hash，type，block hash 与 timepoint 为 0，内容相同",
+            "en": "code_hash = config.custodian_script_type_hash, type, zero block hash and timepoint, same content"
+          },
+          "err": "7"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "⚠ 状态：官方已宣布 Godwoken 退役（2025-06-01 起，Nervos Talk “Sunset of Force Bridge and Godwoken”）；冻结期限延至 2026-01-01 23:59:59 UTC，之后网络冻结、桥前端下线，v0/v1 RPC 节点已关闭。本页仅作历史 / 审计参考。",
+      "en": "⚠ Status: Godwoken was officially sunset (from 2025-06-01, Nervos Talk “Sunset of Force Bridge and Godwoken”); the freeze deadline was extended to 2026-01-01 23:59:59 UTC, after which the network froze, the bridge UI went offline and v0/v1 RPC nodes were shut down. This page is for historical / audit reference."
+    },
+    {
+      "zh": "错误码（gw-utils/src/error.rs）：1 IndexOutOfBound，2 ItemMissing，3 LengthNotEnough，4 Encoding，5 InvalidArgs，6 InvalidSince，7 InvalidOutput，8 OwnerCellNotFound，9 RollupCellNotFound，10 RollupConfigNotFound，11 ProofNotFound，13 MerkleProof，14 AmountOverflow，15 InsufficientAmount，16/17 Insufficient{Input,Output}FinalizedAssets，18 SMTKeyMissing，19 InvalidStateCheckpoint，20 InvalidBlock，21 InvalidStatus，22 InvalidStakeCellUnlock，23 InvalidPostGlobalState，24 InvalidChallengeCell，25 InvalidStakeCell，26 InvalidDepositCell，27 InvalidWithdrawalCell，28 InvalidCustodianCell，29 InvalidRevertedBlocks，30 InvalidChallengeReward，32 InvalidChallengeTarget，33 InvalidWithdrawalRequest，34 UnknownEOAScript，39 InvalidTypeID，41 WrongSignature，43 RegistryAddressNotFound，45 NotFinalized。",
+      "en": "Error codes (gw-utils/src/error.rs): 1 IndexOutOfBound, 2 ItemMissing, 3 LengthNotEnough, 4 Encoding, 5 InvalidArgs, 6 InvalidSince, 7 InvalidOutput, 8 OwnerCellNotFound, 9 RollupCellNotFound, 10 RollupConfigNotFound, 11 ProofNotFound, 13 MerkleProof, 14 AmountOverflow, 15 InsufficientAmount, 16/17 Insufficient{Input,Output}FinalizedAssets, 18 SMTKeyMissing, 19 InvalidStateCheckpoint, 20 InvalidBlock, 21 InvalidStatus, 22 InvalidStakeCellUnlock, 23 InvalidPostGlobalState, 24 InvalidChallengeCell, 25 InvalidStakeCell, 26 InvalidDepositCell, 27 InvalidWithdrawalCell, 28 InvalidCustodianCell, 29 InvalidRevertedBlocks, 30 InvalidChallengeReward, 32 InvalidChallengeTarget, 33 InvalidWithdrawalRequest, 34 UnknownEOAScript, 39 InvalidTypeID, 41 WrongSignature, 43 RegistryAddressNotFound, 45 NotFinalized."
+    },
+    {
+      "zh": "Timepoint（u64）：最高位 0 = L2 区块号，1 = 毫秒时间戳（低 63 位）。",
+      "en": "Timepoint (u64): top bit 0 = L2 block number, 1 = millisecond timestamp (low 63 bits)."
+    }
+  ]
+}

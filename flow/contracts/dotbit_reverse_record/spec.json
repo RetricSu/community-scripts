@@ -1,0 +1,135 @@
+{
+  "title": {
+    "zh": ".bit ReverseRecordCell Type 约束",
+    "en": ".bit ReverseRecordCell Type Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：dotbitHQ/did-contracts @0cc9fbf contracts/reverse-record-cell-type（“sync the source code from latest deployed contracts”）",
+    "en": "Source: dotbitHQ/did-contracts @0cc9fbf contracts/reverse-record-cell-type (\"sync the source code from latest deployed contracts\")"
+  },
+  "transitions": [
+    {
+      "tag": "n → 0",
+      "title": {
+        "zh": "retract_reverse_record：收回反向解析记录",
+        "en": "retract_reverse_record: retract reverse records"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "输入 #0..#n-1：ReverseRecordCell（全部输入）",
+            "en": "inputs #0..#n-1: ReverseRecordCells (all inputs)"
+          },
+          "body": "Cell{\n  lock: {{L (same for all)}},\n  type: {{REVERSE_RECORD}}\n}"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "BalanceCell（退款）",
+            "en": "BalanceCell (refund)"
+          },
+          "body": "Cell{\n  lock: {{L}},\n  type: {{BALANCE_CELL}} | none,\n  capacity: {{≥ Σ inputs − common_fee}}\n}"
+        }
+      ],
+      "extras": [
+        {
+          "zh": "Witness：\"das\" ‖ 00000000 ‖ ActionData{ action: \"retract_reverse_record\", params }",
+          "en": "Witness: \"das\" ‖ 00000000 ‖ ActionData{ action: \"retract_reverse_record\", params }"
+        }
+      ],
+      "limits": [
+        {
+          "field": "witness",
+          "cond": {
+            "zh": "das ActionData witness 可解析",
+            "en": "das ActionData witness decodes"
+          },
+          "err": "46"
+        },
+        {
+          "field": {
+            "zh": "系统开关",
+            "en": "system switch"
+          },
+          "cond": {
+            "zh": "ConfigCellMain.status ≠ off（配置，未检查）",
+            "en": "ConfigCellMain.status ≠ off (config, not checked)"
+          },
+          "err": "-1"
+        },
+        {
+          "field": "action",
+          "cond": {
+            "zh": "只支持 retract_reverse_record",
+            "en": "only retract_reverse_record is supported"
+          },
+          "err": "27"
+        },
+        {
+          "field": {
+            "zh": "数量",
+            "en": "count"
+          },
+          "cond": {
+            "zh": "输入 > 0，输出 = 0",
+            "en": "inputs > 0, outputs = 0"
+          },
+          "err": "6"
+        },
+        {
+          "field": {
+            "zh": "位置",
+            "en": "position"
+          },
+          "cond": {
+            "zh": "从输入 #0 起连续，之后没有其他输入",
+            "en": "contiguous from input #0, nothing after"
+          },
+          "err": "6"
+        },
+        {
+          "field": "lock",
+          "cond": {
+            "zh": "所有输入的 lock 相同",
+            "en": "all inputs share one lock"
+          },
+          "err": "6"
+        },
+        {
+          "field": {
+            "zh": "退款",
+            "en": "refund"
+          },
+          "cond": {
+            "zh": "lock = L 的 BalanceCell 输出容量 ≥ Σ 输入 − common_fee（配置，未检查）",
+            "en": "BalanceCell outputs with lock L hold ≥ Σ inputs − common_fee (config, not checked)"
+          },
+          "err": "34"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "部署：code hash 是 Type ID 脚本哈希；type-id args 来自 dotbitHQ/das-lib core/env.go（主网 0x000f3e1a…，测试网 Testnet2 0x334d7841…），主网与测试网都已在链上看到活的 code cell 和交易。",
+      "en": "Deployment: the code hash is the Type ID script hash; type-id args come from dotbitHQ/das-lib core/env.go (mainnet 0x000f3e1a…, testnet Testnet2 0x334d7841…); live code cells and txs seen on both networks."
+    },
+    {
+      "zh": "Type ID 合约可升级：主网 code cell 已多次替换。所读源码是 0cc9fbf（官方注明从最新部署合约同步），未做可复现构建。",
+      "en": "Type ID contracts are upgradable: the mainnet code cell has been replaced several times. The source read is 0cc9fbf (officially described as synced from the latest deployed contracts); no reproducible build."
+    },
+    {
+      "zh": "早期部署的二进制还支持 declare_reverse_record / redeclare_reverse_record（链上有这类交易）；当前源码对它们返回 27，解码器对这类交易显示为未检查。",
+      "en": "Earlier deployed binaries also supported declare_reverse_record / redeclare_reverse_record (such txs exist on chain); the current source returns 27 for them, and the decoder shows those txs as not checked."
+    },
+    {
+      "zh": "系统开关、BalanceCell type id 和 common_fee 都来自 cell_deps 里的 ConfigCell，解码器不加载 cell_deps 数据，所以这些项未检查。",
+      "en": "The system switch, BalanceCell type id and common_fee come from ConfigCells in cell_deps; the decoder does not load cell_dep data, so these are not checked."
+    },
+    {
+      "zh": "错误码（das-core error.rs）：-1 SystemOff · 6 InvalidTransactionStructure · 27 ActionNotSupported · 34 ChangeError · 46 WitnessDataDecodingError",
+      "en": "Error codes (das-core error.rs): -1 SystemOff · 6 InvalidTransactionStructure · 27 ActionNotSupported · 34 ChangeError · 46 WitnessDataDecodingError"
+    }
+  ]
+}

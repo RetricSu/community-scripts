@@ -1,0 +1,615 @@
+{
+  "title": {
+    "zh": "Fiber Commitment Lock 约束",
+    "en": "Fiber Commitment Lock Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：nervosnetwork/fiber-scripts / contracts/commitment-lock/src/main.rs（HEAD e7e1c9ba）　·　协议：Daric　·　部署：nervosnetwork/fiber config/*/config.yml　·　mainnet 0x2d45…406c / testnet 0x740d…81d8 (type)",
+    "en": "Source: nervosnetwork/fiber-scripts / contracts/commitment-lock/src/main.rs (HEAD e7e1c9ba)　·　protocol: Daric　·　deployments: nervosnetwork/fiber config/*/config.yml　·　mainnet 0x2d45…406c / testnet 0x740d…81d8 (type)"
+  },
+  "transitions": [
+    {
+      "tag": "A",
+      "title": {
+        "zh": "撤销（unlock_count = 0）：用更新的版本惩罚旧承诺",
+        "en": "Revocation (unlock_count = 0): punish an old commitment with a newer version"
+      },
+      "inputs": [
+        {
+          "label": "commitment cell",
+          "body": "Cell{ lock: COMMITMENT_LOCK(args{version v}) }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "outputs[0]",
+          "body": {
+            "zh": "签名覆盖的新 cell（通常回到新承诺）",
+            "en": "new cell covered by the signature (usually back to the newer commitment)"
+          }
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "args 字节布局（57 或 58 字节）",
+            "en": "args byte layout (57 or 58 bytes)"
+          },
+          "layout": [
+            {
+              "name": "pubkey_hash",
+              "size": "20B",
+              "role": {
+                "zh": "blake160(聚合公钥)，撤销路径用",
+                "en": "blake160(aggregated pubkey), for revocation"
+              },
+              "cons": {
+                "zh": "—",
+                "en": "—"
+              },
+              "err": "23",
+              "color": 1,
+              "flex": 3
+            },
+            {
+              "name": "delay_epoch",
+              "size": "8B",
+              "role": {
+                "zh": "相对 epoch since（u64 LE）",
+                "en": "relative epoch since (u64 LE)"
+              },
+              "cons": {
+                "zh": "首次结算时延",
+                "en": "delay for first settlement"
+              },
+              "err": "6",
+              "color": 2,
+              "flex": 2
+            },
+            {
+              "name": "version",
+              "size": "8B",
+              "role": {
+                "zh": "承诺版本（u64 大端）",
+                "en": "commitment version (u64 big-endian)"
+              },
+              "cons": {
+                "zh": "撤销需 ≥",
+                "en": "revocation needs ≥"
+              },
+              "err": "17",
+              "color": 3,
+              "flex": 2
+            },
+            {
+              "name": "settlement_hash",
+              "size": "20B",
+              "role": {
+                "zh": "blake160(settlement 脚本)",
+                "en": "blake160(settlement script)"
+              },
+              "cons": {
+                "zh": "= witness 哈希",
+                "en": "= witness hash"
+              },
+              "err": "15",
+              "color": 4,
+              "flex": 3
+            },
+            {
+              "name": "settlement_flag",
+              "size": "1B",
+              "role": {
+                "zh": "0x00 首次 / 0x01 后续",
+                "en": "0x00 first / 0x01 subsequent"
+              },
+              "cons": {
+                "zh": "决定是否检查 since",
+                "en": "decides the since check"
+              },
+              "err": "6",
+              "color": 6,
+              "flex": 1
+            },
+            {
+              "name": "feature?",
+              "size": "1B",
+              "role": {
+                "zh": "0x01 = 完整 32 字节 payment hash（v1）",
+                "en": "0x01 = full 32-byte payment hash (v1)"
+              },
+              "cons": {
+                "zh": "可选；长度 57 或 58",
+                "en": "optional; length 57 or 58"
+              },
+              "err": "12",
+              "color": 7,
+              "flex": 1
+            }
+          ]
+        },
+        {
+          "label": {
+            "zh": "witness（撤销）",
+            "en": "witness (revocation)"
+          },
+          "layout": [
+            {
+              "name": "empty_witness_args",
+              "size": "16B",
+              "role": {
+                "zh": "空 WitnessArgs 占位，兼容 xUDT",
+                "en": "empty WitnessArgs placeholder for xUDT compatibility"
+              },
+              "cons": {
+                "zh": "= 0x10000000…10000000",
+                "en": "= 0x10000000…10000000"
+              },
+              "err": "14",
+              "color": 5,
+              "flex": 2
+            },
+            {
+              "name": "unlock_count",
+              "size": "1B",
+              "role": {
+                "zh": "0x00 = 撤销",
+                "en": "0x00 = revocation"
+              },
+              "cons": {
+                "zh": "—",
+                "en": "—"
+              },
+              "err": "",
+              "color": 6,
+              "flex": 1
+            },
+            {
+              "name": "version",
+              "size": "8B",
+              "role": {
+                "zh": "新版本（大端）",
+                "en": "new version (big-endian)"
+              },
+              "cons": {
+                "zh": "≥ args.version",
+                "en": "≥ args.version"
+              },
+              "err": "17",
+              "color": 3,
+              "flex": 2
+            },
+            {
+              "name": "pubkey",
+              "size": "32B",
+              "role": {
+                "zh": "x-only 聚合公钥",
+                "en": "x-only aggregated pubkey"
+              },
+              "cons": {
+                "zh": "—",
+                "en": "—"
+              },
+              "err": "23",
+              "color": 2,
+              "flex": 3
+            },
+            {
+              "name": "signature",
+              "size": "64B",
+              "role": {
+                "zh": "Schnorr 聚合签名",
+                "en": "aggregated Schnorr signature"
+              },
+              "cons": {
+                "zh": "见下",
+                "en": "see below"
+              },
+              "err": "23",
+              "color": 4,
+              "flex": 4
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "version",
+          "cond": {
+            "zh": "witness.version ≥ args.version（8 字节大端比较）",
+            "en": "witness.version ≥ args.version (8-byte big-endian comparison)"
+          },
+          "err": "17"
+        },
+        {
+          "field": "signature",
+          "cond": {
+            "zh": "Schnorr（算法 7）覆盖 blake2b(outputs[0] ‖ data_len u32 LE ‖ data ‖ args[0..28] ‖ new_version)（未检查）",
+            "en": "Schnorr (algorithm 7) over blake2b(outputs[0] ‖ data_len u32 LE ‖ data ‖ args[0..28] ‖ new_version) (not checked)"
+          },
+          "err": "23"
+        }
+      ]
+    },
+    {
+      "tag": "B",
+      "title": {
+        "zh": "结算（unlock_count ≥ 1）：pending HTLC 与双方余额",
+        "en": "Settlement (unlock_count ≥ 1): pending HTLCs and party balances"
+      },
+      "inputs": [
+        {
+          "label": "commitment cell",
+          "body": "Cell{ lock: COMMITMENT_LOCK(args), type: UDT?, capacity / UDT amount = A }"
+        },
+        {
+          "label": "witness",
+          "body": "16B ‖ unlock_count ‖ settlement_script ‖ unlocks[]"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "outputs[0]（余额 > 0 且双方未全部结算时）",
+            "en": "outputs[0] (when balance > 0 and not all parties settled)"
+          },
+          "body": "Cell{ lock: COMMITMENT_LOCK(args[0..36] ‖ blake160(new_settlement_script) ‖ 0x01 ‖ feature?),\n      type: same UDT?, amount = A − settled }"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "settlement_script 布局",
+            "en": "settlement_script layout"
+          },
+          "layout": [
+            {
+              "name": "pending_htlc_count",
+              "size": "1B",
+              "role": {
+                "zh": "N",
+                "en": "N"
+              },
+              "cons": {
+                "zh": "—",
+                "en": "—"
+              },
+              "err": "",
+              "color": 6,
+              "flex": 1
+            },
+            {
+              "name": "pending_htlc × N",
+              "size": "N × 85B / 97B",
+              "role": {
+                "zh": "见下",
+                "en": "see below"
+              },
+              "cons": {
+                "zh": "—",
+                "en": "—"
+              },
+              "err": "",
+              "color": 1,
+              "flex": 4
+            },
+            {
+              "name": "remote_pubkey_hash",
+              "size": "20B",
+              "role": {
+                "zh": "对方结算公钥哈希",
+                "en": "remote settlement pubkey hash"
+              },
+              "cons": {
+                "zh": "0xFE 签名者",
+                "en": "0xFE signer"
+              },
+              "err": "",
+              "color": 4,
+              "flex": 2
+            },
+            {
+              "name": "remote_amount",
+              "size": "16B",
+              "role": {
+                "zh": "u128 LE",
+                "en": "u128 LE"
+              },
+              "cons": {
+                "zh": "—",
+                "en": "—"
+              },
+              "err": "",
+              "color": 2,
+              "flex": 2
+            },
+            {
+              "name": "local_pubkey_hash",
+              "size": "20B",
+              "role": {
+                "zh": "本方结算公钥哈希",
+                "en": "local settlement pubkey hash"
+              },
+              "cons": {
+                "zh": "0xFF 签名者",
+                "en": "0xFF signer"
+              },
+              "err": "",
+              "color": 5,
+              "flex": 2
+            },
+            {
+              "name": "local_amount",
+              "size": "16B",
+              "role": {
+                "zh": "u128 LE",
+                "en": "u128 LE"
+              },
+              "cons": {
+                "zh": "—",
+                "en": "—"
+              },
+              "err": "",
+              "color": 3,
+              "flex": 2
+            }
+          ]
+        },
+        {
+          "label": {
+            "zh": "pending_htlc 布局（旧版 85 字节；v1 97 字节）",
+            "en": "pending_htlc layout (85 bytes legacy; 97 bytes v1)"
+          },
+          "layout": [
+            {
+              "name": "htlc_type",
+              "size": "1B",
+              "role": {
+                "zh": "bit0：0 offered / 1 received；bit1：0 blake2b / 1 sha256",
+                "en": "bit0: 0 offered / 1 received; bit1: 0 blake2b / 1 sha256"
+              },
+              "cons": {
+                "zh": "—",
+                "en": "—"
+              },
+              "err": "",
+              "color": 1,
+              "flex": 1
+            },
+            {
+              "name": "payment_amount",
+              "size": "16B",
+              "role": {
+                "zh": "u128 LE",
+                "en": "u128 LE"
+              },
+              "cons": {
+                "zh": "从余额扣除",
+                "en": "deducted from the balance"
+              },
+              "err": "",
+              "color": 2,
+              "flex": 2
+            },
+            {
+              "name": "payment_hash",
+              "size": "20B / 32B",
+              "role": {
+                "zh": "旧版 20 字节；v1 32 字节",
+                "en": "20 bytes legacy; 32 bytes v1"
+              },
+              "cons": {
+                "zh": "原像哈希前缀相等",
+                "en": "prefix of the preimage hash"
+              },
+              "err": "22",
+              "color": 3,
+              "flex": 2
+            },
+            {
+              "name": "remote_htlc_pubkey_hash",
+              "size": "20B",
+              "role": {
+                "zh": "blake160(对方 HTLC 公钥)",
+                "en": "blake160(remote HTLC pubkey)"
+              },
+              "cons": {
+                "zh": "签名者",
+                "en": "signer"
+              },
+              "err": "",
+              "color": 4,
+              "flex": 2
+            },
+            {
+              "name": "local_htlc_pubkey_hash",
+              "size": "20B",
+              "role": {
+                "zh": "blake160(本方 HTLC 公钥)",
+                "en": "blake160(local HTLC pubkey)"
+              },
+              "cons": {
+                "zh": "签名者",
+                "en": "signer"
+              },
+              "err": "",
+              "color": 5,
+              "flex": 2
+            },
+            {
+              "name": "htlc_expiry",
+              "size": "8B",
+              "role": {
+                "zh": "绝对时间戳 since",
+                "en": "absolute timestamp since"
+              },
+              "cons": {
+                "zh": "超时路径要求 since ≥",
+                "en": "timeout path needs since ≥"
+              },
+              "err": "11",
+              "color": 6,
+              "flex": 2
+            }
+          ]
+        },
+        {
+          "label": {
+            "zh": "unlock 条目布局（按 HTLC 序号升序排列）",
+            "en": "unlock entry layout (ascending HTLC index)"
+          },
+          "layout": [
+            {
+              "name": "unlock_type",
+              "size": "1B",
+              "role": {
+                "zh": "0x00–0xFD HTLC 序号；0xFE 对方；0xFF 本方",
+                "en": "0x00–0xFD HTLC index; 0xFE remote; 0xFF local"
+              },
+              "cons": {
+                "zh": "< N 或 0xFE/0xFF",
+                "en": "< N or 0xFE/0xFF"
+              },
+              "err": "7",
+              "color": 1,
+              "flex": 2
+            },
+            {
+              "name": "with_preimage",
+              "size": "1B",
+              "role": {
+                "zh": "0 / 1",
+                "en": "0 / 1"
+              },
+              "cons": {
+                "zh": "其它值报错",
+                "en": "other values fail"
+              },
+              "err": "8",
+              "color": 2,
+              "flex": 1
+            },
+            {
+              "name": "signature",
+              "size": "65B",
+              "role": {
+                "zh": "secp256k1 可恢复签名",
+                "en": "recoverable secp256k1 signature"
+              },
+              "cons": {
+                "zh": "ckb-auth 算法 0",
+                "en": "ckb-auth algorithm 0"
+              },
+              "err": "23",
+              "color": 3,
+              "flex": 3
+            },
+            {
+              "name": "preimage?",
+              "size": "32B",
+              "role": {
+                "zh": "HTLC 原像",
+                "en": "HTLC preimage"
+              },
+              "cons": {
+                "zh": "哈希 = payment_hash",
+                "en": "hash = payment_hash"
+              },
+              "err": "22",
+              "color": 4,
+              "flex": 2
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "inputs",
+          "cond": {
+            "zh": "group 只有 1 个输入",
+            "en": "exactly 1 group input"
+          },
+          "err": "5"
+        },
+        {
+          "field": "args",
+          "cond": {
+            "zh": "长度 57，或 58 且 args[57] = 0x01",
+            "en": "length 57, or 58 with args[57] = 0x01"
+          },
+          "err": "12"
+        },
+        {
+          "field": "witness",
+          "cond": {
+            "zh": "长度 ≥ 1 + N×HTLC + 72；blake2b(settlement_script)[0..20] = args.settlement_hash",
+            "en": "length ≥ 1 + N×HTLC + 72; blake2b(settlement_script)[0..20] = args.settlement_hash"
+          },
+          "err": "13 / 15"
+        },
+        {
+          "field": "unlocks",
+          "cond": {
+            "zh": "至少一个；最多一个 0xFE/0xFF 条目",
+            "en": "at least one; at most one 0xFE/0xFF entry"
+          },
+          "err": "9"
+        },
+        {
+          "field": "htlc preimage",
+          "cond": {
+            "zh": "交易无绝对时间戳 since 时：原像哈希前缀 = payment_hash；offered 由 remote 签，received 由 local 签；首次结算需相对 since ≥ delay×1/3",
+            "en": "no absolute timestamp since in the tx: preimage hash prefix = payment_hash; offered signed by remote, received by local; first settlement needs relative since ≥ delay×1/3"
+          },
+          "err": "22 / 6"
+        },
+        {
+          "field": "htlc timeout",
+          "cond": {
+            "zh": "存在绝对时间戳 since 时：since ≥ htlc_expiry；offered 由 local 签，received 由 remote 签；首次结算需 ≥ delay×2/3",
+            "en": "with an absolute timestamp since: since ≥ htlc_expiry; offered signed by local, received by remote; first settlement needs ≥ delay×2/3"
+          },
+          "err": "11 / 6"
+        },
+        {
+          "field": "party settlement",
+          "cond": {
+            "zh": "0xFE 领取对方余额、0xFF 领取本方余额，新脚本中该方置为 36 字节 0；首次结算需 since ≥ delay_epoch",
+            "en": "0xFE claims the remote balance and 0xFF the local one; that party becomes 36 zero bytes in the new script; first settlement needs since ≥ delay_epoch"
+          },
+          "err": "6"
+        },
+        {
+          "field": "outputs[0]",
+          "cond": {
+            "zh": "余额 > 0 且未全部结算：lock 同脚本、args 为新 settlement_hash 且 flag = 0x01；CKB 通道 capacity = 余额且无 type；UDT 通道 type 相同、数量 = 余额（HTLC 结算时 capacity 不变）",
+            "en": "balance > 0 and not all settled: same lock, args with the new settlement_hash and flag 0x01; CKB channel capacity = balance with no type; UDT channel same type, amount = balance (capacity unchanged for HTLC settlement)"
+          },
+          "err": "18 / 19 / 20 / 21"
+        },
+        {
+          "field": "signatures",
+          "cond": {
+            "zh": "每个结算项一个 secp256k1 签名，覆盖 blake2b(raw tx 去掉 cell_deps)（未检查）",
+            "en": "one secp256k1 signature per settled item over blake2b(raw tx without cell_deps) (not checked)"
+          },
+          "err": "10 / 23"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码（main.rs Error，按枚举顺序）：1 IndexOutOfBound · 2 ItemMissing · 3 LengthNotEnough · 4 Encoding · 5 MultipleInputs · 6 InvalidSince · 7 InvalidUnlockType · 8 InvalidWithPreimageFlag · 9 InvalidSettlementCount · 10 InvalidUnlockCount · 11 InvalidExpiry · 12 ArgsLenError · 13 WitnessLenError · 14 EmptyWitnessArgsError · 15 WitnessHashError · 16 InvalidFundingTx · 17 InvalidRevocationVersion · 18 OutputCapacityError · 19 OutputLockError · 20 OutputTypeError · 21 OutputUdtAmountError · 22 PreimageError · 23 AuthError",
+      "en": "Error codes (main.rs Error, enum order): 1 IndexOutOfBound · 2 ItemMissing · 3 LengthNotEnough · 4 Encoding · 5 MultipleInputs · 6 InvalidSince · 7 InvalidUnlockType · 8 InvalidWithPreimageFlag · 9 InvalidSettlementCount · 10 InvalidUnlockCount · 11 InvalidExpiry · 12 ArgsLenError · 13 WitnessLenError · 14 EmptyWitnessArgsError · 15 WitnessHashError · 16 InvalidFundingTx · 17 InvalidRevocationVersion · 18 OutputCapacityError · 19 OutputLockError · 20 OutputTypeError · 21 OutputUdtAmountError · 22 PreimageError · 23 AuthError"
+    },
+    {
+      "zh": "README 写的是旧的 85 字节 HTLC；源码另支持 58 字节 args（feature 0x01）与 97 字节 HTLC。链上还存在 36/56 字节 args 的早期版本 cell，本页不解析",
+      "en": "The README describes the older 85-byte HTLC; the source also supports 58-byte args (feature 0x01) and 97-byte HTLCs. Cells from earlier versions with 36/56-byte args exist on chain and are not decoded here"
+    },
+    {
+      "zh": "未核实：当前部署的二进制是否就是 HEAD 版本",
+      "en": "Unverified: whether the deployed binary is the HEAD version"
+    }
+  ]
+}

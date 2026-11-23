@@ -1,0 +1,243 @@
+{
+  "title": {
+    "zh": ".bit Time Info Type 约束",
+    "en": ".bit Time Info Type Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：dotbitHQ/ckb-time-script @37343ab contracts/info-type",
+    "en": "Source: dotbitHQ/ckb-time-script @37343ab contracts/info-type"
+  },
+  "transitions": [
+    {
+      "tag": "0 → 1",
+      "title": {
+        "zh": "创建（与 Index State 同一笔交易）",
+        "en": "Create (in the same tx as the Index State)"
+      },
+      "inputs": [],
+      "outputs": [
+        {
+          "label": {
+            "zh": "输出 #0：Index State Cell",
+            "en": "output #0: Index State Cell"
+          },
+          "body": "Cell{ type: { codeHash: {{INDEX_STATE}}, args: {{A}} } }"
+        },
+        {
+          "label": "Info Cell",
+          "body": "Cell{\n  type: { codeHash: {{INFO}}, args: {{A}} },\n  data: {{index u8}} ‖ {{type u8}} ‖ {{value u64 BE}}\n}"
+        }
+      ],
+      "limits": [
+        {
+          "field": "output #0",
+          "cond": {
+            "zh": "必须有 type",
+            "en": "must have a type"
+          },
+          "err": "13"
+        },
+        {
+          "field": "args",
+          "cond": {
+            "zh": "= 输出 #0 type 的 args",
+            "en": "= output #0 type args"
+          },
+          "err": "5"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "10 字节",
+            "en": "10 bytes"
+          },
+          "err": "6"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 1",
+      "title": {
+        "zh": "更新：写入新的时间 / 高度",
+        "en": "Update: write a new time / height"
+      },
+      "inputs": [
+        {
+          "label": "Info Cell",
+          "body": "data: {{i_old}} ‖ {{type}} ‖ {{old}}\nsince: {{…}}"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "输出 #0：Index State Cell",
+            "en": "output #0: Index State Cell"
+          },
+          "body": "data: {{i}} ‖ 12"
+        },
+        {
+          "label": "Info Cell",
+          "body": "data: {{i}} ‖ {{type}} ‖ {{new > old}}"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "data 字节布局",
+            "en": "data byte layout"
+          },
+          "layout": [
+            {
+              "name": "index",
+              "size": "1B",
+              "role": {
+                "zh": "与 Index State 对应",
+                "en": "matches Index State"
+              },
+              "cons": {
+                "zh": "= 输出 #0 data[0]",
+                "en": "= output #0 data[0]"
+              },
+              "err": "9",
+              "color": 1,
+              "flex": 1
+            },
+            {
+              "name": "type",
+              "size": "1B",
+              "role": {
+                "zh": "0 任意 · 1 时间戳 · 2 区块高度",
+                "en": "0 arbitrary · 1 timestamp · 2 block number"
+              },
+              "cons": "—",
+              "err": "—",
+              "color": 2,
+              "flex": 1
+            },
+            {
+              "name": "value",
+              "size": "8B BE",
+              "role": {
+                "zh": "时间戳或区块高度",
+                "en": "timestamp or block number"
+              },
+              "cons": {
+                "zh": "严格变大，并等于 since",
+                "en": "strictly increases and equals since"
+              },
+              "err": "10 · 11 · 12",
+              "color": 3,
+              "flex": 4
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": {
+            "zh": "输出 #0 data",
+            "en": "output #0 data"
+          },
+          "cond": {
+            "zh": "2 字节（假定输出 #0 是 Index State）",
+            "en": "2 bytes (output #0 is assumed to be the Index State)"
+          },
+          "err": "7"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "输入、输出都 10 字节",
+            "en": "input and output both 10 bytes"
+          },
+          "err": "6"
+        },
+        {
+          "field": "index",
+          "cond": {
+            "zh": "= 输出 #0 data[0]",
+            "en": "= output #0 data[0]"
+          },
+          "err": "9"
+        },
+        {
+          "field": "type = 1",
+          "cond": {
+            "zh": "新值 > 旧值；组内第一个输入的 since = (1<<62) + 新时间戳",
+            "en": "new > old; the group's first input since = (1<<62) + new timestamp"
+          },
+          "err": "10 · 12"
+        },
+        {
+          "field": "type = 2",
+          "cond": {
+            "zh": "新值 > 旧值；since = 新区块高度",
+            "en": "new > old; since = new block number"
+          },
+          "err": "11 · 12"
+        },
+        {
+          "field": {
+            "zh": "type 其他",
+            "en": "other type"
+          },
+          "cond": {
+            "zh": "不检查内容",
+            "en": "content not checked"
+          },
+          "err": "—"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 0",
+      "title": {
+        "zh": "回收",
+        "en": "Recycle"
+      },
+      "inputs": [
+        {
+          "label": "Info Cell",
+          "body": "Cell{ type: {{INFO}} }"
+        }
+      ],
+      "outputs": [],
+      "limits": [
+        {
+          "field": "—",
+          "cond": {
+            "zh": "输出里没有同 code hash 的 type 即通过",
+            "en": "passes when no output has a type with this code hash"
+          },
+          "err": "—"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "这两个脚本组成 .bit 的链上时间 / 区块高度预言机：1 个 Index State cell 指向 12 个 Info cell 中最新的一个，每次更新同时改 Index State 和一个 Info cell。",
+      "en": "The two scripts form the .bit on-chain time / block-number oracle: one Index State cell points to the newest of 12 Info cells; each update rewrites the Index State and one Info cell."
+    },
+    {
+      "zh": "“输入里是否已有本脚本”只比较 code_hash，不比较 args：输入有、输出没有就当作回收直接通过，任何持有 lock 的人都能销毁。",
+      "en": "\"Is this script already in the inputs\" compares code_hash only, not args: present in inputs but absent from outputs is treated as recycling and always passes; whoever holds the lock can destroy the cell."
+    },
+    {
+      "zh": "合约没有检查谁能更新：权限完全来自 cell 的 lock。",
+      "en": "The scripts do not check who may update; authority comes entirely from the lock of the cells."
+    },
+    {
+      "zh": "部署：哈希来自仓库 migrations（主网 2021-08-24、测试网 2021-08-09-103746），链上 code cell 已核对；二进制没有可复现构建。",
+      "en": "Deployment: hashes from the repo migrations (mainnet 2021-08-24, testnet 2021-08-09-103746), checked on chain; no reproducible build of the binary."
+    },
+    {
+      "zh": "since 让 CKB 共识保证写入值不超过链上真实时间 / 高度：交易不能早于该时间 / 高度上链。",
+      "en": "The since field makes CKB consensus guarantee the written value is not ahead of the chain: the tx cannot be committed before that time / height."
+    },
+    {
+      "zh": "错误码：1–4 syscall · 5 InvalidArgument · 6 InfoDataLenError · 7 IndexStateDataLenError · 8 InfoTypeNotExist · 9 InfoIndexNotSame · 10 OutputTimestampNotBigger · 11 OutputBlockNumberNotBigger · 12 InvalidTimeInfoSince · 13 IndexStateTypeNotExist",
+      "en": "Error codes: 1–4 syscall · 5 InvalidArgument · 6 InfoDataLenError · 7 IndexStateDataLenError · 8 InfoTypeNotExist · 9 InfoIndexNotSame · 10 OutputTimestampNotBigger · 11 OutputBlockNumberNotBigger · 12 InvalidTimeInfoSince · 13 IndexStateTypeNotExist"
+    }
+  ]
+}

@@ -1,0 +1,121 @@
+{
+  "tags": [
+    "nft",
+    "community",
+    "open-source",
+    "p-spore"
+  ],
+  "contributors": [],
+  "source": {
+    "repo": "https://github.com/sporeprotocol/spore-contract",
+    "commit": "9a6010e43ffd09ac9e6fe7ee389cc915e3e4f999",
+    "paths": [
+      "contracts/cluster/src/entry.rs",
+      "lib/errors/src/error.rs"
+    ],
+    "commit_note": "default-branch HEAD recorded at backfill 2026-10-21; spec/plugin were written from the default branch shortly before (exact read commit not recorded)",
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0x7366a61534fa7c7e6225ecc0d828ea3b5366adec2b58206f2ee84995fe030075",
+          "evidence": [
+            "listed in deployment/frozen/testnet.toml",
+            "listed in deployment/migration/mainnet/cluster/2024-01-23-0.2.2-beta.1.json",
+            "listed in deployment/migration/testnet/cluster/2024-01-19-0.2.1.json"
+          ],
+          "matches_commit": false
+        },
+        {
+          "data_hash": "0x0bbe768b519d8ea7b96d58f1182eb7e6ef96c541fbd9526975077ee09f049058",
+          "evidence": [
+            "listed in deployment/migration/testnet/cluster/2024-03-16-0.2.2-beta.2.json"
+          ],
+          "matches_commit": false
+        },
+        {
+          "data_hash": "0x598d793defef36e2eeba54a9b45130e4ca92822e1d193671f490950c3b856080",
+          "evidence": [
+            "listed in deployment/frozen/testnet.toml"
+          ],
+          "matches_commit": false
+        }
+      ],
+      "note": "hash appears in the repo only as a deployment record or doc, which does not prove the recorded commit builds this binary (reproducible build not attempted)"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0x7366a61534fa7c7e6225ecc0d828ea3b5366adec2b58206f2ee84995fe030075",
+      "hash_type": "data1",
+      "constant_source": "spore-sdk predefined.ts (Cluster v2)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0xe464b7fb9311c5e2820e61c99afc615d6b98bdefbe318c34868c010cbd0dc938"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0xe464b7fb9311c5e2820e61c99afc615d6b98bdefbe318c34868c010cbd0dc938"
+      },
+      "type_script": null,
+      "data_hash": "0x7366a61534fa7c7e6225ecc0d828ea3b5366adec2b58206f2ee84995fe030075",
+      "deploy_tx": "0xe464b7fb9311c5e2820e61c99afc615d6b98bdefbe318c34868c010cbd0dc938",
+      "deploy_block": 12026092
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0x0bbe768b519d8ea7b96d58f1182eb7e6ef96c541fbd9526975077ee09f049058",
+      "hash_type": "data1",
+      "constant_source": "spore-sdk predefined.ts (Cluster v2 preview)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0xcebb174d6e300e26074aea2f5dbd7f694bb4fe3de52b6dfe205e54f90164510a"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0xcebb174d6e300e26074aea2f5dbd7f694bb4fe3de52b6dfe205e54f90164510a"
+      },
+      "type_script": {
+        "args": "0xbbb44cfa03cac36ee1f0bd2741c06caea20d19cf0516e8aa4fa99d7f293d8fca",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x0bbe768b519d8ea7b96d58f1182eb7e6ef96c541fbd9526975077ee09f049058",
+      "deploy_tx": "0xcebb174d6e300e26074aea2f5dbd7f694bb4fe3de52b6dfe205e54f90164510a",
+      "deploy_block": 12606811
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0x598d793defef36e2eeba54a9b45130e4ca92822e1d193671f490950c3b856080",
+      "hash_type": "data1",
+      "constant_source": "spore-sdk predefined.ts (Cluster v1)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x49551a20dfe39231e7db49431d26c9c08ceec96a29024eef3acc936deeb2ca76"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x49551a20dfe39231e7db49431d26c9c08ceec96a29024eef3acc936deeb2ca76"
+      },
+      "type_script": {
+        "args": "0x0105d3692db7f6bfe00966ca999e040edad45cfe29b5cd8e636ee39c1c728762",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x598d793defef36e2eeba54a9b45130e4ca92822e1d193671f490950c3b856080",
+      "deploy_tx": "0x49551a20dfe39231e7db49431d26c9c08ceec96a29024eef3acc936deeb2ca76",
+      "deploy_block": 10219183
+    }
+  ],
+  "checked_at": "2026-10-20"
+}

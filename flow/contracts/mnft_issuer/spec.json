@@ -1,0 +1,226 @@
+{
+  "title": {
+    "zh": "M-NFT Issuer 约束",
+    "en": "M-NFT Issuer Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：nervina-labs/ckb-nft-scripts @b5af002 contracts/issuer-type/src/entry.rs　·　mainnet 0x24b0…8b81 / testnet 0xb598…11ed (type)",
+    "en": "Source: nervina-labs/ckb-nft-scripts @b5af002 contracts/issuer-type/src/entry.rs　·　mainnet 0x24b0…8b81 / testnet 0xb598…11ed (type)"
+  },
+  "transitions": [
+    {
+      "tag": "0 → 1",
+      "title": {
+        "zh": "创建 issuer",
+        "en": "Create issuer"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "inputs[0]：任意",
+            "en": "inputs[0]: any"
+          },
+          "body": "CellInput{ since, previous_output }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "Issuer cell",
+          "body": "Cell{\n  type: { codeHash: {{ISSUER_TYPE}}, hashType: type, args: {{issuer_id 20B}} },\n  data: version 0 ‖ class_count {{0}} ‖ set_count {{0}} ‖ info\n}"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "data 字节布局（大端）",
+            "en": "data byte layout (big-endian)"
+          },
+          "layout": [
+            {
+              "name": "version",
+              "size": "1B",
+              "role": {
+                "zh": "版本",
+                "en": "version"
+              },
+              "cons": "= 0",
+              "err": "11",
+              "color": 1,
+              "flex": 1
+            },
+            {
+              "name": "class_count",
+              "size": "4B BE",
+              "role": {
+                "zh": "已建 class 数",
+                "en": "classes created"
+              },
+              "cons": {
+                "zh": "创建 = 0；之后不减",
+                "en": "0 on create; never decreases"
+              },
+              "err": "8",
+              "color": 2,
+              "flex": 2
+            },
+            {
+              "name": "set_count",
+              "size": "4B BE",
+              "role": {
+                "zh": "set 数",
+                "en": "set count"
+              },
+              "cons": {
+                "zh": "创建 = 0；之后不减",
+                "en": "0 on create; never decreases"
+              },
+              "err": "9",
+              "color": 3,
+              "flex": 2
+            },
+            {
+              "name": "info",
+              "size": "u16 BE ‖ bytes",
+              "role": {
+                "zh": "发行者信息",
+                "en": "issuer info"
+              },
+              "cons": {
+                "zh": "长度足够",
+                "en": "length fits"
+              },
+              "err": "5",
+              "color": 4,
+              "flex": 3
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "恰 20 字节，= blake2b(第一个 CellInput ‖ 首个此 type 输出序号)[0..20]",
+            "en": "exactly 20 bytes, = blake2b(first CellInput ‖ first output index with this type)[0..20]"
+          },
+          "err": "7"
+        },
+        {
+          "field": "count",
+          "cond": {
+            "zh": "同一 type 的 issuer cell：0→1 / 1→1 / 1→0",
+            "en": "issuer cells with this type: 0→1 / 1→1 / 1→0"
+          },
+          "err": "6"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "≥ 11 字节，version = 0，class_count = set_count = 0",
+            "en": "≥ 11 bytes, version = 0, class_count = set_count = 0"
+          },
+          "err": "5 / 11 / 8 / 9"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 1",
+      "title": {
+        "zh": "更新 issuer",
+        "en": "Update issuer"
+      },
+      "inputs": [
+        {
+          "label": "Issuer cell",
+          "body": "Cell{ type: ISSUER, data: { class_count: a, set_count: s } }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "Issuer cell",
+          "body": "Cell{ type: ISSUER, data: { class_count: {{≥ a}}, set_count: {{≥ s}} } }"
+        }
+      ],
+      "limits": [
+        {
+          "field": "witness",
+          "cond": {
+            "zh": "见说明：对应 WitnessArgs.lock 存在",
+            "en": "see notes: the matching WitnessArgs.lock is present"
+          },
+          "err": "40"
+        },
+        {
+          "field": "class_count / set_count",
+          "cond": {
+            "zh": "均不减",
+            "en": "neither decreases"
+          },
+          "err": "8 / 9"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 0",
+      "title": {
+        "zh": "销毁 issuer",
+        "en": "Destroy issuer"
+      },
+      "inputs": [
+        {
+          "label": "Issuer cell",
+          "body": "Cell{ type: ISSUER, data: { class_count: {{0}}, set_count: {{0}} } }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "无",
+            "en": "none"
+          },
+          "body": "—"
+        }
+      ],
+      "limits": [
+        {
+          "field": "witness",
+          "cond": {
+            "zh": "对应 WitnessArgs.lock 存在",
+            "en": "the matching WitnessArgs.lock is present"
+          },
+          "err": "40"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "class_count = set_count = 0",
+            "en": "class_count = set_count = 0"
+          },
+          "err": "10"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "版本：wiki Lina-Mainnet-deployment 写明部署提交 b5af002，Aggron-Testnet-deployment 写明 d0a844d；两者合约代码只差 helper.rs 中 CLASS_TYPE_CODE_HASH 常量（主网 0xd51e…3d9a / 测试网 0x095b…e3fc）。之后的提交只调整目录结构与 capsule 版本。未做可复现构建。",
+      "en": "Version: the wiki Lina-Mainnet-deployment page names deployment commit b5af002 and Aggron-Testnet-deployment names d0a844d; the contract code differs only in helper.rs CLASS_TYPE_CODE_HASH (mainnet 0xd51e…3d9a / testnet 0x095b…e3fc). Later commits only restructure directories and bump capsule. No reproducible build was attempted."
+    },
+    {
+      "zh": "规则 40（helper.rs）：找到第一个带此 type 的输入，取它的 lock，再找第一个使用该 lock 的输入；该位置的 WitnessArgs.lock 必须存在（witness 缺失或解析失败也算缺失），用于禁止 ACP 这类不签名的 lock 更新 / 销毁。",
+      "en": "Rule 40 (helper.rs): take the first input with this type, take its lock, find the first input with that lock; the WitnessArgs.lock at that index must be present (a missing or unparsable witness counts as absent). It blocks signature-less locks such as ACP from updating / destroying."
+    },
+    {
+      "zh": "只读取 group 中第一个输入 / 输出的 data。",
+      "en": "Only the first group input / output data is read."
+    },
+    {
+      "zh": "错误码（script-utils/src/error.rs，wiki Error-Codes）：1–4 syscall · 5 IssuerDataInvalid · 6 IssuerCellsCountError · 7 TypeArgsInvalid · 8 IssuerClassCountError · 9 IssuerSetCountError · 10 IssuerCellCannotDestroyed · 11 VersionInvalid · 12 ClassDataInvalid · 13 ClassTotalSmallerThanIssued · 14 ClassCellsCountError · 15 ClassIssuedInvalid · 16 ClassImmutableFieldsNotSame · 17 ClassCellCannotDestroyed · 18 ClassIdIncreaseError · 19 NFTDataInvalid · 20 NFTCellsCountError · 21 NFTTokenIdIncreaseError · 22–39 NFT 状态规则 · 40 GroupInputWitnessNoneError",
+      "en": "Error codes (script-utils/src/error.rs, wiki Error-Codes): 1–4 syscall · 5 IssuerDataInvalid · 6 IssuerCellsCountError · 7 TypeArgsInvalid · 8 IssuerClassCountError · 9 IssuerSetCountError · 10 IssuerCellCannotDestroyed · 11 VersionInvalid · 12 ClassDataInvalid · 13 ClassTotalSmallerThanIssued · 14 ClassCellsCountError · 15 ClassIssuedInvalid · 16 ClassImmutableFieldsNotSame · 17 ClassCellCannotDestroyed · 18 ClassIdIncreaseError · 19 NFTDataInvalid · 20 NFTCellsCountError · 21 NFTTokenIdIncreaseError · 22–39 NFT state rules · 40 GroupInputWitnessNoneError"
+    },
+    {
+      "zh": "2026-11-19 上游审阅（非链上升级声明）：官方 wiki 仍固定 Lina=b5af002、Aggron=d0a844d；与 HEAD 的差异为格式/导入整理及 helper 内 CLASS_TYPE_CODE_HASH 从 Lina 改为 Aggron。不能用 Aggron 常量替换主网；维持按网络选择 class hash，数据布局、转换和错误码不变。",
+      "en": "2026-11-19 upstream review (not an on-chain upgrade claim): Official wiki still pins Lina=b5af002 and Aggron=d0a844d. HEAD differs by formatting/import cleanup and switching helper CLASS_TYPE_CODE_HASH from Lina to Aggron. Do not replace the mainnet constant with Aggron; retain network-specific class hashes, layouts, transitions and errors."
+    }
+  ]
+}

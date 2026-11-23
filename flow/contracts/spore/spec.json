@@ -1,0 +1,244 @@
+{
+  "title": {
+    "zh": "Spore（type）约束",
+    "en": "Spore (type) Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：sporeprotocol/spore-contract / contracts/spore/src/entry.rs + lib/utils + lib/errors　·　mainnet 0x4a4d…b9f5（data1）/ testnet v2 0x685a…0a0d、v1 0xbbad…3494（data1）（spore-sdk）",
+    "en": "Source: sporeprotocol/spore-contract / contracts/spore/src/entry.rs + lib/utils + lib/errors　·　mainnet 0x4a4d…b9f5 (data1) / testnet v2 0x685a…0a0d, v1 0xbbad…3494 (data1) (spore-sdk)"
+  },
+  "transitions": [
+    {
+      "tag": "0 → 1",
+      "title": {
+        "zh": "铸造 Mint",
+        "en": "Mint"
+      },
+      "inputs": [
+        {
+          "label": "tx.inputs[0]",
+          "body": {
+            "zh": "任意 cell（用于计算 spore_id）",
+            "en": "any cell (used to derive spore_id)"
+          }
+        },
+        {
+          "label": {
+            "zh": "可选：cluster 授权",
+            "en": "optional: cluster authorization"
+          },
+          "body": {
+            "zh": "cluster cell 在输入+输出\n或 cluster 的 lock 在输入+输出（lock proxy）\n或 cluster agent",
+            "en": "cluster cell in inputs+outputs\nor the cluster's lock in inputs+outputs (lock proxy)\nor a cluster agent"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "spore cell",
+          "body": "Cell{\n  type: { codeHash: SPORE, hashType: data1,\n          args: {{spore_id = type_id(inputs[0], i)}} },\n  data: SporeData{\n    content_type: {{\"image/png\"…}},\n    content: {{bytes}},\n    cluster_id: Some(32B)?\n  }\n}"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "data：SporeData（molecule table）",
+            "en": "data: SporeData (molecule table)"
+          },
+          "layout": [
+            {
+              "name": "content_type",
+              "size": "Bytes",
+              "role": {
+                "zh": "MIME，可带 ;immortal=true、mutant[]=…",
+                "en": "MIME, may carry ;immortal=true, mutant[]=…"
+              },
+              "cons": {
+                "zh": "非空且可解析",
+                "en": "non-empty and parsable"
+              },
+              "err": "64 / 80–87",
+              "color": 1,
+              "flex": 2
+            },
+            {
+              "name": "content",
+              "size": "Bytes",
+              "role": {
+                "zh": "NFT 内容",
+                "en": "NFT content"
+              },
+              "cons": {
+                "zh": "非空；multipart 需含 --boundary",
+                "en": "non-empty; multipart must contain --boundary"
+              },
+              "err": "66 / 69",
+              "color": 3,
+              "flex": 4
+            },
+            {
+              "name": "cluster_id?",
+              "size": "BytesOpt",
+              "role": {
+                "zh": "所属 cluster 的 type args",
+                "en": "type args of the owning cluster"
+              },
+              "cons": {
+                "zh": "cluster cell 在 cell_deps",
+                "en": "cluster cell in cell_deps"
+              },
+              "err": "6 / 7",
+              "color": 4,
+              "flex": 2
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "group",
+          "cond": {
+            "zh": "输出 ≤ 1",
+            "en": "outputs ≤ 1"
+          },
+          "err": "67"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "是合法 SporeData",
+            "en": "is a valid SporeData"
+          },
+          "err": "62"
+        },
+        {
+          "field": "args[0..32]",
+          "cond": {
+            "zh": "= blake2b(inputs[0] ‖ 输出序号 u64)",
+            "en": "= blake2b(inputs[0] ‖ output index u64)"
+          },
+          "err": "63"
+        },
+        {
+          "field": "cluster_id",
+          "cond": {
+            "zh": "cell_deps 有该 cluster；需 cluster 或其 lock（或 agent）同时在输入输出",
+            "en": "that cluster is in cell_deps; the cluster or its lock (or agent) must be in both inputs and outputs"
+          },
+          "err": "6 / 7"
+        },
+        {
+          "field": "mutant",
+          "cond": {
+            "zh": "content_type 声明的每个 mutant 都在 cell_deps，执行扩展并支付费用；cluster 要求的 mutant 必须被引用",
+            "en": "every declared mutant is in cell_deps, runs and is paid; the cluster's required mutant must be applied"
+          },
+          "err": "71 / 72 / 73 / 74"
+        },
+        {
+          "field": "witness",
+          "cond": {
+            "zh": "co-build Message 中恰有一个本脚本的 SporeAction，字段与 cell 一致（HEAD 源码；已部署版本可能不同，未核实）",
+            "en": "exactly one SporeAction for this script in the co-build Message, fields match the cell (HEAD source; deployed version may differ, unverified)"
+          },
+          "err": "8–13"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 1",
+      "title": {
+        "zh": "转移 Transfer",
+        "en": "Transfer"
+      },
+      "inputs": [
+        {
+          "label": "spore",
+          "body": "Cell{ lock: A, type: SPORE({{id}}), data: D }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "spore",
+          "body": "Cell{ lock: {{B}}, type: SPORE({{id}}), data: {{D}} }"
+        }
+      ],
+      "limits": [
+        {
+          "field": "group",
+          "cond": {
+            "zh": "输入 ≤ 1、输出 ≤ 1",
+            "en": "inputs ≤ 1, outputs ≤ 1"
+          },
+          "err": "67 / 68"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "字节完全相同",
+            "en": "byte-identical"
+          },
+          "err": "61"
+        },
+        {
+          "field": "witness",
+          "cond": {
+            "zh": "co-build Message 中恰有一个本脚本的 SporeAction，字段与 cell 一致（HEAD 源码；已部署版本可能不同，未核实）",
+            "en": "exactly one SporeAction for this script in the co-build Message, fields match the cell (HEAD source; deployed version may differ, unverified)"
+          },
+          "err": "8–13"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 0",
+      "title": {
+        "zh": "销毁 Burn",
+        "en": "Burn"
+      },
+      "inputs": [
+        {
+          "label": "spore",
+          "body": "Cell{ type: SPORE({{id}}), data: D }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "outputs",
+          "body": {
+            "zh": "不含该 spore",
+            "en": "no cell with this spore"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "content_type",
+          "cond": {
+            "zh": "不能带 immortal=true",
+            "en": "must not have immortal=true"
+          },
+          "err": "65"
+        },
+        {
+          "field": "witness",
+          "cond": {
+            "zh": "co-build Message 中恰有一个本脚本的 SporeAction，字段与 cell 一致（HEAD 源码；已部署版本可能不同，未核实）",
+            "en": "exactly one SporeAction for this script in the co-build Message, fields match the cell (HEAD source; deployed version may differ, unverified)"
+          },
+          "err": "8–13"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码（lib/errors）：5 InvalidClusterData · 6 ClusterCellNotInDep · 7 ClusterOwnershipVerifyFailed · 8–13 co-build · 60 BoundaryEncoding · 61 ModifySporePermanentField · 62 InvalidSporeData · 63 InvalidSporeID · 64 InvalidContentType · 65 DestroyImmortalNFT · 66 EmptyContent · 67 ConflictCreation · 68 MultipleSpend · 69 InvalidMultipartContent · 70 MIMEParsingError · 71–74 extension · 80–87 MIME",
+      "en": "Error codes (lib/errors): 5 InvalidClusterData · 6 ClusterCellNotInDep · 7 ClusterOwnershipVerifyFailed · 8–13 co-build · 60 BoundaryEncoding · 61 ModifySporePermanentField · 62 InvalidSporeData · 63 InvalidSporeID · 64 InvalidContentType · 65 DestroyImmortalNFT · 66 EmptyContent · 67 ConflictCreation · 68 MultipleSpend · 69 InvalidMultipartContent · 70 MIMEParsingError · 71–74 extension · 80–87 MIME"
+    },
+    {
+      "zh": "spore-sdk 还列出 tag 为 did 的 Spore 部署（mainnet 0xcfba…cb33 / testnet 0x0b1f…890f，type），本解码器按 Spore 解析",
+      "en": "spore-sdk also lists a Spore deployment tagged did (mainnet 0xcfba…cb33 / testnet 0x0b1f…890f, type); the decoder treats it as Spore"
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "tags": [
+    "identity",
+    "community",
+    "open-source"
+  ],
+  "contributors": [
+    "duanyytop",
+    "linkdesu"
+  ],
+  "source": {
+    "repo": "https://github.com/dotbitHQ/ckb-time-script",
+    "commit": "37343ab501e71b9eb8a83f04a66c3cafb48044d3",
+    "paths": [
+      "contracts/info-type/src/entry.rs",
+      "contracts/info-type/src/error.rs",
+      "libs/common/src/constants.rs",
+      "migrations/mainnet/2021-08-24-000000.json"
+    ],
+    "commit_note": "commit 37343ab \"chore: deploy script to mainnet\" adds migrations/mainnet/2021-08-24-000000.json (hashes used here); contract code last changed at a2fa7d9 (2021-08-09). No reproducible build attempted.",
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0x1871b6ecbe086e0c0a5298b653de8bd7efb223c1f7927f41ad8b13de848b7209",
+          "evidence": [],
+          "matches_commit": false
+        }
+      ],
+      "note": "no binary or checksum at the recorded commit matched the deployed data hash (reproducible build not attempted)"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0x9e537bf5b8ec044ca3f53355e879f3fd8832217e4a9b41d9994cf0c547241a79",
+      "hash_type": "type",
+      "constant_source": "ckb-time-script migrations/mainnet/2021-08-24-000000.json",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x3ba4c4b6cb70fd332d0159fa1c2ce021b361b7ccfe1acf2c44ad4902b1c905a5"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x3ba4c4b6cb70fd332d0159fa1c2ce021b361b7ccfe1acf2c44ad4902b1c905a5"
+      },
+      "type_script": {
+        "args": "0x4b673f820a6278ece8515bc358ccf5bf6ef385736d30bc2a990f923fe7f33b95",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x1871b6ecbe086e0c0a5298b653de8bd7efb223c1f7927f41ad8b13de848b7209",
+      "deploy_tx": "0x3ba4c4b6cb70fd332d0159fa1c2ce021b361b7ccfe1acf2c44ad4902b1c905a5",
+      "deploy_block": 15198605
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0x96248cdefb09eed910018a847cfb51ad044c2d7db650112931760e3ef34a7e9a",
+      "hash_type": "type",
+      "constant_source": "ckb-time-script migrations/testnet/2021-08-09-103746.json",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x9155635997e8d59ccbf5e160a138c299a195837870fd8acf592da73c1b053a73"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x9155635997e8d59ccbf5e160a138c299a195837870fd8acf592da73c1b053a73"
+      },
+      "type_script": {
+        "args": "0xd7d02a61910488efb47917e840a0443bfa01d50cb42f4833d95bc7e7ad6276ba",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x1871b6ecbe086e0c0a5298b653de8bd7efb223c1f7927f41ad8b13de848b7209",
+      "deploy_tx": "0x9155635997e8d59ccbf5e160a138c299a195837870fd8acf592da73c1b053a73",
+      "deploy_block": 2386188
+    }
+  ],
+  "checked_at": "2026-11-06"
+}

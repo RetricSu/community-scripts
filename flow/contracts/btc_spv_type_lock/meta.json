@@ -1,0 +1,81 @@
+{
+  "tags": [
+    "btc",
+    "cryptape",
+    "open-source",
+    "p-rgbpp"
+  ],
+  "contributors": [
+    "chaoticlonghair"
+  ],
+  "source": {
+    "repo": "https://github.com/ckb-cell/ckb-bitcoin-spv-contracts",
+    "commit": "f3e3ba846c1de580ae7f0720cbb64df13036b80a",
+    "paths": [
+      "contracts/ckb-bitcoin-spv-type-lock/src",
+      "checksums.txt"
+    ],
+    "commit_note": "tag btc-mainnet-v0.1.0 (= origin/production). sha256 of the mainnet code cell data 481b173ca6d264c4c447210fae466ef4a2f9d7a78f5d6fd07dda4d61cf1bf34c equals checksums.txt here (checksums are sha256, so check-deployments cannot match them; binary status set by hand). Verifier types: ckb-cell/ckb-bitcoin-spv @a3c43fd",
+    "binary": {
+      "status": "verified",
+      "per": [
+        {
+          "data_hash": "0x0a1d2402d7ccd9fe9b6e86eda78c6bd89cd3e00d84521bd5271c62846da7dbbf",
+          "evidence": [
+            "sha256 481b173ca6d264c4c447210fae466ef4a2f9d7a78f5d6fd07dda4d61cf1bf34c of the code cell data is listed for build/release/ckb-bitcoin-spv-type-lock in checksums.txt at f3e3ba8"
+          ],
+          "matches_commit": true
+        }
+      ],
+      "note": "verified by hand via sha256 checksums.txt (check-deployments compares blake2b only and would rewrite this as unverified)"
+    },
+    "upstream_review": {
+      "repo": "https://github.com/ckb-cell/ckb-bitcoin-spv-contracts",
+      "base_commit": "f3e3ba846c1de580ae7f0720cbb64df13036b80a",
+      "commit": "94f5606bf3a80c201dc1bd341d739c32c1a29198",
+      "paths": [
+        "contracts/ckb-bitcoin-spv-type-lock/src",
+        "checksums.txt"
+      ],
+      "disposition": "retain-deployed-version",
+      "reason": {
+        "zh": "主网 production 分支及 btc-mainnet-v0.1.0 仍为 f3e3ba8；master 新增销毁、testnet reset、操作分类和 verifier 变更，checksum 也不同，不能直接套到现有主网部署。",
+        "en": "Mainnet production and btc-mainnet-v0.1.0 still point to f3e3ba8. Master adds destroy, testnet reset, operation-dispatch and verifier changes and has a different checksum; these must not be applied to the existing mainnet deployment."
+      },
+      "evidence": [
+        "https://github.com/ckb-cell/ckb-bitcoin-spv-contracts/tree/btc-mainnet-v0.1.0",
+        "https://github.com/ckb-cell/ckb-bitcoin-spv-contracts/blob/f3e3ba846c1de580ae7f0720cbb64df13036b80a/checksums.txt",
+        "https://github.com/ckb-cell/ckb-bitcoin-spv-contracts/compare/f3e3ba846c1de580ae7f0720cbb64df13036b80a...94f5606bf3a80c201dc1bd341d739c32c1a29198"
+      ],
+      "reviewed_at": "2026-11-19"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0xa76e227da81b97d23deabf0d8964aa41c042f4bcf2db2b8bd873fe8521de741d",
+      "hash_type": "type",
+      "constant_source": "type of the SPV client cell 0xd6b2fcb7…:1 whose type hash 0x00a2…c6f7 is btc_lc_type_hash in the RGB++ lock config cell 0x04c5c3e6…:1 (mainnet)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x1dc9a53526bb7a9a4974aa6de7636014279bff996321c9acc5180912e7d8a2b8"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x1dc9a53526bb7a9a4974aa6de7636014279bff996321c9acc5180912e7d8a2b8"
+      },
+      "type_script": {
+        "args": "0xe58e5edfb4b7320cf822be815b025d6b8c0d5767b44c5eb1209e3edc52c97eb7",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x0a1d2402d7ccd9fe9b6e86eda78c6bd89cd3e00d84521bd5271c62846da7dbbf",
+      "deploy_tx": "0x1dc9a53526bb7a9a4974aa6de7636014279bff996321c9acc5180912e7d8a2b8",
+      "deploy_block": 12576657
+    }
+  ],
+  "checked_at": "2026-11-06"
+}

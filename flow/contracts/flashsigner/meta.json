@@ -1,0 +1,68 @@
+{
+  "tags": [
+    "identity",
+    "community",
+    "no-source"
+  ],
+  "contributors": [],
+  "source": {
+    "status": "no-source",
+    "note": "No public source found, unconfirmed with maintainer",
+    "binary": {
+      "status": "no-source"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0x081dbffa88dab54ba426d231ca64eb760cea2fe9e16761a1da400da1b2cbe128",
+      "hash_type": "type",
+      "constant_source": "CKB Explorer registry API /api/v2/scripts (explorer.nervos.org, read 2026-11-06); nervosnetwork/ckb-explorer-frontend src/constants/scripts.ts @39f93f2 (tag flashsigner)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x0f0c22372a05f3c5f47acb066c65f9bae86bdce043762310e50309cc5a77abd4"
+        },
+        "dep_type": "dep_group"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0xc418a6f5c202911086bc92d46553e535fb72eaef32323a4e2cc46d701f7ebafb"
+      },
+      "type_script": {
+        "args": "0x5377d5489bc4329c273a2f2bfbdcf709e3340da5438838a66096191fee56600a",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x0d5da9effc2aa91aa2d813fef14c746ce263e0cb70cf8f4d064569ab047a5768",
+      "deploy_tx": "0xc418a6f5c202911086bc92d46553e535fb72eaef32323a4e2cc46d701f7ebafb",
+      "deploy_block": 6230328
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0x577a5e5930e2ecdd6200765f3442e6119dc99e87df474f22f13cab819c80b242",
+      "hash_type": "type",
+      "constant_source": "CKB Explorer registry API /api/v2/scripts (explorer.nervos.org, read 2026-11-06); nervosnetwork/ckb-explorer-frontend src/constants/scripts.ts @39f93f2 (tag flashsigner)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0xb66776ff3244033fcd15312ae8b17d384c11bebbb923fce3bd896d89f4744d48"
+        },
+        "dep_type": "dep_group"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x791547a3fc0bb119bb2635b46b9ec90e52c89c90d982b06e17780954c521c423"
+      },
+      "type_script": {
+        "args": "0xfa23c4831d0d6fe08bd920301fc8d59b7b35b665875f583e9573ec86546f43a1",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0xe822b7e218bcb85efa3f47c540236f16ac8afda82187fd28b30d05f503812da5",
+      "deploy_tx": "0x791547a3fc0bb119bb2635b46b9ec90e52c89c90d982b06e17780954c521c423",
+      "deploy_block": 3590991
+    }
+  ],
+  "checked_at": "2026-11-06"
+}

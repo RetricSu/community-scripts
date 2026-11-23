@@ -1,0 +1,68 @@
+{
+  "tags": [
+    "defi",
+    "community",
+    "no-source"
+  ],
+  "contributors": [],
+  "source": {
+    "status": "no-source",
+    "note": "No public source found, unconfirmed with maintainer",
+    "binary": {
+      "status": "no-source"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0x7ef6e226ca9a3514ac76759f0b1550e70c9aa10aff89111fedf2c9d800d256f7",
+      "hash_type": "type",
+      "constant_source": "on chain: lock of the Pool Cell whose type = pool_type_code_hash 0xc70a8b00…3c98 (UTXOSwap docs, mainnet)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x7dfd96165a48fc0f346ad207491e8309f22c76f73f9b0940253471119706b5cb"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x7dfd96165a48fc0f346ad207491e8309f22c76f73f9b0940253471119706b5cb"
+      },
+      "type_script": {
+        "args": "0x264fd0e34d701449ab87a33639851c317e74e4012da68774a7190611f7695cc1",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x55a9b0386434198d0929c2688c67fd9fa9b4265a5c7c5bd82f0919a1a184c4a6",
+      "deploy_tx": "0x7dfd96165a48fc0f346ad207491e8309f22c76f73f9b0940253471119706b5cb",
+      "deploy_block": 13363528
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0x30e2c8a0cc9c27b2b2125ecf3aabe74acd692fe2b6635bcee02dab6973fbb593",
+      "hash_type": "type",
+      "constant_source": "on chain: lock of the Pool Cell whose type = pool_type_code_hash 0x5b9228b1…8735 (UTXOSwap docs, testnet)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x452de675cff343e46d6fc7da00255008ef0169eb34deab05dc11661ebe785a5a"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x452de675cff343e46d6fc7da00255008ef0169eb34deab05dc11661ebe785a5a"
+      },
+      "type_script": {
+        "args": "0x8acf86d3ba48aed39abe2383d20ecb38a2fb80e75eedf01193c01bac2b69740c",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0xf2a7278aaa3d9a5aed269a1c0907f5e0afc8ef498de256e709984d3df4e84a5b",
+      "deploy_tx": "0x452de675cff343e46d6fc7da00255008ef0169eb34deab05dc11661ebe785a5a",
+      "deploy_block": 13407066
+    }
+  ],
+  "checked_at": "2026-11-06"
+}

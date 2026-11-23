@@ -1,0 +1,61 @@
+{
+  "title": {
+    "zh": "ccBTC Asset（无公开源码）",
+    "en": "ccBTC Asset (no public source)"
+  },
+  "subtitle": {
+    "zh": "未找到公开源码，尚未向维护方确认　·　mainnet 0x092c…5ae3 (type)",
+    "en": "No public source found, unconfirmed with maintainer　·　mainnet 0x092c…5ae3 (type)"
+  },
+  "transitions": [
+    {
+      "tag": "?",
+      "title": {
+        "zh": "仅识别：链上可核实的事实",
+        "en": "Identification only: facts verifiable on chain"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "带该 type 的 cell",
+            "en": "cell carrying this type"
+          },
+          "body": "Cell{\n  type: { codeHash: {{0x092c…5ae3}},\n          hashType: type,\n          args: 0x68e64ba4…0a4ac8 (ccBTC) }\n}"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "验证规则",
+            "en": "validation rules"
+          },
+          "body": {
+            "zh": "未知：无公开源码，本页不列任何规则或错误码",
+            "en": "unknown: no public source, this page lists no rules or error codes"
+          }
+        }
+      ],
+      "extras": [
+        {
+          "zh": "code_hash 来自 UTXOSwap 官方文档示例中 BTC（ccBTC，type hash 0x3cd44aec…fa57，args 0x68e64ba4…4ac8）的 type script，并在链上核实。ccBTC 由 Cross-Chain Tokens 发行、Cactus Custody 托管（官方新闻稿）。",
+          "en": "code_hash taken from the BTC (ccBTC, type hash 0x3cd44aec…fa57, args 0x68e64ba4…4ac8) type script in the official UTXOSwap docs example, confirmed on chain. ccBTC is issued by Cross-Chain Tokens and custodied by Cactus Custody (official press release)."
+        },
+        {
+          "zh": "其二进制 data hash（0xa994…ae2c）与 xUDT（0x50bd…1b95）不同，不能套用 xUDT 规则。",
+          "en": "Its binary data hash (0xa994…ae2c) differs from xUDT (0x50bd…1b95), so xUDT rules cannot be assumed."
+        }
+      ],
+      "limits": []
+    }
+  ],
+  "notes": [
+    {
+      "zh": "未找到公开源码，尚未向维护方确认",
+      "en": "No public source found, unconfirmed with maintainer"
+    },
+    {
+      "zh": "部署（code cell / cell_dep / data hash）由 scripts/check-deployments.js 从链上解析，见下方来源卡片",
+      "en": "Deployment (code cell / cell_dep / data hash) resolved from chain by scripts/check-deployments.js; see the provenance card below"
+    }
+  ]
+}

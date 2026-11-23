@@ -1,0 +1,61 @@
+{
+  "title": {
+    "zh": "Stable++ Asset（无公开源码）",
+    "en": "Stable++ Asset (no public source)"
+  },
+  "subtitle": {
+    "zh": "未找到公开源码，尚未向维护方确认　·　mainnet 0x26a3…032b (type)",
+    "en": "No public source found, unconfirmed with maintainer　·　mainnet 0x26a3…032b (type)"
+  },
+  "transitions": [
+    {
+      "tag": "?",
+      "title": {
+        "zh": "仅识别：链上可核实的事实",
+        "en": "Identification only: facts verifiable on chain"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "带该 type 的 cell",
+            "en": "cell carrying this type"
+          },
+          "body": "Cell{\n  type: { codeHash: {{0x26a3…032b}},\n          hashType: type,\n          args: … }\n}"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "验证规则",
+            "en": "validation rules"
+          },
+          "body": {
+            "zh": "未知：无公开源码，本页不列任何规则或错误码",
+            "en": "unknown: no public source, this page lists no rules or error codes"
+          }
+        }
+      ],
+      "extras": [
+        {
+          "zh": "CKB Explorer 注册表：官网 https://www.stablepp.xyz/stablecoin；部署交易 0x8ec1081b…8977（index 0）。仅主网。",
+          "en": "CKB Explorer registry: website https://www.stablepp.xyz/stablecoin; deploy tx 0x8ec1081b…8977 (index 0). Mainnet only."
+        },
+        {
+          "zh": "其二进制 data hash 与 xUDT 不同，不能套用 xUDT 规则。",
+          "en": "Its binary data hash differs from xUDT, so xUDT rules cannot be assumed."
+        }
+      ],
+      "limits": []
+    }
+  ],
+  "notes": [
+    {
+      "zh": "未找到公开源码，尚未向维护方确认",
+      "en": "No public source found, unconfirmed with maintainer"
+    },
+    {
+      "zh": "部署（code cell / cell_dep / data hash）由 scripts/check-deployments.js 从链上解析，见下方来源卡片",
+      "en": "Deployment (code cell / cell_dep / data hash) resolved from chain by scripts/check-deployments.js; see the provenance card below"
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+[{"tx":"0xe2f8d40497c1d484bf5e2a622b1f1279c87ce218633e5002c8e30dd451f7a357","net":"mainnet","name":"listing cell spent","expect":["cells_sale_lock"]},
+ {"tx":"0x38cc560320cd5d13e76d94365ccf6b488f6f5d12279a0ac4abde737df2b6b14d","net":"testnet","name":"testnet listing cell spent","expect":["cells_sale_lock"]}]

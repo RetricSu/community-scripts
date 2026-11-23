@@ -1,0 +1,353 @@
+{
+  "title": {
+    "zh": "CKBFS V2 约束（witness 文件存储）",
+    "en": "CKBFS V2 Constraints (witness file storage)"
+  },
+  "subtitle": {
+    "zh": "来源：code-monad/ckbfs @db973a8 contracts/ckbfs/src/entry.rs + contracts/ckb-adler32（mode 1）　·　data1 0x31e6…8d3a（主网 + 测试网）",
+    "en": "Source: code-monad/ckbfs @db973a8 contracts/ckbfs/src/entry.rs + contracts/ckb-adler32 (mode 1)　·　data1 0x31e6…8d3a (mainnet + testnet)"
+  },
+  "transitions": [
+    {
+      "tag": "0 → 1",
+      "title": {
+        "zh": "发布（创建）",
+        "en": "Publish (create)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "inputs[0]：任意",
+            "en": "inputs[0]: any"
+          },
+          "body": "CellInput{ since, previous_output }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "CKBFS cell",
+          "body": "Cell{\n  type: { codeHash: {{CKBFS_V2}}, hashType: data1,\n          args: {{type_id 32B}} ‖ [hasher_code_hash 32B] },\n  data: CKBFSData { indexes, checksum, content_type, filename, backlinks: [] }\n}"
+        },
+        {
+          "label": "witnesses[i], i ∈ indexes",
+          "body": "\"CKBFS\"(5B) ‖ 0x00(1B) ‖ {{content part}}"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "args 字节布局",
+            "en": "args byte layout"
+          },
+          "layout": [
+            {
+              "name": "type_id",
+              "size": "32B",
+              "role": {
+                "zh": "唯一 ID",
+                "en": "unique id"
+              },
+              "cons": {
+                "zh": "= blake2b(inputs[0] ‖ 输出序号 u64)",
+                "en": "= blake2b(inputs[0] ‖ output index u64)"
+              },
+              "err": "102",
+              "color": 1,
+              "flex": 2
+            },
+            {
+              "name": "hasher_code_hash",
+              "size": "32B?",
+              "role": {
+                "zh": "可选：校验器 data1 code hash",
+                "en": "optional: hasher data1 code hash"
+              },
+              "cons": {
+                "zh": "缺省用内置 ckb-adler32 hash",
+                "en": "defaults to the built-in ckb-adler32 hash"
+              },
+              "err": "106",
+              "color": 2,
+              "flex": 2
+            }
+          ]
+        },
+        {
+          "label": {
+            "zh": "data（molecule table CKBFSData）",
+            "en": "data (molecule table CKBFSData)"
+          },
+          "layout": [
+            {
+              "name": "indexes",
+              "size": "Uint32[]",
+              "role": {
+                "zh": "内容所在 witness 序号",
+                "en": "witness indexes holding the content"
+              },
+              "cons": {
+                "zh": "创建时非空",
+                "en": "non-empty on create"
+              },
+              "err": "101",
+              "color": 1,
+              "flex": 2
+            },
+            {
+              "name": "checksum",
+              "size": "4B LE",
+              "role": "Adler-32",
+              "cons": {
+                "zh": "= adler32(各 witness[6..] 依次拼接)",
+                "en": "= adler32(witness[6..] of each index, in order)"
+              },
+              "err": "-101",
+              "color": 2,
+              "flex": 1
+            },
+            {
+              "name": "content_type",
+              "size": "Bytes",
+              "role": "MIME",
+              "cons": {
+                "zh": "之后不可变",
+                "en": "immutable afterwards"
+              },
+              "err": "105",
+              "color": 3,
+              "flex": 1
+            },
+            {
+              "name": "filename",
+              "size": "Bytes",
+              "role": {
+                "zh": "文件名",
+                "en": "file name"
+              },
+              "cons": {
+                "zh": "之后不可变",
+                "en": "immutable afterwards"
+              },
+              "err": "105",
+              "color": 4,
+              "flex": 1
+            },
+            {
+              "name": "backlinks",
+              "size": "BackLink[]",
+              "role": {
+                "zh": "历史片段 {indexes, checksum, tx_hash}",
+                "en": "earlier parts {indexes, checksum, tx_hash}"
+              },
+              "cons": {
+                "zh": "创建时必须为空（见说明）",
+                "en": "must be empty on create (see notes)"
+              },
+              "err": "101",
+              "color": 5,
+              "flex": 2
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "type",
+          "cond": {
+            "zh": "同一 tx 中该 type 的输出 ≤ 1",
+            "en": "≤ 1 output with this type in the tx"
+          },
+          "err": "107"
+        },
+        {
+          "field": "args",
+          "cond": {
+            "zh": "≥ 32 字节；args[0..32] 按 type_id 规则",
+            "en": "≥ 32 bytes; args[0..32] by the type_id rule"
+          },
+          "err": "-3 / 102"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "合法 molecule；indexes 非空；backlinks 为空",
+            "en": "valid molecule; indexes non-empty; backlinks empty"
+          },
+          "err": "-4 / 101"
+        },
+        {
+          "field": "cell_deps",
+          "cond": {
+            "zh": "含 data hash = 校验器 code hash 的 cell（解码器不检查）",
+            "en": "contains a cell whose data hash = the hasher code hash (not checked by the decoder)"
+          },
+          "err": "106"
+        },
+        {
+          "field": "checksum",
+          "cond": {
+            "zh": "exec ckb-adler32 mode 1：adler32(witnesses[indexes][6..]) = data.checksum；witness 缺失或 < 6 字节时 panic",
+            "en": "exec ckb-adler32 mode 1: adler32(witnesses[indexes][6..]) = data.checksum; a missing or < 6-byte witness panics"
+          },
+          "err": "-101"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 1",
+      "title": {
+        "zh": "追加内容",
+        "en": "Append"
+      },
+      "inputs": [
+        {
+          "label": "CKBFS cell",
+          "body": "Cell{ type: CKBFS_V2, data: { indexes: I, checksum: c0, content_type, filename, backlinks: B } }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "CKBFS cell",
+          "body": "Cell{ type: same,\n  data: { indexes: {{I′ ≠ []}}, checksum: {{c1}}, content_type, filename,\n          backlinks: B ‖ {{BackLink{ indexes, checksum, tx_hash }}} } }"
+        },
+        {
+          "label": "witnesses[i], i ∈ I′",
+          "body": "\"CKBFS\" ‖ 0x00 ‖ {{new content part}}"
+        }
+      ],
+      "limits": [
+        {
+          "field": "content_type / filename",
+          "cond": {
+            "zh": "不变",
+            "en": "unchanged"
+          },
+          "err": "105"
+        },
+        {
+          "field": "backlinks",
+          "cond": {
+            "zh": "若输入 indexes 非空或输入 backlinks > 1：输出 backlinks 恰多 1 个；最后一个的 tx_hash = 输入 out_point.tx_hash 或 indexes = 输入 indexes",
+            "en": "if input indexes is non-empty or input backlinks > 1: output has exactly one more backlink; the last one has tx_hash = input out_point.tx_hash or indexes = input indexes"
+          },
+          "err": "108"
+        },
+        {
+          "field": "backlinks",
+          "cond": {
+            "zh": "输入 backlinks 原样作为输出前缀",
+            "en": "input backlinks kept unchanged as the output prefix"
+          },
+          "err": "108"
+        },
+        {
+          "field": "checksum",
+          "cond": {
+            "zh": "从 c0 恢复 Adler-32 状态，继续累加 witnesses[I′][6..]，结果 = c1",
+            "en": "resume Adler-32 from c0 over witnesses[I′][6..]; result = c1"
+          },
+          "err": "-101"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 1",
+      "title": {
+        "zh": "转移",
+        "en": "Transfer"
+      },
+      "inputs": [
+        {
+          "label": "CKBFS cell",
+          "body": "Cell{ lock: A, type: CKBFS_V2, data: { checksum: c0, backlinks: B, … } }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "CKBFS cell",
+          "body": "Cell{ lock: {{B′}}, type: same,\n  data: { indexes: {{[]}}, checksum: c0, content_type, filename, backlinks: {{…}} } }"
+        }
+      ],
+      "limits": [
+        {
+          "field": "checksum",
+          "cond": {
+            "zh": "输出 indexes 为空即视为转移，checksum 不变",
+            "en": "empty output indexes means transfer; checksum unchanged"
+          },
+          "err": "105"
+        },
+        {
+          "field": "backlinks",
+          "cond": {
+            "zh": "输入无 backlink：输出恰 1 个，且 tx_hash = 输入 out_point.tx_hash；否则 backlinks 完全相同",
+            "en": "input has no backlink: output has exactly 1 with tx_hash = input out_point.tx_hash; otherwise backlinks identical"
+          },
+          "err": "109 / 105"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 0",
+      "title": {
+        "zh": "销毁：禁止",
+        "en": "Destroy: forbidden"
+      },
+      "inputs": [
+        {
+          "label": "CKBFS cell",
+          "body": "Cell{ type: CKBFS_V2 }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "无 CKBFS 输出",
+            "en": "no CKBFS output"
+          },
+          "body": "—"
+        }
+      ],
+      "limits": [
+        {
+          "field": "type",
+          "cond": {
+            "zh": "有输入无输出 → 失败",
+            "en": "input without output → fails"
+          },
+          "err": "103"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "版本：README 把 0x31e6…8d3a 标为 \"Version 20241025.db973a8e8032\"，即提交 db973a8（tag v2/v2.0 = 88297de 只改 README）。该提交的 hash.rs 固定 ckb-adler32 = 0x2138…536f，与链上 V2 部署交易同一 dep_group 中的 adler32 cell 一致。未做可复现构建。",
+      "en": "Version: the README labels 0x31e6…8d3a \"Version 20241025.db973a8e8032\", i.e. commit db973a8 (tags v2/v2.0 = 88297de only edit the README). That commit's hash.rs pins ckb-adler32 = 0x2138…536f, which matches the adler32 cell in the same on-chain dep_group. No reproducible build was attempted."
+    },
+    {
+      "zh": "数据结构来自 crates.io ckbfs-types 0.2.1（schemas/ckbfs.mol），不是仓库 RFC.md（那时 RFC 仍是 V1 的 index: Uint32Opt）。",
+      "en": "The data layout comes from crates.io ckbfs-types 0.2.1 (schemas/ckbfs.mol), not the repo RFC.md (which still showed V1's index: Uint32Opt at that commit)."
+    },
+    {
+      "zh": "校验通过 exec_cell 跳转到 ckb-adler32，进程被替换，所以 checksum 不符时退出码是 adler32 的 -101（ValidateFailure），104 只在 exec 本身失败时出现。",
+      "en": "Checksum validation exec_cell-s into ckb-adler32, which replaces the process, so a wrong checksum exits with adler32's -101 (ValidateFailure); 104 only appears when exec itself fails."
+    },
+    {
+      "zh": "按源码原样：创建时若 backlinks 非空，查找引用 cell 用 32 字节 code_hash 与整个序列化 Script 比较，永远不相等 → 101；且读取 cell_dep 用的是输出序号而不是找到的位置。",
+      "en": "As written: on create with non-empty backlinks, the reference-cell search compares a 32-byte code_hash with the whole serialized Script, which never matches → 101; it would also read the cell_dep at the output index rather than the found position."
+    },
+    {
+      "zh": "只看第一个带此 type 的输入；witness 头 \"CKBFS\" ‖ 0x00 不被检查，只是跳过 6 字节。",
+      "en": "Only the first input with this type is considered; the witness header \"CKBFS\" ‖ 0x00 is not checked, just skipped (6 bytes)."
+    },
+    {
+      "zh": "错误码（error.rs）：-1 IndexOutOfBound · -2 ItemMissing · -3 LengthNotEnough · -4 Encoding · 101 InvalidInitialData · 102 InvalidTypeId · 103 DeletionForbidden · 104 ChecksumMismatch · 105 InvalidFieldUpdate · 106 NoChecksumHasherFound · 107 DuplicatedOutputs · 108 InvalidAppend · 109 InvalidTransfer；ckb-adler32：-101 ValidateFailure",
+      "en": "Error codes (error.rs): -1 IndexOutOfBound · -2 ItemMissing · -3 LengthNotEnough · -4 Encoding · 101 InvalidInitialData · 102 InvalidTypeId · 103 DeletionForbidden · 104 ChecksumMismatch · 105 InvalidFieldUpdate · 106 NoChecksumHasherFound · 107 DuplicatedOutputs · 108 InvalidAppend · 109 InvalidTransfer; ckb-adler32: -101 ValidateFailure"
+    },
+    {
+      "zh": "2026-11-19 上游审阅（非链上升级声明）：README 仍将 V2 部署标为 20241025.db973a8e8032；HEAD 是 V3，新增链式 witness、前序位置校验和 110–112 错误码，并更换 adler32 hash。V3 已由 ckbfs_v3 独立描述，V2 继续保留旧 schema / checksum 规则。",
+      "en": "2026-11-19 upstream review (not an on-chain upgrade claim): README still identifies V2 deployments as 20241025.db973a8e8032. HEAD is V3: linked witnesses, previous-position validation, errors 110–112 and another adler32 hash. V3 is already described by ckbfs_v3; retain V2 schema and checksum rules."
+    }
+  ]
+}

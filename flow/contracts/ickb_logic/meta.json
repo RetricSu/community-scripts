@@ -1,0 +1,59 @@
+{
+  "tags": [
+    "defi",
+    "token",
+    "community",
+    "open-source",
+    "p-ickb"
+  ],
+  "contributors": [
+    "phroi"
+  ],
+  "source": {
+    "repo": "https://github.com/ickb/contracts",
+    "commit": "c951927e35fb5d4a13e28c5e55687d49cea7ca05",
+    "paths": [
+      "scripts/contracts/ickb_logic/src"
+    ],
+    "commit_note": "default-branch HEAD recorded at backfill 2026-10-21; spec/plugin were written from the default branch shortly before (exact read commit not recorded)",
+    "binary": {
+      "status": "verified",
+      "per": [
+        {
+          "data_hash": "0x2a8100ab5990fa055ab1b50891702e1e895c7bd1df6322cd725c1a6115873bd3",
+          "evidence": [
+            "listed in scripts/deployment/mainnet/migrations/2024-09-12-151119.json",
+            "listed in scripts/deployment/testnet/migrations/2024-09-12-141730.json",
+            "blake2b of scripts/build/release/ickb_logic"
+          ],
+          "matches_commit": true
+        }
+      ],
+      "note": "deployed data hash matches a binary / checksum in the repo at the recorded commit"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0x2a8100ab5990fa055ab1b50891702e1e895c7bd1df6322cd725c1a6115873bd3",
+      "hash_type": "data1",
+      "constant_source": "blake2b of ickb/contracts release binary, confirmed on mainnet",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x621a6f38de3b9f453016780edac3b26bfcbfa3e2ecb47c2da275471a5d3ed165"
+        },
+        "dep_type": "dep_group"
+      },
+      "code_cell": {
+        "tx_hash": "0xd7309191381f5a8a2904b8a79958a9be2752dbba6871fa193dab6aeb29dc8f44",
+        "index": "0x0"
+      },
+      "type_script": null,
+      "data_hash": "0x2a8100ab5990fa055ab1b50891702e1e895c7bd1df6322cd725c1a6115873bd3",
+      "deploy_tx": "0xd7309191381f5a8a2904b8a79958a9be2752dbba6871fa193dab6aeb29dc8f44",
+      "deploy_block": 14010067
+    }
+  ],
+  "checked_at": "2026-10-20"
+}

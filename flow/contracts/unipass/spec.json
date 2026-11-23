@@ -1,0 +1,61 @@
+{
+  "title": {
+    "zh": "UniPass lock（已废弃）（无公开源码）",
+    "en": "UniPass lock (deprecated) (no public source)"
+  },
+  "subtitle": {
+    "zh": "未找到公开源码，尚未向维护方确认　·　mainnet 0xd01f…b60a (type) · testnet 0x3e1e…a783 (type) · mainnet 0x614d…09b3 (type) · testnet 0x124a…2be6 (type)",
+    "en": "No public source found, unconfirmed with maintainer　·　mainnet 0xd01f…b60a (type) · testnet 0x3e1e…a783 (type) · mainnet 0x614d…09b3 (type) · testnet 0x124a…2be6 (type)"
+  },
+  "transitions": [
+    {
+      "tag": "?",
+      "title": {
+        "zh": "仅识别：链上可核实的事实",
+        "en": "Identification only: facts verifiable on chain"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "被该 lock 锁定的 input",
+            "en": "input locked by this script"
+          },
+          "body": "Cell{\n  lock: { codeHash: {{0xd01f…b60a}},\n          hashType: type,\n          args: … }\n}"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "验证规则",
+            "en": "validation rules"
+          },
+          "body": {
+            "zh": "未知：无公开源码，本页不列任何规则或错误码",
+            "en": "unknown: no public source, this page lists no rules or error codes"
+          }
+        }
+      ],
+      "extras": [
+        {
+          "zh": "CKB Explorer 注册表描述（原文英文）：“UniPass Wallet is a smart contract wallet solution that supports on-chain Email social recovery.” 官网 https://www.unipass.id",
+          "en": "CKB Explorer registry description: \"UniPass Wallet is a smart contract wallet solution that supports on-chain Email social recovery.\" Website https://www.unipass.id"
+        },
+        {
+          "zh": "本插件同时匹配 V2 与 V3 两个 code_hash（不同二进制）；“已废弃”来自用户提供的清单，注册表未标 deprecated。",
+          "en": "This plugin matches both the V2 and V3 code_hashes (different binaries); \"deprecated\" comes from the user-supplied list, the registry does not flag it."
+        }
+      ],
+      "limits": []
+    }
+  ],
+  "notes": [
+    {
+      "zh": "未找到公开源码，尚未向维护方确认",
+      "en": "No public source found, unconfirmed with maintainer"
+    },
+    {
+      "zh": "部署（code cell / cell_dep / data hash）由 scripts/check-deployments.js 从链上解析，见下方来源卡片",
+      "en": "Deployment (code cell / cell_dep / data hash) resolved from chain by scripts/check-deployments.js; see the provenance card below"
+    }
+  ]
+}

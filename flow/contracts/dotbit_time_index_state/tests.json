@@ -1,0 +1,17 @@
+[
+  {
+    "tx": "0xc8a576cc55826dfb3f2d0c4698b700c1ae026a0f659ed332cdfe11299c08b99a",
+    "net": "mainnet",
+    "name": "oracle update (index 10 → 11)"
+  },
+  {
+    "tx": "0xe5797542adb9a1c47e426275e65145a414a8e731e5c301434839f06a4224c61b",
+    "net": "mainnet",
+    "name": "oracle update (index 9 → 10)"
+  },
+  {
+    "tx": "0x77351e1d6b24c0d0698c0fc523156c5087ba1a7a299993b8a4f9ff6a6aa14913",
+    "net": "testnet",
+    "name": "oracle update (testnet)"
+  }
+]

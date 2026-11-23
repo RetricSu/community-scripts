@@ -1,0 +1,115 @@
+{
+  "title": {
+    "zh": "一次性锁 约束",
+    "en": "Single Use Lock Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：ckb-devrel/ckb-proxy-locks / contracts/single-use-lock/src/entry.rs　·　0x8290…bbaf (data1，主网与测试网相同)",
+    "en": "Source: ckb-devrel/ckb-proxy-locks / contracts/single-use-lock/src/entry.rs　·　0x8290…bbaf (data1, same on mainnet and testnet)"
+  },
+  "transitions": [
+    {
+      "tag": "A",
+      "title": {
+        "zh": "与指定 OutPoint 同时花费",
+        "en": "Spend together with a given OutPoint"
+      },
+      "inputs": [
+        {
+          "label": "input",
+          "body": "Cell{ lock: { codeHash: SINGLE_USE, args: {{OutPoint 36B}} } }"
+        },
+        {
+          "label": {
+            "zh": "另一输入",
+            "en": "another input"
+          },
+          "body": {
+            "zh": "previous_output = args 中的 OutPoint",
+            "en": "previous_output = the OutPoint in args"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "outputs：任意",
+            "en": "outputs: any"
+          },
+          "body": {
+            "zh": "任意",
+            "en": "any"
+          }
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "args 字节布局",
+            "en": "args byte layout"
+          },
+          "layout": [
+            {
+              "name": "tx_hash",
+              "size": "32B",
+              "role": {
+                "zh": "OutPoint.tx_hash",
+                "en": "OutPoint.tx_hash"
+              },
+              "cons": {
+                "zh": "被某个输入消耗",
+                "en": "consumed by an input"
+              },
+              "err": "7",
+              "color": 1,
+              "flex": 4
+            },
+            {
+              "name": "index",
+              "size": "4B",
+              "role": {
+                "zh": "OutPoint.index u32 LE",
+                "en": "OutPoint.index u32 LE"
+              },
+              "cons": {
+                "zh": "同上",
+                "en": "same"
+              },
+              "err": "7",
+              "color": 2,
+              "flex": 1
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "≥ 36 字节",
+            "en": "≥ 36 bytes"
+          },
+          "err": "4"
+        },
+        {
+          "field": "inputs",
+          "cond": {
+            "zh": "某个输入的 previous_output = args 中的 OutPoint（该 OutPoint 只能花一次，故锁只能用一次）",
+            "en": "some input's previous_output = the OutPoint in args (it can be spent only once, so the lock is single-use)"
+          },
+          "err": "7"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码（error.rs）：1 IndexOutOfBound · 2 ItemMissing · 3 LengthNotEnough · 4 Encoding · 5 Overflow · 6 MoleculeVerification · 7 OutpointNotFound",
+      "en": "Error codes (error.rs): 1 IndexOutOfBound · 2 ItemMissing · 3 LengthNotEnough · 4 Encoding · 5 Overflow · 6 MoleculeVerification · 7 OutpointNotFound"
+    },
+    {
+      "zh": "不检查任何签名：安全性完全来自 args 指向的其他脚本",
+      "en": "No signature is checked: security comes entirely from the script that args points to"
+    }
+  ]
+}

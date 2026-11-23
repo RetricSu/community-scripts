@@ -1,0 +1,401 @@
+{
+  "title": {
+    "zh": "CrowdCell Receipt 类型脚本 约束",
+    "en": "CrowdCell Receipt Type Script Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：alesfer001/CrowdCell / contracts/receipt/src/main.rs@acbb40e　·　0x5237…8bf8b5 (data2，仅测试网)　·　社区合约，未经独立审计",
+    "en": "Source: alesfer001/CrowdCell / contracts/receipt/src/main.rs@acbb40e　·　0x5237…8bf8b5 (data2, testnet only)　·　community contract, not independently audited"
+  },
+  "transitions": [
+    {
+      "tag": "0 → 1",
+      "title": {
+        "zh": "随认捐创建回执",
+        "en": "Create receipt with a pledge"
+      },
+      "inputs": [
+        {
+          "label": "—",
+          "body": {
+            "zh": "无 group 输入",
+            "en": "no group input"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "receipt",
+          "body": "Cell{ type: { codeHash: RECEIPT, hashType: data2, args: {{pledge_code_hash 32B}} ‖ {{pledge_lock_code_hash 32B}} }, data(80B): {{amount}} ‖ {{backer}} ‖ {{campaign_hash}} ‖ {{deadline}} }"
+        },
+        {
+          "label": {
+            "zh": "回执数量",
+            "en": "receipts"
+          },
+          "body": {
+            "zh": "同一交易最多 1 个 receipt 输出",
+            "en": "at most 1 receipt output per transaction"
+          }
+        },
+        {
+          "label": "pledge",
+          "body": {
+            "zh": "第一个 type code_hash = args[0..32] 且 data ≥ 72B 的输出；其 lock code_hash 须等于 args[32..64]",
+            "en": "first output with type code_hash = args[0..32] and data ≥ 72B; its lock code_hash must equal args[32..64]"
+          }
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "receipt type args 字节布局（64B）",
+            "en": "receipt type args byte layout (64B)"
+          },
+          "layout": [
+            {
+              "name": "pledge_code_hash",
+              "size": "32B",
+              "role": {
+                "zh": "pledge type script 的 code_hash",
+                "en": "pledge type script code_hash"
+              },
+              "cons": {
+                "zh": "= pledge 输出的 type code_hash",
+                "en": "= pledge output type code_hash"
+              },
+              "err": "14",
+              "color": 1,
+              "flex": 4
+            },
+            {
+              "name": "pledge_lock_code_hash",
+              "size": "32B",
+              "role": {
+                "zh": "pledge lock 的 code_hash（真正的 pledge 所在的 lock）",
+                "en": "pledge lock code_hash (the lock a real pledge sits under)"
+              },
+              "cons": {
+                "zh": "= pledge 输出的 lock code_hash",
+                "en": "= pledge output lock code_hash"
+              },
+              "err": "26",
+              "color": 2,
+              "flex": 4
+            }
+          ]
+        },
+        {
+          "label": {
+            "zh": "receipt data 字节布局（创建时 80B）",
+            "en": "receipt data byte layout (80B at creation)"
+          },
+          "layout": [
+            {
+              "name": "pledge_amount",
+              "size": "8B",
+              "role": {
+                "zh": "认捐额 u64 LE",
+                "en": "pledge amount u64 LE"
+              },
+              "cons": {
+                "zh": "> 0；= pledge amount",
+                "en": "> 0; = pledge amount"
+              },
+              "err": "12 / 21",
+              "color": 1,
+              "flex": 2
+            },
+            {
+              "name": "backer_lock_hash",
+              "size": "32B",
+              "role": {
+                "zh": "认捐人 lock hash",
+                "en": "backer lock hash"
+              },
+              "cons": {
+                "zh": "非零；= pledge data[32..64]",
+                "en": "non-zero; = pledge data[32..64]"
+              },
+              "err": "13 / 22",
+              "color": 2,
+              "flex": 4
+            },
+            {
+              "name": "campaign_type_hash",
+              "size": "32B",
+              "role": {
+                "zh": "campaign type script hash",
+                "en": "campaign type script hash"
+              },
+              "cons": {
+                "zh": "= pledge lock args[0..32]",
+                "en": "= pledge lock args[0..32]"
+              },
+              "err": "24",
+              "color": 3,
+              "flex": 4
+            },
+            {
+              "name": "deadline_block",
+              "size": "8B",
+              "role": {
+                "zh": "截止区块 u64 LE",
+                "en": "deadline u64 LE"
+              },
+              "cons": {
+                "zh": "= pledge lock args[32..40]",
+                "en": "= pledge lock args[32..40]"
+              },
+              "err": "24",
+              "color": 4,
+              "flex": 2
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "receipt outputs",
+          "cond": {
+            "zh": "≤ 1（同一交易中的 receipt 输出）",
+            "en": "≤ 1 (receipt outputs in the tx)"
+          },
+          "err": "27"
+        },
+        {
+          "field": "args",
+          "cond": {
+            "zh": "≥ 64 字节",
+            "en": "≥ 64 bytes"
+          },
+          "err": "20"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "≥ 80 字节",
+            "en": "≥ 80 bytes"
+          },
+          "err": "10"
+        },
+        {
+          "field": "pledge_amount",
+          "cond": {
+            "zh": "> 0",
+            "en": "> 0"
+          },
+          "err": "12"
+        },
+        {
+          "field": "backer_lock_hash",
+          "cond": {
+            "zh": "≠ 0",
+            "en": "≠ 0"
+          },
+          "err": "13"
+        },
+        {
+          "field": "pledge",
+          "cond": {
+            "zh": "输出中存在 type code_hash = args[0..32] 且 data ≥ 72B 的 cell",
+            "en": "an output with type code_hash = args[0..32] and data ≥ 72B exists"
+          },
+          "err": "14"
+        },
+        {
+          "field": "amount",
+          "cond": {
+            "zh": "= pledge data[64..72]",
+            "en": "= pledge data[64..72]"
+          },
+          "err": "21"
+        },
+        {
+          "field": "backer",
+          "cond": {
+            "zh": "= pledge data[32..64]",
+            "en": "= pledge data[32..64]"
+          },
+          "err": "22"
+        },
+        {
+          "field": "pledge lock",
+          "cond": {
+            "zh": "pledge cell 的 lock code_hash = args[32..64]",
+            "en": "pledge cell lock code_hash = args[32..64]"
+          },
+          "err": "26"
+        },
+        {
+          "field": "campaign",
+          "cond": {
+            "zh": "pledge lock args ≥ 72B，且 [0..32] = campaign hash、[32..40] = deadline",
+            "en": "pledge lock args ≥ 72B and [0..32] = campaign hash, [32..40] = deadline"
+          },
+          "err": "24"
+        },
+        {
+          "field": "load cell data / type",
+          "cond": {
+            "zh": "加载失败（越界除外）",
+            "en": "load fails (out-of-bounds excepted)"
+          },
+          "err": "9"
+        },
+        {
+          "field": "load script",
+          "cond": {
+            "zh": "加载 type script 失败",
+            "en": "loading the type script fails"
+          },
+          "err": "19"
+        },
+        {
+          "field": "load pledge lock",
+          "cond": {
+            "zh": "匹配的 pledge 输出的 lock 加载失败",
+            "en": "loading the matching pledge output's lock fails"
+          },
+          "err": "16"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 0",
+      "title": {
+        "zh": "销毁回执取回押金",
+        "en": "Destroy receipt to reclaim its deposit"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "receipt（每个 group input 单独检查）",
+            "en": "receipt (each group input checked separately)"
+          },
+          "body": {
+            "zh": "Cell{\n  type: RECEIPT,\n  data(80B): {{amount}} ‖ {{backer}} ‖ {{campaign_hash}} ‖ {{deadline}},\n  since: {{绝对区块号，宽限期分支}}\n}",
+            "en": "Cell{\n  type: RECEIPT,\n  data(80B): {{amount}} ‖ {{backer}} ‖ {{campaign_hash}} ‖ {{deadline}},\n  since: {{absolute block number, grace-period branch}}\n}"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "无 group 输出",
+            "en": "no group output"
+          },
+          "body": {
+            "zh": "脚本不检查 capacity 去向（由回执自身的 lock 决定，不在本合约内）",
+            "en": "the script does not check where the capacity goes (the receipt's own lock decides, outside this contract)"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "data",
+          "cond": {
+            "zh": "每个 group input ≥ 80 字节（40 字节旧格式不再接受）",
+            "en": "each group input ≥ 80 bytes (the 40-byte legacy form is rejected)"
+          },
+          "err": "10"
+        },
+        {
+          "field": "settled (cell_dep)",
+          "cond": {
+            "zh": "cell_deps 中有该 campaign type hash 的 cell，且其 data[56] ≠ 0（1 Success / 2 Failed）→ 通过",
+            "en": "a cell_dep with the campaign type hash and data[56] ≠ 0 (1 Success / 2 Failed) → passes"
+          },
+          "err": "—"
+        },
+        {
+          "field": "settled (since)",
+          "cond": {
+            "zh": "since 为绝对区块号且 ≥ deadline + 1,944,000 → 通过",
+            "en": "since is an absolute block number ≥ deadline + 1,944,000 → passes"
+          },
+          "err": "—"
+        },
+        {
+          "field": "settled",
+          "cond": {
+            "zh": "以上两条都不满足 → 不允许（每个 group input 都要满足）",
+            "en": "neither holds → not allowed (every group input must satisfy it)"
+          },
+          "err": "23"
+        },
+        {
+          "field": "since",
+          "cond": {
+            "zh": "加载 group input 的 since 失败",
+            "en": "loading the group input's since fails"
+          },
+          "err": "25"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 1",
+      "title": {
+        "zh": "修改",
+        "en": "Modify"
+      },
+      "inputs": [
+        {
+          "label": "receipt",
+          "body": "Cell{ type: RECEIPT, … }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "receipt",
+          "body": "Cell{ type: RECEIPT, … }"
+        }
+      ],
+      "limits": [
+        {
+          "field": "group",
+          "cond": {
+            "zh": "输入与输出同时含 receipt 时不允许",
+            "en": "receipt in both inputs and outputs is not allowed"
+          },
+          "err": "11"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码（contracts/receipt/src/main.rs，共 16 个）：9 LOAD_DATA · 10 INVALID_RECEIPT_DATA · 11 RECEIPT_MODIFICATION_NOT_ALLOWED · 12 ZERO_PLEDGE_AMOUNT · 13 ZERO_BACKER_HASH · 14 NO_MATCHING_PLEDGE · 16 LOAD_LOCK · 19 LOAD_SCRIPT · 20 INVALID_ARGS · 21 AMOUNT_MISMATCH · 22 BACKER_MISMATCH · 23 CAMPAIGN_NOT_SETTLED · 24 CAMPAIGN_MISMATCH · 25 LOAD_SINCE · 26 NOT_PLEDGE_LOCK · 27 MULTIPLE_RECEIPTS。15、17、18 已不在源码中。",
+      "en": "Error codes (contracts/receipt/src/main.rs, 16 in total): 9 LOAD_DATA · 10 INVALID_RECEIPT_DATA · 11 RECEIPT_MODIFICATION_NOT_ALLOWED · 12 ZERO_PLEDGE_AMOUNT · 13 ZERO_BACKER_HASH · 14 NO_MATCHING_PLEDGE · 16 LOAD_LOCK · 19 LOAD_SCRIPT · 20 INVALID_ARGS · 21 AMOUNT_MISMATCH · 22 BACKER_MISMATCH · 23 CAMPAIGN_NOT_SETTLED · 24 CAMPAIGN_MISMATCH · 25 LOAD_SINCE · 26 NOT_PLEDGE_LOCK · 27 MULTIPLE_RECEIPTS. 15, 17 and 18 are no longer in the source."
+    },
+    {
+      "zh": "创建时只检查找到的第一个 pledge 输出（type code_hash 匹配且 data ≥ 72B），其余输出不检查",
+      "en": "Creation checks only the first pledge output found (type code_hash matches and data ≥ 72B); other outputs are not checked"
+    },
+    {
+      "zh": "所有回执共享同一个 script group，销毁时每个 group input 都要通过结算检查（不是只检查第一个）",
+      "en": "All receipts share one script group, so destruction checks every group input's settlement, not only the first"
+    },
+    {
+      "zh": "回执只保护自己的押金，不能取走认捐资金；认捐资金由 pledge lock 结算",
+      "en": "A receipt only guards its own deposit and cannot take pledged funds; pledged funds are settled by the pledge lock"
+    },
+    {
+      "zh": "回执押金 300 CKB 是前端按 (8 + 80 + 65 + 97) × 1.2 计算的常量（RECEIPT_CELL_CAPACITY），合约不检查 capacity",
+      "en": "The 300 CKB deposit is a frontend constant computed as (8 + 80 + 65 + 97) × 1.2 (RECEIPT_CELL_CAPACITY); the contract does not check capacity"
+    },
+    {
+      "zh": "二进制：deployment/checksums-testnet.txt（acbb40e）记录的 blake2b 与上述 code_hash 相同；作者于 2026-11-04 在该 commit 用 ./scripts/build-contracts.sh 重新构建，五个合约的哈希均与测试网部署一致",
+      "en": "Binary: deployment/checksums-testnet.txt (acbb40e) records a blake2b equal to the code_hash above; the author rebuilt with ./scripts/build-contracts.sh at that commit on 2026-11-04 and all five hashes matched the testnet deployment"
+    },
+    {
+      "zh": "解码器限制：cell_deps 数据不解析，“已结算”的 cell_dep 分支显示为未检查；since 宽限期分支可离线判断",
+      "en": "Decoder limitation: cell_dep data is not resolved, so the cell_dep settled branch shows as not checked; the since grace-period branch is checked offline"
+    },
+    {
+      "zh": "没有 receipt cell 的交易，脚本直接返回 0（不是错误码）",
+      "en": "A transaction with no receipt cells returns 0 from the script (not an error code)"
+    }
+  ]
+}

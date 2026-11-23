@@ -1,0 +1,58 @@
+{
+  "tags": [
+    "identity",
+    "open-source",
+    "community"
+  ],
+  "contributors": [
+    "luongthanhtung03"
+  ],
+  "source": {
+    "repo": "https://github.com/luongthanhtung03/ckb-session-kit",
+    "commit": "8157a64458ebe20e83b28e71f26331fdd95965e4",
+    "paths": [
+      "contracts/session-lock/src/main.rs",
+      "src/lock.ts",
+      "deployment/testnet.json",
+      "docs/SECURITY-EVIDENCE.md"
+    ],
+    "commit_note": "commit bumped after docs/SDK work (58 commits); contracts/session-lock/src/main.rs unchanged since before f51f07cc",
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0xab419466529ea479590d4be7b23580ce2ddc640ba902735c9ad9a22dc64c08ce",
+          "evidence": [
+            "listed in deployment/testnet.json"
+          ],
+          "matches_commit": false
+        }
+      ],
+      "note": "hash appears in the repo only as a deployment record or doc, which does not prove the recorded commit builds this binary (reproducible build not attempted)"
+    }
+  },
+  "deployments": [
+    {
+      "network": "testnet",
+      "code_hash": "0xab419466529ea479590d4be7b23580ce2ddc640ba902735c9ad9a22dc64c08ce",
+      "hash_type": "data2",
+      "constant_source": "ckb-session-kit src/lock.ts TESTNET_DEPLOYMENT, deployment/testnet.json, docs/SECURITY-EVIDENCE.md",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0xf3098bdb9a7bb1c500990be0f1159b7e66f507fef6b7a4f904046024284877f2"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0xf3098bdb9a7bb1c500990be0f1159b7e66f507fef6b7a4f904046024284877f2"
+      },
+      "type_script": null,
+      "data_hash": "0xab419466529ea479590d4be7b23580ce2ddc640ba902735c9ad9a22dc64c08ce",
+      "deploy_tx": "0xf3098bdb9a7bb1c500990be0f1159b7e66f507fef6b7a4f904046024284877f2",
+      "deploy_block": 22736207
+    }
+  ],
+  "checked_at": "2026-10-31"
+}

@@ -1,0 +1,64 @@
+{
+  "_doc": "Project registry keyed by project tag id (group 'project' in tags.json). Only links listed by the project itself (repo README, repo homepage, GitHub org/user profile); every URL HTTP-checked when added. Unknown fields are omitted. 'source' says where each link was found.",
+  "p-crowdcell": {
+    "name": "CrowdCell",
+    "desc": {
+      "zh": "CKB 上全有或全无的众筹（测试网预览）",
+      "en": "All-or-nothing crowdfunding on CKB (testnet preview)"
+    },
+    "website": "https://crowdcell.vercel.app",
+    "github": "https://github.com/alesfer001/CrowdCell",
+    "talk": "https://talk.nervos.org/t/introducing-ckb-kickstarter-decentralized-all-or-nothing-crowdfunding-on-nervos-ckb-testnet-mvp-live/10130",
+    "talk_profile": "https://talk.nervos.org/u/Ayoub_Lesfer",
+    "x": "https://x.com/crowdcellckb",
+    "author": "Ayoub Lesfer (GitHub alesfer001, Nervos Talk Ayoub_Lesfer)",
+    "source": "CrowdCell README @acbb40e; Nervos Talk /t/10130 created by Ayoub_Lesfer"
+  },
+  "p-cells": {
+    "name": "Cells / Cellula (.cell names)",
+    "website": "https://cellula.id",
+    "docs": "https://cellula.id/developers",
+    "github": "https://github.com/LusoCryptoLabs/cells-contracts",
+    "x": "https://x.com/lusocryptolabs",
+    "source": "cells-contracts repo homepage + README; X from the LusoCryptoLabs GitHub profile"
+  },
+  "p-godwoken": {
+    "name": "Godwoken",
+    "website": "https://godwoken.com",
+    "docs": "https://docs.godwoken.io",
+    "github": "https://github.com/godwokenrises",
+    "x": "https://x.com/godwokenrises",
+    "source": "godwoken repo homepage + README; website and X from the godwokenrises GitHub org profile"
+  },
+  "p-fiber": {
+    "name": "Fiber Network",
+    "website": "https://www.fiber.world",
+    "github": "https://github.com/nervosnetwork/fiber",
+    "discord": "https://discord.gg/BF9AJ4fzs6",
+    "source": "nervosnetwork/fiber repo homepage + README"
+  },
+  "p-spore": {
+    "name": "Spore Protocol",
+    "website": "https://spore.pro",
+    "docs": "https://docs.spore.pro",
+    "github": "https://github.com/sporeprotocol",
+    "source": "spore-contract README; sporeprotocol GitHub org profile"
+  },
+  "p-ickb": {
+    "name": "iCKB",
+    "website": "https://ickb.org",
+    "github": "https://github.com/ickb",
+    "source": "ickb GitHub org profile; ickb/contracts README"
+  },
+  "p-rgbpp": {
+    "name": "RGB++ (UTXO Stack)",
+    "github": "https://github.com/utxostack/rgbpp",
+    "x": "https://x.com/utxostack",
+    "source": "utxostack GitHub org profile (X); org website https://www.utxostack.network returned HTTP 402 to automated checks, so omitted"
+  },
+  "p-proxy-locks": {
+    "name": "ckb-proxy-locks",
+    "github": "https://github.com/ckb-devrel/ckb-proxy-locks",
+    "source": "repo (no website/docs listed)"
+  }
+}

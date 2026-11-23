@@ -1,0 +1,748 @@
+{
+  "title": {
+    "zh": "Godwoken rollup cell（state-validator，type）约束",
+    "en": "Godwoken rollup cell (state-validator, type) Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：godwokenrises/godwoken @c2b1f85 / gwos/contracts/state-validator + gw-utils　·　部署：godwoken-info @8ce6390 mainnet_v1 / testnet_v1_1",
+    "en": "Source: godwokenrises/godwoken @c2b1f85 / gwos/contracts/state-validator + gw-utils　·　deployments: godwoken-info @8ce6390 mainnet_v1 / testnet_v1_1"
+  },
+  "transitions": [
+    {
+      "tag": "0 → 1",
+      "title": {
+        "zh": "初始化 rollup cell",
+        "en": "Initialize rollup cell"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "input[0] 任意 cell",
+            "en": "input[0] any cell"
+          },
+          "body": "Cell{\n  capacity: any,\n  lock: deployer lock,\n  type: null,\n  data: any\n}\n// used for type_id"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "output[i] rollup cell",
+            "en": "output[i] rollup cell"
+          },
+          "body": "Cell{\n  capacity: R,\n  lock: rollup lock,\n  type: { codeHash: STATE_VALIDATOR, hashType: type, args: {{type_id(inputs[0], i) 32B}} },\n  data: {{GlobalState}}\n}"
+        }
+      ],
+      "sections": [
+        {
+          "title": {
+            "zh": "cell_deps",
+            "en": "cell_deps"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "cell_dep：STATE_VALIDATOR 代码",
+                "en": "cell_dep: STATE_VALIDATOR code"
+              },
+              "body": "code cell (see deployments)\n// needed by CKB to run the script"
+            },
+            {
+              "label": {
+                "zh": "cell_dep：RollupConfig cell",
+                "en": "cell_dep: RollupConfig cell"
+              },
+              "body": "Cell{ data: RollupConfig (molecule) }\n// load_rollup_config(): found by {{data hash == GlobalState.rollup_config_hash}} → else 10"
+            }
+          ]
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "data：GlobalState（190 字节 struct；V0 为 181 字节）",
+            "en": "data: GlobalState (190-byte struct; V0 is 181 bytes)"
+          },
+          "layout": [
+            {
+              "name": "rollup_config_hash",
+              "size": "32",
+              "role": {
+                "zh": "RollupConfig cell 的 data hash",
+                "en": "data hash of the RollupConfig cell"
+              },
+              "color": 1,
+              "flex": 2,
+              "err": "10"
+            },
+            {
+              "name": "account",
+              "size": "32+4",
+              "role": {
+                "zh": "L2 账户 SMT 根 + 账户数",
+                "en": "L2 account SMT root + count"
+              },
+              "color": 2,
+              "flex": 2
+            },
+            {
+              "name": "block",
+              "size": "32+8",
+              "role": {
+                "zh": "L2 区块 SMT 根 + 区块数",
+                "en": "L2 block SMT root + count"
+              },
+              "color": 3,
+              "flex": 2,
+              "cons": {
+                "zh": "submit：+1",
+                "en": "submit: +1"
+              },
+              "err": "23"
+            },
+            {
+              "name": "reverted_block_root",
+              "size": "32",
+              "role": {
+                "zh": "已回滚区块 SMT 根",
+                "en": "reverted block SMT root"
+              },
+              "color": 4,
+              "flex": 2,
+              "err": "13"
+            },
+            {
+              "name": "tip_block_hash",
+              "size": "32",
+              "role": {
+                "zh": "最新 L2 区块 hash",
+                "en": "latest L2 block hash"
+              },
+              "color": 5,
+              "flex": 2,
+              "err": "23"
+            },
+            {
+              "name": "tip_block_timestamp",
+              "size": "8",
+              "role": {
+                "zh": "最新区块时间戳（V0 无）",
+                "en": "latest block timestamp (absent in V0)"
+              },
+              "color": 6,
+              "flex": 1
+            },
+            {
+              "name": "last_finalized_timepoint",
+              "size": "8",
+              "role": {
+                "zh": "最近终结的 Timepoint",
+                "en": "last finalized Timepoint"
+              },
+              "color": 1,
+              "flex": 1,
+              "err": "23"
+            },
+            {
+              "name": "status",
+              "size": "1",
+              "role": {
+                "zh": "0 running / 1 halting",
+                "en": "0 running / 1 halting"
+              },
+              "color": 2,
+              "flex": 1,
+              "err": "21"
+            },
+            {
+              "name": "version",
+              "size": "1",
+              "role": {
+                "zh": "rollup 版本（V0 无）",
+                "en": "rollup version (absent in V0)"
+              },
+              "color": 3,
+              "flex": 1,
+              "cons": {
+                "zh": "≤ 2，不可降级",
+                "en": "≤ 2, no downgrade"
+              },
+              "err": "23"
+            }
+          ],
+          "hex": [
+            [
+              "rollup_config_hash",
+              "0x…(32B)"
+            ],
+            [
+              "block.count",
+              "0x{{a086010000000000}}  ← 100000"
+            ],
+            [
+              "last_finalized_timepoint",
+              "0x{{80}}0001…  ← top bit 1 = timestamp"
+            ],
+            [
+              "status / version",
+              "0x{{00}}{{02}}"
+            ]
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "≥ 32 字节，前 32 字节满足 type_id 规则",
+            "en": "≥ 32 bytes; first 32 bytes satisfy the type_id rule"
+          },
+          "err": "39"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "合法 GlobalState",
+            "en": "valid GlobalState"
+          },
+          "err": "4"
+        },
+        {
+          "field": "cell_deps",
+          "cond": {
+            "zh": "有 data hash = rollup_config_hash 的 RollupConfig",
+            "en": "a RollupConfig whose data hash = rollup_config_hash"
+          },
+          "err": "10"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 1",
+      "title": {
+        "zh": "提交 L2 区块 RollupSubmitBlock",
+        "en": "Submit L2 block (RollupSubmitBlock)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "input[0] rollup cell",
+            "en": "input[0] rollup cell"
+          },
+          "body": "Cell{\n  capacity: R,\n  lock: rollup lock (mainnet: omni_lock deployment),\n  type: { codeHash: STATE_VALIDATOR, hashType: type, args: type_id 32B },\n  data: GlobalState{ status: {{0 running}}, block.count: n, … }\n}"
+        },
+        {
+          "label": {
+            "zh": "input[1…] deposit cells（本区块收录）",
+            "en": "input[1…] deposit cells (collected by this block)"
+          },
+          "body": "Cell{\n  capacity: ≥ deposit,\n  lock: { DEPOSIT_LOCK, args: {{rollup_type_hash}} ‖ DepositLockArgs },\n  type: null | sUDT,\n  data: 0x | sUDT amount\n}"
+        },
+        {
+          "label": {
+            "zh": "input[…] custodian cells（支付提款）",
+            "en": "input[…] custodian cells (fund withdrawals)"
+          },
+          "body": "Cell{\n  capacity: X,\n  lock: { CUSTODIAN_LOCK, args: rollup_type_hash ‖ CustodianLockArgs },\n  type: null | sUDT,\n  data: …\n}"
+        },
+        {
+          "label": {
+            "zh": "input[…] 出块者 stake cell（可选，续用）",
+            "en": "input[…] producer stake cell (optional, reused)"
+          },
+          "body": "Cell{\n  capacity: S,\n  lock: { STAKE_LOCK, args: rollup_type_hash ‖ owner ‖ timepoint },\n  type: null,\n  data: 0x\n}"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "output[0] rollup cell′",
+            "en": "output[0] rollup cell′"
+          },
+          "body": "Cell{\n  capacity: R,\n  lock: rollup lock (mainnet: omni_lock deployment),\n  type: { codeHash: STATE_VALIDATOR, hashType: type, args: type_id 32B },\n  data: GlobalState{ {{block.count = n+1}}, {{tip_block_hash = new block}},\n  account = block.post_account, {{config / reverted_root / status unchanged}} }\n}\n// lock {{unchanged}}"
+        },
+        {
+          "label": {
+            "zh": "output[…] stake cell",
+            "en": "output[…] stake cell"
+          },
+          "body": "Cell{\n  capacity: {{≥ required_staking_capacity, ≥ input stake}},\n  lock: { STAKE_LOCK, args: {{same owner, stake_finalized_timepoint = this block}} },\n  type: null,\n  data: 0x\n}"
+        },
+        {
+          "label": {
+            "zh": "output[…] custodian cells（新存款）",
+            "en": "output[…] custodian cells (new deposits)"
+          },
+          "body": "Cell{\n  capacity: = deposits,\n  lock: { CUSTODIAN_LOCK, args: {{deposit_block_hash = this block, deposit_finalized_timepoint, deposit_lock_args}} },\n  type: null | sUDT,\n  data: …\n}"
+        },
+        {
+          "label": {
+            "zh": "output[…] withdrawal cells（本区块提款）",
+            "en": "output[…] withdrawal cells (this block’s withdrawals)"
+          },
+          "body": "Cell{\n  capacity: = request,\n  lock: { WITHDRAWAL_LOCK, args: {{rollup_type_hash ‖ WithdrawalLockArgs ‖ owner_lock}} },\n  type: null | sUDT,\n  data: …\n}"
+        }
+      ],
+      "sections": [
+        {
+          "title": {
+            "zh": "cell_deps",
+            "en": "cell_deps"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "cell_dep：STATE_VALIDATOR 代码",
+                "en": "cell_dep: STATE_VALIDATOR code"
+              },
+              "body": "code cell (see deployments)\n// needed by CKB to run the script"
+            },
+            {
+              "label": {
+                "zh": "cell_dep：RollupConfig cell",
+                "en": "cell_dep: RollupConfig cell"
+              },
+              "body": "Cell{ data: RollupConfig (molecule) }\n// load_rollup_config(): found by {{data hash == GlobalState.rollup_config_hash}} → else 10"
+            },
+            {
+              "label": {
+                "zh": "cell_dep：各 lock 代码",
+                "en": "cell_dep: lock codes"
+              },
+              "body": "custodian / deposit / withdrawal / stake lock code cells"
+            }
+          ]
+        },
+        {
+          "title": {
+            "zh": "witnesses（WitnessArgs）",
+            "en": "witnesses (WitnessArgs)"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "witnesses[rollup 输出序号]",
+                "en": "witnesses[rollup output index]"
+              },
+              "body": "{ lock: signature for the rollup cell lock (block producer),\n  output_type: {{RollupAction::RollupSubmitBlock{ block: L2Block,\n                 reverted_block_hashes, reverted_block_proof }}} }"
+            }
+          ]
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "data：GlobalState（190 字节 struct；V0 为 181 字节）",
+            "en": "data: GlobalState (190-byte struct; V0 is 181 bytes)"
+          },
+          "layout": [
+            {
+              "name": "rollup_config_hash",
+              "size": "32",
+              "role": {
+                "zh": "RollupConfig cell 的 data hash",
+                "en": "data hash of the RollupConfig cell"
+              },
+              "color": 1,
+              "flex": 2,
+              "err": "10"
+            },
+            {
+              "name": "account",
+              "size": "32+4",
+              "role": {
+                "zh": "L2 账户 SMT 根 + 账户数",
+                "en": "L2 account SMT root + count"
+              },
+              "color": 2,
+              "flex": 2
+            },
+            {
+              "name": "block",
+              "size": "32+8",
+              "role": {
+                "zh": "L2 区块 SMT 根 + 区块数",
+                "en": "L2 block SMT root + count"
+              },
+              "color": 3,
+              "flex": 2,
+              "cons": {
+                "zh": "submit：+1",
+                "en": "submit: +1"
+              },
+              "err": "23"
+            },
+            {
+              "name": "reverted_block_root",
+              "size": "32",
+              "role": {
+                "zh": "已回滚区块 SMT 根",
+                "en": "reverted block SMT root"
+              },
+              "color": 4,
+              "flex": 2,
+              "err": "13"
+            },
+            {
+              "name": "tip_block_hash",
+              "size": "32",
+              "role": {
+                "zh": "最新 L2 区块 hash",
+                "en": "latest L2 block hash"
+              },
+              "color": 5,
+              "flex": 2,
+              "err": "23"
+            },
+            {
+              "name": "tip_block_timestamp",
+              "size": "8",
+              "role": {
+                "zh": "最新区块时间戳（V0 无）",
+                "en": "latest block timestamp (absent in V0)"
+              },
+              "color": 6,
+              "flex": 1
+            },
+            {
+              "name": "last_finalized_timepoint",
+              "size": "8",
+              "role": {
+                "zh": "最近终结的 Timepoint",
+                "en": "last finalized Timepoint"
+              },
+              "color": 1,
+              "flex": 1,
+              "err": "23"
+            },
+            {
+              "name": "status",
+              "size": "1",
+              "role": {
+                "zh": "0 running / 1 halting",
+                "en": "0 running / 1 halting"
+              },
+              "color": 2,
+              "flex": 1,
+              "err": "21"
+            },
+            {
+              "name": "version",
+              "size": "1",
+              "role": {
+                "zh": "rollup 版本（V0 无）",
+                "en": "rollup version (absent in V0)"
+              },
+              "color": 3,
+              "flex": 1,
+              "cons": {
+                "zh": "≤ 2，不可降级",
+                "en": "≤ 2, no downgrade"
+              },
+              "err": "23"
+            }
+          ],
+          "hex": [
+            [
+              "rollup_config_hash",
+              "0x…(32B)"
+            ],
+            [
+              "block.count",
+              "0x{{a086010000000000}}  ← 100000"
+            ],
+            [
+              "last_finalized_timepoint",
+              "0x{{80}}0001…  ← top bit 1 = timestamp"
+            ],
+            [
+              "status / version",
+              "0x{{00}}{{02}}"
+            ]
+          ]
+        },
+        {
+          "label": {
+            "zh": "witnesses[rollup 输出序号].output_type：RollupAction（molecule union）",
+            "en": "witnesses[rollup output index].output_type: RollupAction (molecule union)"
+          },
+          "layout": [
+            {
+              "name": "item_id",
+              "size": "4B LE",
+              "role": {
+                "zh": "0 SubmitBlock / 1 EnterChallenge / 2 CancelChallenge / 3 Revert",
+                "en": "0 SubmitBlock / 1 EnterChallenge / 2 CancelChallenge / 3 Revert"
+              },
+              "color": 1,
+              "flex": 1,
+              "err": "4"
+            },
+            {
+              "name": "body",
+              "size": "table",
+              "role": {
+                "zh": "对应动作参数（如 SubmitBlock{block, reverted_block_hashes, reverted_block_proof}）",
+                "en": "action args (e.g. SubmitBlock{block, reverted_block_hashes, reverted_block_proof})"
+              },
+              "color": 2,
+              "flex": 4,
+              "cons": "≤ 512 KiB",
+              "err": "4"
+            }
+          ],
+          "hex": [
+            [
+              "RollupSubmitBlock",
+              "0x{{00000000}}…"
+            ]
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "lock",
+          "cond": {
+            "zh": "rollup cell lock 不变",
+            "en": "rollup cell lock unchanged"
+          },
+          "err": "7"
+        },
+        {
+          "field": "version",
+          "cond": {
+            "zh": "post ≤ 2 且 ≥ prev",
+            "en": "post ≤ 2 and ≥ prev"
+          },
+          "err": "23"
+        },
+        {
+          "field": "status",
+          "cond": {
+            "zh": "prev = running",
+            "en": "prev = running"
+          },
+          "err": "21"
+        },
+        {
+          "field": {
+            "zh": "区块",
+            "en": "block"
+          },
+          "cond": {
+            "zh": "检查点 / 提款根 / 交易 / 时间戳",
+            "en": "checkpoints / withdrawal root / txs / timestamp"
+          },
+          "err": "19 / 20"
+        },
+        {
+          "field": "SMT",
+          "cond": {
+            "zh": "kv_state_proof、区块 / 账户证明",
+            "en": "kv_state_proof, block / account proofs"
+          },
+          "err": "13 / 18"
+        },
+        {
+          "field": "stake",
+          "cond": {
+            "zh": "输出 stake cell 容量 ≥ required，参数与输入对应",
+            "en": "output stake capacity ≥ required; args match the input"
+          },
+          "err": "25"
+        },
+        {
+          "field": "deposit",
+          "cond": {
+            "zh": "deposit cell 与 L2 铸币一致",
+            "en": "deposit cells match L2 minting"
+          },
+          "err": "26"
+        },
+        {
+          "field": "withdrawal",
+          "cond": {
+            "zh": "withdrawal cell 与请求一致",
+            "en": "withdrawal cells match requests"
+          },
+          "err": "27 / 33"
+        },
+        {
+          "field": "custodian",
+          "cond": {
+            "zh": "输入 / 输出托管资产守恒",
+            "en": "custodian assets balance"
+          },
+          "err": "28 / 16 / 17"
+        },
+        {
+          "field": {
+            "zh": "挑战",
+            "en": "challenge"
+          },
+          "cond": {
+            "zh": "交易中不得有 challenge cell",
+            "en": "no challenge cell in the tx"
+          },
+          "err": "24"
+        },
+        {
+          "field": "post GlobalState",
+          "cond": {
+            "zh": "完全等于按区块计算的期望值",
+            "en": "exactly equals the expected state"
+          },
+          "err": "23"
+        },
+        {
+          "field": "reverted_block_hashes",
+          "cond": {
+            "zh": "对 reverted_block_root 的 SMT 证明",
+            "en": "SMT proof against reverted_block_root"
+          },
+          "err": "13"
+        }
+      ],
+      "extras": [
+        {
+          "zh": "提交区块的详细规则（submit_block.rs 1000+ 行）只按错误码归纳，解码器不离线复算 SMT 证明与资产。",
+          "en": "The full submit rules (submit_block.rs, 1000+ lines) are summarized by error code; the decoder does not recompute SMT proofs or assets offline."
+        }
+      ]
+    },
+    {
+      "tag": "1 → 1",
+      "title": {
+        "zh": "进入 / 取消挑战、回滚",
+        "en": "Enter / cancel challenge, revert"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "input[0] rollup cell",
+            "en": "input[0] rollup cell"
+          },
+          "body": "Cell{\n  capacity: R,\n  lock: rollup lock (mainnet: omni_lock deployment),\n  type: { codeHash: STATE_VALIDATOR, hashType: type, args: type_id 32B },\n  data: GlobalState (190B)\n}"
+        },
+        {
+          "label": {
+            "zh": "input[…] challenge cell（取消 / 回滚时）",
+            "en": "input[…] challenge cell (cancel / revert)"
+          },
+          "body": "Cell{\n  capacity: C,\n  lock: { CHALLENGE_LOCK, args: rollup_type_hash ‖ ChallengeLockArgs },\n  type: null,\n  data: 0x\n}"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "output[0] rollup cell′",
+            "en": "output[0] rollup cell′"
+          },
+          "body": "Cell{\n  capacity: R,\n  lock: rollup lock (mainnet: omni_lock deployment),\n  type: { codeHash: STATE_VALIDATOR, hashType: type, args: type_id 32B },\n  data: GlobalState{ {{status: Enter → 1 halting; Cancel / Revert → 0 running}} }\n}"
+        },
+        {
+          "label": {
+            "zh": "output[…] challenge cell（进入挑战时）",
+            "en": "output[…] challenge cell (enter challenge)"
+          },
+          "body": "Cell{\n  capacity: C,\n  lock: { CHALLENGE_LOCK, args: {{target{block_hash, target_index, target_type}}} ‖ rewards_receiver_lock },\n  type: null,\n  data: 0x\n}"
+        }
+      ],
+      "sections": [
+        {
+          "title": {
+            "zh": "witnesses（WitnessArgs）",
+            "en": "witnesses (WitnessArgs)"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "witnesses[rollup 输出序号]",
+                "en": "witnesses[rollup output index]"
+              },
+              "body": "{ output_type: {{RollupEnterChallenge{ChallengeWitness} | RollupCancelChallenge{} |\n                RollupRevert{reverted_blocks, block_proof, reverted_block_proof, new_tip_block}}} }"
+            }
+          ]
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "witnesses[rollup 输出序号].output_type：RollupAction（molecule union）",
+            "en": "witnesses[rollup output index].output_type: RollupAction (molecule union)"
+          },
+          "layout": [
+            {
+              "name": "item_id",
+              "size": "4B LE",
+              "role": {
+                "zh": "0 SubmitBlock / 1 EnterChallenge / 2 CancelChallenge / 3 Revert",
+                "en": "0 SubmitBlock / 1 EnterChallenge / 2 CancelChallenge / 3 Revert"
+              },
+              "color": 1,
+              "flex": 1,
+              "err": "4"
+            },
+            {
+              "name": "body",
+              "size": "table",
+              "role": {
+                "zh": "对应动作参数（如 SubmitBlock{block, reverted_block_hashes, reverted_block_proof}）",
+                "en": "action args (e.g. SubmitBlock{block, reverted_block_hashes, reverted_block_proof})"
+              },
+              "color": 2,
+              "flex": 4,
+              "cons": "≤ 512 KiB",
+              "err": "4"
+            }
+          ],
+          "hex": [
+            [
+              "RollupSubmitBlock",
+              "0x{{00000000}}…"
+            ]
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "Enter",
+          "cond": {
+            "zh": "prev running；输入无 / 输出恰有 challenge cell；目标区块未终结且存在",
+            "en": "prev running; no input / one output challenge cell; target block exists and is not finalized"
+          },
+          "err": "21 / 24 / 32"
+        },
+        {
+          "field": "Cancel",
+          "cond": {
+            "zh": "输入有 challenge cell；奖励 / 销毁正确；status 回 running",
+            "en": "an input challenge cell; reward / burn correct; status back to running"
+          },
+          "err": "24 / 30 / 23"
+        },
+        {
+          "field": "Revert",
+          "cond": {
+            "zh": "challenge 成熟；回滚区块与证明；奖励；stake 罚没",
+            "en": "challenge matured; reverted blocks and proofs; rewards; stake slashed"
+          },
+          "err": "24 / 29 / 30 / 25 / 6 / 23"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "⚠ 状态：官方已宣布 Godwoken 退役（2025-06-01 起，Nervos Talk “Sunset of Force Bridge and Godwoken”）；冻结期限延至 2026-01-01 23:59:59 UTC，之后网络冻结、桥前端下线，v0/v1 RPC 节点已关闭。本页仅作历史 / 审计参考。",
+      "en": "⚠ Status: Godwoken was officially sunset (from 2025-06-01, Nervos Talk “Sunset of Force Bridge and Godwoken”); the freeze deadline was extended to 2026-01-01 23:59:59 UTC, after which the network froze, the bridge UI went offline and v0/v1 RPC nodes were shut down. This page is for historical / audit reference."
+    },
+    {
+      "zh": "错误码（gw-utils/src/error.rs）：1 IndexOutOfBound，2 ItemMissing，3 LengthNotEnough，4 Encoding，5 InvalidArgs，6 InvalidSince，7 InvalidOutput，8 OwnerCellNotFound，9 RollupCellNotFound，10 RollupConfigNotFound，11 ProofNotFound，13 MerkleProof，14 AmountOverflow，15 InsufficientAmount，16/17 Insufficient{Input,Output}FinalizedAssets，18 SMTKeyMissing，19 InvalidStateCheckpoint，20 InvalidBlock，21 InvalidStatus，22 InvalidStakeCellUnlock，23 InvalidPostGlobalState，24 InvalidChallengeCell，25 InvalidStakeCell，26 InvalidDepositCell，27 InvalidWithdrawalCell，28 InvalidCustodianCell，29 InvalidRevertedBlocks，30 InvalidChallengeReward，32 InvalidChallengeTarget，33 InvalidWithdrawalRequest，34 UnknownEOAScript，39 InvalidTypeID，41 WrongSignature，43 RegistryAddressNotFound，45 NotFinalized。",
+      "en": "Error codes (gw-utils/src/error.rs): 1 IndexOutOfBound, 2 ItemMissing, 3 LengthNotEnough, 4 Encoding, 5 InvalidArgs, 6 InvalidSince, 7 InvalidOutput, 8 OwnerCellNotFound, 9 RollupCellNotFound, 10 RollupConfigNotFound, 11 ProofNotFound, 13 MerkleProof, 14 AmountOverflow, 15 InsufficientAmount, 16/17 Insufficient{Input,Output}FinalizedAssets, 18 SMTKeyMissing, 19 InvalidStateCheckpoint, 20 InvalidBlock, 21 InvalidStatus, 22 InvalidStakeCellUnlock, 23 InvalidPostGlobalState, 24 InvalidChallengeCell, 25 InvalidStakeCell, 26 InvalidDepositCell, 27 InvalidWithdrawalCell, 28 InvalidCustodianCell, 29 InvalidRevertedBlocks, 30 InvalidChallengeReward, 32 InvalidChallengeTarget, 33 InvalidWithdrawalRequest, 34 UnknownEOAScript, 39 InvalidTypeID, 41 WrongSignature, 43 RegistryAddressNotFound, 45 NotFinalized."
+    },
+    {
+      "zh": "Timepoint（u64）：最高位 0 = L2 区块号，1 = 毫秒时间戳（低 63 位）。",
+      "en": "Timepoint (u64): top bit 0 = L2 block number, 1 = millisecond timestamp (low 63 bits)."
+    }
+  ]
+}

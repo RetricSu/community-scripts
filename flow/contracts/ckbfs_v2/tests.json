@@ -1,0 +1,22 @@
+[
+  {
+    "tx": "0xd824b272df0e6ec2cee6eeb353a418174ff52150f4643aa06642d7236b141d0e",
+    "net": "mainnet",
+    "name": "CKBFS V2 publish (3 witnesses)"
+  },
+  {
+    "tx": "0x9afc3938efe0e29cb0246ea800b4ecf76e1407bd771f1f36980d1d8069f7c4d7",
+    "net": "testnet",
+    "name": "CKBFS V2 append"
+  },
+  {
+    "tx": "0x8b53101cb812e92957304daf09f437cd211efc8e4d7eac7fd92101fb422715de",
+    "net": "testnet",
+    "name": "CKBFS V2 publish (6 indexes)"
+  },
+  {
+    "tx": "0xbb0e0a9770c1f9315fa93ec76e79e6971057365dccb9fa4b086055b588a60252",
+    "net": "testnet",
+    "name": "CKBFS V2 publish (testnet)"
+  }
+]

@@ -1,0 +1,282 @@
+{
+  "title": {
+    "zh": "M-NFT NFT 约束",
+    "en": "M-NFT NFT Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：nervina-labs/ckb-nft-scripts @b5af002 contracts/nft-type/src/{entry,validator}.rs　·　mainnet 0x2b24…aec9 / testnet 0xb183…959f (type)",
+    "en": "Source: nervina-labs/ckb-nft-scripts @b5af002 contracts/nft-type/src/{entry,validator}.rs　·　mainnet 0x2b24…aec9 / testnet 0xb183…959f (type)"
+  },
+  "transitions": [
+    {
+      "tag": "0 → n",
+      "title": {
+        "zh": "铸造（class 1 → 1）",
+        "en": "Mint (class 1 → 1)"
+      },
+      "inputs": [
+        {
+          "label": "Class cell",
+          "body": "Cell{ type: CLASS { args: class_args 24B }, data: { issued: a, configure: c } }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "Class cell",
+          "body": "Cell{ type: CLASS, data: { issued: {{b > a}} } }"
+        },
+        {
+          "label": "NFT cell × (b − a)",
+          "body": "Cell{\n  type: { codeHash: {{NFT_TYPE}}, hashType: type,\n          args: {{class_args 24B}} ‖ {{token_id u32 BE}} },\n  data: version 0 ‖ characteristic 8B ‖ configure {{= c}} ‖ state ‖ [extinfo]\n}"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "data 字节布局",
+            "en": "data byte layout"
+          },
+          "layout": [
+            {
+              "name": "version",
+              "size": "1B",
+              "role": {
+                "zh": "版本",
+                "en": "version"
+              },
+              "cons": "= 0",
+              "err": "11",
+              "color": 1,
+              "flex": 1
+            },
+            {
+              "name": "characteristic",
+              "size": "8B",
+              "role": {
+                "zh": "特征",
+                "en": "characteristic"
+              },
+              "cons": {
+                "zh": "configure bit3 = 0 且未锁定才可改",
+                "en": "changeable only if configure bit3 = 0 and not locked"
+              },
+              "err": "23 / 39",
+              "color": 2,
+              "flex": 2
+            },
+            {
+              "name": "configure",
+              "size": "1B",
+              "role": {
+                "zh": "权限位（1 = 禁止）：bit0 claim · bit1 lock · bit2 ext_info · bit3 characteristic · bit4 claim 前转移 · bit5 claim 后转移 · bit6 claim 前销毁 · bit7 claim 后销毁",
+                "en": "permission bits (1 = forbidden): bit0 claim · bit1 lock · bit2 ext_info · bit3 characteristic · bit4 transfer before claim · bit5 transfer after claim · bit6 destroy before claim · bit7 destroy after claim"
+              },
+              "cons": {
+                "zh": "= class configure；不可变",
+                "en": "= class configure; immutable"
+              },
+              "err": "22 / 24",
+              "color": 3,
+              "flex": 4
+            },
+            {
+              "name": "state",
+              "size": "1B",
+              "role": {
+                "zh": "bit0 claimed · bit1 locked",
+                "en": "bit0 claimed · bit1 locked"
+              },
+              "cons": {
+                "zh": "只能单向置位（除非批准）",
+                "en": "one-way only (unless approved)"
+              },
+              "err": "25 / 26",
+              "color": 4,
+              "flex": 2
+            },
+            {
+              "name": "extinfo",
+              "size": "…",
+              "role": {
+                "zh": "扩展信息",
+                "en": "extension info"
+              },
+              "cons": {
+                "zh": "只能追加",
+                "en": "append-only"
+              },
+              "err": "31 / 32 / 37",
+              "color": 5,
+              "flex": 2
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "恰 28 字节",
+            "en": "exactly 28 bytes"
+          },
+          "err": "7"
+        },
+        {
+          "field": "class",
+          "cond": {
+            "zh": "输入中该 class cell 恰 1 个；issued 增加",
+            "en": "exactly 1 input with this class type; its issued increases"
+          },
+          "err": "14 / 15"
+        },
+        {
+          "field": "token ids",
+          "cond": {
+            "zh": "同 class 的 NFT 输出数 = 增量，token id 依次为 [a..b)",
+            "en": "NFT outputs of this class = the increase, token ids [a..b) in order"
+          },
+          "err": "20 / 21"
+        },
+        {
+          "field": "configure",
+          "cond": {
+            "zh": "NFT configure = 输入 class configure",
+            "en": "NFT configure = input class configure"
+          },
+          "err": "22"
+        }
+      ]
+    },
+    {
+      "tag": "n → n",
+      "title": {
+        "zh": "更新 / 转移 / claim / lock",
+        "en": "Update / transfer / claim / lock"
+      },
+      "inputs": [
+        {
+          "label": "NFT cell",
+          "body": "Cell{ lock: A, type: NFT, data: { characteristic, configure, state, extinfo } }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "NFT cell",
+          "body": "Cell{ lock: {{B}}, type: NFT, data: { … } }"
+        }
+      ],
+      "limits": [
+        {
+          "field": "witness",
+          "cond": {
+            "zh": "对应 WitnessArgs.lock 存在",
+            "en": "the matching WitnessArgs.lock is present"
+          },
+          "err": "40"
+        },
+        {
+          "field": "characteristic / configure",
+          "cond": {
+            "zh": "characteristic 改变需权限且未锁定；configure 不变",
+            "en": "characteristic change needs permission and no lock; configure unchanged"
+          },
+          "err": "23 / 39 / 24"
+        },
+        {
+          "field": "state",
+          "cond": {
+            "zh": "未批准时：claim 需未锁定且允许；不可取消 claim；lock 需允许；不可解锁",
+            "en": "without approval: claim needs unlocked + allowed; no un-claim; lock needs permission; no unlock"
+          },
+          "err": "35 / 27 / 25 / 28 / 26"
+        },
+        {
+          "field": "lock",
+          "cond": {
+            "zh": "lock 改变 = 转移：需未锁定，且按 claim 状态被 configure 允许",
+            "en": "lock change = transfer: must be unlocked and allowed by configure for the claim state"
+          },
+          "err": "36 / 29 / 30"
+        },
+        {
+          "field": "extinfo",
+          "cond": {
+            "zh": "允许时只能追加且未锁定；不允许时长度不变",
+            "en": "if allowed: append-only and unlocked; otherwise length unchanged"
+          },
+          "err": "31 / 32 / 37"
+        }
+      ]
+    },
+    {
+      "tag": "n → 0",
+      "title": {
+        "zh": "销毁",
+        "en": "Destroy"
+      },
+      "inputs": [
+        {
+          "label": "NFT cell",
+          "body": "Cell{ type: NFT, data: { state } }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "无同 class 的 NFT",
+            "en": "no NFT of this class"
+          },
+          "body": "—"
+        }
+      ],
+      "limits": [
+        {
+          "field": "witness",
+          "cond": {
+            "zh": "对应 WitnessArgs.lock 存在",
+            "en": "the matching WitnessArgs.lock is present"
+          },
+          "err": "40"
+        },
+        {
+          "field": "state",
+          "cond": {
+            "zh": "未批准时：未锁定，且按 claim 状态被 configure 允许",
+            "en": "without approval: unlocked and allowed by configure for the claim state"
+          },
+          "err": "38 / 33 / 34"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "版本：wiki Lina-Mainnet-deployment 写明部署提交 b5af002，Aggron-Testnet-deployment 写明 d0a844d；两者合约代码只差 helper.rs 中 CLASS_TYPE_CODE_HASH 常量（主网 0xd51e…3d9a / 测试网 0x095b…e3fc）。之后的提交只调整目录结构与 capsule 版本。未做可复现构建。",
+      "en": "Version: the wiki Lina-Mainnet-deployment page names deployment commit b5af002 and Aggron-Testnet-deployment names d0a844d; the contract code differs only in helper.rs CLASS_TYPE_CODE_HASH (mainnet 0xd51e…3d9a / testnet 0x095b…e3fc). Later commits only restructure directories and bump capsule. No reproducible build was attempted."
+    },
+    {
+      "zh": "“批准”（helper.rs）：cell_deps[0] 的 lock = inputs[0] 的 lock，且 cell_deps[0] 的 type hash[0..20] = issuer id 或 type = 本 class。批准时跳过 claim / lock 规则和销毁规则。解码器不读取 cell_deps，所以这些规则不满足时显示为“未检查”。",
+      "en": "\"Approval\" (helper.rs): cell_deps[0] lock = inputs[0] lock, and cell_deps[0] type hash[0..20] = issuer id or its type = this class. With approval the claim / lock rules and the destroy rules are skipped. The decoder does not load cell_deps, so those rules show as \"not checked\" when unmet."
+    },
+    {
+      "zh": "按源码原样：configure 不允许 ext_info 时只比较数据长度，等长但内容不同的修改能通过。",
+      "en": "As written: when configure forbids ext_info, only the data length is compared, so a same-length content change passes."
+    },
+    {
+      "zh": "NFT 合约内置 class type code hash（构建常量），所以主网 / 测试网二进制不同。动作按同一 class 的所有 NFT 计数。",
+      "en": "The NFT script embeds the class type code hash (a build constant), so the mainnet and testnet binaries differ. The action counts all NFTs of the same class."
+    },
+    {
+      "zh": "规则 40（helper.rs）：找到第一个带此 type 的输入，取它的 lock，再找第一个使用该 lock 的输入；该位置的 WitnessArgs.lock 必须存在（witness 缺失或解析失败也算缺失），用于禁止 ACP 这类不签名的 lock 更新 / 销毁。",
+      "en": "Rule 40 (helper.rs): take the first input with this type, take its lock, find the first input with that lock; the WitnessArgs.lock at that index must be present (a missing or unparsable witness counts as absent). It blocks signature-less locks such as ACP from updating / destroying."
+    },
+    {
+      "zh": "错误码（script-utils/src/error.rs，wiki Error-Codes）：1–4 syscall · 5 IssuerDataInvalid · 6 IssuerCellsCountError · 7 TypeArgsInvalid · 8 IssuerClassCountError · 9 IssuerSetCountError · 10 IssuerCellCannotDestroyed · 11 VersionInvalid · 12 ClassDataInvalid · 13 ClassTotalSmallerThanIssued · 14 ClassCellsCountError · 15 ClassIssuedInvalid · 16 ClassImmutableFieldsNotSame · 17 ClassCellCannotDestroyed · 18 ClassIdIncreaseError · 19 NFTDataInvalid · 20 NFTCellsCountError · 21 NFTTokenIdIncreaseError · 22–39 NFT 状态规则 · 40 GroupInputWitnessNoneError",
+      "en": "Error codes (script-utils/src/error.rs, wiki Error-Codes): 1–4 syscall · 5 IssuerDataInvalid · 6 IssuerCellsCountError · 7 TypeArgsInvalid · 8 IssuerClassCountError · 9 IssuerSetCountError · 10 IssuerCellCannotDestroyed · 11 VersionInvalid · 12 ClassDataInvalid · 13 ClassTotalSmallerThanIssued · 14 ClassCellsCountError · 15 ClassIssuedInvalid · 16 ClassImmutableFieldsNotSame · 17 ClassCellCannotDestroyed · 18 ClassIdIncreaseError · 19 NFTDataInvalid · 20 NFTCellsCountError · 21 NFTTokenIdIncreaseError · 22–39 NFT state rules · 40 GroupInputWitnessNoneError"
+    },
+    {
+      "zh": "2026-11-19 上游审阅（非链上升级声明）：官方 wiki 仍固定 Lina=b5af002、Aggron=d0a844d；与 HEAD 的差异为格式/导入整理及 helper 内 CLASS_TYPE_CODE_HASH 从 Lina 改为 Aggron。不能用 Aggron 常量替换主网；维持按网络选择 class hash，数据布局、转换和错误码不变。",
+      "en": "2026-11-19 upstream review (not an on-chain upgrade claim): Official wiki still pins Lina=b5af002 and Aggron=d0a844d. HEAD differs by formatting/import cleanup and switching helper CLASS_TYPE_CODE_HASH from Lina to Aggron. Do not replace the mainnet constant with Aggron; retain network-specific class hashes, layouts, transitions and errors."
+    }
+  ]
+}

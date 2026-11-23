@@ -1,0 +1,260 @@
+{
+  "title": {
+    "zh": ".bit IncomeCell Type 约束",
+    "en": ".bit IncomeCell Type Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：dotbitHQ/did-contracts @0cc9fbf contracts/income-cell-type",
+    "en": "Source: dotbitHQ/did-contracts @0cc9fbf contracts/income-cell-type"
+  },
+  "transitions": [
+    {
+      "tag": "0 → 1",
+      "title": {
+        "zh": "create_income：创建 IncomeCell",
+        "en": "create_income: create an IncomeCell"
+      },
+      "inputs": [],
+      "outputs": [
+        {
+          "label": "IncomeCell",
+          "body": "Cell{\n  lock: {{always-success}},\n  type: {{INCOME}},\n  capacity: {{= basic_capacity}}\n}"
+        }
+      ],
+      "limits": [
+        {
+          "field": "witness",
+          "cond": {
+            "zh": "das ActionData witness 可解析",
+            "en": "das ActionData witness decodes"
+          },
+          "err": "46"
+        },
+        {
+          "field": {
+            "zh": "系统开关",
+            "en": "system switch"
+          },
+          "cond": {
+            "zh": "ConfigCellMain.status ≠ off（配置，未检查）",
+            "en": "ConfigCellMain.status ≠ off (config, not checked)"
+          },
+          "err": "-1"
+        },
+        {
+          "field": {
+            "zh": "数量",
+            "en": "count"
+          },
+          "cond": {
+            "zh": "输入 0 个、输出 1 个 IncomeCell",
+            "en": "0 IncomeCells in inputs, 1 in outputs"
+          },
+          "err": "6"
+        },
+        {
+          "field": "lock",
+          "cond": {
+            "zh": "always-success lock（code_hash = ALWAYS_SUCCESS_LOCK_TYPE_ID，hash_type type）",
+            "en": "always-success lock (code_hash = ALWAYS_SUCCESS_LOCK_TYPE_ID, hash_type type)"
+          },
+          "err": "30"
+        },
+        {
+          "field": {
+            "zh": "witness 记录",
+            "en": "witness records"
+          },
+          "cond": {
+            "zh": "只有 1 条，属于 creator，金额 = basic_capacity（未检查）",
+            "en": "exactly 1, owned by the creator, amount = basic_capacity (not checked)"
+          },
+          "err": "6"
+        },
+        {
+          "field": "capacity",
+          "cond": {
+            "zh": "= ConfigCellIncome.basic_capacity（配置，未检查）",
+            "en": "= ConfigCellIncome.basic_capacity (config, not checked)"
+          },
+          "err": "-122"
+        }
+      ]
+    },
+    {
+      "tag": "n → m",
+      "title": {
+        "zh": "consolidate_income：合并收入记录",
+        "en": "consolidate_income: merge income records"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "IncomeCell × n（n ≥ 2）",
+            "en": "IncomeCell × n (n ≥ 2)"
+          },
+          "body": "Cell{ type: {{INCOME}} }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "IncomeCell × m（m ≤ n）",
+            "en": "IncomeCell × m (m ≤ n)"
+          },
+          "body": "Cell{ type: {{INCOME}} }"
+        },
+        {
+          "label": {
+            "zh": "转给记录所有者的 cell",
+            "en": "cells paid to record owners"
+          },
+          "body": "Cell{ lock: {{owner}}, capacity: {{≥ amount − fee}} }"
+        }
+      ],
+      "limits": [
+        {
+          "field": "witness",
+          "cond": {
+            "zh": "das ActionData witness 可解析",
+            "en": "das ActionData witness decodes"
+          },
+          "err": "46"
+        },
+        {
+          "field": {
+            "zh": "系统开关",
+            "en": "system switch"
+          },
+          "cond": {
+            "zh": "ConfigCellMain.status ≠ off（配置，未检查）",
+            "en": "ConfigCellMain.status ≠ off (config, not checked)"
+          },
+          "err": "-1"
+        },
+        {
+          "field": {
+            "zh": "数量",
+            "en": "count"
+          },
+          "cond": {
+            "zh": "输入 ≥ 2，输出 ≤ 输入",
+            "en": "inputs ≥ 2, outputs ≤ inputs"
+          },
+          "err": "-126"
+        },
+        {
+          "field": {
+            "zh": "记录",
+            "en": "records"
+          },
+          "cond": {
+            "zh": "按 max_records、min_transfer_capacity、合并费率分为转出 / 保留；每个转出记录在输出中恰好 1 个同 lock 的 cell 且金额足够；不能浪费（未检查：需要解码 witness 和配置）",
+            "en": "split into transfer / keep by max_records, min_transfer_capacity and the consolidate profit rate; each transferred record has exactly one output cell with its lock and enough capacity; no waste (not checked: needs decoded witnesses and config)"
+          },
+          "err": "-125 · -124 · -123 · 6"
+        }
+      ]
+    },
+    {
+      "tag": "* → *",
+      "title": {
+        "zh": "其他业务中出现",
+        "en": "Used inside other actions"
+      },
+      "inputs": [],
+      "outputs": [
+        {
+          "label": "IncomeCell",
+          "body": "Cell{ type: {{INCOME}} }"
+        }
+      ],
+      "limits": [
+        {
+          "field": "witness",
+          "cond": {
+            "zh": "das ActionData witness 可解析",
+            "en": "das ActionData witness decodes"
+          },
+          "err": "46"
+        },
+        {
+          "field": {
+            "zh": "系统开关",
+            "en": "system switch"
+          },
+          "cond": {
+            "zh": "ConfigCellMain.status ≠ off（配置，未检查）",
+            "en": "ConfigCellMain.status ≠ off (config, not checked)"
+          },
+          "err": "-1"
+        },
+        {
+          "field": "confirm_proposal",
+          "cond": {
+            "zh": "输入中有 ProposalCell（按配置 type id，未检查）",
+            "en": "a ProposalCell is in inputs (by config type id, not checked)"
+          },
+          "err": "6"
+        },
+        {
+          "field": "buy_account",
+          "cond": {
+            "zh": "输入中有 AccountSaleCell（未检查）",
+            "en": "an AccountSaleCell is in inputs (not checked)"
+          },
+          "err": "6"
+        },
+        {
+          "field": "accept_offer",
+          "cond": {
+            "zh": "输入中有 OfferCell（未检查）",
+            "en": "an OfferCell is in inputs (not checked)"
+          },
+          "err": "6"
+        },
+        {
+          "field": "renew_account",
+          "cond": {
+            "zh": "输入中有 AccountCell（未检查）",
+            "en": "an AccountCell is in inputs (not checked)"
+          },
+          "err": "6"
+        },
+        {
+          "field": {
+            "zh": "其他 action",
+            "en": "other actions"
+          },
+          "cond": {
+            "zh": "不支持",
+            "en": "not supported"
+          },
+          "err": "27"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "部署：code hash 是 Type ID 脚本哈希；type-id args 来自 dotbitHQ/das-lib core/env.go（主网 0x108fba6a…，测试网 Testnet2 0xd7b9d821…），两网都已在链上看到活的 code cell 和交易。",
+      "en": "Deployment: the code hash is the Type ID script hash; type-id args come from dotbitHQ/das-lib core/env.go (mainnet 0x108fba6a…, testnet Testnet2 0xd7b9d821…); live code cells and txs seen on both networks."
+    },
+    {
+      "zh": "这个 type 不检查 lock 以外的签名：IncomeCell 用 always-success lock，规则全部在 type 里。",
+      "en": "This type does not check signatures: IncomeCells use the always-success lock, so all rules live in the type."
+    },
+    {
+      "zh": "大部分规则依赖 IncomeCell witness 的 molecule 记录和 cell_deps 里的 ConfigCellIncome / ConfigCellProfitRate；解码器不加载 cell_deps 数据，本插件也不解码 IncomeCell witness，所以这些项显示为未检查。",
+      "en": "Most rules depend on the molecule records in IncomeCell witnesses and on ConfigCellIncome / ConfigCellProfitRate in cell_deps; the decoder does not load cell_dep data and this plugin does not decode IncomeCell witnesses, so those items show as not checked."
+    },
+    {
+      "zh": "Type ID 合约可升级；所读源码 0cc9fbf 官方注明从最新部署合约同步，未做可复现构建。",
+      "en": "Type ID contracts are upgradable; the source read (0cc9fbf) is officially described as synced from the latest deployed contracts; no reproducible build."
+    },
+    {
+      "zh": "错误码（das-core error.rs）：-1 SystemOff · 6 InvalidTransactionStructure · 27 ActionNotSupported · 30 AlwaysSuccessLockIsRequired · 46 WitnessDataDecodingError · -126 ConsolidateConditionNotSatisfied · -125 ConsolidateError · -124 ConsolidateWaste · -123 TransferError · -122 CapacityError",
+      "en": "Error codes (das-core error.rs): -1 SystemOff · 6 InvalidTransactionStructure · 27 ActionNotSupported · 30 AlwaysSuccessLockIsRequired · 46 WitnessDataDecodingError · -126 ConsolidateConditionNotSatisfied · -125 ConsolidateError · -124 ConsolidateWaste · -123 TransferError · -122 CapacityError"
+    }
+  ]
+}

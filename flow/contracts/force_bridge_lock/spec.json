@@ -1,0 +1,183 @@
+{
+  "title": {
+    "zh": "Force Bridge 跨链锁（bridge lockscript）约束",
+    "en": "Force Bridge bridge lockscript Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：nervosnetwork/force-bridge@f3d7df7 ckb-contracts/lib/bridge-lockscript-lib/src/lib.rs + adapter.rs　·　mainnet 0x93bc…1789 / testnet 0x2170…b50e，hash_type type（force-bridge 官方配置）",
+    "en": "Source: nervosnetwork/force-bridge@f3d7df7 ckb-contracts/lib/bridge-lockscript-lib/src/lib.rs + adapter.rs　·　mainnet 0x93bc…1789 / testnet 0x2170…b50e, hash_type type (force-bridge official config)"
+  },
+  "transitions": [
+    {
+      "tag": "1 → N",
+      "title": {
+        "zh": "解锁：由 owner cell 的 lock（委员会多签）授权",
+        "en": "Unlock: authorised by the owner cell lock (committee multisig)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "input（bridge lock）",
+            "en": "input (bridge lock)"
+          },
+          "body": "Cell{\n  lock: { codeHash: BRIDGE_LOCK,\n          args: ForceBridgeLockscriptArgs{\n            {{owner_cell_type_hash}}, chain, asset } }\n}"
+        },
+        {
+          "label": {
+            "zh": "另一个 input（owner 授权）",
+            "en": "another input (owner authorisation)"
+          },
+          "body": {
+            "zh": "Cell{ lock: {{hash = owner cell 的 lock hash}} }",
+            "en": "Cell{ lock: {{hash = owner cell lock hash}} }"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "outputs：任意",
+            "en": "outputs: any"
+          },
+          "body": {
+            "zh": "本 lock 不检查 outputs",
+            "en": "this lock does not check outputs"
+          }
+        }
+      ],
+      "sections": [
+        {
+          "title": {
+            "zh": "cell_deps",
+            "en": "cell_deps"
+          },
+          "boxes": [
+            {
+              "label": "owner cell",
+              "body": {
+                "zh": "Cell{\n  type: {{hash = owner_cell_type_hash}}（Type ID），\n  lock: 委员会多签\n}\n按顺序找第一个 type hash 匹配的 cell_dep",
+                "en": "Cell{\n  type: {{hash = owner_cell_type_hash}} (Type ID),\n  lock: committee multisig\n}\nfirst cell_dep (in order) whose type hash matches"
+              }
+            }
+          ]
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "args 字节布局（molecule table）",
+            "en": "args byte layout (molecule table)"
+          },
+          "layout": [
+            {
+              "name": "header",
+              "size": "16B",
+              "role": {
+                "zh": "total_size + 3 个 offset",
+                "en": "total_size + 3 offsets"
+              },
+              "cons": {
+                "zh": "molecule 严格校验",
+                "en": "strict molecule verify"
+              },
+              "err": "-1",
+              "color": 0
+            },
+            {
+              "name": "owner_cell_type_hash",
+              "size": "32B",
+              "role": {
+                "zh": "owner cell 的 type script hash",
+                "en": "type script hash of the owner cell"
+              },
+              "cons": {
+                "zh": "必须在 cell_deps 里找到",
+                "en": "must be found in cell_deps"
+              },
+              "err": "-1",
+              "color": 1,
+              "flex": 3
+            },
+            {
+              "name": "chain",
+              "size": "1B",
+              "role": {
+                "zh": "来源链（链下 ChainType：0 BTC / 1 ETH / 2 EOS / 3 TRON / 4 POLKADOT）",
+                "en": "origin chain (off-chain ChainType: 0 BTC / 1 ETH / 2 EOS / 3 TRON / 4 POLKADOT)"
+              },
+              "cons": {
+                "zh": "lock 不检查",
+                "en": "not checked by the lock"
+              },
+              "color": 2
+            },
+            {
+              "name": "asset",
+              "size": "4+nB",
+              "role": {
+                "zh": "资产标识（如 ETH 代币地址字符串）",
+                "en": "asset id (e.g. ETH token address string)"
+              },
+              "cons": {
+                "zh": "lock 不检查",
+                "en": "not checked by the lock"
+              },
+              "color": 3,
+              "flex": 2
+            }
+          ],
+          "hex": [
+            [
+              "args",
+              "0x5f000000 10000000 30000000 31000000 | c5fe9a19…e18d | 01 | 2a000000 \"0xeca82185adCE47f39c684352B0439f030f860318\""
+            ]
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "ForceBridgeLockscriptArgsReader::verify(args, false) 通过",
+            "en": "ForceBridgeLockscriptArgsReader::verify(args, false) passes"
+          },
+          "err": "-1"
+        },
+        {
+          "field": "owner cell",
+          "cond": {
+            "zh": "cell_deps 中存在 type hash = owner_cell_type_hash 的 cell，否则 panic “owner cell not found”",
+            "en": "a cell_dep with type hash = owner_cell_type_hash exists, else panic \"owner cell not found\""
+          },
+          "err": "-1"
+        },
+        {
+          "field": "inputs",
+          "cond": {
+            "zh": "某个 input 的 lock hash = 该 owner cell 的 lock hash，否则 panic “not authorized to unlock the cell”",
+            "en": "some input lock hash = that owner cell lock hash, else panic \"not authorized to unlock the cell\""
+          },
+          "err": "-1"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "所有失败都是 panic，contracts-helper 的 panic_handler 统一 exit(-1)，没有细分错误码。",
+      "en": "Every failure is a panic; contracts-helper panic_handler exits with -1, so there are no finer error codes."
+    },
+    {
+      "zh": "不检查签名：安全性完全来自 owner cell 的 lock（官方部署文档：委员会 secp256k1 多签）和 owner cell 的 Type ID 唯一性。",
+      "en": "No signature is checked here: security comes entirely from the owner cell lock (committee secp256k1 multisig per the official deployment doc) and the Type ID uniqueness of the owner cell."
+    },
+    {
+      "zh": "注意：CKB Explorer 注册表里名为 “Force Bridge” 的 0x9f3a…f52f 不是这个 bridge lockscript，而是 Force Bridge 部署的未发布版 Omnilock（见 omnilock_v1 页）。",
+      "en": "Note: the CKB Explorer registry entry named \"Force Bridge\" (0x9f3a…f52f) is not this bridge lockscript but a pre-release Omnilock deployed by Force Bridge (see the omnilock_v1 page)."
+    },
+    {
+      "zh": "同仓库的 recipient-typescript 不在清单中，未收录。",
+      "en": "The recipient-typescript in the same repo is not in the list and was not added."
+    }
+  ]
+}

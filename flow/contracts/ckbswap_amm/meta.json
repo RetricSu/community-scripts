@@ -1,0 +1,27 @@
+{
+  "tags": [
+    "defi",
+    "token",
+    "open-source",
+    "community"
+  ],
+  "contributors": [
+    "ckbswap"
+  ],
+  "source": {
+    "repo": "https://github.com/ckbswap/contracts",
+    "commit": "b7cd8458a798b4386c1b401ce7dd10333a728443",
+    "paths": [
+      "contracts/swap/src/main.rs",
+      "crates/protocol/src/lib.rs",
+      "README.md"
+    ],
+    "commit_note": "commit read when writing this spec (default-branch HEAD, 2026-10-27). The repository publishes no deployment (README: no deployment configuration, transaction builder or CKB-VM integration tests), so there is no on-chain code_hash and no test tx.",
+    "binary": {
+      "status": "unverified",
+      "note": "no deployment resolved on chain"
+    }
+  },
+  "deployments": [],
+  "checked_at": "2026-11-12"
+}

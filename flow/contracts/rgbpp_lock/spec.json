@@ -1,0 +1,231 @@
+{
+  "title": {
+    "zh": "RGB++ lock 约束",
+    "en": "RGB++ lock Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：utxostack/rgbpp / contracts/rgbpp-lock/src/main.rs + crates/core　·　mainnet 0xbc6c…6936 / testnet3 0x61ca…3248 / signet 0xd075…0364，hash_type type（rgbpp-sdk）",
+    "en": "Source: utxostack/rgbpp / contracts/rgbpp-lock/src/main.rs + crates/core　·　mainnet 0xbc6c…6936 / testnet3 0x61ca…3248 / signet 0xd075…0364, hash_type type (rgbpp-sdk)"
+  },
+  "transitions": [
+    {
+      "tag": "N → M",
+      "title": {
+        "zh": "同构绑定转移（BTC 交易驱动 CKB 交易）",
+        "en": "Isomorphic transfer (BTC tx drives the CKB tx)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "RGB++ cell（绑定 BTC UTXO）",
+            "en": "RGB++ cell (bound to a BTC UTXO)"
+          },
+          "body": "Cell{\n  lock: { codeHash: RGBPP_LOCK,\n          args: {{out_index u32}} ‖ {{btc_txid 32B}} },\n  type: xUDT / Spore …\n}"
+        },
+        {
+          "label": "witness[group 0].lock",
+          "body": {
+            "zh": "RGBPPUnlock{\n  version: {{0}},\n  extra_data: { input_len, output_len },\n  btc_tx: {{raw BTC tx}},\n  btc_tx_proof: {{SPV proof}}\n}\n// 或 4 字节 u32 = 另一个 witness 的序号",
+            "en": "RGBPPUnlock{\n  version: {{0}},\n  extra_data: { input_len, output_len },\n  btc_tx: {{raw BTC tx}},\n  btc_tx_proof: {{SPV proof}}\n}\n// or a 4-byte u32 index of another witness"
+          }
+        },
+        {
+          "label": "cell_deps",
+          "body": {
+            "zh": "RGB++ config cell（BTC 轻客户端 type hash、BTC time lock type hash）+ 轻客户端 cell",
+            "en": "RGB++ config cell (BTC light client type hash, BTC time lock type hash) + light client cell"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "新 RGB++ cell（重新绑定到本 BTC 交易的输出）",
+            "en": "new RGB++ cell (re-sealed to an output of this BTC tx)"
+          },
+          "body": "Cell{\n  lock: RGBPP_LOCK( {{i < btc_tx.outputs}} ‖ {{btc_tx.txid}} ),\n  type: same asset\n}"
+        },
+        {
+          "label": {
+            "zh": "或 BTC time lock（leap 到 CKB）",
+            "en": "or a BTC time lock (leap to CKB)"
+          },
+          "body": "Cell{ lock: BTC_TIME_LOCK{ lock_script, after ≥ 6, btc_txid = btc_tx.txid } }"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "args：RGBPPLock（struct 36B）",
+            "en": "args: RGBPPLock (struct 36B)"
+          },
+          "layout": [
+            {
+              "name": "out_index",
+              "size": "4B",
+              "role": {
+                "zh": "BTC 输出序号 u32 LE",
+                "en": "BTC output index u32 LE"
+              },
+              "cons": {
+                "zh": "BTC 交易花费 (txid, index)",
+                "en": "BTC tx spends (txid, index)"
+              },
+              "err": "0x44 (68)",
+              "color": 2
+            },
+            {
+              "name": "btc_txid",
+              "size": "32B",
+              "role": {
+                "zh": "BTC txid（内部字节序，浏览器显示需反转）",
+                "en": "BTC txid (internal byte order; reverse for explorers)"
+              },
+              "cons": "—",
+              "err": "0x31 (49)",
+              "color": 1,
+              "flex": 4
+            }
+          ]
+        },
+        {
+          "label": {
+            "zh": "BTC 交易中的 commitment",
+            "en": "commitment inside the BTC tx"
+          },
+          "layout": [
+            {
+              "name": "OP_RETURN",
+              "size": "1B",
+              "role": "0x6a",
+              "cons": {
+                "zh": "第一个 OP_RETURN 输出",
+                "en": "first OP_RETURN output"
+              },
+              "err": "0x33 (51)",
+              "color": 0
+            },
+            {
+              "name": "PUSH32",
+              "size": "1B",
+              "role": "0x20",
+              "cons": {
+                "zh": "脚本恰 34 字节",
+                "en": "script exactly 34 bytes"
+              },
+              "err": "0x33 (51)",
+              "color": 2
+            },
+            {
+              "name": "commitment",
+              "size": "32B",
+              "role": {
+                "zh": "sha256d(\"RGB++\" ‖ version u16 ‖ input_len ‖ output_len ‖ 前 input_len 个 OutPoint ‖ 前 output_len 个 (CellOutput(RGB++/BTC time lock 的 btc_txid 置 0) ‖ data_len u32 ‖ data))",
+                "en": "sha256d(\"RGB++\" ‖ version u16 ‖ input_len ‖ output_len ‖ first input_len OutPoints ‖ first output_len (CellOutput with RGB++/BTC-time-lock btc_txid zeroed ‖ data_len u32 ‖ data))"
+              },
+              "cons": {
+                "zh": "与 CKB 交易一致",
+                "en": "matches the CKB tx"
+              },
+              "err": "0x42 (66)",
+              "color": 5,
+              "flex": 5
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "36 字节 RGBPPLock",
+            "en": "36-byte RGBPPLock"
+          },
+          "err": "0x31"
+        },
+        {
+          "field": "witness",
+          "cond": {
+            "zh": "存在且为 RGBPPUnlock",
+            "en": "present and a valid RGBPPUnlock"
+          },
+          "err": "0x02 / 0x34"
+        },
+        {
+          "field": "btc_tx",
+          "cond": {
+            "zh": "可解析（非 segwit 序列化，无尾随字节）",
+            "en": "parsable (non-segwit serialization, no trailing bytes)"
+          },
+          "err": "0x30"
+        },
+        {
+          "field": "UTXO seal",
+          "cond": {
+            "zh": "BTC 交易的某个输入 = (args.btc_txid, args.out_index)",
+            "en": "a BTC tx input = (args.btc_txid, args.out_index)"
+          },
+          "err": "0x44"
+        },
+        {
+          "field": "SPV",
+          "cond": {
+            "zh": "btc_tx 在 BTC 轻客户端中有证明",
+            "en": "btc_tx is proven in the BTC light client"
+          },
+          "err": "0x20–0x23"
+        },
+        {
+          "field": "commitment",
+          "cond": {
+            "zh": "version = 0；input_len、output_len > 0",
+            "en": "version = 0; input_len, output_len > 0"
+          },
+          "err": "0x43 / 0x33"
+        },
+        {
+          "field": "commitment",
+          "cond": {
+            "zh": "未被承诺的输入 / 输出都不能带 type",
+            "en": "uncommitted inputs / outputs carry no type"
+          },
+          "err": "0x42"
+        },
+        {
+          "field": "commitment",
+          "cond": {
+            "zh": "重算值 = OP_RETURN 中的 32 字节",
+            "en": "recomputed value = the 32 bytes in OP_RETURN"
+          },
+          "err": "0x42"
+        },
+        {
+          "field": "outputs",
+          "cond": {
+            "zh": "每个带 type 的输出：RGB++ lock 且 btc_txid = 本 BTC 交易、out_index < 输出数；或 BTC time lock 且 btc_txid = 本交易、after ≥ 6",
+            "en": "each typed output: RGB++ lock with btc_txid = this BTC tx and out_index < output count, or BTC time lock with btc_txid = this tx and after ≥ 6"
+          },
+          "err": "0x41"
+        },
+        {
+          "field": "config",
+          "cond": {
+            "zh": "cell_deps 中有 RGB++ config cell",
+            "en": "RGB++ config cell is in cell_deps"
+          },
+          "err": "0x10 / 0x11"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码（crates/core/src/error.rs，i8）：0x01–0x05 ckb-std · 0x10 ConfigNotFound · 0x11 ConfigMalformed · 0x20 SpvClientNotFound · 0x21 SpvClientMalformed · 0x22 SpvProofIncorrect · 0x23 SpvProofMalformed · 0x30 BadBtcTx · 0x31 BadRGBPPLock · 0x32 BadBTCTimeLock · 0x33 BadBtcCommitment · 0x34 BadRGBPPUnlock · 0x35 BadBTCTimeUnlock · 0x40 OutputCellMismatch · 0x41 OutputCellWithUnknownLock · 0x42 CommitmentMismatch · 0x43 UnknownCommitmentVersion · 0x44 UtxoSealMismatch",
+      "en": "Error codes (crates/core/src/error.rs, i8): 0x01–0x05 ckb-std · 0x10 ConfigNotFound · 0x11 ConfigMalformed · 0x20 SpvClientNotFound · 0x21 SpvClientMalformed · 0x22 SpvProofIncorrect · 0x23 SpvProofMalformed · 0x30 BadBtcTx · 0x31 BadRGBPPLock · 0x32 BadBTCTimeLock · 0x33 BadBtcCommitment · 0x34 BadRGBPPUnlock · 0x35 BadBTCTimeUnlock · 0x40 OutputCellMismatch · 0x41 OutputCellWithUnknownLock · 0x42 CommitmentMismatch · 0x43 UnknownCommitmentVersion · 0x44 UtxoSealMismatch"
+    },
+    {
+      "zh": "解码器会解析 btc_tx、计算 txid，并按 CKB 交易重算 commitment 与 OP_RETURN 对比；SPV 证明不检查",
+      "en": "The decoder parses btc_tx, computes its txid and recomputes the commitment from the CKB tx to compare with OP_RETURN; the SPV proof is not checked"
+    }
+  ]
+}

@@ -1,0 +1,120 @@
+{
+  "title": {
+    "zh": "时间锁（proxy-locks） 约束",
+    "en": "Time Lock (proxy-locks) Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：ckb-devrel/ckb-proxy-locks / contracts/time-lock/src/entry.rs　·　0x6fac…4451 (data1，主网与测试网相同)",
+    "en": "Source: ckb-devrel/ckb-proxy-locks / contracts/time-lock/src/entry.rs　·　0x6fac…4451 (data1, same on mainnet and testnet)"
+  },
+  "transitions": [
+    {
+      "tag": "A",
+      "title": {
+        "zh": "到期后由指定 lock 解锁",
+        "en": "Unlock by a given lock after a time"
+      },
+      "inputs": [
+        {
+          "label": "input",
+          "body": "Cell{ lock: { codeHash: TIME_LOCK, args: {{lock_hash 32B}} ‖ {{locked_until 8B}} } }, since ≥ locked_until"
+        },
+        {
+          "label": {
+            "zh": "授权 cell",
+            "en": "authorising cell"
+          },
+          "body": "Cell{ lock: hash = lock_hash }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "outputs：任意",
+            "en": "outputs: any"
+          },
+          "body": {
+            "zh": "任意",
+            "en": "any"
+          }
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "args 字节布局",
+            "en": "args byte layout"
+          },
+          "layout": [
+            {
+              "name": "lock_hash",
+              "size": "32B",
+              "role": {
+                "zh": "所需 lock 脚本哈希",
+                "en": "required lock script hash"
+              },
+              "cons": {
+                "zh": "输入中存在",
+                "en": "present in inputs"
+              },
+              "err": "7",
+              "color": 1,
+              "flex": 4
+            },
+            {
+              "name": "locked_until",
+              "size": "8B",
+              "role": {
+                "zh": "since 格式 u64 LE",
+                "en": "since-encoded u64 LE"
+              },
+              "cons": {
+                "zh": "每个 group 输入 since 不小于它",
+                "en": "no group input since below it"
+              },
+              "err": "6",
+              "color": 2,
+              "flex": 2
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "≥ 40 字节",
+            "en": "≥ 40 bytes"
+          },
+          "err": "5"
+        },
+        {
+          "field": "lock",
+          "cond": {
+            "zh": "输入中有 lock hash = args[0..32]",
+            "en": "an input has lock hash = args[0..32]"
+          },
+          "err": "7"
+        },
+        {
+          "field": "since",
+          "cond": {
+            "zh": "每个 group 输入 since 不小于 locked_until；ckb-std 比较时标志字节不同即不可比较，视为通过（按源码推断）",
+            "en": "every group input since is not below locked_until; with different flag bytes ckb-std cannot compare and it passes (inferred from source)"
+          },
+          "err": "6"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码（error.rs）：1 IndexOutOfBound · 2 ItemMissing · 3 LengthNotEnough · 4 Encoding · 5 InvalidArguments · 6 LockTimeNotPassed · 7 RequiredLockScriptNotFound",
+      "en": "Error codes (error.rs): 1 IndexOutOfBound · 2 ItemMissing · 3 LengthNotEnough · 4 Encoding · 5 InvalidArguments · 6 LockTimeNotPassed · 7 RequiredLockScriptNotFound"
+    },
+    {
+      "zh": "不检查任何签名：安全性完全来自 args 指向的其他脚本",
+      "en": "No signature is checked: security comes entirely from the script that args points to"
+    }
+  ]
+}

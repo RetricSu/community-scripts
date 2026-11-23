@@ -1,0 +1,91 @@
+{
+  "tags": [
+    "identity",
+    "community",
+    "open-source",
+    "p-cells"
+  ],
+  "contributors": [
+    "LusoCryptoLabs"
+  ],
+  "source": {
+    "repo": "https://github.com/LusoCryptoLabs/cells-contracts",
+    "commit": "6d29dab2770fa0980e13b9cbeefff0c844ef4101",
+    "paths": [
+      "contracts/sale-lock/src/main.rs",
+      "crates/cells-core/src/lib.rs"
+    ],
+    "commit_note": "commit read after #5 plain-payment fix (2026-11-06 mainnet upgrade); docs/TRUST.md hashes",
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0x00744b0fbf48cf261c0263843f38099ce0d66c57695f9e7330b80299fe20be61",
+          "evidence": [
+            "listed in README.md"
+          ],
+          "matches_commit": false
+        },
+        {
+          "data_hash": "0xa5c166bb3a317d49afa4b3bb1efb9ce34cea2b080b3dc27fbf698e2ca0d5ee69",
+          "evidence": [],
+          "matches_commit": false
+        }
+      ],
+      "note": "no binary or checksum at the recorded commit matched the deployed data hash (reproducible build not attempted); mainnet data hash matches docs/TRUST.md at recorded commit (script does not treat TRUST.md as checksum evidence); testnet hash also upgraded on-chain (TRUST.md testnet table may lag)"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0x086c8f4e9d4272e3dfbaca399792f730e6604591e87931ee6d67047a3c900879",
+      "hash_type": "type",
+      "constant_source": "cellula-sdk@0.2.1 deployments.js CELLS_DEPLOYMENT_MAINNET.sale; cells-contracts README / docs/TRUST.md",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0xe72ac6421e9b9cd582dda77383ca0f100d7e05f1f08ae191d1f3b569f35ab7da"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0xe72ac6421e9b9cd582dda77383ca0f100d7e05f1f08ae191d1f3b569f35ab7da"
+      },
+      "type_script": {
+        "args": "0x05238ca98c4bc67cb6592707ba40301141344b53687f73d73f702f0cc2d7985f",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x00744b0fbf48cf261c0263843f38099ce0d66c57695f9e7330b80299fe20be61",
+      "deploy_tx": "0xe72ac6421e9b9cd582dda77383ca0f100d7e05f1f08ae191d1f3b569f35ab7da",
+      "deploy_block": 20943808
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0x498ab6b49b6b25b3c47fcea74bd8a4447bc4efda6417809152a846e058ad0ae4",
+      "hash_type": "type",
+      "constant_source": "cellula-sdk@0.2.1 deployments.js CELLS_DEPLOYMENT_TESTNET.sale",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x279ab20ee45be9a58be6cb5cfecfc16d368ca03b62e6f115f48a55e0bb161e40"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x279ab20ee45be9a58be6cb5cfecfc16d368ca03b62e6f115f48a55e0bb161e40"
+      },
+      "type_script": {
+        "args": "0xd02a9ec3afff1b51bcb54e46ff7f79a7a587bb69e5ecf2bc1454c842ea749585",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0xa5c166bb3a317d49afa4b3bb1efb9ce34cea2b080b3dc27fbf698e2ca0d5ee69",
+      "deploy_tx": "0x279ab20ee45be9a58be6cb5cfecfc16d368ca03b62e6f115f48a55e0bb161e40",
+      "deploy_block": 22975820
+    }
+  ],
+  "checked_at": "2026-11-09"
+}

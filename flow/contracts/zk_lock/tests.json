@@ -1,0 +1,18 @@
+[
+  {
+    "tx": "0xc967684e22fc4e3110e0b2c6822667fa4940cd6e47398962f4c9081610e47571",
+    "net": "testnet",
+    "name": "zk-Lock generic unlock (Poseidon preimage)",
+    "expect": [
+      "zk_lock"
+    ]
+  },
+  {
+    "tx": "0x013b0946b00ac5db51da4342803b4c81f2460d72802852753b93f7b18b372f85",
+    "net": "testnet",
+    "name": "zk-Lock bound unlock (tx_hash-bound, README reference)",
+    "expect": [
+      "zk_lock"
+    ]
+  }
+]

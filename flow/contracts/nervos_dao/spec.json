@@ -1,0 +1,243 @@
+{
+  "title": {
+    "zh": "NervosDAO 合约约束",
+    "en": "NervosDAO Contract Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：ckb-system-scripts / c/dao.c　·　DAO = type script（code_hash 0x82d7…3f2e，hash_type type）",
+    "en": "Source: ckb-system-scripts / c/dao.c　·　DAO = type script (code_hash 0x82d7…3f2e, hash_type type)"
+  },
+  "transitions": [
+    {
+      "tag": "0 → 1",
+      "title": {
+        "zh": "存款",
+        "en": "Deposit"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "input（任意普通 cell）",
+            "en": "input (any normal cell)"
+          },
+          "body": "Cell{\n  capacity: …,\n  type: null\n}"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "output[j]：deposit cell",
+            "en": "output[j]: deposit cell"
+          },
+          "body": {
+            "zh": "Cell{\n  capacity: X,\n  lock: 任意,\n  type: { codeHash: DAO, args: {{0x}} },\n  data: {{0x0000000000000000}}\n}",
+            "en": "Cell{\n  capacity: X,\n  lock: any,\n  type: { codeHash: DAO, args: {{0x}} },\n  data: {{0x0000000000000000}}\n}"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "type.args",
+          "cond": {
+            "zh": "必须为空",
+            "en": "must be empty"
+          },
+          "err": "-2"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "恰好 8 字节，全为 0",
+            "en": "exactly 8 bytes, all zero"
+          },
+          "err": "-19"
+        },
+        {
+          "field": {
+            "zh": "Σ输出 capacity",
+            "en": "Σ output capacity"
+          },
+          "cond": {
+            "zh": "≤ Σ输入 capacity",
+            "en": "≤ Σ input capacity"
+          },
+          "err": "-15"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 1",
+      "title": {
+        "zh": "提取第一阶段",
+        "en": "Withdraw Phase 1"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "input[i]：deposit cell（位于区块 D）",
+            "en": "input[i]: deposit cell (in block D)"
+          },
+          "body": "Cell{\n  capacity: X,\n  type: { codeHash: DAO, args: 0x },\n  data: 0x0000000000000000\n}"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "output[{{i}}]：withdrawing cell",
+            "en": "output[{{i}}]: withdrawing cell"
+          },
+          "body": {
+            "zh": "Cell{\n  capacity: {{X}},\n  lock: 任意,\n  type: {{{ codeHash: DAO, args: 0x }}},\n  data: {{D.number (u64 LE)}}\n}",
+            "en": "Cell{\n  capacity: {{X}},\n  lock: any,\n  type: {{{ codeHash: DAO, args: 0x }}},\n  data: {{D.number (u64 LE)}}\n}"
+          }
+        }
+      ],
+      "extras": [
+        "header_deps: [ {{D}} ]"
+      ],
+      "limits": [
+        {
+          "field": "index",
+          "cond": {
+            "zh": "输出必须与 deposit 输入在同一 index i",
+            "en": "the output must be at the same index i as the deposit input"
+          }
+        },
+        {
+          "field": "type",
+          "cond": {
+            "zh": "与输入同一 DAO script",
+            "en": "same DAO script as the input"
+          },
+          "err": "-20"
+        },
+        {
+          "field": "capacity",
+          "cond": {
+            "zh": "与输入完全相等",
+            "en": "exactly equal to the input"
+          },
+          "err": "-20"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "8 字节 u64 LE，等于 D 的区块号",
+            "en": "8-byte u64 LE equal to block number of D"
+          },
+          "err": "-20"
+        },
+        {
+          "field": "header_deps",
+          "cond": {
+            "zh": "必须包含区块 D 的 hash",
+            "en": "must include the hash of block D"
+          }
+        },
+        {
+          "field": "lock",
+          "cond": {
+            "zh": "dao.c 不检查",
+            "en": "not checked by dao.c"
+          },
+          "note": {
+            "zh": "CKB 节点可能要求 lock 大小相同，未核实",
+            "en": "the CKB node may require the same lock size; unverified"
+          }
+        }
+      ]
+    },
+    {
+      "tag": "1 → 0",
+      "title": {
+        "zh": "提取第二阶段",
+        "en": "Withdraw Phase 2"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "input[i]：withdrawing cell（位于区块 W）",
+            "en": "input[i]: withdrawing cell (in block W)"
+          },
+          "body": {
+            "zh": "Cell{\n  capacity: X,\n  type: { codeHash: DAO, args: 0x },\n  data: D.number,\n  since: {{≥ 锁定期（绝对 epoch）}}\n}",
+            "en": "Cell{\n  capacity: X,\n  type: { codeHash: DAO, args: 0x },\n  data: D.number,\n  since: {{≥ lock period (absolute epoch)}}\n}"
+          }
+        },
+        {
+          "label": "witness[i]",
+          "body": {
+            "zh": "WitnessArgs{\n  lock: 签名,\n  input_type: {{k (u64 LE, 8 字节)}}\n}",
+            "en": "WitnessArgs{\n  lock: signature,\n  input_type: {{k (u64 LE, 8 bytes)}}\n}"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "outputs：任意 cell",
+            "en": "outputs: any cells"
+          },
+          "body": {
+            "zh": "Cell{\n  capacity: {{Σ ≤ 上限}},\n  lock: 任意,\n  type: 任意\n}",
+            "en": "Cell{\n  capacity: {{Σ ≤ limit}},\n  lock: any,\n  type: any\n}"
+          }
+        }
+      ],
+      "extras": [
+        {
+          "zh": "header_deps: [ {{W}}, …, {{D（位于第 k 个）}} ]",
+          "en": "header_deps: [ {{W}}, …, {{D (at index k)}} ]"
+        }
+      ],
+      "limits": [
+        {
+          "field": "witness.input_type",
+          "cond": {
+            "zh": "8 字节，值为 D 在 header_deps 中的下标 k",
+            "en": "8 bytes; value is k, the index of D in header_deps"
+          },
+          "err": "-11"
+        },
+        {
+          "field": "header_deps",
+          "cond": {
+            "zh": "包含 D 和 W；D 的区块号必须等于 data，且 W 的 epoch 必须晚于 D",
+            "en": "contains D and W; D's block number must equal data, and W's epoch must be later than D's"
+          },
+          "err": "-14"
+        },
+        {
+          "field": "since",
+          "cond": {
+            "zh": "绝对 epoch，且 ≥ D.epoch + ⌈存款 epoch 数 / 180⌉ × 180",
+            "en": "absolute epoch, and ≥ D.epoch + ⌈deposited epochs / 180⌉ × 180"
+          },
+          "err": "-17"
+        },
+        {
+          "field": {
+            "zh": "Σ输出 capacity",
+            "en": "Σ output capacity"
+          },
+          "cond": {
+            "zh": "≤ 普通输入 + Σ 最大可提取",
+            "en": "≤ normal inputs + Σ max withdraw"
+          },
+          "err": "-15"
+        },
+        {
+          "field": {
+            "zh": "最大可提取",
+            "en": "max withdraw"
+          },
+          "cond": "= occupied + (X − occupied) × AR_W / AR_D",
+          "note": {
+            "zh": "AR 取自区块头 dao 字段",
+            "en": "AR is read from the header's dao field"
+          }
+        }
+      ]
+    }
+  ]
+}
