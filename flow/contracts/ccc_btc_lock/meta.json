@@ -1,0 +1,44 @@
+{
+  "tags": [
+    "lock"
+  ],
+  "contributors": [],
+  "source": {
+    "repo": "https://github.com/ckb-devrel/ccc-locks",
+    "commit": null,
+    "paths": [],
+    "binary": {
+      "status": "unverified",
+      "per": [],
+      "note": "generated from community-scripts baseline; provenance not yet verified"
+    }
+  },
+  "deployments": [
+    {
+      "network": "testnet",
+      "code_hash": "0x8f026d6113b24800e04bfb33703f98dfaa6db6719097ab5d3050db9cf4fec45e",
+      "hash_type": "type",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0xba5a1a77019be0e8942119ad549f01ca3c61fd9f911aa46e27d508a802236614"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0xba5a1a77019be0e8942119ad549f01ca3c61fd9f911aa46e27d508a802236614"
+      },
+      "data_hash": "0x3fa562b394f65aac8c2649b6d7d1dea25c677ccfcd4d912e63b272b78bbacb14",
+      "deploy_tx": "0xba5a1a77019be0e8942119ad549f01ca3c61fd9f911aa46e27d508a802236614",
+      "type_script": {
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type",
+        "args": "0xa7e71bd33324ae5a94f9ac93a5d47a3dc38ee79e9ba9d697fc61331e96bf355f"
+      },
+      "deploy_block": 14109397
+    }
+  ],
+  "checked_at": "2026-11-23",
+  "generated_from": "src/deployments/ccc_btc_lock.json"
+}
