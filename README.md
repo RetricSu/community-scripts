@@ -31,6 +31,41 @@ pnpm run monitor -- --network both --no-notify --fail-on none
 
 ---
 
+## 统一门户入口（CKB Contract Hub）
+
+本仓库集成了 [`gpBlockchain/ckb-contract-flow-html`](https://github.com/gpBlockchain/ckb-contract-flow-html) 的合约 Cell 流转规范与纯前端交易解码器（vendored 于 `flow/`，见 `flow/NOTICE.md`），并将其与本系统的安全巡检能力合并为**单一门户入口**：
+
+- **安全态势层**：每日巡检的 P0-P3 计数、每个受监控合约的健康徽章、Type ID 升级事件（交易哈希一键跳入解码器）；
+- **合约目录层**：90+ 合约的约束流转规范页（`flow/contracts/<id>/spec.json` 生成），受监控合约带 🛡 标记，支持按网络 / 标签 / 风险过滤；
+- **交易诊断层**：首页粘贴任意交易哈希，纯浏览器直连 RPC 解码并按合约插件执行无签名约束校验。
+
+```bash
+pnpm run flow:build    # 生成全部 flow 页面 + tx.html 解码器 + 统一 portal/index.html
+pnpm run portal:serve  # 本地预览 http://localhost:4173
+```
+
+### 数据所有权与合并策略
+
+门户的数据在**构建时**合并，源数据互不污染：
+
+| 数据源 | 角色 | 说明 |
+| --- | --- | --- |
+| `src/deployments/*.json` | 监控基线（安全 SSOT） | 保持最小结构；唯一可选扩展字段 `flowId` 指向 flow 目录 |
+| `flow/contracts/<id>/meta.json` | flow 元数据 | 由基线**投影生成**（`generated_from` 标记）；机械字段随基线再生成，知识字段（tags / source.commit / binary 等）人工补过后永不被覆盖 |
+| `flow/contracts/<id>/spec.json` 等 | 知识库 | 上游手写格式原样保留，不翻译、不迁移 |
+| `results/latest-report.json` | 巡检报告 | 构建时内嵌进门户，不回流任何源数据 |
+
+新增一个受监控合约只需：`src/deployments/<name>.json`（唯一手写事实源）→ `pnpm run flow:meta <name> --rpc <url>` 生成 meta → 手写 `spec.json`（约束知识本体）。
+
+```bash
+pnpm run flow:meta my_contract --rpc-mainnet https://mainnet.ckb.dev/rpc --rpc-testnet https://testnet.ckb.dev/rpc  # 基线 -> flow meta 投影
+pnpm run flow:meta --all --check                                                            # CI 漂移检查（只读，不写入）
+```
+
+CI 工作流 `portal.yml` 在每次安全巡检结束后（拉取当次巡检报告产物）或门户源数据变更时自动构建并发布 GitHub Pages。
+
+---
+
 ## 核心监控机制
 
 ### 1. 五类多源交叉对比 (Sources & Adapters)
