@@ -1,0 +1,159 @@
+{
+  "tags": [
+    "proxy",
+    "community",
+    "open-source"
+  ],
+  "contributors": [
+    "code-tsao"
+  ],
+  "source": {
+    "repo": "https://github.com/code-monad/ckbfs",
+    "commit": "db973a8e80322b2bc50b0096c97b0ce7531cfb01",
+    "paths": [
+      "contracts/ckbfs/src/entry.rs",
+      "contracts/ckbfs/src/error.rs",
+      "contracts/ckbfs/src/hash.rs",
+      "contracts/ckb-adler32/src/process.rs",
+      "contracts/ckb-adler32/src/utils.rs"
+    ],
+    "commit_note": "README \"Version 20241025.db973a8e8032\" names this commit for data hash 0x31e6…8d3a; its hash.rs pins ckb-adler32 0x2138…536f = the adler32 cell deployed alongside. Data schema: crates.io ckbfs-types 0.2.1",
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0x31e6376287d223b8c0410d562fb422f04d1d617b2947596a14c3d2efb7218d3a",
+          "evidence": [],
+          "matches_commit": false
+        }
+      ],
+      "note": "no binary or checksum at the recorded commit matched the deployed data hash (reproducible build not attempted)"
+    },
+    "upstream_review": {
+      "repo": "https://github.com/code-monad/ckbfs",
+      "base_commit": "db973a8e80322b2bc50b0096c97b0ce7531cfb01",
+      "commit": "4ee6689bf7ec2515df95311a05a9cdc709f358cb",
+      "paths": [
+        "contracts/ckbfs/src/entry.rs",
+        "contracts/ckbfs/src/error.rs",
+        "contracts/ckbfs/src/hash.rs",
+        "contracts/ckb-adler32/src/process.rs",
+        "contracts/ckb-adler32/src/utils.rs"
+      ],
+      "disposition": "retain-deployed-version",
+      "reason": {
+        "zh": "README 仍将 V2 部署标为 20241025.db973a8e8032；HEAD 是 V3，新增链式 witness、前序位置校验和 110–112 错误码，并更换 adler32 hash。V3 已由 ckbfs_v3 独立描述，V2 继续保留旧 schema / checksum 规则。",
+        "en": "README still identifies V2 deployments as 20241025.db973a8e8032. HEAD is V3: linked witnesses, previous-position validation, errors 110–112 and another adler32 hash. V3 is already described by ckbfs_v3; retain V2 schema and checksum rules."
+      },
+      "evidence": [
+        "https://github.com/code-monad/ckbfs/blob/4ee6689bf7ec2515df95311a05a9cdc709f358cb/README.md",
+        "https://github.com/code-monad/ckbfs/tree/v3",
+        "https://github.com/code-monad/ckbfs/compare/db973a8e80322b2bc50b0096c97b0ce7531cfb01...4ee6689bf7ec2515df95311a05a9cdc709f358cb"
+      ],
+      "reviewed_at": "2026-11-19"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0x31e6376287d223b8c0410d562fb422f04d1d617b2947596a14c3d2efb7218d3a",
+      "hash_type": "data1",
+      "constant_source": "code-monad/ckbfs README \"Version 20241025.db973a8e8032\" (mainnet + testnet, data1)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0xfab07962ed7178ed88d450774e2a6ecd50bae856bdb9b692980be8c5147d1bfa"
+        },
+        "dep_type": "dep_group"
+      },
+      "code_cell": {
+        "tx_hash": "0xc9b6698f44c3b80e7e1c48823b2714e432b93f0206ffaf9df885d23267ed2ebc",
+        "index": "0x1"
+      },
+      "type_script": {
+        "args": "0xb8c16cf1dc255118176787b580c5c5cd8c327d5667cf3421b34bff05ffe77e7d",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x31e6376287d223b8c0410d562fb422f04d1d617b2947596a14c3d2efb7218d3a",
+      "deploy_tx": "0xc9b6698f44c3b80e7e1c48823b2714e432b93f0206ffaf9df885d23267ed2ebc",
+      "deploy_block": 14392854
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0x31e6376287d223b8c0410d562fb422f04d1d617b2947596a14c3d2efb7218d3a",
+      "hash_type": "data1",
+      "constant_source": "code-monad/ckbfs README \"Version 20241025.db973a8e8032\" (mainnet + testnet, data1)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x469af0d961dcaaedd872968a9388b546717a6ccfa47b3165b3f9c981e9d66aaa"
+        },
+        "dep_type": "dep_group"
+      },
+      "code_cell": {
+        "tx_hash": "0x2c8c9ad3134743368b5a79977648f96c5bd0aba187021a72fb624301064d3616",
+        "index": "0x1"
+      },
+      "type_script": {
+        "args": "0x01d5f1721e607a96b5926ac6bfc7e073ef73b01c599b8643c7795ae1e9576a86",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x31e6376287d223b8c0410d562fb422f04d1d617b2947596a14c3d2efb7218d3a",
+      "deploy_tx": "0x2c8c9ad3134743368b5a79977648f96c5bd0aba187021a72fb624301064d3616",
+      "deploy_block": 15011570
+    },
+    {
+      "network": "mainnet",
+      "code_hash": "0xfd2058c9a0c0183354cf637e25d2707ffa9bb6fa2ba9b29f4ebc6be3e54ad7eb",
+      "hash_type": "type",
+      "constant_source": "code-monad/ckbfs README (mainnet type id)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0xfab07962ed7178ed88d450774e2a6ecd50bae856bdb9b692980be8c5147d1bfa"
+        },
+        "dep_type": "dep_group"
+      },
+      "code_cell": {
+        "index": "0x1",
+        "tx_hash": "0xc9b6698f44c3b80e7e1c48823b2714e432b93f0206ffaf9df885d23267ed2ebc"
+      },
+      "type_script": {
+        "args": "0xb8c16cf1dc255118176787b580c5c5cd8c327d5667cf3421b34bff05ffe77e7d",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x31e6376287d223b8c0410d562fb422f04d1d617b2947596a14c3d2efb7218d3a",
+      "deploy_tx": "0xc9b6698f44c3b80e7e1c48823b2714e432b93f0206ffaf9df885d23267ed2ebc",
+      "deploy_block": 14392854
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0x7c6dcab8268201f064dc8676b5eafa60ca2569e5c6209dcbab0eb64a9cb3aaa3",
+      "hash_type": "type",
+      "constant_source": "code-monad/ckbfs README (testnet type id)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x469af0d961dcaaedd872968a9388b546717a6ccfa47b3165b3f9c981e9d66aaa"
+        },
+        "dep_type": "dep_group"
+      },
+      "code_cell": {
+        "index": "0x1",
+        "tx_hash": "0x2c8c9ad3134743368b5a79977648f96c5bd0aba187021a72fb624301064d3616"
+      },
+      "type_script": {
+        "args": "0x01d5f1721e607a96b5926ac6bfc7e073ef73b01c599b8643c7795ae1e9576a86",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x31e6376287d223b8c0410d562fb422f04d1d617b2947596a14c3d2efb7218d3a",
+      "deploy_tx": "0x2c8c9ad3134743368b5a79977648f96c5bd0aba187021a72fb624301064d3616",
+      "deploy_block": 15011570
+    }
+  ],
+  "checked_at": "2026-11-06"
+}

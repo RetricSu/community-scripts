@@ -1,0 +1,63 @@
+{
+  "tags": [
+    "quantum",
+    "identity",
+    "open-source",
+    "community"
+  ],
+  "contributors": [
+    "XuJiandong"
+  ],
+  "source": {
+    "repo": "https://github.com/XuJiandong/shrincs-lock",
+    "commit": "d9326f524216acf3c6972e82ea600041631efeed",
+    "paths": [
+      "contracts/shrincs-lock/src/main.rs",
+      "docs/shrincs-lock-spec.md",
+      "checksums.txt"
+    ],
+    "commit_note": "commit read when writing this spec (default-branch HEAD 2026-09-10). Deployment from README.md \"Deployment\" + deployment/testnet/migrations/2026-09-07-012703.json. sha256 of the testnet code cell data (1dae35ca1ae42da9d3bb14e1ecb1c95ef31a06389a4fde4d252374d13d5f1d14) equals build/release/shrincs-lock in checksums.txt at this commit (checksums are sha256, so check-deployments cannot match them; binary status set by hand).",
+    "binary": {
+      "status": "verified",
+      "per": [
+        {
+          "data_hash": "0x9ab6e4b3ca1ede776acd5f419c762128083aad27a4791256f95fb6e044e66c13",
+          "evidence": [
+            "sha256 1dae35ca1ae42da9d3bb14e1ecb1c95ef31a06389a4fde4d252374d13d5f1d14 of the code cell data is listed for build/release/shrincs-lock in checksums.txt at d9326f5",
+            "listed in deployment/testnet/migrations/2026-09-07-012703.json"
+          ],
+          "matches_commit": true
+        }
+      ],
+      "note": "verified by hand via sha256 checksums.txt (check-deployments compares blake2b only and would rewrite this as unverified)"
+    }
+  },
+  "deployments": [
+    {
+      "network": "testnet",
+      "code_hash": "0x387496fafe46562bb3bb2fa4446f1fc1054ba2f1b4df229a88056d5422a196ac",
+      "hash_type": "type",
+      "constant_source": "shrincs-lock README.md \"Deployment\" (testnet) + deployment/testnet/migrations/2026-09-07-012703.json (type_id)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x3216d00b72e8229d7dbb46a93ea47bd0c650f2bdae42be2f92837328413da48e"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x3216d00b72e8229d7dbb46a93ea47bd0c650f2bdae42be2f92837328413da48e"
+      },
+      "type_script": {
+        "args": "0x1b979ea50f5111c648b425d573cd85f236bea46808f1ab5dc9ffa2457cce0fcc",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x9ab6e4b3ca1ede776acd5f419c762128083aad27a4791256f95fb6e044e66c13",
+      "deploy_tx": "0x3216d00b72e8229d7dbb46a93ea47bd0c650f2bdae42be2f92837328413da48e",
+      "deploy_block": 22334945
+    }
+  ],
+  "checked_at": "2026-11-12"
+}

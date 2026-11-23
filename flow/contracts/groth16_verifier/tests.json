@@ -1,0 +1,18 @@
+[
+  {
+    "tx": "0xc658f9e8a846747a3aad373b2145ac49d920aba00c88885219d6c25f3dc53c96",
+    "net": "testnet",
+    "name": "groth16-ckb e2e verification (square-root example, README Phase 3)",
+    "expect": [
+      "groth16_verifier"
+    ]
+  },
+  {
+    "tx": "0x8c135e6e745cc5ba4d325e8602164d60dc71052ed334de85d3a71461784f44ba",
+    "net": "testnet",
+    "name": "groth16-ckb trigger cell creation",
+    "expect": [
+      "groth16_verifier"
+    ]
+  }
+]

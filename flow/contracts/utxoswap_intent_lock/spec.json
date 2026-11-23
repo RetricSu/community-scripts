@@ -1,0 +1,61 @@
+{
+  "title": {
+    "zh": "UTXOSwap Intent Lock（无公开源码）",
+    "en": "UTXOSwap Intent Lock (no public source)"
+  },
+  "subtitle": {
+    "zh": "未找到公开源码，尚未向维护方确认　·　mainnet 0x3547…060e (type) · testnet 0x4e9c…e101 (type)",
+    "en": "No public source found, unconfirmed with maintainer　·　mainnet 0x3547…060e (type) · testnet 0x4e9c…e101 (type)"
+  },
+  "transitions": [
+    {
+      "tag": "?",
+      "title": {
+        "zh": "仅识别：链上可核实的事实",
+        "en": "Identification only: facts verifiable on chain"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "被该 lock 锁定的 input",
+            "en": "input locked by this script"
+          },
+          "body": "Cell{\n  lock: { codeHash: {{0x3547…060e}},\n          hashType: type,\n          args: … }\n}"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "验证规则",
+            "en": "validation rules"
+          },
+          "body": {
+            "zh": "未知：无公开源码，本页不列任何规则或错误码",
+            "en": "unknown: no public source, this page lists no rules or error codes"
+          }
+        }
+      ],
+      "extras": [
+        {
+          "zh": "UTXOSwap 官方文档：用户资产先放进 intent lock 的 cell，sequencer 把它与 Pool Cell 一起花掉，把结果转回用户 lock。本 code_hash 是链上与 Pool Cell 同一交易被花掉的用户 intent cell 的 lock；角色由文档结构推断，未向维护方确认。",
+          "en": "Official UTXOSwap docs: user assets first go into a cell under the intent lock; the sequencer spends it together with the Pool Cell and returns the result to the user lock. This code_hash is the lock of the user intent cell spent in the same tx as the Pool Cell on chain; the role is inferred from that layout and unconfirmed with the maintainer."
+        },
+        {
+          "zh": "清单标注 “Intent Lock（已废弃）”；但该 code_hash 在最近的池交易里仍在使用。是否另有已废弃的旧版 intent lock，未找到官方来源。",
+          "en": "The list says \"Intent Lock (deprecated)\", yet this code_hash is still used in recent pool txs. Whether an older, deprecated intent lock exists could not be confirmed from an official source."
+        }
+      ],
+      "limits": []
+    }
+  ],
+  "notes": [
+    {
+      "zh": "未找到公开源码，尚未向维护方确认",
+      "en": "No public source found, unconfirmed with maintainer"
+    },
+    {
+      "zh": "部署（code cell / cell_dep / data hash）由 scripts/check-deployments.js 从链上解析，见下方来源卡片",
+      "en": "Deployment (code cell / cell_dep / data hash) resolved from chain by scripts/check-deployments.js; see the provenance card below"
+    }
+  ]
+}

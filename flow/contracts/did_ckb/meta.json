@@ -1,0 +1,85 @@
+{
+  "tags": [
+    "identity",
+    "community",
+    "open-source"
+  ],
+  "contributors": [
+    "XuJiandong"
+  ],
+  "source": {
+    "repo": "https://github.com/web5fans/did-ckb",
+    "commit": "f37c14afeaeb4162e7c66ac336372eb81474c39d",
+    "paths": [
+      "contracts/did-ckb-ts/src"
+    ],
+    "commit_note": "default-branch HEAD recorded at backfill 2026-10-21; spec/plugin were written from the default branch shortly before (exact read commit not recorded)",
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0x079bb8c1dfb249f60d932f4b1a60fa5cb2a36af3653ac09464f262e2f3f682a9",
+          "evidence": [
+            "listed in deployment/mainnet/migrations/2025-11-27-050508.json",
+            "listed in deployment/testnet/migrations/2025-11-28-022028.json"
+          ],
+          "matches_commit": false
+        }
+      ],
+      "note": "hash appears in the repo only as a deployment record or doc, which does not prove the recorded commit builds this binary (reproducible build not attempted)"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0x4a06164dc34dccade5afe3e847a97b6db743e79f5477fa3295acf02849c5984a",
+      "hash_type": "type",
+      "constant_source": "web5fans/did-ckb (mainnet)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0xe2f74c56cdc610d2b9fe898a96a80118845f5278605d7f9ad535dad69ae015bf"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0xe2f74c56cdc610d2b9fe898a96a80118845f5278605d7f9ad535dad69ae015bf"
+      },
+      "type_script": {
+        "args": "0x55573ef6d78e3ca75170ff476176732309a8b31efe94320a954ded3d75c2cb18",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x079bb8c1dfb249f60d932f4b1a60fa5cb2a36af3653ac09464f262e2f3f682a9",
+      "deploy_tx": "0xe2f74c56cdc610d2b9fe898a96a80118845f5278605d7f9ad535dad69ae015bf",
+      "deploy_block": 17943462
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0x510150477b10d6ab551a509b71265f3164e9fd4137fcb5a4322f49f03092c7c5",
+      "hash_type": "type",
+      "constant_source": "web5fans/did-ckb (testnet)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x0e7a830e2d5ebd05cd45a55f93f94559edea0ef1237b7233f49f7facfb3d6a6c"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x0e7a830e2d5ebd05cd45a55f93f94559edea0ef1237b7233f49f7facfb3d6a6c"
+      },
+      "type_script": {
+        "args": "0x3c27695173b888ed44ddf36f901789014384ad6c05a9137f3db9a0779c141c35",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x079bb8c1dfb249f60d932f4b1a60fa5cb2a36af3653ac09464f262e2f3f682a9",
+      "deploy_tx": "0x0e7a830e2d5ebd05cd45a55f93f94559edea0ef1237b7233f49f7facfb3d6a6c",
+      "deploy_block": 19280654
+    }
+  ],
+  "checked_at": "2026-10-20"
+}

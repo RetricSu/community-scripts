@@ -1,0 +1,782 @@
+{
+  "title": {
+    "zh": "Noir 隐私计数（private tally v2）约束",
+    "en": "Noir Private Tally (v2) Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：wamimi/noir-ckb-verifier @e4ba787 contracts/crates/private-tally/src/main.rs、build.rs、docs/private-tally-v2-spec.md　·　testnet 0x3cc4…37d1 (data1)　·　部署见 evidence/private-tally-testnet.md",
+    "en": "Source: wamimi/noir-ckb-verifier @e4ba787 contracts/crates/private-tally/src/main.rs, build.rs, docs/private-tally-v2-spec.md　·　testnet 0x3cc4…37d1 (data1)　·　deployment in evidence/private-tally-testnet.md"
+  },
+  "transitions": [
+    {
+      "tag": "0 → 1",
+      "title": {
+        "zh": "创建 tally（证明初始承诺，c_old = 0）",
+        "en": "Create a tally (proof of the initial commitment, c_old = 0)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "任意资金 cell",
+            "en": "any funding cells"
+          },
+          "body": {
+            "zh": "inputs[0] 决定 type_id",
+            "en": "inputs[0] determines the type_id"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "tally cell（唯一）",
+            "en": "tally cell (exactly one)"
+          },
+          "body": {
+            "zh": "Cell{\n  capacity: C,\n  lock: {{GUARD（always-success，data1，args 空）}},\n  type: PRIVATE_TALLY{ args: {{0x01 ‖ type_id}} },\n  data: {{0x01 ‖ c_new}}\n}",
+            "en": "Cell{\n  capacity: C,\n  lock: {{GUARD (always-success, data1, empty args)}},\n  type: PRIVATE_TALLY{ args: {{0x01 ‖ type_id}} },\n  data: {{0x01 ‖ c_new}}\n}"
+          }
+        },
+        {
+          "label": {
+            "zh": "witness[group 输出下标]",
+            "en": "witness[at the group output index]"
+          },
+          "body": {
+            "zh": "WitnessArgs{\n  output_type: {{Groth16Witness v1(proof, public)}}\n}\n总长 ≤ 512B",
+            "en": "WitnessArgs{\n  output_type: {{Groth16Witness v1(proof, public)}}\n}\ntotal ≤ 512B"
+          }
+        }
+      ],
+      "extras": [
+        {
+          "zh": "cell_deps: [ PRIVATE_TALLY code, GUARD code, {{VK cell（data hash 0x91ad…2e5b，恰好 1 个）}} ]",
+          "en": "cell_deps: [ PRIVATE_TALLY code, GUARD code, {{VK cell (data hash 0x91ad…2e5b, exactly one)}} ]"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "type.args 字节布局（33B）",
+            "en": "type.args byte layout (33B)"
+          },
+          "layout": [
+            {
+              "name": "ver",
+              "size": "1B",
+              "color": 0,
+              "flex": 1,
+              "role": {
+                "zh": "版本",
+                "en": "version"
+              },
+              "cons": {
+                "zh": "= 0x01；且 hash_type = data1",
+                "en": "= 0x01; and hash_type = data1"
+              },
+              "err": "41"
+            },
+            {
+              "name": "type_id",
+              "size": "32B",
+              "color": 1,
+              "flex": 6,
+              "role": {
+                "zh": "ckb-std type_id：创建时 = blake2b(inputs[0] ‖ group 输出序号)",
+                "en": "ckb-std type_id: on creation = blake2b(inputs[0] ‖ group output index)"
+              },
+              "cons": {
+                "zh": "validate_type_id 通过",
+                "en": "validate_type_id passes"
+              },
+              "err": "44"
+            }
+          ],
+          "hex": [
+            [
+              "ver",
+              "0x01"
+            ],
+            [
+              "type_id",
+              "0xe56d70c7bc38fbb7ecff7ab2a7ac2c7338b259a9d860ac54c6c593d08cffaced"
+            ]
+          ],
+          "note": {
+            "zh": "示例：测试网 tx 0xa93b9ed5…4a73 输出 0",
+            "en": "Example: output 0 of testnet tx 0xa93b9ed5…4a73"
+          }
+        },
+        {
+          "label": {
+            "zh": "cell data 字节布局（33B）",
+            "en": "cell data byte layout (33B)"
+          },
+          "layout": [
+            {
+              "name": "ver",
+              "size": "1B",
+              "color": 0,
+              "flex": 1,
+              "role": {
+                "zh": "状态版本",
+                "en": "state version"
+              },
+              "cons": {
+                "zh": "= 0x01，总长恰好 33",
+                "en": "= 0x01, total exactly 33"
+              },
+              "err": "43"
+            },
+            {
+              "name": "commitment",
+              "size": "32B LE",
+              "color": 1,
+              "flex": 6,
+              "role": {
+                "zh": "隐藏计数的承诺（Fr 元素，小端）",
+                "en": "commitment hiding the tally (Fr element, LE)"
+              },
+              "cons": {
+                "zh": "≠ 0 且 < BN254 标量域模数",
+                "en": "≠ 0 and < BN254 scalar modulus"
+              },
+              "err": "54"
+            }
+          ],
+          "hex": [
+            [
+              "ver",
+              "0x01"
+            ],
+            [
+              "commitment",
+              "0xaaa3578eb5b7e27392fd7d4e8765b5eafb2076d1033facbae99e49cdf4c9dd0a"
+            ]
+          ]
+        },
+        {
+          "label": {
+            "zh": "公开输入向量（132B，按 verifier 编码）",
+            "en": "public-input vector (132B, verifier encoding)"
+          },
+          "layout": [
+            {
+              "name": "count",
+              "size": "4B u32 LE",
+              "color": 0,
+              "flex": 1,
+              "role": {
+                "zh": "固定 4",
+                "en": "fixed 4"
+              },
+              "cons": {
+                "zh": "= 4",
+                "en": "= 4"
+              },
+              "err": "49"
+            },
+            {
+              "name": "c_old",
+              "size": "32B",
+              "color": 1,
+              "flex": 2,
+              "role": {
+                "zh": "旧承诺；创建时全 0",
+                "en": "old commitment; all zero on creation"
+              },
+              "err": "49"
+            },
+            {
+              "name": "c_new",
+              "size": "32B",
+              "color": 2,
+              "flex": 2,
+              "role": {
+                "zh": "新承诺 = 输出 data[1..33]",
+                "en": "new commitment = output data[1..33]"
+              },
+              "err": "49"
+            },
+            {
+              "name": "ctx_lo",
+              "size": "16B ‖ 16B 0",
+              "color": 3,
+              "flex": 2,
+              "role": {
+                "zh": "context digest[0..16]，高 16 字节补 0",
+                "en": "context digest[0..16], upper 16 bytes zero"
+              },
+              "err": "49"
+            },
+            {
+              "name": "ctx_hi",
+              "size": "16B ‖ 16B 0",
+              "color": 4,
+              "flex": 2,
+              "role": {
+                "zh": "context digest[16..32]，高 16 字节补 0",
+                "en": "context digest[16..32], upper 16 bytes zero"
+              },
+              "err": "49"
+            }
+          ],
+          "note": {
+            "zh": "witness 中 Groth16Witness.public_inputs 必须与此向量逐字节相等，否则 49",
+            "en": "Groth16Witness.public_inputs in the witness must equal this vector byte for byte, else 49"
+          }
+        },
+        {
+          "label": {
+            "zh": "context digest = blake2b-256(ckb-default-hash, …)",
+            "en": "context digest = blake2b-256(ckb-default-hash, …)"
+          },
+          "layout": [
+            {
+              "name": "prefix",
+              "size": "34B",
+              "color": 0,
+              "flex": 2,
+              "role": {
+                "zh": "\"noir-ckb/private-tally/context/v2\\0\"",
+                "en": "\"noir-ckb/private-tally/context/v2\\0\""
+              },
+              "err": ""
+            },
+            {
+              "name": "network_domain",
+              "size": "32B",
+              "color": 1,
+              "flex": 1,
+              "role": {
+                "zh": "编译进脚本：测试网创世哈希 0x10639e08…9606",
+                "en": "compiled in: testnet genesis hash 0x10639e08…9606"
+              },
+              "err": ""
+            },
+            {
+              "name": "profile",
+              "size": "32B",
+              "color": 2,
+              "flex": 1,
+              "role": {
+                "zh": "blake2b(\"noir-ckb/private-tally/v2\")",
+                "en": "blake2b(\"noir-ckb/private-tally/v2\")"
+              },
+              "err": ""
+            },
+            {
+              "name": "script_hash",
+              "size": "32B",
+              "color": 3,
+              "flex": 1,
+              "role": {
+                "zh": "本 type script 哈希",
+                "en": "this type script hash"
+              },
+              "err": ""
+            },
+            {
+              "name": "type_id",
+              "size": "32B",
+              "color": 4,
+              "flex": 1,
+              "role": {
+                "zh": "args[1..33]",
+                "en": "args[1..33]"
+              },
+              "err": ""
+            },
+            {
+              "name": "op",
+              "size": "1B",
+              "color": 5,
+              "flex": 1,
+              "role": {
+                "zh": "0 = 创建，1 = 更新",
+                "en": "0 = creation, 1 = update"
+              },
+              "err": ""
+            },
+            {
+              "name": "outpoint",
+              "size": "36B",
+              "color": 6,
+              "flex": 1,
+              "role": {
+                "zh": "更新：group 输入 OutPoint；创建：全 0",
+                "en": "update: group input OutPoint; creation: zeros"
+              },
+              "err": ""
+            },
+            {
+              "name": "c_old ‖ c_new",
+              "size": "64B",
+              "color": 7,
+              "flex": 1,
+              "role": {
+                "zh": "旧 / 新承诺",
+                "en": "old / new commitment"
+              },
+              "err": ""
+            },
+            {
+              "name": "lock_hash",
+              "size": "32B",
+              "color": 0,
+              "flex": 1,
+              "role": {
+                "zh": "输出 lock hash",
+                "en": "output lock hash"
+              },
+              "err": ""
+            },
+            {
+              "name": "capacity",
+              "size": "8B LE",
+              "color": 1,
+              "flex": 1,
+              "role": {
+                "zh": "输出 capacity",
+                "en": "output capacity"
+              },
+              "err": ""
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "script",
+          "cond": {
+            "zh": "args 33B、args[0] = 1、hash_type = data1",
+            "en": "args 33B, args[0] = 1, hash_type = data1"
+          },
+          "err": "41"
+        },
+        {
+          "field": "inputs / outputs / cell_deps",
+          "cond": {
+            "zh": "每类 ≤ 64 个（cell_deps 按展开后计）",
+            "en": "≤ 64 each (cell_deps counted after expansion)"
+          },
+          "err": "52"
+        },
+        {
+          "field": {
+            "zh": "同 code 的 type cell",
+            "en": "same-code type cells"
+          },
+          "cond": {
+            "zh": "输入 ≤ 1、输出 = 1、group 输出 = 1、group 输入 = 同 code 输入数（不同 args 也算，不能批量）",
+            "en": "inputs ≤ 1, outputs = 1, group outputs = 1, group inputs = same-code inputs (any args; no batching)"
+          },
+          "err": "42"
+        },
+        {
+          "field": "type_id",
+          "cond": {
+            "zh": "ckb-std validate_type_id(args[1..33])",
+            "en": "ckb-std validate_type_id(args[1..33])"
+          },
+          "err": "44"
+        },
+        {
+          "field": {
+            "zh": "输出 lock",
+            "en": "output lock"
+          },
+          "cond": {
+            "zh": "code_hash = GUARD_DATA_HASH（0xe683…60d7）、data1、args 空",
+            "en": "code_hash = GUARD_DATA_HASH (0xe683…60d7), data1, empty args"
+          },
+          "err": "45"
+        },
+        {
+          "field": {
+            "zh": "输出 data",
+            "en": "output data"
+          },
+          "cond": {
+            "zh": "恰好 33B 且 data[0] = 1",
+            "en": "exactly 33B and data[0] = 1"
+          },
+          "err": "43"
+        },
+        {
+          "field": "c_new",
+          "cond": {
+            "zh": "≠ 0 且 < BN254 模数",
+            "en": "≠ 0 and < BN254 modulus"
+          },
+          "err": "54"
+        },
+        {
+          "field": "witness",
+          "cond": {
+            "zh": "读取 group 输出下标处的 witness（≤ 512B），WitnessArgs.output_type 存在并可解码",
+            "en": "witness at the group output index (≤ 512B), WitnessArgs.output_type present and decodable"
+          },
+          "err": "48"
+        },
+        {
+          "field": "public inputs",
+          "cond": {
+            "zh": "= 重建的 [c_old, c_new, ctx_lo, ctx_hi]",
+            "en": "= rebuilt [c_old, c_new, ctx_lo, ctx_hi]"
+          },
+          "err": "49"
+        },
+        {
+          "field": "cell_deps",
+          "cond": {
+            "zh": "data hash = VK_DATA_HASH（0x91ad…2e5b）的 cell 恰好 1 个，且可解码为 Groth16VerifyingKey v1（≤ 512B）",
+            "en": "exactly one cell with data hash = VK_DATA_HASH (0x91ad…2e5b), decodable as Groth16VerifyingKey v1 (≤ 512B)"
+          },
+          "err": "50"
+        },
+        {
+          "field": "Groth16",
+          "cond": {
+            "zh": "BN254 证明对重建的公开输入验证通过",
+            "en": "BN254 proof verifies against the rebuilt public inputs"
+          },
+          "err": "51"
+        },
+        {
+          "field": {
+            "zh": "任何读取",
+            "en": "any load"
+          },
+          "cond": {
+            "zh": "syscall 失败",
+            "en": "syscall failure"
+          },
+          "err": "40"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 1",
+      "title": {
+        "zh": "更新：加入隐藏的数量（含 +0 掩护更新）",
+        "en": "Update: add a hidden amount (incl. +0 cover update)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "旧 tally cell（group 输入）",
+            "en": "old tally cell (group input)"
+          },
+          "body": {
+            "zh": "Cell{\n  capacity: {{C}},\n  lock: {{GUARD}},\n  type: PRIVATE_TALLY(args),\n  data: {{0x01 ‖ c_old}}\n}",
+            "en": "Cell{\n  capacity: {{C}},\n  lock: {{GUARD}},\n  type: PRIVATE_TALLY(args),\n  data: {{0x01 ‖ c_old}}\n}"
+          }
+        },
+        {
+          "label": {
+            "zh": "witness[group 输入下标]",
+            "en": "witness[at the group input index]"
+          },
+          "body": {
+            "zh": "WitnessArgs{\n  input_type: {{Groth16Witness v1(proof, public)}}\n}\n总长 ≤ 512B",
+            "en": "WitnessArgs{\n  input_type: {{Groth16Witness v1(proof, public)}}\n}\ntotal ≤ 512B"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "新 tally cell（唯一）",
+            "en": "new tally cell (exactly one)"
+          },
+          "body": {
+            "zh": "Cell{\n  capacity: {{= C}},\n  lock: {{GUARD}},\n  type: PRIVATE_TALLY(args 不变),\n  data: {{0x01 ‖ c_new}}\n}",
+            "en": "Cell{\n  capacity: {{= C}},\n  lock: {{GUARD}},\n  type: PRIVATE_TALLY(args unchanged),\n  data: {{0x01 ‖ c_new}}\n}"
+          }
+        }
+      ],
+      "extras": [
+        {
+          "zh": "cell_deps: [ PRIVATE_TALLY code, GUARD code, {{VK cell（恰好 1 个）}} ]",
+          "en": "cell_deps: [ PRIVATE_TALLY code, GUARD code, {{VK cell (exactly one)}} ]"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "cell data 字节布局（33B）",
+            "en": "cell data byte layout (33B)"
+          },
+          "layout": [
+            {
+              "name": "ver",
+              "size": "1B",
+              "color": 0,
+              "flex": 1,
+              "role": {
+                "zh": "状态版本",
+                "en": "state version"
+              },
+              "cons": {
+                "zh": "= 0x01，总长恰好 33",
+                "en": "= 0x01, total exactly 33"
+              },
+              "err": "43"
+            },
+            {
+              "name": "commitment",
+              "size": "32B LE",
+              "color": 1,
+              "flex": 6,
+              "role": {
+                "zh": "隐藏计数的承诺（Fr 元素，小端）",
+                "en": "commitment hiding the tally (Fr element, LE)"
+              },
+              "cons": {
+                "zh": "≠ 0 且 < BN254 标量域模数",
+                "en": "≠ 0 and < BN254 scalar modulus"
+              },
+              "err": "54"
+            }
+          ],
+          "hex": [
+            [
+              "ver",
+              "0x01"
+            ],
+            [
+              "commitment",
+              "0xaaa3578eb5b7e27392fd7d4e8765b5eafb2076d1033facbae99e49cdf4c9dd0a"
+            ]
+          ]
+        },
+        {
+          "label": {
+            "zh": "公开输入向量（132B，按 verifier 编码）",
+            "en": "public-input vector (132B, verifier encoding)"
+          },
+          "layout": [
+            {
+              "name": "count",
+              "size": "4B u32 LE",
+              "color": 0,
+              "flex": 1,
+              "role": {
+                "zh": "固定 4",
+                "en": "fixed 4"
+              },
+              "cons": {
+                "zh": "= 4",
+                "en": "= 4"
+              },
+              "err": "49"
+            },
+            {
+              "name": "c_old",
+              "size": "32B",
+              "color": 1,
+              "flex": 2,
+              "role": {
+                "zh": "旧承诺；创建时全 0",
+                "en": "old commitment; all zero on creation"
+              },
+              "err": "49"
+            },
+            {
+              "name": "c_new",
+              "size": "32B",
+              "color": 2,
+              "flex": 2,
+              "role": {
+                "zh": "新承诺 = 输出 data[1..33]",
+                "en": "new commitment = output data[1..33]"
+              },
+              "err": "49"
+            },
+            {
+              "name": "ctx_lo",
+              "size": "16B ‖ 16B 0",
+              "color": 3,
+              "flex": 2,
+              "role": {
+                "zh": "context digest[0..16]，高 16 字节补 0",
+                "en": "context digest[0..16], upper 16 bytes zero"
+              },
+              "err": "49"
+            },
+            {
+              "name": "ctx_hi",
+              "size": "16B ‖ 16B 0",
+              "color": 4,
+              "flex": 2,
+              "role": {
+                "zh": "context digest[16..32]，高 16 字节补 0",
+                "en": "context digest[16..32], upper 16 bytes zero"
+              },
+              "err": "49"
+            }
+          ],
+          "note": {
+            "zh": "witness 中 Groth16Witness.public_inputs 必须与此向量逐字节相等，否则 49",
+            "en": "Groth16Witness.public_inputs in the witness must equal this vector byte for byte, else 49"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "script",
+          "cond": {
+            "zh": "args 33B、args[0] = 1、hash_type = data1",
+            "en": "args 33B, args[0] = 1, hash_type = data1"
+          },
+          "err": "41"
+        },
+        {
+          "field": "inputs / outputs / cell_deps",
+          "cond": {
+            "zh": "每类 ≤ 64 个（cell_deps 按展开后计）",
+            "en": "≤ 64 each (cell_deps counted after expansion)"
+          },
+          "err": "52"
+        },
+        {
+          "field": {
+            "zh": "同 code 的 type cell",
+            "en": "same-code type cells"
+          },
+          "cond": {
+            "zh": "输入 ≤ 1、输出 = 1、group 输出 = 1、group 输入 = 同 code 输入数（不同 args 也算，不能批量）",
+            "en": "inputs ≤ 1, outputs = 1, group outputs = 1, group inputs = same-code inputs (any args; no batching)"
+          },
+          "err": "42"
+        },
+        {
+          "field": "type_id",
+          "cond": {
+            "zh": "ckb-std validate_type_id(args[1..33])",
+            "en": "ckb-std validate_type_id(args[1..33])"
+          },
+          "err": "44"
+        },
+        {
+          "field": {
+            "zh": "输出 lock",
+            "en": "output lock"
+          },
+          "cond": {
+            "zh": "code_hash = GUARD_DATA_HASH（0xe683…60d7）、data1、args 空",
+            "en": "code_hash = GUARD_DATA_HASH (0xe683…60d7), data1, empty args"
+          },
+          "err": "45"
+        },
+        {
+          "field": {
+            "zh": "输出 data",
+            "en": "output data"
+          },
+          "cond": {
+            "zh": "恰好 33B 且 data[0] = 1",
+            "en": "exactly 33B and data[0] = 1"
+          },
+          "err": "43"
+        },
+        {
+          "field": "c_new",
+          "cond": {
+            "zh": "≠ 0 且 < BN254 模数",
+            "en": "≠ 0 and < BN254 modulus"
+          },
+          "err": "54"
+        },
+        {
+          "field": {
+            "zh": "输入 lock",
+            "en": "input lock"
+          },
+          "cond": {
+            "zh": "= GUARD",
+            "en": "= GUARD"
+          },
+          "err": "45"
+        },
+        {
+          "field": {
+            "zh": "输入 data",
+            "en": "input data"
+          },
+          "cond": {
+            "zh": "33B、data[0] = 1；c_old ≠ 0 且 < 模数",
+            "en": "33B, data[0] = 1; c_old ≠ 0 and < modulus"
+          },
+          "err": "43 / 54"
+        },
+        {
+          "field": "capacity",
+          "cond": {
+            "zh": "输入 capacity = 输出 capacity",
+            "en": "input capacity = output capacity"
+          },
+          "err": "47"
+        },
+        {
+          "field": "witness",
+          "cond": {
+            "zh": "读取 group 输入下标处的 witness（≤ 512B），WitnessArgs.input_type 存在并可解码",
+            "en": "witness at the group input index (≤ 512B), WitnessArgs.input_type present and decodable"
+          },
+          "err": "48"
+        },
+        {
+          "field": "public inputs",
+          "cond": {
+            "zh": "= 重建的 [c_old, c_new, ctx_lo, ctx_hi]",
+            "en": "= rebuilt [c_old, c_new, ctx_lo, ctx_hi]"
+          },
+          "err": "49"
+        },
+        {
+          "field": "cell_deps",
+          "cond": {
+            "zh": "data hash = VK_DATA_HASH（0x91ad…2e5b）的 cell 恰好 1 个，且可解码为 Groth16VerifyingKey v1（≤ 512B）",
+            "en": "exactly one cell with data hash = VK_DATA_HASH (0x91ad…2e5b), decodable as Groth16VerifyingKey v1 (≤ 512B)"
+          },
+          "err": "50"
+        },
+        {
+          "field": "Groth16",
+          "cond": {
+            "zh": "BN254 证明对重建的公开输入验证通过",
+            "en": "BN254 proof verifies against the rebuilt public inputs"
+          },
+          "err": "51"
+        },
+        {
+          "field": {
+            "zh": "任何读取",
+            "en": "any load"
+          },
+          "cond": {
+            "zh": "syscall 失败",
+            "en": "syscall failure"
+          },
+          "err": "40"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码来自 main.rs 常量：40 LOAD、41 ARGS、42 SHAPE、43 STATE、44 ID、45 GUARD、47 CAPACITY、48 WITNESS、49 PUBLIC、50 VK、51 PROOF、52 LIMIT、54 COMMITMENT（46、53 未使用）。检查顺序：41 → 52 → 42 → 44 → 45 → 43/54 →（更新）45/43/54/47 → 48 → 49 → 50 → 51。",
+      "en": "Error codes are the constants in main.rs: 40 LOAD, 41 ARGS, 42 SHAPE, 43 STATE, 44 ID, 45 GUARD, 47 CAPACITY, 48 WITNESS, 49 PUBLIC, 50 VK, 51 PROOF, 52 LIMIT, 54 COMMITMENT (46 and 53 unused). Check order: 41 → 52 → 42 → 44 → 45 → 43/54 → (update) 45/43/54/47 → 48 → 49 → 50 → 51."
+    },
+    {
+      "zh": "NETWORK_DOMAIN、GUARD_DATA_HASH、VK_DATA_HASH 在构建时由 build.rs 从环境变量编译进二进制；本页使用 evidence/private-tally-testnet/deployment.json 记录的测试网值。没有签名：证明（绑定 context digest）是唯一授权，guard lock 是 always-success。",
+      "en": "NETWORK_DOMAIN, GUARD_DATA_HASH and VK_DATA_HASH are compiled in by build.rs from environment variables; this page uses the testnet values recorded in evidence/private-tally-testnet/deployment.json. There is no signature: the proof (bound to the context digest) is the only authority, and the guard lock is always-success."
+    },
+    {
+      "zh": "数量本身与\"新 = 旧 + 隐藏量\"关系由 Noir 电路强制，不是脚本代码直接比较；链上只看到承诺变化。解码器重算 type_id、context digest 与公开输入；VK 查找和 Groth16 配对为 NOT_CHECKED。",
+      "en": "The amount and the \"new = old + hidden amount\" relation are enforced by the Noir circuit, not compared by the script code; on chain only the commitment changes. The decoder recomputes type_id, the context digest and the public inputs; the VK lookup and Groth16 pairing are NOT_CHECKED."
+    }
+  ]
+}

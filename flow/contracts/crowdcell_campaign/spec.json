@@ -1,0 +1,696 @@
+{
+  "title": {
+    "zh": "CrowdCell Campaign 类型脚本 约束",
+    "en": "CrowdCell Campaign Type Script Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：alesfer001/CrowdCell / contracts/campaign/src/main.rs@acbb40e　·　0xd50c…a8f5 (data2，仅测试网)　·　社区合约，未经独立审计",
+    "en": "Source: alesfer001/CrowdCell / contracts/campaign/src/main.rs@acbb40e　·　0xd50c…a8f5 (data2, testnet only)　·　community contract, not independently audited"
+  },
+  "transitions": [
+    {
+      "tag": "0 → 1",
+      "title": {
+        "zh": "创建众筹",
+        "en": "Create campaign"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "首个 input",
+            "en": "first input"
+          },
+          "body": {
+            "zh": "任意 cell（决定 TypeID）",
+            "en": "any cell (seeds the TypeID)"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "campaign",
+          "body": "Cell{ type: { codeHash: CAMPAIGN, args: {{type_id 32B}} ‖ {{pledge_lock_code_hash 32B}} },\n  data: creator_lock_hash ‖ {{funding_goal>0}} ‖ {{deadline_block>0}} ‖ {{total_pledged=0}} ‖ {{status=0}} ‖ reserved ‖ metadata }"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "type args 字节布局（64B）",
+            "en": "type args byte layout (64B)"
+          },
+          "layout": [
+            {
+              "name": "type_id",
+              "size": "32B",
+              "role": {
+                "zh": "TypeID",
+                "en": "TypeID"
+              },
+              "cons": {
+                "zh": "check_type_id(0,32)",
+                "en": "check_type_id(0,32)"
+              },
+              "err": "12",
+              "color": 1,
+              "flex": 4
+            },
+            {
+              "name": "pledge_lock_code_hash",
+              "size": "32B",
+              "role": {
+                "zh": "pledge-lock 的 code_hash",
+                "en": "code hash of pledge-lock"
+              },
+              "cons": {
+                "zh": "非全零",
+                "en": "non-zero"
+              },
+              "err": "15",
+              "color": 2,
+              "flex": 4
+            }
+          ]
+        },
+        {
+          "label": {
+            "zh": "campaign data 字节布局（≥65B）",
+            "en": "campaign data byte layout (≥65B)"
+          },
+          "layout": [
+            {
+              "name": "creator_lock_hash",
+              "size": "32B",
+              "role": {
+                "zh": "创建者 lock hash",
+                "en": "creator lock hash"
+              },
+              "cons": {
+                "zh": "不可变",
+                "en": "immutable"
+              },
+              "color": 1,
+              "flex": 4
+            },
+            {
+              "name": "funding_goal",
+              "size": "8B",
+              "role": {
+                "zh": "目标 u64 LE（shannon）",
+                "en": "goal u64 LE (shannons)"
+              },
+              "cons": {
+                "zh": "创建时 > 0；不可变",
+                "en": "> 0 at creation; immutable"
+              },
+              "err": "3",
+              "color": 2,
+              "flex": 2
+            },
+            {
+              "name": "deadline_block",
+              "size": "8B",
+              "role": {
+                "zh": "截止区块 u64 LE",
+                "en": "deadline block u64 LE"
+              },
+              "cons": {
+                "zh": "创建时 > 0；不可变",
+                "en": "> 0 at creation; immutable"
+              },
+              "err": "4",
+              "color": 3,
+              "flex": 2
+            },
+            {
+              "name": "total_pledged",
+              "size": "8B",
+              "role": {
+                "zh": "累计认捐 u64 LE",
+                "en": "accumulated pledges u64 LE"
+              },
+              "cons": {
+                "zh": "创建时 = 0；认捐时按净流入增加",
+                "en": "= 0 at creation; grows by net pledge inflow"
+              },
+              "err": "5",
+              "color": 4,
+              "flex": 2
+            },
+            {
+              "name": "status",
+              "size": "1B",
+              "role": {
+                "zh": "0 Active · 1 Success · 2 Failed",
+                "en": "0 Active · 1 Success · 2 Failed"
+              },
+              "cons": {
+                "zh": "其它值 → 2",
+                "en": "other values → 2"
+              },
+              "err": "2",
+              "color": 5,
+              "flex": 1
+            },
+            {
+              "name": "reserved‖metadata",
+              "size": "8B+",
+              "role": {
+                "zh": "保留 8B + 元数据尾部",
+                "en": "8B reserved + metadata tail"
+              },
+              "cons": {
+                "zh": "[57..] 不可变，长度不变",
+                "en": "[57..] immutable, length unchanged"
+              },
+              "color": 6,
+              "flex": 2
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "TypeID 校验失败",
+            "en": "TypeID check fails"
+          },
+          "err": "12"
+        },
+        {
+          "field": "args",
+          "cond": {
+            "zh": "长度 ≥ 64 且 pledge_lock_code_hash ≠ 0",
+            "en": "length ≥ 64 and pledge_lock_code_hash ≠ 0"
+          },
+          "err": "15"
+        },
+        {
+          "field": "script",
+          "cond": {
+            "zh": "load_script 成功",
+            "en": "load_script succeeds"
+          },
+          "err": "7"
+        },
+        {
+          "field": "group",
+          "cond": {
+            "zh": "group 内输入、输出各至多 1 个",
+            "en": "at most 1 group input and 1 group output"
+          },
+          "err": "21"
+        },
+        {
+          "field": "group data",
+          "cond": {
+            "zh": "group 内 cell 的 data 可读",
+            "en": "group cell data readable"
+          },
+          "err": "9"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "≥ 65 字节",
+            "en": "≥ 65 bytes"
+          },
+          "err": "1"
+        },
+        {
+          "field": "data[56]",
+          "cond": {
+            "zh": "status ∈ {0,1,2}",
+            "en": "status ∈ {0,1,2}"
+          },
+          "err": "2"
+        },
+        {
+          "field": "funding_goal",
+          "cond": {
+            "zh": "> 0",
+            "en": "> 0"
+          },
+          "err": "3"
+        },
+        {
+          "field": "deadline_block",
+          "cond": {
+            "zh": "> 0（不检查是否在未来）",
+            "en": "> 0 (not checked to be in the future)"
+          },
+          "err": "4"
+        },
+        {
+          "field": "total_pledged",
+          "cond": {
+            "zh": "= 0",
+            "en": "= 0"
+          },
+          "err": "5"
+        },
+        {
+          "field": "status",
+          "cond": {
+            "zh": "= 0 Active",
+            "en": "= 0 Active"
+          },
+          "err": "6"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 1",
+      "title": {
+        "zh": "认捐：累计器更新（Active → Active）",
+        "en": "Pledge: accumulator update (Active → Active)"
+      },
+      "inputs": [
+        {
+          "label": "campaign",
+          "body": "Cell{ lock: {{L}}, capacity: C, type: {{campaign type}}, data: …total_pledged = T, status = 0 }"
+        },
+        {
+          "label": {
+            "zh": "可选：本 campaign 的旧 pledge",
+            "en": "optional: consumed pledges of this campaign"
+          },
+          "body": "Cell{ lock: { codeHash: pledge_lock_code_hash, args: campaign_type_hash ‖ {{deadline_block}} ‖ … } }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "campaign",
+          "body": {
+            "zh": "Cell{ lock: {{L 与输入相同}}, {{capacity ≥ C}}, data: {{total_pledged = T + Σnew − Σold}}, status = 0, 其余字段不变 }",
+            "en": "Cell{ lock: {{same as input}}, {{capacity ≥ C}}, data: {{total_pledged = T + Σnew − Σold}}, status = 0, other fields unchanged }"
+          }
+        },
+        {
+          "label": "pledge",
+          "body": {
+            "zh": "Cell{ lock: { codeHash: {{pledge_lock_code_hash}}, args: {{campaign_type_hash}} ‖ {{deadline_block}} ‖ backer_lock_hash }, data(72B)[64..72] = {{amount ≥ 100 CKB（新建）}}, {{capacity ≥ amount + occupied}} }",
+            "en": "Cell{ lock: { codeHash: {{pledge_lock_code_hash}}, args: {{campaign_type_hash}} ‖ {{deadline_block}} ‖ backer_lock_hash }, data(72B)[64..72] = {{amount ≥ 100 CKB (created)}}, {{capacity ≥ amount + occupied}} }"
+          }
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "pledge lock args 字节布局（72B）",
+            "en": "pledge lock args byte layout (72B)"
+          },
+          "layout": [
+            {
+              "name": "campaign_type_hash",
+              "size": "32B",
+              "role": {
+                "zh": "本 campaign 的 type script hash",
+                "en": "this campaign's type script hash"
+              },
+              "cons": {
+                "zh": "与 campaign 相同则计入累计",
+                "en": "same as this campaign: counted toward total"
+              },
+              "color": 1,
+              "flex": 4
+            },
+            {
+              "name": "deadline",
+              "size": "8B",
+              "role": {
+                "zh": "截止区块 u64 LE",
+                "en": "deadline block u64 LE"
+              },
+              "cons": {
+                "zh": "= campaign deadline_block",
+                "en": "= campaign deadline_block"
+              },
+              "err": "26",
+              "color": 2,
+              "flex": 2
+            },
+            {
+              "name": "backer_lock_hash",
+              "size": "32B",
+              "role": {
+                "zh": "支持者 lock hash",
+                "en": "backer lock hash"
+              },
+              "color": 3,
+              "flex": 4
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "capacity",
+          "cond": {
+            "zh": "输出 campaign capacity ≥ 输入",
+            "en": "output campaign capacity ≥ input"
+          },
+          "err": "17"
+        },
+        {
+          "field": "lock",
+          "cond": {
+            "zh": "输出 campaign 的 lock hash 与输入相同",
+            "en": "output campaign lock hash = input lock hash"
+          },
+          "err": "28"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "输入、输出 campaign data ≥ 65 字节；status ∈ {0,1,2}",
+            "en": "input and output campaign data ≥ 65 bytes; status ∈ {0,1,2}"
+          },
+          "err": "1"
+        },
+        {
+          "field": "status",
+          "cond": {
+            "zh": "旧状态必须为 Active",
+            "en": "old status must be Active"
+          },
+          "err": "16"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "creator_lock_hash / funding_goal / deadline_block / 长度 / [57..] 不变",
+            "en": "creator_lock_hash / funding_goal / deadline_block / length / [57..] unchanged"
+          },
+          "err": "16"
+        },
+        {
+          "field": "pledge lock args",
+          "cond": {
+            "zh": "本 campaign 的 pledge：lock args ≥ 72 字节且 [32..40] = deadline_block（新建与消耗的都检查）",
+            "en": "this campaign's pledges: lock args ≥ 72 bytes and [32..40] = deadline_block (created and consumed)"
+          },
+          "err": "26"
+        },
+        {
+          "field": "pledge data",
+          "cond": {
+            "zh": "本 campaign 的 pledge cell data ≥ 72 字节",
+            "en": "pledge cell data of this campaign ≥ 72 bytes"
+          },
+          "err": "16"
+        },
+        {
+          "field": "amount",
+          "cond": {
+            "zh": "新建 pledge 的 amount ≥ 100 CKB（10,000,000,000 shannon）；消耗的 pledge 不检查",
+            "en": "new pledge amount ≥ 100 CKB (10,000,000,000 shannons); consumed pledges not checked"
+          },
+          "err": "23"
+        },
+        {
+          "field": "capacity",
+          "cond": {
+            "zh": "pledge capacity ≥ amount + occupied capacity",
+            "en": "pledge capacity ≥ amount + occupied capacity"
+          },
+          "err": "22"
+        },
+        {
+          "field": "total_pledged",
+          "cond": {
+            "zh": "Σ新建 > Σ消耗，且新 total = 旧 total + 差值",
+            "en": "Σcreated > Σconsumed, and new total = old total + delta"
+          },
+          "err": "16"
+        },
+        {
+          "field": "u64",
+          "cond": {
+            "zh": "累加与金额加 occupied 不溢出",
+            "en": "accumulation and amount + occupied do not overflow"
+          },
+          "err": "19"
+        },
+        {
+          "field": "cell / pledge data",
+          "cond": {
+            "zh": "读取 lock、capacity、occupied 失败",
+            "en": "reading lock, capacity or occupied fails"
+          },
+          "err": "20"
+        },
+        {
+          "field": "data load",
+          "cond": {
+            "zh": "读取 campaign 或 pledge data 失败",
+            "en": "reading campaign or pledge data fails"
+          },
+          "err": "9"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 2",
+      "title": {
+        "zh": "结算：Active → Success / Failed",
+        "en": "Finalize: Active → Success / Failed"
+      },
+      "inputs": [
+        {
+          "label": "campaign",
+          "body": {
+            "zh": "Cell{ lock: {{L}}, data: status = 0 }, {{since = 绝对区块号 ≥ deadline_block}}",
+            "en": "Cell{ lock: {{L}}, data: status = 0 }, {{since = absolute block ≥ deadline_block}}"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "campaign",
+          "body": {
+            "zh": "Cell{ lock: {{L 与输入相同}}, {{capacity ≥ C}}, data: {{total_pledged 不变}}, {{status = total ≥ goal ? 1 : 2}} }",
+            "en": "Cell{ lock: {{same as input}}, {{capacity ≥ C}}, data: {{total_pledged unchanged}}, {{status = total ≥ goal ? 1 : 2}} }"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "capacity",
+          "cond": {
+            "zh": "输出 capacity ≥ 输入",
+            "en": "output capacity ≥ input"
+          },
+          "err": "17"
+        },
+        {
+          "field": "lock",
+          "cond": {
+            "zh": "输出 campaign 的 lock hash 与输入相同",
+            "en": "output campaign lock hash = input lock hash"
+          },
+          "err": "28"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "输入、输出 campaign data ≥ 65 字节；status ∈ {0,1,2}",
+            "en": "input and output campaign data ≥ 65 bytes; status ∈ {0,1,2}"
+          },
+          "err": "1"
+        },
+        {
+          "field": "since",
+          "cond": {
+            "zh": "读取失败",
+            "en": "load fails"
+          },
+          "err": "14"
+        },
+        {
+          "field": "since",
+          "cond": {
+            "zh": "非 0、绝对、标志合法、按区块号，且 ≥ deadline_block",
+            "en": "non-zero, absolute, valid flags, block number, ≥ deadline_block"
+          },
+          "err": "10"
+        },
+        {
+          "field": "status",
+          "cond": {
+            "zh": "旧状态 Active",
+            "en": "old status Active"
+          },
+          "err": "10"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "creator_lock_hash / funding_goal / deadline_block / 长度 / [57..] 不变；total_pledged 不变",
+            "en": "creator_lock_hash / funding_goal / deadline_block / length / [57..] unchanged; total_pledged unchanged"
+          },
+          "err": "10"
+        },
+        {
+          "field": "status",
+          "cond": {
+            "zh": "Success 要求 total ≥ goal；Failed 要求 total < goal",
+            "en": "Success requires total ≥ goal; Failed requires total < goal"
+          },
+          "err": "18"
+        },
+        {
+          "field": "data load",
+          "cond": {
+            "zh": "读取 campaign data 失败",
+            "en": "reading campaign data fails"
+          },
+          "err": "9"
+        }
+      ]
+    },
+    {
+      "tag": "2 → 0",
+      "title": {
+        "zh": "销毁已结算的 campaign",
+        "en": "Destroy a finalized campaign"
+      },
+      "inputs": [
+        {
+          "label": "campaign",
+          "body": {
+            "zh": "Cell{ capacity: C, data: {{status ∈ {1,2}}} }, {{since = 绝对区块号 ≥ deadline + 1,944,000}}",
+            "en": "Cell{ capacity: C, data: {{status ∈ {1,2}}} }, {{since = absolute block ≥ deadline + 1,944,000}}"
+          }
+        },
+        {
+          "label": {
+            "zh": "同一交易的其他 input",
+            "en": "other inputs of the same tx"
+          },
+          "body": {
+            "zh": "不得是 pledge-lock cell，不得带其他 type script",
+            "en": "no pledge-lock cell; no cell with another type script"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "创建者",
+            "en": "creator"
+          },
+          "body": "Σ Cell{ lock hash = creator_lock_hash }.capacity {{≥ C − 1 CKB}}"
+        }
+      ],
+      "limits": [
+        {
+          "field": "status",
+          "cond": {
+            "zh": "Active 不可销毁",
+            "en": "Active cannot be destroyed"
+          },
+          "err": "13"
+        },
+        {
+          "field": "inputs",
+          "cond": {
+            "zh": "同一交易不得花费任何 pledge-lock cell",
+            "en": "no pledge-lock cell may be spent in the same tx"
+          },
+          "err": "25"
+        },
+        {
+          "field": "inputs",
+          "cond": {
+            "zh": "同一交易不得花费带其他 type script 的 cell（含同创建者的其他 campaign）",
+            "en": "no cell with another type script may be spent in the same tx (including another campaign of the same creator)"
+          },
+          "err": "27"
+        },
+        {
+          "field": "outputs",
+          "cond": {
+            "zh": "付给 creator_lock_hash 的 capacity ≥ C − 1 CKB（先于 since 检查）",
+            "en": "capacity paid to creator_lock_hash ≥ C − 1 CKB (checked before since)"
+          },
+          "err": "24"
+        },
+        {
+          "field": "since",
+          "cond": {
+            "zh": "非 0、绝对、标志合法、按区块号，且 ≥ deadline_block + 1,944,000（约 180 天）",
+            "en": "non-zero, absolute, valid flags, block number, ≥ deadline_block + 1,944,000 (~180 days)"
+          },
+          "err": "13"
+        },
+        {
+          "field": "cell reads",
+          "cond": {
+            "zh": "读取 lock、type、capacity 失败",
+            "en": "reading lock, type or capacity fails"
+          },
+          "err": "20"
+        },
+        {
+          "field": "payout sum",
+          "cond": {
+            "zh": "付给创建者的 capacity 累加溢出",
+            "en": "sum of capacity paid to the creator overflows"
+          },
+          "err": "19"
+        },
+        {
+          "field": "data load",
+          "cond": {
+            "zh": "读取 campaign data 失败",
+            "en": "reading campaign data fails"
+          },
+          "err": "9"
+        },
+        {
+          "field": "since",
+          "cond": {
+            "zh": "读取失败",
+            "en": "load fails"
+          },
+          "err": "14"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码（main.rs@acbb40e）：1 data 过短 · 2 status 非法 · 3 goal=0 · 4 deadline=0 · 5 创建时 total≠0 · 6 创建时非 Active · 7 NO_SCRIPT · 9 LOAD_DATA · 10 INVALID_FINALIZATION · 11 MODIFICATION_NOT_ALLOWED（已定义，未使用）· 12 INVALID_TYPE_ID · 13 DESTRUCTION_NOT_ALLOWED · 14 LOAD_SINCE · 15 INVALID_ARGS · 16 INVALID_PLEDGE_UPDATE · 17 CAPACITY_DECREASED · 18 STATUS_NOT_JUSTIFIED · 19 OVERFLOW · 20 LOAD_CELL · 21 MULTIPLE_CAMPAIGN_CELLS · 22 PLEDGE_UNDERFUNDED · 23 PLEDGE_BELOW_MINIMUM · 24 CREATOR_NOT_PAID · 25 DESTRUCTION_WITH_PLEDGES · 26 PLEDGE_DEADLINE_MISMATCH · 27 DESTRUCTION_OTHER_TYPED_INPUT · 28 CAMPAIGN_LOCK_CHANGED",
+      "en": "Error codes (main.rs@acbb40e): 1 data too short · 2 bad status · 3 goal=0 · 4 deadline=0 · 5 total≠0 at creation · 6 not Active at creation · 7 NO_SCRIPT · 9 LOAD_DATA · 10 INVALID_FINALIZATION · 11 MODIFICATION_NOT_ALLOWED (defined, unused) · 12 INVALID_TYPE_ID · 13 DESTRUCTION_NOT_ALLOWED · 14 LOAD_SINCE · 15 INVALID_ARGS · 16 INVALID_PLEDGE_UPDATE · 17 CAPACITY_DECREASED · 18 STATUS_NOT_JUSTIFIED · 19 OVERFLOW · 20 LOAD_CELL · 21 MULTIPLE_CAMPAIGN_CELLS · 22 PLEDGE_UNDERFUNDED · 23 PLEDGE_BELOW_MINIMUM · 24 CREATOR_NOT_PAID · 25 DESTRUCTION_WITH_PLEDGES · 26 PLEDGE_DEADLINE_MISMATCH · 27 DESTRUCTION_OTHER_TYPED_INPUT · 28 CAMPAIGN_LOCK_CHANGED"
+    },
+    {
+      "zh": "状态转换前先检查 lock 不变（28）与 capacity 不减（17）；数据解析错误（1 / 2）先于二者。输出为 Active 的交易一律走认捐路径，因此 1 → 2 的 check_status_justified 中以 Active 为目标的分支（同为 10）不可达",
+      "en": "Every transition checks lock unchanged (28) and capacity not decreased (17); data parse errors (1 / 2) come first. An Active output always takes the pledge path, so the Active-target branch of check_status_justified (also 10) is unreachable"
+    },
+    {
+      "zh": "pledge 归属：pledge cell 的 lock code_hash = args[32..64] 且 lock args[0..32] = 本 campaign 的 type hash。归属 pledge 的 lock args 必须 ≥ 72 字节且 deadline 与 campaign 相同（否则 26），否则其金额不计入也不放行。pledge data 里的 campaign_id 仅作信息",
+      "en": "A pledge belongs to the campaign when its lock code_hash = args[32..64] and lock args[0..32] = this campaign's type hash. A belonging pledge must have lock args ≥ 72 bytes and the campaign's deadline (else 26). pledge data's campaign_id is informational only"
+    },
+    {
+      "zh": "消耗的 pledge 不设最低金额，但同样要求归属、deadline（26）与 capacity（22）；新建 pledge 的金额 ≥ 100 CKB（23）",
+      "en": "Consumed pledges have no minimum amount but still need the matching deadline (26) and enough capacity (22); created pledges need amount ≥ 100 CKB (23)"
+    },
+    {
+      "zh": "截止规则：since 为 0 视为绝对区块 0（而非非法编码），因此在 1 → 2 报 10、在 2 → 0 报 13；destruction 先检查创建者出资（24），再检查 since（13）",
+      "en": "Since rule: since = 0 is absolute block 0, not an invalid encoding, so it fails with 10 in 1 → 2 and 13 in 2 → 0; destruction checks creator payout (24) before since (13)"
+    },
+    {
+      "zh": "谁能花费 campaign cell（以及截止前能否结算）由 campaign-lock 决定，本页不覆盖（见 crowdcell_campaign_lock 卡片）；pledge cell 自身的 type 规则见 CrowdCell 的 pledge 类型脚本（未收录）",
+      "en": "Who may spend the campaign cell (and whether it can finalize before the deadline) is decided by campaign-lock, not covered here (see the crowdcell_campaign_lock card); pledge cells' own type rules live in CrowdCell's pledge type script (not included)"
+    },
+    {
+      "zh": "非本合约规则：README 的 ~180 天按 8 秒/块估算",
+      "en": "Not a contract rule: the README's ~180 days assumes 8 s blocks"
+    },
+    {
+      "zh": "CrowdCell 自述为测试网预览，未经独立审计",
+      "en": "CrowdCell describes itself as a testnet preview; not independently audited"
+    }
+  ]
+}

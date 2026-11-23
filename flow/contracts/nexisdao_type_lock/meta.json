@@ -1,0 +1,54 @@
+{
+  "tags": [
+    "defi",
+    "community",
+    "open-source"
+  ],
+  "contributors": [
+    "NexisDao"
+  ],
+  "source": {
+    "repo": "https://github.com/NexisDao/NexisDao-core",
+    "commit": "1447fed98e74935394e877c9a78a368ae3e6dbd5",
+    "paths": [
+      "contracts/type_lock/src/entry.rs",
+      "contracts/type_lock/src/error.rs"
+    ],
+    "commit_note": "default-branch HEAD read 2026-11-06 (the repo has a single commit); code hash from dckb-rescuer/v1-core README",
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0x8baa01f58baab0cb58fc319136ea4f6866ed59c323fa94bf7d6b72bea21c74de",
+          "evidence": [],
+          "matches_commit": false
+        }
+      ],
+      "note": "no binary or checksum at the recorded commit matched the deployed data hash (reproducible build not attempted)"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0x8baa01f58baab0cb58fc319136ea4f6866ed59c323fa94bf7d6b72bea21c74de",
+      "hash_type": "data",
+      "constant_source": "dckb-rescuer/v1-core README (\"Type lock … deployed with this code hash\"); seen on chain as a data lock of dCKB NervosDAO deposits",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x4",
+          "tx_hash": "0x584ddf4379ae4fc87a435162c77faf9bbd55e5704f7ffbdcfa5052ed81f6770f"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x4",
+        "tx_hash": "0x584ddf4379ae4fc87a435162c77faf9bbd55e5704f7ffbdcfa5052ed81f6770f"
+      },
+      "type_script": null,
+      "data_hash": "0x8baa01f58baab0cb58fc319136ea4f6866ed59c323fa94bf7d6b72bea21c74de",
+      "deploy_tx": "0x584ddf4379ae4fc87a435162c77faf9bbd55e5704f7ffbdcfa5052ed81f6770f",
+      "deploy_block": 5664076
+    }
+  ],
+  "checked_at": "2026-11-06"
+}

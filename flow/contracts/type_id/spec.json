@@ -1,0 +1,165 @@
+{
+  "title": {
+    "zh": "Type ID（内置 type）约束",
+    "en": "Type ID (built-in type) Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：nervosnetwork/ckb / script/src/type_id.rs（节点内置，非 RISC-V 合约）　·　code_hash 0x0000…545950455f4944（\"TYPE_ID\"），hash_type type，主网/测试网相同",
+    "en": "Source: nervosnetwork/ckb / script/src/type_id.rs (built into the node, not a RISC-V binary)　·　code_hash 0x0000…545950455f4944 (\"TYPE_ID\"), hash_type type, same on both networks"
+  },
+  "transitions": [
+    {
+      "tag": "0 → 1",
+      "title": {
+        "zh": "创建",
+        "en": "Create"
+      },
+      "inputs": [
+        {
+          "label": "tx.inputs[0]",
+          "body": {
+            "zh": "CellInput{ since, previous_output }\n// 任意 cell",
+            "en": "CellInput{ since, previous_output }\n// any cell"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "新 cell（output 序号 i）",
+            "en": "new cell (output index i)"
+          },
+          "body": "Cell{\n  type: { codeHash: TYPE_ID, hashType: type,\n          args: {{blake2b(inputs[0] ‖ u64le(i))}} }\n}"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "args 计算",
+            "en": "args derivation"
+          },
+          "layout": [
+            {
+              "name": "CellInput",
+              "size": "44B",
+              "role": {
+                "zh": "since u64 ‖ tx_hash 32B ‖ index u32",
+                "en": "since u64 ‖ tx_hash 32B ‖ index u32"
+              },
+              "cons": {
+                "zh": "交易第一个输入",
+                "en": "the tx's first input"
+              },
+              "err": "-3",
+              "color": 1,
+              "flex": 3
+            },
+            {
+              "name": "output index",
+              "size": "8B",
+              "role": {
+                "zh": "group 第一个输出的序号（u64 LE）",
+                "en": "index of the group's first output (u64 LE)"
+              },
+              "cons": "—",
+              "err": "-3",
+              "color": 3
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "恰为 32 字节",
+            "en": "exactly 32 bytes"
+          },
+          "err": "-1"
+        },
+        {
+          "field": "args",
+          "cond": {
+            "zh": "= blake2b(第一个 CellInput ‖ 输出序号)",
+            "en": "= blake2b(first CellInput ‖ output index)"
+          },
+          "err": "-3"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 1",
+      "title": {
+        "zh": "更新",
+        "en": "Update"
+      },
+      "inputs": [
+        {
+          "label": "input",
+          "body": "Cell{ type: TYPE_ID({{id}}) }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "output",
+          "body": {
+            "zh": "Cell{ type: TYPE_ID({{id}}), data: 新数据 }",
+            "en": "Cell{ type: TYPE_ID({{id}}), data: new data }"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "group",
+          "cond": {
+            "zh": "最多 1 个输入与 1 个输出带同一 type_id",
+            "en": "at most 1 input and 1 output share the same type_id"
+          },
+          "err": "-2"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 0",
+      "title": {
+        "zh": "销毁",
+        "en": "Destroy"
+      },
+      "inputs": [
+        {
+          "label": "input",
+          "body": "Cell{ type: TYPE_ID({{id}}) }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "outputs",
+          "body": {
+            "zh": "不再含该 type_id",
+            "en": "no cell with this type_id"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "group",
+          "cond": {
+            "zh": "至多 1 个输入",
+            "en": "at most 1 input"
+          },
+          "err": "-2"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码：-1 ERROR_ARGS · -2 ERROR_TOO_MANY_CELLS · -3 ERROR_INVALID_INPUT_HASH；消耗固定 1,000,000 cycles",
+      "en": "Error codes: -1 ERROR_ARGS · -2 ERROR_TOO_MANY_CELLS · -3 ERROR_INVALID_INPUT_HASH; costs a fixed 1,000,000 cycles"
+    },
+    {
+      "zh": "合约部署常用 type_id 让 code_hash（hash_type=type）在升级后保持不变",
+      "en": "Deployments use type_id so the code_hash (hash_type=type) stays stable across upgrades"
+    }
+  ]
+}

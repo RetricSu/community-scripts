@@ -1,0 +1,770 @@
+{
+  "title": {
+    "zh": "zk-Lock（Groth16 证明解锁）约束",
+    "en": "zk-Lock (Groth16 proof-unlocked) Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：CECILIA-MULANDI/zk-Lock @699c63a crates/zk-lock-core/src、contracts/zk-lock、contracts/zk-lock-bound　·　Pudge 测试网 generic 0x2417…fa7b (type) / bound 0xfbb4…028e (type)　·　部署见 README.md「Pudge testnet」",
+    "en": "Source: CECILIA-MULANDI/zk-Lock @699c63a crates/zk-lock-core/src, contracts/zk-lock, contracts/zk-lock-bound　·　Pudge testnet generic 0x2417…fa7b (type) / bound 0xfbb4…028e (type)　·　deployments in README.md \"Pudge testnet\""
+  },
+  "transitions": [
+    {
+      "tag": "0 → 1",
+      "title": {
+        "zh": "锁定：创建 zk-Lock cell（lock 不运行）",
+        "en": "Lock: create a zk-Lock cell (lock does not run)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "任意输入",
+            "en": "any inputs"
+          },
+          "body": {
+            "zh": "由各自的 lock 授权",
+            "en": "authorized by their own locks"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "zk-Lock cell",
+            "en": "zk-Lock cell"
+          },
+          "body": {
+            "zh": "Cell{\n  capacity: C,\n  lock: ZK_LOCK{ args: {{vk_hash ‖ pi_commitment}} },\n  type: 任意\n}",
+            "en": "Cell{\n  capacity: C,\n  lock: ZK_LOCK{ args: {{vk_hash ‖ pi_commitment}} },\n  type: any\n}"
+          }
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "lock.args 字节布局（64B）",
+            "en": "lock.args byte layout (64B)"
+          },
+          "layout": [
+            {
+              "name": "vk_hash",
+              "size": "32B",
+              "color": 0,
+              "flex": 2,
+              "role": {
+                "zh": "验证密钥 cell 的 data hash（blake2b-256, ckb-default-hash）",
+                "en": "data hash of the verifying-key cell (blake2b-256, ckb-default-hash)"
+              },
+              "cons": {
+                "zh": "恰好 1 个 cell_dep 的 data hash 等于它",
+                "en": "exactly one cell_dep has this data hash"
+              },
+              "err": "14 / 21"
+            },
+            {
+              "name": "pi_commitment",
+              "size": "32B",
+              "color": 1,
+              "flex": 2,
+              "role": {
+                "zh": "公开输入承诺 = blake2b-256(公开输入字节)；bound 模式下不含第 0 个",
+                "en": "public-input commitment = blake2b-256(public-input bytes); excludes input 0 in bound mode"
+              },
+              "cons": {
+                "zh": "= blake2b(witness 中的公开输入体)",
+                "en": "= blake2b(public-input body in witness)"
+              },
+              "err": "15"
+            }
+          ],
+          "hex": [
+            [
+              "vk_hash",
+              "0x58480ee31438fa04fd733af8ec1821498462be31ffa89694d5b6de76bbfffab5"
+            ],
+            [
+              "pi_commitment",
+              "0x2567e69254d608455e5a462e0d8d74dd32b89920a58b1a0d8930ba26549bc675"
+            ]
+          ],
+          "note": {
+            "zh": "示例：Pudge 测试网 tx 0x929a6507…ecd5 输出 0 的 lock.args；总长必须恰好 64 字节，否则 10",
+            "en": "Example: lock.args of output 0 in Pudge tx 0x929a6507…ecd5; length must be exactly 64 bytes, else 10"
+          }
+        }
+      ],
+      "limits": []
+    },
+    {
+      "tag": "1 → N",
+      "title": {
+        "zh": "generic 解锁（Binding::None，contracts/zk-lock）：任意交易中提交有效证明",
+        "en": "Generic unlock (Binding::None, contracts/zk-lock): any valid proof, in any transaction"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "zk-Lock cell（group 输入）",
+            "en": "zk-Lock cell (group input)"
+          },
+          "body": "Cell{\n  lock: ZK_LOCK(0x2417…fa7b){ args: {{vk_hash ‖ pi_commitment}} }\n}"
+        },
+        {
+          "label": "witness",
+          "body": "WitnessArgs{ lock: {{proof(128) ‖ pi_count u32 ‖ pi × 32}} }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "outputs：任意",
+            "en": "outputs: any"
+          },
+          "body": {
+            "zh": "不检查输出",
+            "en": "outputs not checked"
+          }
+        }
+      ],
+      "extras": [
+        {
+          "zh": "cell_deps: [ zk-Lock code, {{VK cell: data hash = vk_hash（恰好 1 个）}} ]",
+          "en": "cell_deps: [ zk-Lock code, {{VK cell: data hash = vk_hash (exactly one)}} ]"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "witness.lock 字节布局（WitnessArgs.lock，位于 group 第一个输入的下标）",
+            "en": "witness.lock byte layout (WitnessArgs.lock at the group's first input index)"
+          },
+          "layout": [
+            {
+              "name": "proof.A",
+              "size": "32B",
+              "color": 2,
+              "flex": 1,
+              "role": {
+                "zh": "G1 压缩点（arkworks）",
+                "en": "G1 compressed (arkworks)"
+              },
+              "cons": {
+                "zh": "非无穷远点，可反序列化",
+                "en": "not infinity, deserializable"
+              },
+              "err": "17"
+            },
+            {
+              "name": "proof.B",
+              "size": "64B",
+              "color": 3,
+              "flex": 2,
+              "role": {
+                "zh": "G2 压缩点",
+                "en": "G2 compressed"
+              },
+              "cons": {
+                "zh": "非无穷远点",
+                "en": "not infinity"
+              },
+              "err": "17"
+            },
+            {
+              "name": "proof.C",
+              "size": "32B",
+              "color": 4,
+              "flex": 1,
+              "role": {
+                "zh": "G1 压缩点",
+                "en": "G1 compressed"
+              },
+              "cons": {
+                "zh": "非无穷远点",
+                "en": "not infinity"
+              },
+              "err": "17"
+            },
+            {
+              "name": "pi_count",
+              "size": "4B u32 LE",
+              "color": 5,
+              "flex": 1,
+              "role": {
+                "zh": "公开输入个数 n",
+                "en": "number of public inputs n"
+              },
+              "cons": {
+                "zh": "总长 = 128 + 4 + 32n；n + 1 = VK 的 ic_len",
+                "en": "total = 128 + 4 + 32n; n + 1 = VK ic_len"
+              },
+              "err": "13 / 19"
+            },
+            {
+              "name": "pi × n",
+              "size": "32B × n",
+              "color": 6,
+              "flex": 2,
+              "role": {
+                "zh": "BN254 Fr 元素（小端，规范编码）",
+                "en": "BN254 Fr elements (LE, canonical)"
+              },
+              "cons": {
+                "zh": "< 模数",
+                "en": "< modulus"
+              },
+              "err": "18"
+            }
+          ],
+          "hex": [
+            [
+              "proof",
+              "0x3dc6d41b…637c17 (128B)"
+            ],
+            [
+              "pi_count",
+              "0x01000000 (= 1)"
+            ],
+            [
+              "pi[0]",
+              "0x3100000000000000000000000000000000000000000000000000000000000000"
+            ]
+          ],
+          "note": {
+            "zh": "示例：Pudge tx 0xc967684e…7571 的 witness.lock（164B）；blake2b(pi[0]) = 0x2567e692…c675 = args[32..64]",
+            "en": "Example: witness.lock of Pudge tx 0xc967684e…7571 (164B); blake2b(pi[0]) = 0x2567e692…c675 = args[32..64]"
+          }
+        },
+        {
+          "label": {
+            "zh": "VK cell data（arkworks 压缩 VerifyingKey<Bn254>，原始字节，非 molecule）",
+            "en": "VK cell data (arkworks-compressed VerifyingKey<Bn254>, raw bytes, not molecule)"
+          },
+          "layout": [
+            {
+              "name": "alpha_g1",
+              "size": "32B",
+              "color": 0,
+              "flex": 1,
+              "role": {
+                "zh": "G1",
+                "en": "G1"
+              },
+              "cons": {
+                "zh": "非无穷远点",
+                "en": "not infinity"
+              },
+              "err": "16"
+            },
+            {
+              "name": "beta_g2",
+              "size": "64B",
+              "color": 1,
+              "flex": 2,
+              "role": {
+                "zh": "G2",
+                "en": "G2"
+              },
+              "cons": {
+                "zh": "非无穷远点",
+                "en": "not infinity"
+              },
+              "err": "16"
+            },
+            {
+              "name": "gamma_g2",
+              "size": "64B",
+              "color": 2,
+              "flex": 2,
+              "role": {
+                "zh": "G2",
+                "en": "G2"
+              },
+              "cons": {
+                "zh": "非无穷远点",
+                "en": "not infinity"
+              },
+              "err": "16"
+            },
+            {
+              "name": "delta_g2",
+              "size": "64B",
+              "color": 3,
+              "flex": 2,
+              "role": {
+                "zh": "G2",
+                "en": "G2"
+              },
+              "cons": {
+                "zh": "非无穷远点",
+                "en": "not infinity"
+              },
+              "err": "16"
+            },
+            {
+              "name": "ic_len",
+              "size": "8B u64 LE",
+              "color": 4,
+              "flex": 1,
+              "role": {
+                "zh": "gamma_abc_g1 个数",
+                "en": "number of gamma_abc_g1 points"
+              },
+              "cons": {
+                "zh": "≥ 1；总长 = 232 + 32·ic_len",
+                "en": "≥ 1; total = 232 + 32·ic_len"
+              },
+              "err": "16"
+            },
+            {
+              "name": "gamma_abc_g1",
+              "size": "32B × ic_len",
+              "color": 5,
+              "flex": 2,
+              "role": {
+                "zh": "G1 点",
+                "en": "G1 points"
+              },
+              "cons": {
+                "zh": "均非无穷远点",
+                "en": "none at infinity"
+              },
+              "err": "16"
+            }
+          ],
+          "note": {
+            "zh": "来自 groth16-ckb verifier-core（zk-lock-core 依赖 rev e969ad1）。该 cell 只作为 cell_dep，不被 zk-Lock 消费",
+            "en": "From groth16-ckb verifier-core (zk-lock-core pins rev e969ad1). The cell is only a cell_dep; zk-Lock never consumes it"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "script.args",
+          "cond": {
+            "zh": "长度 = 64 字节",
+            "en": "length = 64 bytes"
+          },
+          "err": "10"
+        },
+        {
+          "field": "cell_deps",
+          "cond": {
+            "zh": "data hash = vk_hash 的 cell_dep 恰好 1 个；出现 2 个",
+            "en": "exactly one cell_dep with data hash = vk_hash; a second one"
+          },
+          "err": "21",
+          "note": {
+            "zh": "先检测重复（21），再检测缺失（14）",
+            "en": "duplicate checked first (21), then missing (14)"
+          }
+        },
+        {
+          "field": "cell_deps",
+          "cond": {
+            "zh": "找不到 data hash = vk_hash 的 cell_dep",
+            "en": "no cell_dep with data hash = vk_hash"
+          },
+          "err": "14"
+        },
+        {
+          "field": "witness[group 0].lock",
+          "cond": {
+            "zh": "WitnessArgs.lock 必须存在",
+            "en": "WitnessArgs.lock must be present"
+          },
+          "err": "11",
+          "note": {
+            "zh": "witness 不是合法 WitnessArgs 时由 ckb-std 返回 SysError → 4（Encoding）；witness 缺失 → 1（IndexOutOfBound）",
+            "en": "if the witness is not valid WitnessArgs ckb-std returns SysError → 4 (Encoding); missing witness → 1 (IndexOutOfBound)"
+          }
+        },
+        {
+          "field": "witness.lock",
+          "cond": {
+            "zh": "长度 ≥ 132（128 proof + 4 pi_count）",
+            "en": "length ≥ 132 (128 proof + 4 pi_count)"
+          },
+          "err": "12"
+        },
+        {
+          "field": "witness.lock",
+          "cond": {
+            "zh": "长度 = 128 + 4 + 32 × pi_count",
+            "en": "length = 128 + 4 + 32 × pi_count"
+          },
+          "err": "13"
+        },
+        {
+          "field": "pi_commitment",
+          "cond": {
+            "zh": "blake2b-256(全部公开输入字节，不含 pi_count) = args[32..64]",
+            "en": "blake2b-256(all public-input bytes, without pi_count) = args[32..64]"
+          },
+          "err": "15"
+        },
+        {
+          "field": "VK cell data",
+          "cond": {
+            "zh": "长度 ≥ 232、ic_len ≥ 1、长度 = 232 + 32·ic_len、点可反序列化且非无穷远",
+            "en": "length ≥ 232, ic_len ≥ 1, length = 232 + 32·ic_len, points deserialize and are not infinity"
+          },
+          "err": "16"
+        },
+        {
+          "field": "proof",
+          "cond": {
+            "zh": "128 字节、可反序列化、A/B/C 非无穷远",
+            "en": "128 bytes, deserializable, A/B/C not infinity"
+          },
+          "err": "17"
+        },
+        {
+          "field": "public inputs",
+          "cond": {
+            "zh": "每个 Fr 为规范编码",
+            "en": "each Fr canonically encoded"
+          },
+          "err": "18"
+        },
+        {
+          "field": "pi_count",
+          "cond": {
+            "zh": "pi_count + 1 = VK ic_len",
+            "en": "pi_count + 1 = VK ic_len"
+          },
+          "err": "19"
+        },
+        {
+          "field": "Groth16",
+          "cond": {
+            "zh": "BN254 配对检查通过",
+            "en": "BN254 pairing check passes"
+          },
+          "err": "20"
+        }
+      ]
+    },
+    {
+      "tag": "1 → N",
+      "title": {
+        "zh": "交易绑定解锁（Binding::Transaction，contracts/zk-lock-bound）：pi[0] = tx_hash 标量",
+        "en": "Transaction-bound unlock (Binding::Transaction, contracts/zk-lock-bound): pi[0] = tx_hash scalar"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "zk-Lock bound cell（group 输入）",
+            "en": "zk-Lock bound cell (group input)"
+          },
+          "body": "Cell{\n  lock: ZK_LOCK_BOUND(0xfbb4…028e){ args: {{vk_hash ‖ pi_commitment(pi[1..n])}} }\n}"
+        },
+        {
+          "label": "witness",
+          "body": "WitnessArgs{ lock: {{proof(128) ‖ pi_count u32 ‖ pi[0]=ctx ‖ pi[1..n]}} }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "outputs：被 tx_hash 固定",
+            "en": "outputs: pinned by tx_hash"
+          },
+          "body": {
+            "zh": "任何字段变化都会改变 tx_hash → pi[0] 不匹配",
+            "en": "any change alters tx_hash → pi[0] mismatch"
+          }
+        }
+      ],
+      "extras": [
+        {
+          "zh": "cell_deps: [ zk-Lock-bound code, {{VK cell: data hash = vk_hash（恰好 1 个）}} ]",
+          "en": "cell_deps: [ zk-Lock-bound code, {{VK cell: data hash = vk_hash (exactly one)}} ]"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "pi[0]：交易上下文标量（32B）",
+            "en": "pi[0]: transaction-context scalar (32B)"
+          },
+          "layout": [
+            {
+              "name": "tx_hash[0..31]",
+              "size": "31B",
+              "color": 0,
+              "flex": 6,
+              "role": {
+                "zh": "当前交易 tx_hash 的前 31 字节（不含 witness）",
+                "en": "first 31 bytes of this tx_hash (witnesses excluded)"
+              },
+              "cons": {
+                "zh": "逐字节相等",
+                "en": "byte-equal"
+              },
+              "err": "22"
+            },
+            {
+              "name": "0x00",
+              "size": "1B",
+              "color": 1,
+              "flex": 1,
+              "role": {
+                "zh": "最高字节清零，保证 < BN254 模数",
+                "en": "top byte cleared to stay < BN254 modulus"
+              },
+              "cons": {
+                "zh": "= 0x00",
+                "en": "= 0x00"
+              },
+              "err": "22"
+            }
+          ],
+          "note": {
+            "zh": "pi_commitment 只覆盖 pi[1..n]；配对检查使用包含 pi[0] 的完整向量",
+            "en": "pi_commitment covers pi[1..n] only; the pairing check uses the full vector including pi[0]"
+          }
+        },
+        {
+          "label": {
+            "zh": "witness.lock 字节布局（WitnessArgs.lock，位于 group 第一个输入的下标）",
+            "en": "witness.lock byte layout (WitnessArgs.lock at the group's first input index)"
+          },
+          "layout": [
+            {
+              "name": "proof.A",
+              "size": "32B",
+              "color": 2,
+              "flex": 1,
+              "role": {
+                "zh": "G1 压缩点（arkworks）",
+                "en": "G1 compressed (arkworks)"
+              },
+              "cons": {
+                "zh": "非无穷远点，可反序列化",
+                "en": "not infinity, deserializable"
+              },
+              "err": "17"
+            },
+            {
+              "name": "proof.B",
+              "size": "64B",
+              "color": 3,
+              "flex": 2,
+              "role": {
+                "zh": "G2 压缩点",
+                "en": "G2 compressed"
+              },
+              "cons": {
+                "zh": "非无穷远点",
+                "en": "not infinity"
+              },
+              "err": "17"
+            },
+            {
+              "name": "proof.C",
+              "size": "32B",
+              "color": 4,
+              "flex": 1,
+              "role": {
+                "zh": "G1 压缩点",
+                "en": "G1 compressed"
+              },
+              "cons": {
+                "zh": "非无穷远点",
+                "en": "not infinity"
+              },
+              "err": "17"
+            },
+            {
+              "name": "pi_count",
+              "size": "4B u32 LE",
+              "color": 5,
+              "flex": 1,
+              "role": {
+                "zh": "公开输入个数 n",
+                "en": "number of public inputs n"
+              },
+              "cons": {
+                "zh": "总长 = 128 + 4 + 32n；n + 1 = VK 的 ic_len",
+                "en": "total = 128 + 4 + 32n; n + 1 = VK ic_len"
+              },
+              "err": "13 / 19"
+            },
+            {
+              "name": "pi × n",
+              "size": "32B × n",
+              "color": 6,
+              "flex": 2,
+              "role": {
+                "zh": "BN254 Fr 元素（小端，规范编码）",
+                "en": "BN254 Fr elements (LE, canonical)"
+              },
+              "cons": {
+                "zh": "< 模数",
+                "en": "< modulus"
+              },
+              "err": "18"
+            }
+          ],
+          "hex": [
+            [
+              "proof",
+              "0x3dc6d41b…637c17 (128B)"
+            ],
+            [
+              "pi_count",
+              "0x01000000 (= 1)"
+            ],
+            [
+              "pi[0]",
+              "0x3100000000000000000000000000000000000000000000000000000000000000"
+            ]
+          ],
+          "note": {
+            "zh": "示例：Pudge tx 0xc967684e…7571 的 witness.lock（164B）；blake2b(pi[0]) = 0x2567e692…c675 = args[32..64]",
+            "en": "Example: witness.lock of Pudge tx 0xc967684e…7571 (164B); blake2b(pi[0]) = 0x2567e692…c675 = args[32..64]"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "script.args",
+          "cond": {
+            "zh": "长度 = 64 字节",
+            "en": "length = 64 bytes"
+          },
+          "err": "10"
+        },
+        {
+          "field": "cell_deps",
+          "cond": {
+            "zh": "data hash = vk_hash 的 cell_dep 恰好 1 个；出现 2 个",
+            "en": "exactly one cell_dep with data hash = vk_hash; a second one"
+          },
+          "err": "21",
+          "note": {
+            "zh": "先检测重复（21），再检测缺失（14）",
+            "en": "duplicate checked first (21), then missing (14)"
+          }
+        },
+        {
+          "field": "cell_deps",
+          "cond": {
+            "zh": "找不到 data hash = vk_hash 的 cell_dep",
+            "en": "no cell_dep with data hash = vk_hash"
+          },
+          "err": "14"
+        },
+        {
+          "field": "witness[group 0].lock",
+          "cond": {
+            "zh": "WitnessArgs.lock 必须存在",
+            "en": "WitnessArgs.lock must be present"
+          },
+          "err": "11",
+          "note": {
+            "zh": "witness 不是合法 WitnessArgs 时由 ckb-std 返回 SysError → 4（Encoding）；witness 缺失 → 1（IndexOutOfBound）",
+            "en": "if the witness is not valid WitnessArgs ckb-std returns SysError → 4 (Encoding); missing witness → 1 (IndexOutOfBound)"
+          }
+        },
+        {
+          "field": "witness.lock",
+          "cond": {
+            "zh": "长度 ≥ 132（128 proof + 4 pi_count）",
+            "en": "length ≥ 132 (128 proof + 4 pi_count)"
+          },
+          "err": "12"
+        },
+        {
+          "field": "witness.lock",
+          "cond": {
+            "zh": "长度 = 128 + 4 + 32 × pi_count",
+            "en": "length = 128 + 4 + 32 × pi_count"
+          },
+          "err": "13"
+        },
+        {
+          "field": "pi_count",
+          "cond": {
+            "zh": "≥ 1（需要保留 pi[0]）",
+            "en": "≥ 1 (pi[0] must exist)"
+          },
+          "err": "23"
+        },
+        {
+          "field": "pi_commitment",
+          "cond": {
+            "zh": "blake2b-256(pi[1..n]) = args[32..64]",
+            "en": "blake2b-256(pi[1..n]) = args[32..64]"
+          },
+          "err": "15"
+        },
+        {
+          "field": "pi[0]",
+          "cond": {
+            "zh": "= tx_hash[0..31] ‖ 0x00",
+            "en": "= tx_hash[0..31] ‖ 0x00"
+          },
+          "err": "22"
+        },
+        {
+          "field": "VK cell data",
+          "cond": {
+            "zh": "长度 ≥ 232、ic_len ≥ 1、长度 = 232 + 32·ic_len、点可反序列化且非无穷远",
+            "en": "length ≥ 232, ic_len ≥ 1, length = 232 + 32·ic_len, points deserialize and are not infinity"
+          },
+          "err": "16"
+        },
+        {
+          "field": "proof",
+          "cond": {
+            "zh": "128 字节、可反序列化、A/B/C 非无穷远",
+            "en": "128 bytes, deserializable, A/B/C not infinity"
+          },
+          "err": "17"
+        },
+        {
+          "field": "public inputs",
+          "cond": {
+            "zh": "每个 Fr 为规范编码",
+            "en": "each Fr canonically encoded"
+          },
+          "err": "18"
+        },
+        {
+          "field": "pi_count",
+          "cond": {
+            "zh": "pi_count + 1 = VK ic_len",
+            "en": "pi_count + 1 = VK ic_len"
+          },
+          "err": "19"
+        },
+        {
+          "field": "Groth16",
+          "cond": {
+            "zh": "BN254 配对检查通过",
+            "en": "BN254 pairing check passes"
+          },
+          "err": "20"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码来自 crates/zk-lock-core/src/error.rs（#[repr(i8)]）：1–5 为 ckb-std SysError 映射（1 IndexOutOfBound、2 ItemMissing、3 LengthNotEnough、4 Encoding、5 其他），10–23 为业务错误。检查顺序固定：10 → 21/14 → 11 → 12 → 13 →（bound: 23）→ 15 →（bound: 22）→ 16–20。",
+      "en": "Error codes from crates/zk-lock-core/src/error.rs (#[repr(i8)]): 1–5 map ckb-std SysError (1 IndexOutOfBound, 2 ItemMissing, 3 LengthNotEnough, 4 Encoding, 5 other); 10–23 are script errors. The check order is fixed: 10 → 21/14 → 11 → 12 → 13 → (bound: 23) → 15 → (bound: 22) → 16–20."
+    },
+    {
+      "zh": "只读取 group 第 0 个输入的 witness：同一 group 的多个 cell 用一份证明一起解锁。generic 模式不检查输出，witness 可被任何看到它的人重放（README 也如此说明）；bound 模式用 tx_hash 绑定整笔交易。",
+      "en": "Only the witness of group input 0 is read: several cells in one group unlock with one proof. Generic mode checks no outputs, so the witness is replayable by anyone who sees it (as the README states); bound mode binds the whole tx via tx_hash."
+    },
+    {
+      "zh": "16–20 来自 groth16-ckb verifier-core（rev e969ad1）的 VerifyError；VK 在 zk-Lock 中是原始 arkworks 字节，而不是 groth16-ckb 类型脚本使用的 molecule Groth16VerifyingKey。",
+      "en": "16–20 come from groth16-ckb verifier-core (rev e969ad1) VerifyError; in zk-Lock the VK is raw arkworks bytes, not the molecule Groth16VerifyingKey used by the groth16-ckb type script."
+    },
+    {
+      "zh": "解码器离线检查：args 长度、witness 长度、pi_commitment、bound 模式的 pi[0]；VK cell_dep 查找与 Groth16 配对检查无法离线完成（NOT_CHECKED）。项目自述为测试网 / 未审计。",
+      "en": "The decoder checks offline: args length, witness length, pi_commitment, and pi[0] in bound mode; the VK cell_dep lookup and Groth16 pairing cannot be done offline (NOT_CHECKED). The project describes itself as testnet / unaudited."
+    }
+  ]
+}

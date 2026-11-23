@@ -1,0 +1,92 @@
+{
+  "tags": [
+    "identity",
+    "community",
+    "open-source"
+  ],
+  "contributors": [
+    "linkdesu"
+  ],
+  "source": {
+    "repo": "https://github.com/dotbitHQ/did-contracts",
+    "commit": "0cc9fbf51bd508a0c8f532a9e43bb7cb17b79370",
+    "paths": [
+      "contracts/income-cell-type/src/entry.rs",
+      "libs/das-core/src/verifiers/misc.rs",
+      "libs/das-core/src/verifiers/common.rs",
+      "libs/das-core/src/error.rs",
+      ".env.mainnet",
+      ".env.testnet2"
+    ],
+    "commit_note": "\"sync the source code from latest deployed contracts\" (2025-03-20); type-id args from dotbitHQ/das-lib core/env.go @57eb578",
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0x4c14e91789cdaebba45388f422ec687cdf22ad895b769d1c1ad37ff0ce029354",
+          "evidence": [],
+          "matches_commit": false
+        },
+        {
+          "data_hash": "0x5cbc65b40cfacc3c9dafb8763b244ee6aec8b81989bcd887d7c004599cdc7c3d",
+          "evidence": [],
+          "matches_commit": false
+        }
+      ],
+      "note": "no binary or checksum at the recorded commit matched the deployed data hash (reproducible build not attempted)"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0x6c1d69a358954fc471a2ffa82a98aed5a4912e6002a5e761524f2304ab53bf39",
+      "hash_type": "type",
+      "constant_source": "dotbitHQ/das-lib core/env.go EnvMainNet IncomeCellType type-id args 0x108fba6a…; code hash = Type ID script hash; live code cell 0x0266b5a1…:0",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x0266b5a13edddd62f6954a6ee40b94eda76d7d5b9466ee9c5059817958dfd8e8"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x0266b5a13edddd62f6954a6ee40b94eda76d7d5b9466ee9c5059817958dfd8e8"
+      },
+      "type_script": {
+        "args": "0x108fba6a9b9f2898b4cdf11383ba2a6ed3da951b458c48e5f5de0353bbca2d46",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x4c14e91789cdaebba45388f422ec687cdf22ad895b769d1c1ad37ff0ce029354",
+      "deploy_tx": "0x0266b5a13edddd62f6954a6ee40b94eda76d7d5b9466ee9c5059817958dfd8e8",
+      "deploy_block": 15198783
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0x08d1cdc6ab92d9cabe0096a2c7642f73d0ef1b24c94c43f21c6c3a32ffe0bb5e",
+      "hash_type": "type",
+      "constant_source": "dotbitHQ/das-lib core/env.go EnvTestnet2 IncomeCellType type-id args 0xd7b9d821…",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x2219d49ae71d2b4f45248ff581adcff605549213ceb7e316c3dd8264025fd221"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x2219d49ae71d2b4f45248ff581adcff605549213ceb7e316c3dd8264025fd221"
+      },
+      "type_script": {
+        "args": "0xd7b9d8213671aec03f3a3ab95171e0e79481db2c084586b9ea99914c00ff3716",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x5cbc65b40cfacc3c9dafb8763b244ee6aec8b81989bcd887d7c004599cdc7c3d",
+      "deploy_tx": "0x2219d49ae71d2b4f45248ff581adcff605549213ceb7e316c3dd8264025fd221",
+      "deploy_block": 14851498
+    }
+  ],
+  "checked_at": "2026-11-06"
+}

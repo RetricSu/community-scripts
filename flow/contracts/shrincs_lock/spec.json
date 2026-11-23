@@ -1,0 +1,290 @@
+{
+  "title": {
+    "zh": "SHRINCS 抗量子 Lock 约束",
+    "en": "SHRINCS Post-quantum Lock Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：XuJiandong/shrincs-lock @d9326f5 contracts/shrincs-lock/src/main.rs、docs/shrincs-lock-spec.md　·　testnet 0x3874…96ac (type)　·　部署见 README.md / deployment/testnet/migrations/2026-09-07-012703.json",
+    "en": "Source: XuJiandong/shrincs-lock @d9326f5 contracts/shrincs-lock/src/main.rs, docs/shrincs-lock-spec.md　·　testnet 0x3874…96ac (type)　·　deployment in README.md / deployment/testnet/migrations/2026-09-07-012703.json"
+  },
+  "transitions": [
+    {
+      "tag": "1 → N",
+      "title": {
+        "zh": "SHRINCS 签名解锁（有状态 324B / 无状态 2568B）",
+        "en": "SHRINCS signature unlock (stateful 324B / stateless 2568B)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "SHRINCS cell（group 输入）",
+            "en": "SHRINCS cell (group input)"
+          },
+          "body": "Cell{\n  lock: SHRINCS_LOCK{ args: {{pubkey 32B = seed ‖ root}} }\n}"
+        },
+        {
+          "label": {
+            "zh": "witness[group 0]",
+            "en": "witness[group 0]"
+          },
+          "body": {
+            "zh": "WitnessArgs{\n  lock: {{SHRINCS 签名}},\n  input_type: …（计入签名消息）,\n  output_type: …（计入签名消息）\n}",
+            "en": "WitnessArgs{\n  lock: {{SHRINCS signature}},\n  input_type: … (signed),\n  output_type: … (signed)\n}"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "outputs：任意",
+            "en": "outputs: any"
+          },
+          "body": {
+            "zh": "由签名消息覆盖（tx_hash）",
+            "en": "covered by the signed message (tx_hash)"
+          }
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "lock.args 字节布局（SHRINCS 公钥，32B）",
+            "en": "lock.args byte layout (SHRINCS public key, 32B)"
+          },
+          "layout": [
+            {
+              "name": "seed",
+              "size": "16B",
+              "color": 0,
+              "flex": 1,
+              "role": {
+                "zh": "公钥 seed（PublicKey.seed）",
+                "en": "public-key seed (PublicKey.seed)"
+              },
+              "cons": {
+                "zh": "args 总长 = 32",
+                "en": "args length = 32"
+              },
+              "err": "74"
+            },
+            {
+              "name": "root",
+              "size": "16B",
+              "color": 1,
+              "flex": 1,
+              "role": {
+                "zh": "压缩根（PublicKey.root）",
+                "en": "compressed root (PublicKey.root)"
+              },
+              "cons": {
+                "zh": "args 总长 = 32",
+                "en": "args length = 32"
+              },
+              "err": "74"
+            }
+          ],
+          "hex": [
+            [
+              "seed",
+              "0xc56884e13db7dd53a4dba68f768b2b45"
+            ],
+            [
+              "root",
+              "0x0cce73dd6228f313a4f1398875c9166c"
+            ]
+          ],
+          "note": {
+            "zh": "示例：测试网 tx 0xc3993e2a…a8a2 输入的 lock.args",
+            "en": "Example: input lock.args of testnet tx 0xc3993e2a…a8a2"
+          }
+        },
+        {
+          "label": {
+            "zh": "签名消息 = blake2b-256(personal \"ckb-shrincs-msg-\", CKB_TX_MESSAGE_ALL)",
+            "en": "signing message = blake2b-256(personal \"ckb-shrincs-msg-\", CKB_TX_MESSAGE_ALL)"
+          },
+          "layout": [
+            {
+              "name": "tx_hash",
+              "size": "32B",
+              "color": 0,
+              "flex": 1,
+              "role": {
+                "zh": "交易哈希",
+                "en": "transaction hash"
+              },
+              "err": "71"
+            },
+            {
+              "name": "inputs",
+              "size": "Σ",
+              "color": 1,
+              "flex": 2,
+              "role": {
+                "zh": "每个输入：CellOutput ‖ u32 len(data) ‖ data",
+                "en": "every input: CellOutput ‖ u32 len(data) ‖ data"
+              },
+              "err": "71"
+            },
+            {
+              "name": "w0.input_type / output_type",
+              "size": "len ‖ bytes",
+              "color": 2,
+              "flex": 2,
+              "role": {
+                "zh": "group 第一个 witness 的 input_type、output_type（molecule BytesOpt），不含 lock",
+                "en": "input_type, output_type (molecule BytesOpt) of the group's first witness; lock excluded"
+              },
+              "cons": {
+                "zh": "witness 是合法 WitnessArgs",
+                "en": "witness is valid WitnessArgs"
+              },
+              "err": "72"
+            },
+            {
+              "name": "group witnesses[1..]",
+              "size": "u32 len ‖ w",
+              "color": 3,
+              "flex": 1,
+              "role": {
+                "zh": "group 其余 witness",
+                "en": "remaining group witnesses"
+              },
+              "cons": {
+                "zh": "长度 ≤ u32::MAX",
+                "en": "length ≤ u32::MAX"
+              },
+              "err": "75"
+            },
+            {
+              "name": "extra witnesses",
+              "size": "u32 len ‖ w",
+              "color": 4,
+              "flex": 1,
+              "role": {
+                "zh": "下标 ≥ 输入数的 witness",
+                "en": "witnesses beyond the input count"
+              },
+              "err": "71"
+            }
+          ],
+          "note": {
+            "zh": "按 RFC PR #446（CKB_TX_MESSAGE_ALL）；读取失败返回 71（Syscall）",
+            "en": "Per RFC PR #446 (CKB_TX_MESSAGE_ALL); load failures return 71 (Syscall)"
+          }
+        },
+        {
+          "label": {
+            "zh": "witness.lock：SHRINCS 签名（SHRINCS_B 参数集）",
+            "en": "witness.lock: SHRINCS signature (SHRINCS_B parameter set)"
+          },
+          "layout": [
+            {
+              "name": "signature",
+              "size": "324B / 2568B",
+              "color": 5,
+              "flex": 3,
+              "role": {
+                "zh": "有状态签名 324B，或无状态签名 2568B（README 参数表）",
+                "en": "stateful 324B or stateless 2568B (README parameter table)"
+              },
+              "cons": {
+                "zh": "shrincs_verify::<SHRINCS_B>(msg, sig, pk) 通过",
+                "en": "shrincs_verify::<SHRINCS_B>(msg, sig, pk) passes"
+              },
+              "err": "76"
+            }
+          ],
+          "note": {
+            "zh": "签名内部结构由 shrincs-rs 1.1.0 crate 定义，不在本仓库源码中；合约不检查长度，只把整个 lock 字节交给 verify",
+            "en": "The internal signature layout is defined by the shrincs-rs 1.1.0 crate, not in this repo; the contract does not check the length and passes the whole lock bytes to verify"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "witness[group 0]",
+          "cond": {
+            "zh": "可加载",
+            "en": "loadable"
+          },
+          "err": "71",
+          "note": {
+            "zh": "Error::Syscall = 71",
+            "en": "Error::Syscall = 71"
+          }
+        },
+        {
+          "field": "witness[group 0]",
+          "cond": {
+            "zh": "是合法 molecule WitnessArgs",
+            "en": "is valid molecule WitnessArgs"
+          },
+          "err": "72"
+        },
+        {
+          "field": "CKB_TX_MESSAGE_ALL",
+          "cond": {
+            "zh": "tx_hash / 输入 cell / witness 均可加载",
+            "en": "tx_hash / input cells / witnesses loadable"
+          },
+          "err": "71"
+        },
+        {
+          "field": "CKB_TX_MESSAGE_ALL",
+          "cond": {
+            "zh": "每段长度可放进 u32",
+            "en": "each length fits in u32"
+          },
+          "err": "75"
+        },
+        {
+          "field": "WitnessArgs.lock",
+          "cond": {
+            "zh": "必须存在（签名）",
+            "en": "must be present (signature)"
+          },
+          "err": "73"
+        },
+        {
+          "field": "script",
+          "cond": {
+            "zh": "load_script 成功",
+            "en": "load_script succeeds"
+          },
+          "err": "71"
+        },
+        {
+          "field": "script.args",
+          "cond": {
+            "zh": "长度 = 32（seed 16B ‖ root 16B）",
+            "en": "length = 32 (seed 16B ‖ root 16B)"
+          },
+          "err": "74"
+        },
+        {
+          "field": "signature",
+          "cond": {
+            "zh": "SHRINCS_B 验证通过",
+            "en": "SHRINCS_B verification passes"
+          },
+          "err": "76"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码来自 contracts/shrincs-lock/src/main.rs 的 enum Error（#[repr(i8)]，71 起递增）：71 Syscall、72 WitnessParse、73 SignatureMissing、74 PubkeyLength、75 CkbTxMessageAll、76 ShrincsVerify。注意：args 长度在计算签名消息之后才检查。",
+      "en": "Error codes from enum Error in contracts/shrincs-lock/src/main.rs (#[repr(i8)], counting from 71): 71 Syscall, 72 WitnessParse, 73 SignatureMissing, 74 PubkeyLength, 75 CkbTxMessageAll, 76 ShrincsVerify. Note: the args length is checked only after the signing message is computed."
+    },
+    {
+      "zh": "有状态签名依赖签名设备本地保存计数器（README），链上合约不跟踪状态；同一 group 只验证第一个 witness 的签名。",
+      "en": "Stateful signatures rely on a counter kept on the signing device (README); the on-chain script tracks no state. Only the first witness of the group carries the signature."
+    },
+    {
+      "zh": "解码器离线检查 args 长度、WitnessArgs 结构与签名存在；签名消息与 SHRINCS 验证为 NOT_CHECKED。二进制：链上 code cell 数据的 sha256 = checksums.txt 中 build/release/shrincs-lock 的值（手工核验）。",
+      "en": "The decoder checks args length, WitnessArgs shape and that a signature is present offline; the signing message and SHRINCS verification are NOT_CHECKED. Binary: sha256 of the on-chain code cell data equals build/release/shrincs-lock in checksums.txt (verified by hand)."
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+[{"tx":"0x31f86157b9656673dca539ea571eb91268b1eaef6036fd3c4e77311dfb9f9be7","net":"mainnet","name":"withdrawal cell spent","expect":["godwoken_withdrawal_lock"]},{"tx":"0xd6cc4f518eaad355f7c5b8de5a70b5fe130dcf400cd0b70bf9a85fedc9e609d0","net":"testnet","name":"testnet withdrawal spent","expect":["godwoken_withdrawal_lock"]}]

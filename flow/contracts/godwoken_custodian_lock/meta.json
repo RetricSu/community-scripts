@@ -1,0 +1,85 @@
+{
+  "tags": [
+    "layer2",
+    "nervos",
+    "open-source",
+    "p-godwoken"
+  ],
+  "contributors": [
+    "jjyr",
+    "keroro520"
+  ],
+  "source": {
+    "repo": "https://github.com/godwokenrises/godwoken",
+    "commit": "c2b1f8501de16ef93a4d659f384041bcb1f7bd92",
+    "paths": [
+      "gwos/contracts/custodian-lock/src/entry.rs",
+      "gwos/contracts/gw-utils/src/error.rs"
+    ],
+    "commit_note": "exact commit read (default-branch HEAD, 2024-01-12). Deployment constants from godwokenrises/godwoken-info @8ce6390133ddfffe9d40d51b7be191418b54958c (mainnet_v1, testnet_v1_1 scripts-deploy-result.json).",
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0xa254fee1ed74ae1e2e9b30df6607b27e6368aa950e5c0b8eaf33267c6c8addb0",
+          "evidence": [],
+          "matches_commit": false
+        }
+      ],
+      "note": "no binary or checksum at the recorded commit matched the deployed data hash (reproducible build not attempted)"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0x000f87062a2fe9bb4a6cc475212ea11014b84deb32e0375ee51e6ec4a553e009",
+      "hash_type": "type",
+      "constant_source": "godwoken-info mainnet_v1/scripts-deploy-result.json custodian_lock",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x71b55e3641fdc8d00d9943a93b2c6e6ab42f7e57909009c2a1ad5c234956cdc5"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x71b55e3641fdc8d00d9943a93b2c6e6ab42f7e57909009c2a1ad5c234956cdc5"
+      },
+      "type_script": {
+        "args": "0x3ef49f39b45bd41a5bcc8ef103e88c675e850c1de2b51b1cb3c70edd6ee56936",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0xa254fee1ed74ae1e2e9b30df6607b27e6368aa950e5c0b8eaf33267c6c8addb0",
+      "deploy_tx": "0x71b55e3641fdc8d00d9943a93b2c6e6ab42f7e57909009c2a1ad5c234956cdc5",
+      "deploy_block": 7469194
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0x85ae4db0dd83f428a31deb342e4000af37ce2c9645d9e619df00096e3c50a2bb",
+      "hash_type": "type",
+      "constant_source": "godwoken-info testnet_v1_1/scripts-deploy-result.json custodian_lock",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x7aed145beb6984fff008ca6224d0726d06a19959c4f01d15e49942d76e28747a"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x7aed145beb6984fff008ca6224d0726d06a19959c4f01d15e49942d76e28747a"
+      },
+      "type_script": {
+        "args": "0xc4695745c69c298c89bc701b6cc8614332c6fd8a2ed160e04748fc6fda636e71",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0xa254fee1ed74ae1e2e9b30df6607b27e6368aa950e5c0b8eaf33267c6c8addb0",
+      "deploy_tx": "0x7aed145beb6984fff008ca6224d0726d06a19959c4f01d15e49942d76e28747a",
+      "deploy_block": 5292883
+    }
+  ],
+  "checked_at": "2026-10-21"
+}

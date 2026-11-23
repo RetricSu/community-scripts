@@ -1,0 +1,97 @@
+{
+  "title": {
+    "zh": "Type 销毁锁 约束",
+    "en": "Type Burn Lock Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：ckb-devrel/ckb-proxy-locks / contracts/type-burn-lock/src/entry.rs　·　0xff78…f53a (data1，主网与测试网相同)",
+    "en": "Source: ckb-devrel/ckb-proxy-locks / contracts/type-burn-lock/src/entry.rs　·　0xff78…f53a (data1, same on mainnet and testnet)"
+  },
+  "transitions": [
+    {
+      "tag": "A",
+      "title": {
+        "zh": "销毁指定 type 即可解锁",
+        "en": "Unlock by burning a given type"
+      },
+      "inputs": [
+        {
+          "label": "input",
+          "body": "Cell{ lock: { codeHash: TYPE_BURN, args: {{type_hash 32B}} } }"
+        },
+        {
+          "label": {
+            "zh": "被销毁的 cell",
+            "en": "burnt cell"
+          },
+          "body": "Cell{ type: hash = type_hash }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "outputs：无该 type",
+            "en": "outputs: none with that type"
+          },
+          "body": {
+            "zh": "任意（不能含 type_hash）",
+            "en": "any (none with type_hash)"
+          }
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "args 字节布局",
+            "en": "args byte layout"
+          },
+          "layout": [
+            {
+              "name": "type_hash",
+              "size": "32B",
+              "role": {
+                "zh": "需销毁的 type 脚本哈希",
+                "en": "type script hash to burn"
+              },
+              "cons": {
+                "zh": "在输入中、不在输出中",
+                "en": "in inputs, not in outputs"
+              },
+              "err": "6",
+              "color": 1,
+              "flex": 4
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "≥ 32 字节",
+            "en": "≥ 32 bytes"
+          },
+          "err": "4"
+        },
+        {
+          "field": "burn",
+          "cond": {
+            "zh": "有输入的 type hash = args[0..32]，且没有输出带该 type",
+            "en": "an input has type hash = args[0..32] and no output has it"
+          },
+          "err": "6"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码（error.rs）：1 IndexOutOfBound · 2 ItemMissing · 3 LengthNotEnough · 4 Encoding · 5 Overflow · 6 TypeScriptNotBurnt",
+      "en": "Error codes (error.rs): 1 IndexOutOfBound · 2 ItemMissing · 3 LengthNotEnough · 4 Encoding · 5 Overflow · 6 TypeScriptNotBurnt"
+    },
+    {
+      "zh": "不检查任何签名：安全性完全来自 args 指向的其他脚本",
+      "en": "No signature is checked: security comes entirely from the script that args points to"
+    }
+  ]
+}

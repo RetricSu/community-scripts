@@ -1,0 +1,76 @@
+{
+  "tags": [
+    "proxy",
+    "nervos",
+    "open-source",
+    "p-proxy-locks"
+  ],
+  "contributors": [
+    "xcshuan"
+  ],
+  "source": {
+    "repo": "https://github.com/ckb-devrel/ckb-proxy-locks",
+    "commit": "38b7e1df19828f2203c01b30340be26691b70d7a",
+    "paths": [
+      "contracts/always-success/src/main.rs"
+    ],
+    "commit_note": "default-branch HEAD recorded at backfill 2026-10-21; spec/plugin were written from the default branch shortly before (exact read commit not recorded)",
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0x3b521cc4b552f109d092d8cc468a8048acb53c5952dbe769d2b2f9cf6e47f7f1",
+          "evidence": [],
+          "matches_commit": false
+        }
+      ],
+      "note": "no binary or checksum at the recorded commit matched the deployed data hash (reproducible build not attempted)"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0x3b521cc4b552f109d092d8cc468a8048acb53c5952dbe769d2b2f9cf6e47f7f1",
+      "hash_type": "data1",
+      "constant_source": "ckb-devrel/ckb-proxy-locks contracts/always-success (mainnet and testnet)",
+      "cell_dep": {
+        "out_point": {
+          "tx_hash": "0x10d63a996157d32c01078058000052674ca58d15f921bec7f1dcdac2160eb66b",
+          "index": "0x0"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "tx_hash": "0x10d63a996157d32c01078058000052674ca58d15f921bec7f1dcdac2160eb66b",
+        "index": "0x0"
+      },
+      "type_script": null,
+      "data_hash": "0x3b521cc4b552f109d092d8cc468a8048acb53c5952dbe769d2b2f9cf6e47f7f1",
+      "deploy_tx": "0x10d63a996157d32c01078058000052674ca58d15f921bec7f1dcdac2160eb66b",
+      "deploy_block": 13589704,
+      "via": "documented cell dep"
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0x3b521cc4b552f109d092d8cc468a8048acb53c5952dbe769d2b2f9cf6e47f7f1",
+      "hash_type": "data1",
+      "constant_source": "ckb-devrel/ckb-proxy-locks contracts/always-success (mainnet and testnet)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0xb4f171c9c9caf7401f54a8e56225ae21d95032150a87a4678eac3f66a3137b93"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0xb4f171c9c9caf7401f54a8e56225ae21d95032150a87a4678eac3f66a3137b93"
+      },
+      "type_script": null,
+      "data_hash": "0x3b521cc4b552f109d092d8cc468a8048acb53c5952dbe769d2b2f9cf6e47f7f1",
+      "deploy_tx": "0xb4f171c9c9caf7401f54a8e56225ae21d95032150a87a4678eac3f66a3137b93",
+      "deploy_block": 14025090
+    }
+  ],
+  "checked_at": "2026-10-20"
+}

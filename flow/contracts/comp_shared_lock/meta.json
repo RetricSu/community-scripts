@@ -1,0 +1,64 @@
+{
+  "tags": [
+    "proxy",
+    "open-source",
+    "community"
+  ],
+  "contributors": [
+    "gpBlockchain"
+  ],
+  "source": {
+    "repo": "https://github.com/gpBlockchain/comp-shared-lock",
+    "commit": "fd2370ab4bfe15892fa2bc99c1cd92506c8bac63",
+    "paths": [
+      "contracts/comp-shared-lock/src/main.rs",
+      "contracts/comp-shared-lock/src/json.rs",
+      "docs/contract-design.md",
+      "docs/wall-binary-payload.md",
+      "deployment.json"
+    ],
+    "commit_note": "default-branch (master) HEAD read on 2026-11-12; contract source last changed in 1898f9d (2026-08-21, v0.3.0). Deployment from deployment.json (identical to frontend/public/deployment.json): Type ID code cell, upgraded once in 0x54d0bc54… (dataHash 0x47cf5e… → 0x81dae1…). Not surfaced by ckb-talk-radar; added at user request.",
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0x81dae172b482fcf4748d7a71afae9adee91d02df70e29c022902db60b600c4d8",
+          "evidence": [
+            "listed in deployment.json",
+            "listed in plugins/comp-shared-lock/skills/comp-shared-lock/deployment.json"
+          ],
+          "matches_commit": false
+        }
+      ],
+      "note": "hash appears in the repo only as a deployment record or doc, which does not prove the recorded commit builds this binary (reproducible build not attempted)"
+    }
+  },
+  "deployments": [
+    {
+      "network": "testnet",
+      "code_hash": "0xbc475946ff0e50276ca152c423cc260b8817de1c42a3be2eafffc55765f873c1",
+      "hash_type": "type",
+      "constant_source": "gpBlockchain/comp-shared-lock deployment.json @fd2370a (codeHash = Type ID typeHash, hashType type)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x54d0bc54693cdfcaf2447ce920b3fe117cb8c490a2917b8a1d6094789651db64"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x54d0bc54693cdfcaf2447ce920b3fe117cb8c490a2917b8a1d6094789651db64"
+      },
+      "type_script": {
+        "args": "0xecf583fa79b907a7f055fee7cef4205e15863e21fd29f62d962357075fb5a2c0",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x81dae172b482fcf4748d7a71afae9adee91d02df70e29c022902db60b600c4d8",
+      "deploy_tx": "0x54d0bc54693cdfcaf2447ce920b3fe117cb8c490a2917b8a1d6094789651db64",
+      "deploy_block": 22154878
+    }
+  ],
+  "checked_at": "2026-11-12"
+}

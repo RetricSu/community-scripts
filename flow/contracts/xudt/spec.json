@@ -1,0 +1,191 @@
+{
+  "title": {
+    "zh": "xUDT（Extensible UDT）合约约束",
+    "en": "xUDT (Extensible UDT) Contract Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：RFC 0052 · ckb-production-scripts/c/xudt_rce.c（master）+ c/rce.h 错误码　·　Mirana code_hash 0x50bd…1b95，hash_type data1",
+    "en": "Source: RFC 0052 · ckb-production-scripts/c/xudt_rce.c (master) + c/rce.h error codes　·　Mirana code_hash 0x50bd…1b95, hash_type data1"
+  },
+  "transitions": [
+    {
+      "tag": "0 → N",
+      "title": {
+        "zh": "发行 / 增发（owner 模式）",
+        "en": "Issue / Mint (owner mode)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "某个 input：owner",
+            "en": "some input: owner"
+          },
+          "body": {
+            "zh": "Cell{\n  lock: {{hash(lock) == args[0..32]}}   // 默认\n  // flags 0x80000000：input type hash 也可\n  // flags 0x40000000：output type hash 也可\n  // flags 0x20000000：禁用 input lock 方式\n}",
+            "en": "Cell{\n  lock: {{hash(lock) == args[0..32]}}   // default\n  // flags 0x80000000: input type hash also accepted\n  // flags 0x40000000: output type hash also accepted\n  // flags 0x20000000: disables the input-lock method\n}"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "output：xUDT cell",
+            "en": "output: xUDT cell"
+          },
+          "body": "Cell{\n  type: { codeHash: xUDT,\n          args: {{owner lock hash 32B}} {{[flags u32 LE] [extension data]}} },\n  data: {{amount u128 LE (16B)}} [extension data]\n}"
+        }
+      ],
+      "limits": [
+        {
+          "field": "type.args",
+          "cond": {
+            "zh": "≥ 32 字节",
+            "en": "≥ 32 bytes"
+          },
+          "err": "-1"
+        },
+        {
+          "field": {
+            "zh": "owner 模式",
+            "en": "owner mode"
+          },
+          "cond": {
+            "zh": "满足任一启用的 owner 条件时跳过数量检查（扩展脚本仍执行）",
+            "en": "when any enabled owner condition holds, the amount check is skipped (extension scripts still run)"
+          }
+        }
+      ]
+    },
+    {
+      "tag": "N → M",
+      "title": {
+        "zh": "转账 / 销毁",
+        "en": "Transfer / Burn"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "inputs：xUDT cell（同一 type）",
+            "en": "inputs: xUDT cells (same type)"
+          },
+          "body": "Cell{\n  type: { codeHash: xUDT, args: … },\n  data: {{amount_in u128 LE}}\n}"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "outputs：xUDT cell（同一 type）",
+            "en": "outputs: xUDT cells (same type)"
+          },
+          "body": "Cell{\n  type: { codeHash: xUDT, args: … },\n  data: {{amount_out u128 LE}}\n}"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "type.args 字节布局",
+            "en": "type.args byte layout"
+          },
+          "layout": [
+            {
+              "name": "owner lock hash",
+              "size": "32B",
+              "role": {
+                "zh": "owner 判定用 hash",
+                "en": "hash used for owner checks"
+              },
+              "cons": "≥ 32B",
+              "err": "-1",
+              "color": 4,
+              "flex": 3
+            },
+            {
+              "name": "flags",
+              "size": {
+                "zh": "4B u32 LE（可选）",
+                "en": "4B u32 LE (optional)"
+              },
+              "role": {
+                "zh": "低位：0 无扩展 / 1 扩展在 args / 2 扩展在 witness；高 3 位：owner 模式开关",
+                "en": "low bits: 0 no extension / 1 extensions in args / 2 extensions in witness; top 3 bits: owner-mode switches"
+              },
+              "cons": {
+                "zh": "去掉 owner 位后 ∈ {0,1,2}",
+                "en": "∈ {0,1,2} after masking owner bits"
+              },
+              "err": "44",
+              "color": 2
+            },
+            {
+              "name": {
+                "zh": "扩展数据",
+                "en": "extension data"
+              },
+              "size": {
+                "zh": "变长",
+                "en": "variable"
+              },
+              "role": {
+                "zh": "flags=1：ScriptVec；flags=2：20 字节 blake160(witness 中的 ScriptVec)",
+                "en": "flags=1: ScriptVec; flags=2: 20-byte blake160 of the ScriptVec in the witness"
+              },
+              "cons": {
+                "zh": "flags=1 长度须与 ScriptVec 一致；flags=2 须为 20 字节且 hash 匹配",
+                "en": "flags=1 length must match the ScriptVec; flags=2 must be 20 bytes and the hash must match"
+              },
+              "err": "45 / 44 / 49",
+              "color": 1,
+              "flex": 2
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "data",
+          "cond": {
+            "zh": "长度 ≥ 16 字节，前 16 字节为 u128 LE",
+            "en": "length ≥ 16 bytes; first 16 bytes are u128 LE"
+          },
+          "err": "-2"
+        },
+        {
+          "field": "Σ amount",
+          "cond": {
+            "zh": "累加不得溢出",
+            "en": "summation must not overflow"
+          },
+          "err": "-51"
+        },
+        {
+          "field": "Σ amount_in",
+          "cond": {
+            "zh": "≥ Σ amount_out（非 owner 模式）",
+            "en": "≥ Σ amount_out (non-owner mode)"
+          },
+          "err": "-52"
+        },
+        {
+          "field": {
+            "zh": "扩展脚本",
+            "en": "extension scripts"
+          },
+          "cond": {
+            "zh": "每个扩展脚本的 validate 必须返回 0",
+            "en": "each extension script's validate must return 0"
+          },
+          "note": {
+            "zh": "具体错误码由扩展脚本决定",
+            "en": "error codes depend on the extension"
+          }
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码数值来自 c/rce.h 枚举（ERROR_INVALID_FLAG=44，ERROR_INVALID_ARGS_FORMAT=45，ERROR_HASH_MISMATCHED=49）；以 master 源码为准，已部署版本可能略有差异",
+      "en": "Numeric error codes come from the c/rce.h enum (ERROR_INVALID_FLAG=44, ERROR_INVALID_ARGS_FORMAT=45, ERROR_HASH_MISMATCHED=49); based on master, the deployed build may differ slightly"
+    }
+  ]
+}

@@ -1,0 +1,192 @@
+{
+  "title": {
+    "zh": "PW lock 约束",
+    "en": "PW lock Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：lay2dev/pw-lock / c/secp256k1_keccak256_sighash_all_acpl.c（假定部署的是 acpl 版本，未核实）　·　mainnet 0xbf43…febc / testnet 0x58c5…5a63，hash_type type（ccc）",
+    "en": "Source: lay2dev/pw-lock / c/secp256k1_keccak256_sighash_all_acpl.c (deployed build assumed to be acpl, unverified)　·　mainnet 0xbf43…febc / testnet 0x58c5…5a63, hash_type type (ccc)"
+  },
+  "transitions": [
+    {
+      "tag": "A",
+      "title": {
+        "zh": "以太坊签名花费",
+        "en": "Spend with an Ethereum signature"
+      },
+      "inputs": [
+        {
+          "label": "input",
+          "body": "Cell{\n  lock: { codeHash: PW_LOCK,\n          args: {{eth_address 20B}} ‖ ckb_min? ‖ udt_min? }\n}"
+        },
+        {
+          "label": "witness",
+          "body": "WitnessArgs{ lock: {{signature 65B}} }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "outputs：任意",
+            "en": "outputs: any"
+          },
+          "body": {
+            "zh": "Cell{ lock: 任意 }",
+            "en": "Cell{ lock: any }"
+          }
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "args 字节布局",
+            "en": "args byte layout"
+          },
+          "layout": [
+            {
+              "name": "eth_address",
+              "size": "20B",
+              "role": {
+                "zh": "keccak256(未压缩公钥)[12..32]",
+                "en": "keccak256(uncompressed pubkey)[12..32]"
+              },
+              "cons": {
+                "zh": "= 签名恢复结果",
+                "en": "= recovered signer"
+              },
+              "err": "-31",
+              "color": 1,
+              "flex": 4
+            },
+            {
+              "name": "ckb_min?",
+              "size": "1B",
+              "role": {
+                "zh": "最小转入 CKB = 10^x",
+                "en": "min CKB payment = 10^x"
+              },
+              "cons": {
+                "zh": "可选",
+                "en": "optional"
+              },
+              "err": "-1",
+              "color": 3
+            },
+            {
+              "name": "udt_min?",
+              "size": "1B",
+              "role": {
+                "zh": "最小转入 UDT = 10^x",
+                "en": "min UDT payment = 10^x"
+              },
+              "cons": {
+                "zh": "可选",
+                "en": "optional"
+              },
+              "err": "-1",
+              "color": 4
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "20–22 字节",
+            "en": "20–22 bytes"
+          },
+          "err": "-1"
+        },
+        {
+          "field": "witness.lock",
+          "cond": {
+            "zh": "非空即走签名路径，且必须恰 65 字节",
+            "en": "non-empty selects the signature path and must be exactly 65 bytes"
+          },
+          "err": "-1"
+        },
+        {
+          "field": "signature",
+          "cond": {
+            "zh": "keccak256 sighash_all（witness.lock 置 0）恢复出的地址 = args[0..20]",
+            "en": "address recovered from keccak256 sighash_all (lock zeroed) = args[0..20]"
+          },
+          "err": "-11 / -14 / -15 / -31"
+        }
+      ]
+    },
+    {
+      "tag": "B",
+      "title": {
+        "zh": "无签名付款（与 anyone_can_pay 相同）",
+        "en": "Payment without signature (same as anyone_can_pay)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "PW lock 输入",
+            "en": "PW lock inputs"
+          },
+          "body": "Cell{ lock: PW_LOCK(args), capacity: C, type: T?, data: udt? }"
+        },
+        {
+          "label": "witness",
+          "body": {
+            "zh": "witness 缺失或 lock 为空",
+            "en": "witness missing or lock empty"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "同 lock 输出",
+            "en": "same-lock outputs"
+          },
+          "body": "Cell{ lock: same, type: same T,\n  capacity ≥ C + 10^ckb_min or = C,\n  udt ≥ U + 10^udt_min or = U }"
+        }
+      ],
+      "limits": [
+        {
+          "field": "amount",
+          "cond": {
+            "zh": "CKB 或 UDT 至少一个按最小值增加，另一个不变",
+            "en": "CKB or UDT grows by ≥ minimum, the other unchanged"
+          },
+          "err": "-42"
+        },
+        {
+          "field": "pairing",
+          "cond": {
+            "zh": "输入输出按 type 一一配对",
+            "en": "inputs and outputs pair 1:1 by type"
+          },
+          "err": "-44 / -45 / -46"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "无 type 的 data 为空；有 type 的 data ≥ 16B",
+            "en": "no-type data empty; typed data ≥ 16B"
+          },
+          "err": "-2"
+        },
+        {
+          "field": "inputs",
+          "cond": {
+            "zh": "≤ 256",
+            "en": "≤ 256"
+          },
+          "err": "-43"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码（common.h）：-1 ARGUMENTS_LEN · -2 ENCODING · -3 SYSCALL · -11/-12/-13/-14/-15 secp · -18 TOO_MANY_OUTPUT_CELLS · -21 SCRIPT_TOO_LONG · -22 WITNESS_SIZE · -31 PUBKEY_BLAKE160_HASH · -41…-46 ACP",
+      "en": "Error codes (common.h): -1 ARGUMENTS_LEN · -2 ENCODING · -3 SYSCALL · -11/-12/-13/-14/-15 secp · -18 TOO_MANY_OUTPUT_CELLS · -21 SCRIPT_TOO_LONG · -22 WITNESS_SIZE · -31 PUBKEY_BLAKE160_HASH · -41…-46 ACP"
+    }
+  ]
+}

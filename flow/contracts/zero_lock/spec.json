@@ -1,0 +1,93 @@
+{
+  "title": {
+    "zh": "Zero Lock（全零 code hash，不是合约）",
+    "en": "Zero Lock (all-zero code hash, not a contract)"
+  },
+  "subtitle": {
+    "zh": "来源：CKB 节点 nervosnetwork/ckb script/src/types.rs（TxData::extract_script）　·　code_hash 0x00…00，hash_type data（主网与测试网相同，CKB Explorer 注册表）",
+    "en": "Source: CKB node nervosnetwork/ckb script/src/types.rs (TxData::extract_script)　·　code_hash 0x00…00, hash_type data (same on mainnet and testnet, CKB Explorer registry)"
+  },
+  "transitions": [
+    {
+      "tag": "0 → 1",
+      "title": {
+        "zh": "创建：任何人都能把 cell 锁进 Zero Lock",
+        "en": "Create: anyone can put a cell under the Zero Lock"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "任意 input",
+            "en": "any input"
+          },
+          "body": {
+            "zh": "Cell{ lock: 任意（由其自身 lock 授权） }",
+            "en": "Cell{ lock: any (authorised by its own lock) }"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "output",
+          "body": "Cell{\n  lock: { codeHash: {{0x0000…0000}},\n          hashType: {{data}},\n          args: any }\n}"
+        }
+      ],
+      "extras": [
+        {
+          "zh": "lock 只在 input 中执行，所以创建时不运行任何 Zero Lock 代码，也没有检查。",
+          "en": "Locks only run for inputs, so no Zero Lock code runs and nothing is checked when it is created."
+        }
+      ],
+      "limits": []
+    },
+    {
+      "tag": "1 → ✗",
+      "title": {
+        "zh": "花费：永远失败",
+        "en": "Spend: always fails"
+      },
+      "inputs": [
+        {
+          "label": "input",
+          "body": "Cell{\n  lock: { codeHash: {{0x0000…0000}}, hashType: {{data}} }\n}"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "无法上链",
+            "en": "cannot be committed"
+          },
+          "body": {
+            "zh": "交易被节点拒绝",
+            "en": "the node rejects the tx"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "code_hash",
+          "cond": {
+            "zh": "hash_type 为 data/data1/data2 时，节点在 cell_deps 中找 blake2b(data) = code_hash 的 cell；没有任何数据的 hash 是全零，找不到",
+            "en": "for hash_type data/data1/data2 the node looks in cell_deps for a cell with blake2b(data) = code_hash; no data hashes to all zeros, so none is found"
+          },
+          "err": "ScriptNotFound"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "这不是“未开源合约”：链上不存在对应代码，行为完全由 CKB 节点的脚本解析规则决定，因此单独标注。",
+      "en": "This is not a closed-source contract: no code exists on chain; its behaviour is defined entirely by the CKB node's script resolution, so it is listed separately."
+    },
+    {
+      "zh": "用途：常用作“销毁 / 永久锁定”的输出 lock（例如 UTXOSwap 文档里 LP Token Info cell 的 lock 是 all zero）。CKB Explorer 注册表在 2026-11-06 显示主网有约 84.03 亿 CKB 位于该 lock 下。",
+      "en": "Use: a common burn / lock-forever output lock (e.g. the UTXOSwap docs give the LP Token Info cell an all-zero lock). On 2026-11-06 the CKB Explorer registry showed about 8.403 billion CKB under this lock on mainnet."
+    },
+    {
+      "zh": "没有可花费的测试交易：只出现在 output 中，解码器只给 input 中的 lock 建组。",
+      "en": "No spending test tx exists: it only ever appears in outputs, and the decoder only groups locks found in inputs."
+    }
+  ]
+}

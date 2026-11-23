@@ -1,0 +1,205 @@
+{
+  "title": {
+    "zh": "Godwoken 以太坊账户 lock（eth-account-lock）约束",
+    "en": "Godwoken Ethereum account lock (eth-account-lock) Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：godwokenrises/godwoken @c2b1f85 / gwos/contracts/eth-account-lock/src/entry.rs + eth_signature.rs　·　部署：godwoken-info @8ce6390 mainnet_v1 / testnet_v1_1",
+    "en": "Source: godwokenrises/godwoken @c2b1f85 / gwos/contracts/eth-account-lock/src/entry.rs + eth_signature.rs　·　deployments: godwoken-info @8ce6390 mainnet_v1 / testnet_v1_1"
+  },
+  "transitions": [
+    {
+      "tag": "1 → 0",
+      "title": {
+        "zh": "取消挑战时验证 L2 签名",
+        "en": "Verify an L2 signature when cancelling a challenge"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "input[i] 签名 cell",
+            "en": "input[i] signature cell"
+          },
+          "body": "Cell{\n  capacity: any,\n  lock: { ETH_ACCOUNT_LOCK, args: {{rollup_script_hash 32B ‖ eth_address 20B}} },\n  type: any,\n  data: {{owner_lock_hash 32B ‖ signing_type 1B ‖ message 32B}}\n}"
+        },
+        {
+          "label": {
+            "zh": "input[j] 一次性 owner cell",
+            "en": "input[j] one-time owner cell"
+          },
+          "body": "Cell{\n  capacity: any,\n  lock: {{lock hash == data.owner_lock_hash}},\n  type: any,\n  data: any\n}"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "outputs",
+            "en": "outputs"
+          },
+          "body": "any (the challenge-cancel tx)"
+        }
+      ],
+      "sections": [
+        {
+          "title": {
+            "zh": "witnesses（WitnessArgs）",
+            "en": "witnesses (WitnessArgs)"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "witnesses[组首输入]",
+                "en": "witnesses[first group input]"
+              },
+              "body": "{ lock: {{65B secp256k1 recoverable signature}} }"
+            }
+          ]
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "args（52B）",
+            "en": "args (52B)"
+          },
+          "layout": [
+            {
+              "name": "rollup_script_hash",
+              "size": "32B",
+              "role": {
+                "zh": "rollup type hash",
+                "en": "rollup type hash"
+              },
+              "color": 1,
+              "flex": 2,
+              "cons": {
+                "zh": "长度恰 52",
+                "en": "exactly 52 long"
+              },
+              "err": "5"
+            },
+            {
+              "name": "eth_address",
+              "size": "20B",
+              "role": {
+                "zh": "以太坊地址",
+                "en": "Ethereum address"
+              },
+              "color": 2,
+              "flex": 2,
+              "err": "41"
+            }
+          ],
+          "hex": [
+            [
+              "args",
+              "0x{{40d7…(32B)}}{{f39fd6e51aad88f6f4ce6ab8827279cfffb92266}}"
+            ]
+          ]
+        },
+        {
+          "label": {
+            "zh": "data（65B）",
+            "en": "data (65B)"
+          },
+          "layout": [
+            {
+              "name": "owner_lock_hash",
+              "size": "32B",
+              "role": {
+                "zh": "一次性 owner cell 的 lock hash",
+                "en": "lock hash of the one-time owner cell"
+              },
+              "color": 1,
+              "flex": 2,
+              "err": "8"
+            },
+            {
+              "name": "signing_type",
+              "size": "1B",
+              "role": {
+                "zh": "0 Raw / 1 WithPrefix（加以太坊个人签名前缀）",
+                "en": "0 Raw / 1 WithPrefix (Ethereum personal-sign prefix)"
+              },
+              "color": 2,
+              "flex": 1,
+              "cons": {
+                "zh": "0 或 1",
+                "en": "0 or 1"
+              },
+              "err": "4"
+            },
+            {
+              "name": "message",
+              "size": "32B",
+              "role": {
+                "zh": "被签名的消息",
+                "en": "message that was signed"
+              },
+              "color": 3,
+              "flex": 2,
+              "err": "41"
+            }
+          ],
+          "hex": [
+            [
+              "data",
+              "0x{{…(32B)}}{{01}}{{…(32B)}}"
+            ]
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "长度 = 52",
+            "en": "length = 52"
+          },
+          "err": "5"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "长度 = 65，signing_type ∈ {0,1}",
+            "en": "length = 65, signing_type ∈ {0,1}"
+          },
+          "err": "4"
+        },
+        {
+          "field": "owner",
+          "cond": {
+            "zh": "有输入 lock hash = data.owner_lock_hash",
+            "en": "an input with lock hash = data.owner_lock_hash"
+          },
+          "err": "8"
+        },
+        {
+          "field": {
+            "zh": "签名",
+            "en": "signature"
+          },
+          "cond": {
+            "zh": "witness.lock = 65B 且恢复出 eth_address",
+            "en": "witness.lock is 65B and recovers eth_address"
+          },
+          "err": "41"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "⚠ 状态：官方已宣布 Godwoken 退役（2025-06-01 起，Nervos Talk “Sunset of Force Bridge and Godwoken”）；冻结期限延至 2026-01-01 23:59:59 UTC，之后网络冻结、桥前端下线，v0/v1 RPC 节点已关闭。本页仅作历史 / 审计参考。",
+      "en": "⚠ Status: Godwoken was officially sunset (from 2025-06-01, Nervos Talk “Sunset of Force Bridge and Godwoken”); the freeze deadline was extended to 2026-01-01 23:59:59 UTC, after which the network froze, the bridge UI went offline and v0/v1 RPC nodes were shut down. This page is for historical / audit reference."
+    },
+    {
+      "zh": "这是 L2 账户 lock：在 L2 交易里由 Godwoken 节点验证；在 L1 上只在取消挑战时运行。未找到 L1 交易，tests.json 为空。",
+      "en": "This is an L2 account lock: verified by Godwoken nodes inside L2 txs; on L1 it only runs when cancelling a challenge. No L1 tx found; tests.json is empty."
+    },
+    {
+      "zh": "错误码（gw-utils/src/error.rs）：1 IndexOutOfBound，2 ItemMissing，3 LengthNotEnough，4 Encoding，5 InvalidArgs，6 InvalidSince，7 InvalidOutput，8 OwnerCellNotFound，9 RollupCellNotFound，10 RollupConfigNotFound，11 ProofNotFound，13 MerkleProof，14 AmountOverflow，15 InsufficientAmount，16/17 Insufficient{Input,Output}FinalizedAssets，18 SMTKeyMissing，19 InvalidStateCheckpoint，20 InvalidBlock，21 InvalidStatus，22 InvalidStakeCellUnlock，23 InvalidPostGlobalState，24 InvalidChallengeCell，25 InvalidStakeCell，26 InvalidDepositCell，27 InvalidWithdrawalCell，28 InvalidCustodianCell，29 InvalidRevertedBlocks，30 InvalidChallengeReward，32 InvalidChallengeTarget，33 InvalidWithdrawalRequest，34 UnknownEOAScript，39 InvalidTypeID，41 WrongSignature，43 RegistryAddressNotFound，45 NotFinalized。",
+      "en": "Error codes (gw-utils/src/error.rs): 1 IndexOutOfBound, 2 ItemMissing, 3 LengthNotEnough, 4 Encoding, 5 InvalidArgs, 6 InvalidSince, 7 InvalidOutput, 8 OwnerCellNotFound, 9 RollupCellNotFound, 10 RollupConfigNotFound, 11 ProofNotFound, 13 MerkleProof, 14 AmountOverflow, 15 InsufficientAmount, 16/17 Insufficient{Input,Output}FinalizedAssets, 18 SMTKeyMissing, 19 InvalidStateCheckpoint, 20 InvalidBlock, 21 InvalidStatus, 22 InvalidStakeCellUnlock, 23 InvalidPostGlobalState, 24 InvalidChallengeCell, 25 InvalidStakeCell, 26 InvalidDepositCell, 27 InvalidWithdrawalCell, 28 InvalidCustodianCell, 29 InvalidRevertedBlocks, 30 InvalidChallengeReward, 32 InvalidChallengeTarget, 33 InvalidWithdrawalRequest, 34 UnknownEOAScript, 39 InvalidTypeID, 41 WrongSignature, 43 RegistryAddressNotFound, 45 NotFinalized."
+    }
+  ]
+}

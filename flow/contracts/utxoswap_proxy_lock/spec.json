@@ -1,0 +1,61 @@
+{
+  "title": {
+    "zh": "UTXOSwap 池代理锁（sequencer proxy lock）（无公开源码）",
+    "en": "UTXOSwap pool proxy lock (sequencer proxy lock) (no public source)"
+  },
+  "subtitle": {
+    "zh": "未找到公开源码，尚未向维护方确认　·　mainnet 0x7ef6…56f7 (type) · testnet 0x30e2…b593 (type)",
+    "en": "No public source found, unconfirmed with maintainer　·　mainnet 0x7ef6…56f7 (type) · testnet 0x30e2…b593 (type)"
+  },
+  "transitions": [
+    {
+      "tag": "?",
+      "title": {
+        "zh": "仅识别：链上可核实的事实",
+        "en": "Identification only: facts verifiable on chain"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "被该 lock 锁定的 input",
+            "en": "input locked by this script"
+          },
+          "body": "Cell{\n  lock: { codeHash: {{0x7ef6…56f7}},\n          hashType: type,\n          args: … }\n}"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "验证规则",
+            "en": "validation rules"
+          },
+          "body": {
+            "zh": "未知：无公开源码，本页不列任何规则或错误码",
+            "en": "unknown: no public source, this page lists no rules or error codes"
+          }
+        }
+      ],
+      "extras": [
+        {
+          "zh": "UTXOSwap 官方文档（LP Token 一节）给出交易结构：Pool Cell 的 lock 是 “sequencer proxy lock”，type 是 pool_type（主网 0xc70a8b00…3c98，测试网 0x5b9228b1…8735）。本 code_hash 是链上 Pool Cell 实际使用的 lock；角色由文档结构推断，未向维护方确认。",
+          "en": "The official UTXOSwap docs (LP Token section) describe the tx layout: the Pool Cell lock is the \"sequencer proxy lock\" and its type is pool_type (mainnet 0xc70a8b00…3c98, testnet 0x5b9228b1…8735). This code_hash is the lock the on-chain Pool Cell actually uses; the role is inferred from that layout and unconfirmed with the maintainer."
+        },
+        {
+          "zh": "同一交易里池资产 cell 的 “pool controlled lock”（主网 0x393df335…9a88，测试网 0x75ac9069…260e）不在清单中，未收录。",
+          "en": "The \"pool controlled lock\" of pool asset cells in the same txs (mainnet 0x393df335…9a88, testnet 0x75ac9069…260e) is not in the list and was not added."
+        }
+      ],
+      "limits": []
+    }
+  ],
+  "notes": [
+    {
+      "zh": "未找到公开源码，尚未向维护方确认",
+      "en": "No public source found, unconfirmed with maintainer"
+    },
+    {
+      "zh": "部署（code cell / cell_dep / data hash）由 scripts/check-deployments.js 从链上解析，见下方来源卡片",
+      "en": "Deployment (code cell / cell_dep / data hash) resolved from chain by scripts/check-deployments.js; see the provenance card below"
+    }
+  ]
+}

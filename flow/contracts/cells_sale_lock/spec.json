@@ -1,0 +1,334 @@
+{
+  "title": {
+    "zh": "Cells 挂单（sale-lock）约束",
+    "en": "Cells listing (sale-lock) Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：LusoCryptoLabs/cells-contracts @34dad3c / contracts/sale-lock/src/main.rs + cells-core sale_fee　·　主网 0x086c…0879 / 测试网 0x498a…0ae4（type，cellula-sdk）",
+    "en": "Source: LusoCryptoLabs/cells-contracts @34dad3c / contracts/sale-lock/src/main.rs + cells-core sale_fee　·　mainnet 0x086c…0879 / testnet 0x498a…0ae4 (type, cellula-sdk)"
+  },
+  "transitions": [
+    {
+      "tag": "0 → 1",
+      "title": {
+        "zh": "挂单 list",
+        "en": "List"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "名字",
+            "en": "name"
+          },
+          "body": {
+            "zh": "account-cell-type transfer：owner → sale-lock(seller, price) 的 lock hash",
+            "en": "account-cell-type transfer: owner → lock hash of sale-lock(seller, price)"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "挂单 cell",
+            "en": "offer cell"
+          },
+          "body": "Cell{\n  lock: { codeHash: SALE_LOCK, hashType: {{type}},\n          args: {{seller_lock_hash 32B ‖ price u64 LE}} },\n  capacity: deposit\n}"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "lock.args（40 字节）",
+            "en": "lock.args (40 bytes)"
+          },
+          "layout": [
+            {
+              "name": "seller_lock_hash",
+              "size": "32B",
+              "role": {
+                "zh": "卖家完整 lock hash，收款与撤单身份",
+                "en": "seller full lock hash: payee and cancel identity"
+              },
+              "color": 1,
+              "flex": 4
+            },
+            {
+              "name": "price",
+              "size": "8B LE",
+              "role": {
+                "zh": "要价（shannon），写在 args 里因此进入 lock hash，不可篡改",
+                "en": "asking price in shannons; in args so it is part of the lock hash"
+              },
+              "color": 2,
+              "flex": 1,
+              "cons": {
+                "zh": "> 0（购买路径）",
+                "en": "> 0 (purchase path)"
+              },
+              "err": "2"
+            }
+          ],
+          "hex": [
+            [
+              "args",
+              "0x{{a1b2…(32B)}}{{00e40b5402000000}}  ← price 0x02540be400 = 10,000 CKB"
+            ]
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "—",
+          "cond": {
+            "zh": "创建 lock 不执行脚本；约束在花费时检查",
+            "en": "creating a lock runs no script; checks happen at spend"
+          },
+          "err": "—"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 0",
+      "title": {
+        "zh": "撤单 / 改价（卖家路径）",
+        "en": "Cancel / relist (seller path)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "挂单 cell",
+            "en": "offer cell"
+          },
+          "body": "Cell{ lock: SALE_LOCK(seller, price) }"
+        },
+        {
+          "label": {
+            "zh": "卖家输入",
+            "en": "seller input"
+          },
+          "body": {
+            "zh": "lock hash = {{seller_lock_hash}}，且不是 anyone-can-pay lock",
+            "en": "lock hash = {{seller_lock_hash}}, not an anyone-can-pay lock"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "outputs",
+          "body": {
+            "zh": "任意",
+            "en": "any"
+          }
+        }
+      ],
+      "layouts": [],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "长度 40",
+            "en": "length 40"
+          },
+          "err": "2"
+        },
+        {
+          "field": {
+            "zh": "卖家",
+            "en": "seller"
+          },
+          "cond": {
+            "zh": "有输入 lock hash = seller_lock_hash 且该 lock 需要签名（lets_anyone_spend 为假）→ 通过",
+            "en": "an input under seller_lock_hash whose lock needs a signature (lets_anyone_spend false) → pass"
+          },
+          "err": "0"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 0",
+      "title": {
+        "zh": "购买（付款路径）",
+        "en": "Buy (payment path)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "挂单 cell",
+            "en": "offer cell"
+          },
+          "body": "Cell{ lock: SALE_LOCK(seller, {{price > 0}}), hashType {{type}}, capacity: deposit }"
+        },
+        {
+          "label": {
+            "zh": "名字",
+            "en": "name"
+          },
+          "body": {
+            "zh": "同交易中 transfer 给买家",
+            "en": "transferred to the buyer in the same tx"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "卖家",
+            "en": "seller"
+          },
+          "body": {
+            "zh": "纯输出（无 type 且 data 为空），lock hash = seller：≥ Σ(price − fee + deposit)（该卖家所有挂单）",
+            "en": "pure outputs (no type and empty data) to seller lock hash: ≥ Σ(price − fee + deposit) over that seller’s offers"
+          }
+        },
+        {
+          "label": "treasury",
+          "body": {
+            "zh": "纯输出（无 type 且 data 为空）≥ Σ fee（本交易所有卖家不在场的挂单）",
+            "en": "pure outputs (no type and empty data) ≥ Σ fee (every offer in the tx whose seller is absent)"
+          }
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "lock.args（40 字节）",
+            "en": "lock.args (40 bytes)"
+          },
+          "layout": [
+            {
+              "name": "seller_lock_hash",
+              "size": "32B",
+              "role": {
+                "zh": "卖家完整 lock hash，收款与撤单身份",
+                "en": "seller full lock hash: payee and cancel identity"
+              },
+              "color": 1,
+              "flex": 4
+            },
+            {
+              "name": "price",
+              "size": "8B LE",
+              "role": {
+                "zh": "要价（shannon），写在 args 里因此进入 lock hash，不可篡改",
+                "en": "asking price in shannons; in args so it is part of the lock hash"
+              },
+              "color": 2,
+              "flex": 1,
+              "cons": {
+                "zh": "> 0（购买路径）",
+                "en": "> 0 (purchase path)"
+              },
+              "err": "2"
+            }
+          ],
+          "hex": [
+            [
+              "args",
+              "0x{{a1b2…(32B)}}{{00e40b5402000000}}  ← price 0x02540be400 = 10,000 CKB"
+            ]
+          ]
+        },
+        {
+          "label": "sale_fee(price)",
+          "layout": [
+            {
+              "name": "price ≥ 6,300 CKB",
+              "size": "1%",
+              "role": {
+                "zh": "1% 分成",
+                "en": "1% share"
+              },
+              "color": 1,
+              "flex": 1
+            },
+            {
+              "name": "630 ≤ price < 6,300",
+              "size": "63 CKB",
+              "role": {
+                "zh": "固定 63 CKB",
+                "en": "flat 63 CKB"
+              },
+              "color": 2,
+              "flex": 1
+            },
+            {
+              "name": "price < 630",
+              "size": "0",
+              "role": {
+                "zh": "无分成",
+                "en": "none"
+              },
+              "color": 3,
+              "flex": 1
+            }
+          ],
+          "hex": [
+            [
+              "10,000 CKB",
+              "fee 100 CKB → seller 9,900 + deposit"
+            ]
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "长度 40",
+            "en": "length 40"
+          },
+          "err": "2"
+        },
+        {
+          "field": "price",
+          "cond": {
+            "zh": "> 0",
+            "en": "> 0"
+          },
+          "err": "2"
+        },
+        {
+          "field": "hash_type",
+          "cond": {
+            "zh": "= type（按 type id 引用）",
+            "en": "= type (named by type id)"
+          },
+          "err": "5"
+        },
+        {
+          "field": {
+            "zh": "卖家收款",
+            "en": "seller payout"
+          },
+          "cond": {
+            "zh": "纯输出（无 type 且 data 为空）合计 ≥ 应得",
+            "en": "pure outputs (no type and empty data) total ≥ owed"
+          },
+          "err": "3"
+        },
+        {
+          "field": "treasury",
+          "cond": {
+            "zh": "纯输出（无 type 且 data 为空）合计 ≥ Σ fee（卖家即 treasury 时为 0）",
+            "en": "pure outputs (no type and empty data) total ≥ Σ fee (zero if seller is the treasury)"
+          },
+          "err": "4"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码：1 Encoding，2 BadArgs，3 Unpaid，4 FeeUnpaid，5 NotByTypeId",
+      "en": "Error codes: 1 Encoding, 2 BadArgs, 3 Unpaid, 4 FeeUnpaid, 5 NotByTypeId"
+    },
+    {
+      "zh": "treasury lock hash 编译进二进制：主网 0x57d9…742d（README 构建参数）。",
+      "en": "The treasury lock hash is compiled in: mainnet 0x57d9…742d (README build values)."
+    },
+    {
+      "zh": "不校验签名：卖家路径依赖卖家 lock 自身。",
+      "en": "No signature checked: the seller path relies on the seller’s own lock."
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const R = require('../lib/ckb'); require('../contracts/acp/plugin');
+const MAX64 = (1n << 64n) - 1n, MAX128 = (1n << 128n) - 1n;
+const wallet = (ckb, udt) => ({ type: 'udt', ckb, udt, dataLen: 16 });
+const payment = (i, o, c = 1n, u = 1n) => R.acp.payment({}, {}, { ins: [[0, i]], outs: [[0, o]], minCkb: c, minUdt: u });
+test('exponents saturate to u64/u128 MAX, not arbitrary-precision powers', () => { const p = R.acp.parse({ script: { args: '0x' + '00'.repeat(20) + 'ffff' }, inputs: [], outputs: [], witnessIndex: 0 }, { witnesses: [], inputs: [], tx: { outputs: [], outputs_data: [] } }); assert.equal(p.minCkb, MAX64); assert.equal(p.minUdt, MAX128); });
+test('saturated threshold can be met by zero-to-MAX transfer', () => { assert.ok(payment(wallet(10n, 0n), wallet(10n, MAX128), MAX64, MAX128).every(x => x.ok)); assert.ok(payment(wallet(0n, 10n), wallet(MAX64, 10n), MAX64, MAX128).every(x => x.ok)); });
+test('both assets may meet their threshold; a partial increase or decrease fails', () => { assert.ok(payment(wallet(10n, 10n), wallet(12n, 12n), 2n, 2n).every(x => x.ok)); for (const o of [wallet(11n, 12n), wallet(9n, 12n)]) assert.ok(payment(wallet(10n, 10n), o, 2n, 2n).some(x => x.ok === false)); });
+test('bounded addition overflow does not wrap and cannot satisfy payment', () => { assert.ok(payment(wallet(MAX64, MAX128), wallet(MAX64, MAX128)).some(x => x.ok === false)); });
+test('exactly 256 group inputs fails before the source end-marker load', () => { for (const n of [255, 256]) { const checks = R.acp.payment({}, {}, { ins: Array.from({ length: n }, (_, i) => [i, wallet(0n, 0n)]), outs: [], minCkb: 0n, minUdt: 0n }); assert.equal(checks[0].ok, n < 256); } });

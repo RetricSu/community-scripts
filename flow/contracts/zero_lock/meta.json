@@ -1,0 +1,25 @@
+{
+  "tags": [
+    "system",
+    "nervos",
+    "open-source"
+  ],
+  "contributors": [
+    "mohanson"
+  ],
+  "source": {
+    "repo": "https://github.com/nervosnetwork/ckb",
+    "commit": "426736a4816e4cda0dfa4ebdf7ba3b4f46e3ecb9",
+    "paths": [
+      "script/src/types.rs",
+      "script/src/error.rs"
+    ],
+    "commit_note": "no contract code exists; behaviour comes from CKB script resolution (TxData::extract_script → ScriptError::ScriptNotFound) at this ckb commit",
+    "binary": {
+      "status": "builtin",
+      "note": "no code cell: nothing hashes to the all-zero data hash; behaviour defined by the CKB node"
+    }
+  },
+  "deployments": [],
+  "checked_at": "2026-11-06"
+}

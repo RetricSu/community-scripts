@@ -1,0 +1,120 @@
+{
+  "title": {
+    "zh": "NexisDAO dCKB Type Lock 约束",
+    "en": "NexisDAO dCKB Type Lock Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：NexisDao/NexisDao-core @1447fed contracts/type_lock/src/entry.rs　·　mainnet 0x8baa…74de (data)",
+    "en": "Source: NexisDao/NexisDao-core @1447fed contracts/type_lock/src/entry.rs　·　mainnet 0x8baa…74de (data)"
+  },
+  "transitions": [
+    {
+      "tag": "1 → *",
+      "title": {
+        "zh": "解锁：交易中必须出现指定 type",
+        "en": "Unlock: the named type must appear in the tx"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "被锁的 cell（如 dCKB 的 NervosDAO 存款）",
+            "en": "locked cell (e.g. a dCKB NervosDAO deposit)"
+          },
+          "body": "Cell{\n  lock: { codeHash: {{TYPE_LOCK}}, hashType: data,\n          args: [{{mode 1B}}] ‖ {{type_hash 32B}} }\n}"
+        },
+        {
+          "label": {
+            "zh": "另一个输入（mode 1 / 0）",
+            "en": "another input (mode 1 / 0)"
+          },
+          "body": "Cell{ type: {{hash = type_hash}} }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "或某个输出（mode 2 / 0）",
+            "en": "or some output (mode 2 / 0)"
+          },
+          "body": "Cell{ type: {{hash = type_hash}} }"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "args 字节布局",
+            "en": "args byte layout"
+          },
+          "layout": [
+            {
+              "name": "mode",
+              "size": {
+                "zh": "1B（args 为 32 字节时省略 = 0）",
+                "en": "1B (omitted = 0 when args is 32 bytes)"
+              },
+              "role": {
+                "zh": "1 只查输入 · 2 只查输出 · 其他 先输入后输出",
+                "en": "1 inputs only · 2 outputs only · other inputs then outputs"
+              },
+              "cons": "—",
+              "err": "5",
+              "color": 1,
+              "flex": 2
+            },
+            {
+              "name": "type_hash",
+              "size": "32B",
+              "role": {
+                "zh": "必须出现的 type script hash",
+                "en": "type script hash that must appear"
+              },
+              "cons": {
+                "zh": "在对应位置找到",
+                "en": "found where mode says"
+              },
+              "err": "6",
+              "color": 2,
+              "flex": 4
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "非空",
+            "en": "not empty"
+          },
+          "err": "5"
+        },
+        {
+          "field": "type",
+          "cond": {
+            "zh": "按 mode 在输入 / 输出中找到 type hash = args 中的值",
+            "en": "an input / output (per mode) has type hash = the value in args"
+          },
+          "err": "6"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "没有签名检查：只要交易里带上指定 type 的 cell 就能解锁。dCKB 存款的 args 固定为 0x01 ‖ DAO info type hash，所以 dCKB 的 DAO Info type 负责真正的规则（社区 dckb-rescuer/v1-core 说明）。",
+      "en": "There is no signature check: including a cell with the named type unlocks it. dCKB deposits use args 0x01 ‖ DAO-info type hash, so the dCKB DAO Info type carries the real rules (per the community dckb-rescuer/v1-core notes)."
+    },
+    {
+      "zh": "部署来源：code hash 来自社区仓库 dckb-rescuer/v1-core 的 README，并在主网 dCKB 存款交易中看到（hash_type data）。NexisDAO 原仓库没有记录部署哈希，未做可复现构建。",
+      "en": "Deployment source: the code hash comes from the community repo dckb-rescuer/v1-core README and appears on mainnet dCKB deposit txs (hash_type data). The original NexisDAO repo records no deployment hash; no reproducible build was attempted."
+    },
+    {
+      "zh": "args 长度不是 32 时取 args[1..] 作为 type hash；若它不是 32 字节则永远匹配不到（6）。",
+      "en": "When args is not 32 bytes, args[1..] is the type hash; if that is not 32 bytes it can never match (6)."
+    },
+    {
+      "zh": "错误码（error.rs）：1–4 syscall · 5 ErrArgs · 6 ErrNotExist",
+      "en": "Error codes (error.rs): 1–4 syscall · 5 ErrArgs · 6 ErrNotExist"
+    }
+  ]
+}

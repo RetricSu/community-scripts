@@ -1,0 +1,4 @@
+[{"tx":"0x219d1540e4dc06fd877a5094b93c5d5d302221b31fb972a4ff3d04f320f315ed","net":"mainnet","name":"genesis (root sentinel)","expect":["cells_account_type"]},
+ {"tx":"0x8ee4e6fe22d2933eaa25763fb397e7edbb78869c5269d1ee8de59858771bd35a","net":"mainnet","name":"register","expect":["cells_account_type","cells_account_lock"]},
+ {"tx":"0x53a0519e06fc4aac3eca2606e12fc19849919a226af872f687dfb3209a0470fd","net":"mainnet","name":"transfer","expect":["cells_account_type","cells_account_lock"]},
+ {"tx":"0x89ca2c196972905168ef2e8776540876b31100458f45ccaa462e7da2b2e90e4a","net":"testnet","name":"testnet (first account tx)","expect":["cells_account_type"]}]

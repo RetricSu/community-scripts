@@ -1,0 +1,215 @@
+{
+  "title": {
+    "zh": "Cheque（lock）约束",
+    "en": "Cheque (lock) Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：nervosnetwork/ckb-cheque-script / src/entry.rs, claim.rs, withdraw.rs　·　mainnet 0xe4d4…fb0c / testnet 0x60d5…0d5b，hash_type type（RFC 0039）",
+    "en": "Source: nervosnetwork/ckb-cheque-script / src/entry.rs, claim.rs, withdraw.rs　·　mainnet 0xe4d4…fb0c / testnet 0x60d5…0d5b, hash_type type (RFC 0039)"
+  },
+  "transitions": [
+    {
+      "tag": "0 → 1",
+      "title": {
+        "zh": "发送方创建 cheque",
+        "en": "Sender creates a cheque"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "发送方 cell",
+            "en": "sender cells"
+          },
+          "body": "Cell{ lock: SENDER(secp256k1), type: UDT?, data: amount }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "cheque cell",
+          "body": "Cell{\n  lock: { codeHash: CHEQUE,\n          args: {{receiver_lock_hash[0..20]}} ‖ {{sender_lock_hash[0..20]}} },\n  type: UDT, data: amount\n}"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "args 字节布局",
+            "en": "args byte layout"
+          },
+          "layout": [
+            {
+              "name": "receiver_lock_hash[0..20]",
+              "size": "20B",
+              "role": {
+                "zh": "接收方 lock script hash 前 20 字节",
+                "en": "first 20 bytes of receiver lock hash"
+              },
+              "cons": {
+                "zh": "args 恰 40B",
+                "en": "args exactly 40B"
+              },
+              "err": "5",
+              "color": 1,
+              "flex": 3
+            },
+            {
+              "name": "sender_lock_hash[0..20]",
+              "size": "20B",
+              "role": {
+                "zh": "发送方 lock script hash 前 20 字节",
+                "en": "first 20 bytes of sender lock hash"
+              },
+              "cons": "—",
+              "err": "5",
+              "color": 3,
+              "flex": 3
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "create",
+          "cond": {
+            "zh": "创建不运行 cheque lock（lock 只在花费时执行）",
+            "en": "creation does not run the cheque lock (locks run only when spent)"
+          },
+          "err": "—"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 0",
+      "title": {
+        "zh": "接收方领取 claim",
+        "en": "Receiver claims"
+      },
+      "inputs": [
+        {
+          "label": "cheque cell",
+          "body": "Cell{ lock: CHEQUE(args), capacity: {{C}}, since: {{0}} }"
+        },
+        {
+          "label": {
+            "zh": "接收方输入（1.b，无 cheque 签名时）",
+            "en": "receiver input (1.b, when the cheque has no signature)"
+          },
+          "body": "Cell{ lock: RECEIVER, witness.lock: {{signature}} }"
+        },
+        {
+          "label": {
+            "zh": "发送方输入（可选）",
+            "en": "sender inputs (optional)"
+          },
+          "body": "Cell{ lock: SENDER, capacity: S }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "接收方 UDT",
+            "en": "receiver UDT"
+          },
+          "body": "Cell{ lock: RECEIVER, type: UDT, data: amount }"
+        },
+        {
+          "label": {
+            "zh": "退还发送方",
+            "en": "refund to sender"
+          },
+          "body": "Cell{ lock: SENDER,\n  Σcapacity = {{S + C}} }"
+        }
+      ],
+      "limits": [
+        {
+          "field": "since",
+          "cond": {
+            "zh": "所有 cheque 输入 since = 0",
+            "en": "every cheque input since = 0"
+          },
+          "err": "10"
+        },
+        {
+          "field": "capacity",
+          "cond": {
+            "zh": "Σ sender 输入 + Σ cheque 输入 = Σ sender 输出（容量原样退回发送方）",
+            "en": "Σ sender inputs + Σ cheque inputs = Σ sender outputs (capacity goes back to sender)"
+          },
+          "err": "8"
+        },
+        {
+          "field": "1.a signature",
+          "cond": {
+            "zh": "cheque witness 签名恢复出的 secp256k1 lock hash[0..20] = receiver",
+            "en": "cheque witness signature recovers to a secp256k1 lock hash[0..20] = receiver"
+          },
+          "err": "12 / 13"
+        },
+        {
+          "field": "1.b input",
+          "cond": {
+            "zh": "无签名时需有 lock hash[0..20] = receiver 的输入，且其 witness.lock 非空",
+            "en": "without signature, an input with lock hash[0..20] = receiver whose witness.lock is non-empty"
+          },
+          "err": "6 / 7"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 0",
+      "title": {
+        "zh": "发送方取回 withdraw（6 epoch 后）",
+        "en": "Sender withdraws (after 6 epochs)"
+      },
+      "inputs": [
+        {
+          "label": "cheque cell",
+          "body": "Cell{ lock: CHEQUE(args), since: {{0xA000000000000006}} }"
+        },
+        {
+          "label": {
+            "zh": "发送方输入（2.b）",
+            "en": "sender input (2.b)"
+          },
+          "body": "Cell{ lock: SENDER, witness.lock: {{signature}} }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "outputs",
+          "body": {
+            "zh": "任意（通常回到发送方）",
+            "en": "any (usually back to sender)"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "since",
+          "cond": {
+            "zh": "所有 cheque 输入 since = 0xA000000000000006（相对 6 epoch）",
+            "en": "every cheque input since = 0xA000000000000006 (relative 6 epochs)"
+          },
+          "err": "11"
+        },
+        {
+          "field": "2.a / 2.b",
+          "cond": {
+            "zh": "签名属于 sender，或存在 sender 输入且其 witness.lock 非空",
+            "en": "signature belongs to sender, or a sender input with non-empty witness.lock"
+          },
+          "err": "6 / 7 / 13"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码：5 InvalidArgument · 6 NoMatchedInputs · 7 WitnessSignatureWrong · 8 SenderCapacityNotSame · 9 WrongPubKey · 10 ClaimChequeInputSinceNotZero · 11 WithdrawChequeInputSinceError · 12 Secp256k1 · 13 NoMatchedSignature（签名路径的错误都会变成 13）；1–4 为系统调用错误",
+      "en": "Error codes: 5 InvalidArgument · 6 NoMatchedInputs · 7 WitnessSignatureWrong · 8 SenderCapacityNotSame · 9 WrongPubKey · 10 ClaimChequeInputSinceNotZero · 11 WithdrawChequeInputSinceError · 12 Secp256k1 · 13 NoMatchedSignature (signature-path errors all surface as 13); 1–4 are syscall errors"
+    },
+    {
+      "zh": "签名路径只认 secp256k1_blake160 lock（code_hash 0x9bd7…cce8, type）",
+      "en": "The signature path only recognizes the secp256k1_blake160 lock (code_hash 0x9bd7…cce8, type)"
+    }
+  ]
+}

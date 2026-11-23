@@ -19,7 +19,10 @@
     "discover": "node dist/src/index.js discover",
     "daily": "node dist/src/index.js daily",
     "monitor": "node dist/src/index.js monitor",
-    "monitor:upgrade": "node dist/src/index.js monitor upgrade"
+    "monitor:upgrade": "node dist/src/index.js monitor upgrade",
+    "flow:meta": "node scripts/gen-flow-meta.js",
+    "flow:build": "node flow/gen.js --all portal && node scripts/build-portal.js",
+    "portal:serve": "node scripts/serve-portal.js"
   },
   "keywords": [
     "ckb",

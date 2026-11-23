@@ -1,0 +1,15 @@
+[
+  {
+    "tx": "0xdcc1d1f0289a0df2ce56094bc0fe873baa03bf5d361545aa908c49778fe11429",
+    "net": "mainnet",
+    "name": "xUDT"
+  },
+  {
+    "tx": "0x0af1403063b56401e830e4ed42b44c2d0b127b6fdab153d32a3c01025475a4b7",
+    "net": "testnet",
+    "name": "xUDT (testnet type_id deployment)",
+    "expect": [
+      "xudt"
+    ]
+  }
+]

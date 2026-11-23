@@ -1,0 +1,138 @@
+{
+  "title": {
+    "zh": "Godwoken 委托 cell lock（delegate-cell-lock）约束",
+    "en": "Godwoken delegate-cell lock Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：godwokenrises/godwoken @c2b1f85 / gwos/contracts/delegate-cell-lock/src/entry.rs　·　未找到官方部署",
+    "en": "Source: godwokenrises/godwoken @c2b1f85 / gwos/contracts/delegate-cell-lock/src/entry.rs　·　no official deployment found"
+  },
+  "transitions": [
+    {
+      "tag": "A",
+      "title": {
+        "zh": "解锁",
+        "en": "Unlock"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "input[0] 被保护 cell（如 rollup cell）",
+            "en": "input[0] protected cell (e.g. rollup cell)"
+          },
+          "body": "Cell{\n  capacity: any,\n  lock: { DELEGATE_CELL_LOCK, args: {{delegate cell type hash 32B}} },\n  type: any,\n  data: any\n}"
+        },
+        {
+          "label": {
+            "zh": "input[k] 当前授权者 cell",
+            "en": "input[k] current authorized cell"
+          },
+          "body": "Cell{\n  capacity: any,\n  lock: {{lock hash[0..20] == delegate cell data}},\n  type: any,\n  data: any\n}"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "outputs",
+            "en": "outputs"
+          },
+          "body": "any"
+        }
+      ],
+      "sections": [
+        {
+          "title": {
+            "zh": "cell_deps",
+            "en": "cell_deps"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "cell_dep：delegate cell",
+                "en": "cell_dep: delegate cell"
+              },
+              "body": "Cell{\n  capacity: any,\n  lock: e.g. multisig (to rotate the key),\n  type: {{type hash == args}} (usually type_id),\n  data: {{20B: lock hash[0..20] of the authorized lock}}\n}"
+            }
+          ]
+        },
+        {
+          "title": {
+            "zh": "witnesses（WitnessArgs）",
+            "en": "witnesses (WitnessArgs)"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "witnesses[组首输入]",
+                "en": "witnesses[first group input]"
+              },
+              "body": "{ lock: {{none}} }  // must be empty, else 9"
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "witness.lock",
+          "cond": {
+            "zh": "必须为空",
+            "en": "must be empty"
+          },
+          "err": "9"
+        },
+        {
+          "field": "args",
+          "cond": {
+            "zh": "恰 32 字节",
+            "en": "exactly 32 bytes"
+          },
+          "err": "5"
+        },
+        {
+          "field": "cell_deps",
+          "cond": {
+            "zh": "有 type hash = args 的 cell",
+            "en": "a cell with type hash = args"
+          },
+          "err": "6"
+        },
+        {
+          "field": {
+            "zh": "其 data",
+            "en": "its data"
+          },
+          "cond": {
+            "zh": "恰 20 字节",
+            "en": "exactly 20 bytes"
+          },
+          "err": "7"
+        },
+        {
+          "field": {
+            "zh": "输入",
+            "en": "inputs"
+          },
+          "cond": {
+            "zh": "有 lock hash[0..20] = 该 data 的输入",
+            "en": "an input whose lock hash[0..20] = that data"
+          },
+          "err": "8"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "⚠ 状态：官方已宣布 Godwoken 退役（2025-06-01 起，Nervos Talk “Sunset of Force Bridge and Godwoken”）；冻结期限延至 2026-01-01 23:59:59 UTC，之后网络冻结、桥前端下线，v0/v1 RPC 节点已关闭。本页仅作历史 / 审计参考。",
+      "en": "⚠ Status: Godwoken was officially sunset (from 2025-06-01, Nervos Talk “Sunset of Force Bridge and Godwoken”); the freeze deadline was extended to 2026-01-01 23:59:59 UTC, after which the network froze, the bridge UI went offline and v0/v1 RPC nodes were shut down. This page is for historical / audit reference."
+    },
+    {
+      "zh": "错误码（delegate-cell-lock/src/error.rs）：1 IndexOutOfBound，2 ItemMissing，3 LengthNotEnough，4 Encoding，5 InvalidArgs，6 CellDepNotFound，7 CellDepDataInvalid，8 InputNotFound，9 InvalidWitnessArgs",
+      "en": "Error codes (delegate-cell-lock/src/error.rs): 1 IndexOutOfBound, 2 ItemMissing, 3 LengthNotEnough, 4 Encoding, 5 InvalidArgs, 6 CellDepNotFound, 7 CellDepDataInvalid, 8 InputNotFound, 9 InvalidWitnessArgs"
+    },
+    {
+      "zh": "godwoken-info 的部署结果中没有该脚本；主网 v1 rollup cell 使用的是 omni_lock 部署。仅静态页面，无部署，无测试交易。",
+      "en": "Not in godwoken-info deploy results; the mainnet v1 rollup cell uses the omni_lock deployment. Static page only: no deployment, no test tx."
+    }
+  ]
+}

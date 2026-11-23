@@ -1,0 +1,4 @@
+[{"tx":"0x57ee42444304f1c1508c1b6136c4e1c33adb1ff8086eb885bd5abdd5080b269b","net":"testnet","name":"Owned counter create at 0","expect":["noir_owned_counter"]},
+ {"tx":"0x24a336fbc09ea5330b83adcbaaf17e6eaafcb21776e13df6ec01d00daa613bb6","net":"testnet","name":"Owned counter proof update 0 -> 1","expect":["noir_owned_counter"]},
+ {"tx":"0x0b6efcd70f111afd1c885557c84f7b93ef4ee8401dd9fe258b9fb677c888798c","net":"testnet","name":"Participant counter create","expect":["noir_owned_counter"]},
+ {"tx":"0xe6589170381a02a249c37be8ab279e6229e2feb8f177f3d572bc63f30089126f","net":"testnet","name":"Participant counter update 0 -> 1","expect":["noir_owned_counter"]}]

@@ -1,0 +1,313 @@
+{
+  "title": {
+    "zh": "Godwoken 托管（custodian-lock）约束",
+    "en": "Godwoken custodian (custodian-lock) Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：godwokenrises/godwoken @c2b1f85 / gwos/contracts/custodian-lock/src/entry.rs　·　部署：godwoken-info @8ce6390 mainnet_v1 / testnet_v1_1",
+    "en": "Source: godwokenrises/godwoken @c2b1f85 / gwos/contracts/custodian-lock/src/entry.rs　·　deployments: godwoken-info @8ce6390 mainnet_v1 / testnet_v1_1"
+  },
+  "transitions": [
+    {
+      "tag": "1 → *",
+      "title": {
+        "zh": "已终结：由 rollup 使用",
+        "en": "Finalized: used by the rollup"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "input[0] rollup cell",
+            "en": "input[0] rollup cell"
+          },
+          "body": "Cell{\n  capacity: R,\n  lock: rollup lock (mainnet: omni_lock deployment),\n  type: { codeHash: STATE_VALIDATOR, hashType: type, args: type_id 32B },\n  data: GlobalState (190B)\n}\n// {{type hash == args[0..32]}}"
+        },
+        {
+          "label": {
+            "zh": "input[1] custodian cell",
+            "en": "input[1] custodian cell"
+          },
+          "body": "Cell{\n  capacity: X,\n  lock: CUSTODIAN_LOCK(rollup_type_hash ‖ args),\n  type: null | sUDT,\n  data: …\n}"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "output[0] rollup cell′",
+            "en": "output[0] rollup cell′"
+          },
+          "body": "Cell{\n  capacity: R,\n  lock: rollup lock (mainnet: omni_lock deployment),\n  type: { codeHash: STATE_VALIDATOR, hashType: type, args: type_id 32B },\n  data: GlobalState (190B)\n}"
+        },
+        {
+          "label": {
+            "zh": "output[…]",
+            "en": "output[…]"
+          },
+          "body": "withdrawal / merged custodian cells (checked by state-validator)"
+        }
+      ],
+      "sections": [
+        {
+          "title": {
+            "zh": "cell_deps",
+            "en": "cell_deps"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "cell_dep：CUSTODIAN_LOCK 代码",
+                "en": "cell_dep: CUSTODIAN_LOCK code"
+              },
+              "body": "code cell (see deployments)\n// needed by CKB to run the script"
+            },
+            {
+              "label": {
+                "zh": "cell_dep：RollupConfig cell",
+                "en": "cell_dep: RollupConfig cell"
+              },
+              "body": "Cell{ data: RollupConfig (molecule) }\n// load_rollup_config(): found by {{data hash == GlobalState.rollup_config_hash}} → else 10"
+            }
+          ]
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "args = rollup_type_hash ‖ CustodianLockArgs（table）",
+            "en": "args = rollup_type_hash ‖ CustodianLockArgs (table)"
+          },
+          "layout": [
+            {
+              "name": "rollup_type_hash",
+              "size": "32B",
+              "role": {
+                "zh": "rollup cell type hash",
+                "en": "rollup cell type hash"
+              },
+              "color": 1,
+              "flex": 2,
+              "err": "5"
+            },
+            {
+              "name": "deposit_block_hash",
+              "size": "32B",
+              "role": {
+                "zh": "收录该存款的 L2 区块（0 = 已终结的合并托管）",
+                "en": "L2 block that took the deposit (0 = finalized/merged)"
+              },
+              "color": 2,
+              "flex": 2
+            },
+            {
+              "name": "deposit_finalized_timepoint",
+              "size": "8B",
+              "role": {
+                "zh": "终结 Timepoint",
+                "en": "finalized Timepoint"
+              },
+              "color": 3,
+              "flex": 1
+            },
+            {
+              "name": "deposit_lock_args",
+              "size": "DepositLockArgs",
+              "role": {
+                "zh": "回滚时用来恢复 deposit cell",
+                "en": "used to restore the deposit cell on revert"
+              },
+              "color": 4,
+              "flex": 3,
+              "cons": {
+                "zh": "回滚输出须一致",
+                "en": "revert output must match"
+              },
+              "err": "7"
+            }
+          ],
+          "hex": [
+            [
+              "deposit_finalized_timepoint",
+              "0x{{80}}…  ← timestamp form"
+            ]
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "合法",
+            "en": "valid"
+          },
+          "err": "5"
+        },
+        {
+          "field": "rollup",
+          "cond": {
+            "zh": "输入中有 rollup cell（读其 GlobalState）",
+            "en": "a rollup cell in inputs (its GlobalState is read)"
+          },
+          "err": "9"
+        },
+        {
+          "field": "config",
+          "cond": {
+            "zh": "RollupConfig 在 cell_deps",
+            "en": "RollupConfig in cell_deps"
+          },
+          "err": "10"
+        },
+        {
+          "field": {
+            "zh": "终结",
+            "en": "finality"
+          },
+          "cond": {
+            "zh": "deposit_finalized_timepoint 已终结 → 通过",
+            "en": "deposit_finalized_timepoint finalized → pass"
+          },
+          "err": "0"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 1",
+      "title": {
+        "zh": "未终结：存款区块被回滚，还原为 deposit cell",
+        "en": "Not finalized: deposit block reverted, restore the deposit cell"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "input[0] rollup cell",
+            "en": "input[0] rollup cell"
+          },
+          "body": "Cell{\n  capacity: R,\n  lock: rollup lock (mainnet: omni_lock deployment),\n  type: { codeHash: STATE_VALIDATOR, hashType: type, args: type_id 32B },\n  data: GlobalState (190B)\n}"
+        },
+        {
+          "label": {
+            "zh": "input[1] custodian cell",
+            "en": "input[1] custodian cell"
+          },
+          "body": "Cell{\n  capacity: X,\n  lock: CUSTODIAN_LOCK(…),\n  type: …,\n  data: …\n}"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "output[0] rollup cell′",
+            "en": "output[0] rollup cell′"
+          },
+          "body": "Cell{\n  capacity: R,\n  lock: rollup lock (mainnet: omni_lock deployment),\n  type: { codeHash: STATE_VALIDATOR, hashType: type, args: type_id 32B },\n  data: GlobalState …\n}\n// its witness = RollupSubmitBlock with {{reverted_block_hashes ∋ deposit_block_hash}}"
+        },
+        {
+          "label": {
+            "zh": "output[k] 还原的 deposit cell",
+            "en": "output[k] restored deposit cell"
+          },
+          "body": "Cell{\n  capacity: …,\n  lock: { codeHash: {{config.deposit_script_type_hash}}, hashType: {{type}},\n          args: {{rollup_type_hash ‖ deposit_lock_args}} },\n  type: …,\n  data: …\n}"
+        }
+      ],
+      "sections": [
+        {
+          "title": {
+            "zh": "witnesses（WitnessArgs）",
+            "en": "witnesses (WitnessArgs)"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "witnesses[custodian 组首输入]",
+                "en": "witnesses[first custodian input]"
+              },
+              "body": "{ lock: {{UnlockCustodianViaRevertWitness{ deposit_lock_hash 32B }}} }  // must parse, else 5"
+            },
+            {
+              "label": {
+                "zh": "witnesses[rollup 输出]",
+                "en": "witnesses[rollup output]"
+              },
+              "body": "{ output_type: RollupAction (must be RollupSubmitBlock) }"
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "witness",
+          "cond": {
+            "zh": "lock 字段为 32 字节 deposit_lock_hash",
+            "en": "lock field is a 32-byte deposit_lock_hash"
+          },
+          "err": "5"
+        },
+        {
+          "field": {
+            "zh": "输出",
+            "en": "output"
+          },
+          "cond": {
+            "zh": "有 lock hash = deposit_lock_hash 的输出",
+            "en": "an output whose lock hash = deposit_lock_hash"
+          },
+          "err": "7"
+        },
+        {
+          "field": {
+            "zh": "输出 lock",
+            "en": "output lock"
+          },
+          "cond": {
+            "zh": "args 前 32 字节 = rollup_type_hash",
+            "en": "args[0..32] = rollup_type_hash"
+          },
+          "err": "5"
+        },
+        {
+          "field": {
+            "zh": "输出 lock",
+            "en": "output lock"
+          },
+          "cond": {
+            "zh": "code_hash = config.deposit_script_type_hash，hash_type = type，args 与 deposit_lock_args 相同",
+            "en": "code_hash = config.deposit_script_type_hash, hash_type type, args equal deposit_lock_args"
+          },
+          "err": "7"
+        },
+        {
+          "field": "rollup",
+          "cond": {
+            "zh": "输出有 rollup cell",
+            "en": "a rollup cell in outputs"
+          },
+          "err": "9"
+        },
+        {
+          "field": {
+            "zh": "回滚",
+            "en": "revert"
+          },
+          "cond": {
+            "zh": "RollupSubmitBlock 的 reverted_block_hashes 含 deposit_block_hash",
+            "en": "RollupSubmitBlock.reverted_block_hashes contains deposit_block_hash"
+          },
+          "err": "29"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "⚠ 状态：官方已宣布 Godwoken 退役（2025-06-01 起，Nervos Talk “Sunset of Force Bridge and Godwoken”）；冻结期限延至 2026-01-01 23:59:59 UTC，之后网络冻结、桥前端下线，v0/v1 RPC 节点已关闭。本页仅作历史 / 审计参考。",
+      "en": "⚠ Status: Godwoken was officially sunset (from 2025-06-01, Nervos Talk “Sunset of Force Bridge and Godwoken”); the freeze deadline was extended to 2026-01-01 23:59:59 UTC, after which the network froze, the bridge UI went offline and v0/v1 RPC nodes were shut down. This page is for historical / audit reference."
+    },
+    {
+      "zh": "错误码（gw-utils/src/error.rs）：1 IndexOutOfBound，2 ItemMissing，3 LengthNotEnough，4 Encoding，5 InvalidArgs，6 InvalidSince，7 InvalidOutput，8 OwnerCellNotFound，9 RollupCellNotFound，10 RollupConfigNotFound，11 ProofNotFound，13 MerkleProof，14 AmountOverflow，15 InsufficientAmount，16/17 Insufficient{Input,Output}FinalizedAssets，18 SMTKeyMissing，19 InvalidStateCheckpoint，20 InvalidBlock，21 InvalidStatus，22 InvalidStakeCellUnlock，23 InvalidPostGlobalState，24 InvalidChallengeCell，25 InvalidStakeCell，26 InvalidDepositCell，27 InvalidWithdrawalCell，28 InvalidCustodianCell，29 InvalidRevertedBlocks，30 InvalidChallengeReward，32 InvalidChallengeTarget，33 InvalidWithdrawalRequest，34 UnknownEOAScript，39 InvalidTypeID，41 WrongSignature，43 RegistryAddressNotFound，45 NotFinalized。",
+      "en": "Error codes (gw-utils/src/error.rs): 1 IndexOutOfBound, 2 ItemMissing, 3 LengthNotEnough, 4 Encoding, 5 InvalidArgs, 6 InvalidSince, 7 InvalidOutput, 8 OwnerCellNotFound, 9 RollupCellNotFound, 10 RollupConfigNotFound, 11 ProofNotFound, 13 MerkleProof, 14 AmountOverflow, 15 InsufficientAmount, 16/17 Insufficient{Input,Output}FinalizedAssets, 18 SMTKeyMissing, 19 InvalidStateCheckpoint, 20 InvalidBlock, 21 InvalidStatus, 22 InvalidStakeCellUnlock, 23 InvalidPostGlobalState, 24 InvalidChallengeCell, 25 InvalidStakeCell, 26 InvalidDepositCell, 27 InvalidWithdrawalCell, 28 InvalidCustodianCell, 29 InvalidRevertedBlocks, 30 InvalidChallengeReward, 32 InvalidChallengeTarget, 33 InvalidWithdrawalRequest, 34 UnknownEOAScript, 39 InvalidTypeID, 41 WrongSignature, 43 RegistryAddressNotFound, 45 NotFinalized."
+    },
+    {
+      "zh": "Timepoint（u64）：最高位 0 = L2 区块号，1 = 毫秒时间戳（低 63 位）。",
+      "en": "Timepoint (u64): top bit 0 = L2 block number, 1 = millisecond timestamp (low 63 bits)."
+    }
+  ]
+}

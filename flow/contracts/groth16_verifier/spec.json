@@ -1,0 +1,455 @@
+{
+  "title": {
+    "zh": "groth16-ckb 验证器 Type Script 约束",
+    "en": "groth16-ckb Verifier Type Script Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：CECILIA-MULANDI/groth16-ckb @e969ad1 script/crates/{ckb-script,verifier-core,wire-decode,groth16-schema}、schemas/groth16.mol　·　testnet 0xc884…2dfb (data1)，取自 README 链接的 e2e 交易　·　预审计，勿上主网",
+    "en": "Source: CECILIA-MULANDI/groth16-ckb @e969ad1 script/crates/{ckb-script,verifier-core,wire-decode,groth16-schema}, schemas/groth16.mol　·　testnet 0xc884…2dfb (data1), taken from the e2e tx linked in the README　·　pre-audit, not for mainnet"
+  },
+  "transitions": [
+    {
+      "tag": "0 → 1",
+      "title": {
+        "zh": "创建触发 cell（不验证）",
+        "en": "Create a trigger cell (no verification)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "任意输入（不含该 type）",
+            "en": "any inputs (without this type)"
+          },
+          "body": {
+            "zh": "—",
+            "en": "—"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "触发 cell",
+            "en": "trigger cell"
+          },
+          "body": "Cell{\n  type: GROTH16_VERIFIER{ args: {{vk_data_hash 32B}} },\n  data: any\n}"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "type.args（32B）",
+            "en": "type.args (32B)"
+          },
+          "layout": [
+            {
+              "name": "vk_data_hash",
+              "size": "32B",
+              "color": 0,
+              "flex": 1,
+              "role": {
+                "zh": "VK cell 数据的 blake2b-256（ckb-default-hash）",
+                "en": "blake2b-256 of the VK cell data (ckb-default-hash)"
+              },
+              "cons": {
+                "zh": "长度 = 32",
+                "en": "length = 32"
+              },
+              "err": "11"
+            }
+          ],
+          "hex": [
+            [
+              "vk_data_hash",
+              "0x1bac22cfcd79a18a529c5038d9f795a91fbfe5dcf972a91563cba365696ab638"
+            ]
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "script",
+          "cond": {
+            "zh": "load_script 成功",
+            "en": "load_script succeeds"
+          },
+          "err": "10"
+        },
+        {
+          "field": "script.args",
+          "cond": {
+            "zh": "长度 = 32",
+            "en": "length = 32"
+          },
+          "err": "11"
+        },
+        {
+          "field": {
+            "zh": "group 输入",
+            "en": "group inputs"
+          },
+          "cond": {
+            "zh": "为空 → 直接返回 0（不检查 witness / VK / proof）",
+            "en": "none → return 0 immediately (no witness / VK / proof checks)"
+          },
+          "err": "—"
+        }
+      ]
+    },
+    {
+      "tag": "1 → *",
+      "title": {
+        "zh": "消费触发 cell：验证 Groth16 证明",
+        "en": "Consume a trigger cell: verify the Groth16 proof"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "触发 cell（group 输入）",
+            "en": "trigger cell (group input)"
+          },
+          "body": "Cell{ type: GROTH16_VERIFIER{ args: {{vk_data_hash}} } }"
+        },
+        {
+          "label": {
+            "zh": "witness[group 输入 0]",
+            "en": "witness[group input 0]"
+          },
+          "body": "WitnessArgs{ input_type: {{Groth16Witness}} }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "outputs：任意",
+            "en": "outputs: any"
+          },
+          "body": {
+            "zh": "同 type 的输出也不受限制",
+            "en": "outputs with the same type are unrestricted too"
+          }
+        }
+      ],
+      "extras": [
+        {
+          "zh": "cell_deps: [ verifier code, {{VK cell: data hash = args}} ]",
+          "en": "cell_deps: [ verifier code, {{VK cell: data hash = args}} ]"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "witness[group 输入 0].input_type = Groth16Witness（molecule）",
+            "en": "witness[group input 0].input_type = Groth16Witness (molecule)"
+          },
+          "layout": [
+            {
+              "name": "table hdr",
+              "size": "12B",
+              "color": 0,
+              "flex": 1,
+              "role": {
+                "zh": "molecule table 头（total ‖ 2 偏移）",
+                "en": "molecule table header (total ‖ 2 offsets)"
+              },
+              "cons": {
+                "zh": "结构合法",
+                "en": "well-formed"
+              },
+              "err": "17"
+            },
+            {
+              "name": "version",
+              "size": "2B u16 LE",
+              "color": 1,
+              "flex": 1,
+              "role": {
+                "zh": "线格式版本",
+                "en": "wire-format version"
+              },
+              "cons": {
+                "zh": "= 1",
+                "en": "= 1"
+              },
+              "err": "18"
+            },
+            {
+              "name": "union id",
+              "size": "4B",
+              "color": 2,
+              "flex": 1,
+              "role": {
+                "zh": "WitnessContent 联合：0 = Bn254Witness",
+                "en": "WitnessContent union: 0 = Bn254Witness"
+              },
+              "cons": {
+                "zh": "= 0（唯一变体）",
+                "en": "= 0 (only variant)"
+              },
+              "err": "17"
+            },
+            {
+              "name": "proof",
+              "size": "128B",
+              "color": 3,
+              "flex": 4,
+              "role": {
+                "zh": "ProofBn254 { a: G1 32B, b: G2 64B, c: G1 32B }（arkworks 压缩）",
+                "en": "ProofBn254 { a: G1 32B, b: G2 64B, c: G1 32B } (arkworks compressed)"
+              },
+              "cons": {
+                "zh": "可反序列化、非无穷远",
+                "en": "deserializable, not infinity"
+              },
+              "err": "2"
+            },
+            {
+              "name": "public_inputs",
+              "size": "FrVec: u32 n ‖ 32B × n",
+              "color": 4,
+              "flex": 3,
+              "role": {
+                "zh": "BN254 Fr 公开输入（小端）",
+                "en": "BN254 Fr public inputs (LE)"
+              },
+              "cons": {
+                "zh": "规范编码；n + 1 = VK ic 数",
+                "en": "canonical; n + 1 = VK ic count"
+              },
+              "err": "3 / 4"
+            }
+          ],
+          "hex": [
+            [
+              "header",
+              "0xc2000000 0c000000 0e000000"
+            ],
+            [
+              "version",
+              "0x0100"
+            ],
+            [
+              "union id",
+              "0x00000000"
+            ],
+            [
+              "proof",
+              "0x3dc6d41b…637c17 (128B)"
+            ],
+            [
+              "public_inputs",
+              "0x01000000 ‖ 0x3100…00"
+            ]
+          ],
+          "note": {
+            "zh": "示例：Pudge tx 0xc658f9e8…3c96 的 witness[0].input_type（194B）",
+            "en": "Example: witness[0].input_type of Pudge tx 0xc658f9e8…3c96 (194B)"
+          }
+        },
+        {
+          "label": {
+            "zh": "VK cell data = Groth16VerifyingKey（molecule）",
+            "en": "VK cell data = Groth16VerifyingKey (molecule)"
+          },
+          "layout": [
+            {
+              "name": "version",
+              "size": "2B",
+              "color": 0,
+              "flex": 1,
+              "role": {
+                "zh": "线格式版本",
+                "en": "wire-format version"
+              },
+              "cons": {
+                "zh": "= 1",
+                "en": "= 1"
+              },
+              "err": "18"
+            },
+            {
+              "name": "union id",
+              "size": "4B",
+              "color": 1,
+              "flex": 1,
+              "role": {
+                "zh": "0 = VerifyingKeyBn254",
+                "en": "0 = VerifyingKeyBn254"
+              },
+              "err": "14"
+            },
+            {
+              "name": "alpha_g1",
+              "size": "32B",
+              "color": 2,
+              "flex": 1,
+              "cons": {
+                "zh": "非无穷远",
+                "en": "not infinity"
+              },
+              "err": "1"
+            },
+            {
+              "name": "beta/gamma/delta_g2",
+              "size": "64B × 3",
+              "color": 3,
+              "flex": 3,
+              "cons": {
+                "zh": "非无穷远",
+                "en": "not infinity"
+              },
+              "err": "1"
+            },
+            {
+              "name": "gamma_abc_g1",
+              "size": "G1Vec",
+              "color": 4,
+              "flex": 2,
+              "role": {
+                "zh": "IC 点",
+                "en": "IC points"
+              },
+              "cons": {
+                "zh": "≥ 1 个，均非无穷远",
+                "en": "≥ 1, none at infinity"
+              },
+              "err": "1"
+            }
+          ],
+          "note": {
+            "zh": "cell_dep 中 data hash = type.args 的 cell；look_for_dep_with_data_hash 取第一个匹配（两个相同 data hash 的 cell 字节相同）",
+            "en": "the cell_dep whose data hash = type.args; look_for_dep_with_data_hash takes the first match (same data hash ⇒ same bytes)"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "script",
+          "cond": {
+            "zh": "load_script 成功",
+            "en": "load_script succeeds"
+          },
+          "err": "10"
+        },
+        {
+          "field": "script.args",
+          "cond": {
+            "zh": "长度 = 32",
+            "en": "length = 32"
+          },
+          "err": "11"
+        },
+        {
+          "field": "witness[group 0]",
+          "cond": {
+            "zh": "可加载为 WitnessArgs",
+            "en": "loads as WitnessArgs"
+          },
+          "err": "15"
+        },
+        {
+          "field": "WitnessArgs.input_type",
+          "cond": {
+            "zh": "必须存在",
+            "en": "must be present"
+          },
+          "err": "16"
+        },
+        {
+          "field": "cell_deps",
+          "cond": {
+            "zh": "存在 data hash = args 的 cell",
+            "en": "a cell with data hash = args exists"
+          },
+          "err": "12"
+        },
+        {
+          "field": "VK cell",
+          "cond": {
+            "zh": "可加载",
+            "en": "loadable"
+          },
+          "err": "13"
+        },
+        {
+          "field": "VK cell data",
+          "cond": {
+            "zh": "Groth16VerifyingKey molecule 合法",
+            "en": "valid Groth16VerifyingKey molecule"
+          },
+          "err": "14"
+        },
+        {
+          "field": "version",
+          "cond": {
+            "zh": "VK 与 witness 的 version 均 = 1",
+            "en": "VK and witness version both = 1"
+          },
+          "err": "18"
+        },
+        {
+          "field": "input_type",
+          "cond": {
+            "zh": "Groth16Witness molecule 合法",
+            "en": "valid Groth16Witness molecule"
+          },
+          "err": "17"
+        },
+        {
+          "field": "VK",
+          "cond": {
+            "zh": "重建的 arkworks VK：长度、ic_len ≥ 1、可反序列化、点非无穷远",
+            "en": "rebuilt arkworks VK: length, ic_len ≥ 1, deserializable, no infinity points"
+          },
+          "err": "1"
+        },
+        {
+          "field": "proof",
+          "cond": {
+            "zh": "128B、可反序列化、A/B/C 非无穷远",
+            "en": "128B, deserializable, A/B/C not infinity"
+          },
+          "err": "2"
+        },
+        {
+          "field": "public_inputs",
+          "cond": {
+            "zh": "长度 = 4 + 32n，Fr 规范编码",
+            "en": "length = 4 + 32n, canonical Fr"
+          },
+          "err": "3"
+        },
+        {
+          "field": "public_inputs",
+          "cond": {
+            "zh": "n + 1 = VK ic_len",
+            "en": "n + 1 = VK ic_len"
+          },
+          "err": "4"
+        },
+        {
+          "field": "Groth16",
+          "cond": {
+            "zh": "BN254 配对检查通过",
+            "en": "BN254 pairing check passes"
+          },
+          "err": "5"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码来自 script/crates/ckb-script/src/main.rs 常量：1 INVALID_VK、2 INVALID_PROOF、3 INVALID_PUBLIC_INPUTS、4 PUBLIC_INPUT_COUNT_MISMATCH、5 VERIFICATION_FAILED、10 SCRIPT_LOAD_FAILED、11 BAD_ARGS_LENGTH、12 VK_CELL_NOT_FOUND、13 VK_LOAD_FAILED、14 VK_MOLECULE_DECODE、15 WITNESS_LOAD_FAILED、16 WITNESS_MISSING_INPUT_TYPE、17 WITNESS_MOLECULE_DECODE、18 VERSION_MISMATCH；19 UNSUPPORTED_CURVE 保留未用。",
+      "en": "Error codes are the constants in script/crates/ckb-script/src/main.rs: 1 INVALID_VK, 2 INVALID_PROOF, 3 INVALID_PUBLIC_INPUTS, 4 PUBLIC_INPUT_COUNT_MISMATCH, 5 VERIFICATION_FAILED, 10 SCRIPT_LOAD_FAILED, 11 BAD_ARGS_LENGTH, 12 VK_CELL_NOT_FOUND, 13 VK_LOAD_FAILED, 14 VK_MOLECULE_DECODE, 15 WITNESS_LOAD_FAILED, 16 WITNESS_MISSING_INPUT_TYPE, 17 WITNESS_MOLECULE_DECODE, 18 VERSION_MISMATCH; 19 UNSUPPORTED_CURVE is reserved and unused."
+    },
+    {
+      "zh": "只验证 group 第 0 个输入的 witness：同一 group 的多个触发 cell 共用一份证明。脚本不检查输出，也不把证明绑定到交易（公开输入不含 tx 上下文），所以证明可被重放；绑定需由上层 lock / 电路实现。",
+      "en": "Only the witness of group input 0 is verified: several trigger cells in one group share one proof. The script checks no outputs and does not bind the proof to the transaction (public inputs carry no tx context), so a proof is replayable; binding must come from an outer lock / circuit."
+    },
+    {
+      "zh": "部署来源：仓库未公布 code_hash；本页 testnet 常量取自 README 链接的 Pudge e2e 交易 0xc658f9e8…3c96 的 cell_deps（code cell 0x8e849c96…a75e:0，2026-05 部署，早于本 commit），数据哈希不在仓库中，二进制未核验。README：预审计基础设施，勿部署到主网。",
+      "en": "Deployment source: the repo publishes no code_hash; the testnet constant here is taken from the cell_deps of the Pudge e2e tx 0xc658f9e8…3c96 linked in the README (code cell 0x8e849c96…a75e:0, deployed 2026-05, before this commit). The data hash is not in the repo; binary unverified. README: pre-audit infrastructure, do not deploy to mainnet."
+    }
+  ]
+}

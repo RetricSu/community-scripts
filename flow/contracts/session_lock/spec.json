@@ -1,0 +1,447 @@
+{
+  "title": {
+    "zh": "Session lock（会话密钥 lock）约束",
+    "en": "Session lock (session-key lock) Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：luongthanhtung03/ckb-session-kit @ f51f07c / contracts/session-lock/src/main.rs　·　testnet 0xab41…08ce (data2)　·　社区项目，仅测试网",
+    "en": "Source: luongthanhtung03/ckb-session-kit @ f51f07c / contracts/session-lock/src/main.rs　·　testnet 0xab41…08ce (data2)　·　community project, testnet only"
+  },
+  "transitions": [
+    {
+      "tag": "owner",
+      "title": {
+        "zh": "Owner 模式：任意花费 / 撤销",
+        "en": "Owner mode: spend anything / revoke"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "session-lock cell(s)",
+            "en": "session-lock cell(s)"
+          },
+          "body": "Cell{\n  lock: { codeHash: SESSION_LOCK (data2),\n          args: {{owner ‖ session ‖ max_per_tx ‖ min_interval}} }\n}"
+        },
+        {
+          "label": {
+            "zh": "owner 的 cell（任意 lock，自行验签）",
+            "en": "owner's cell (its own lock verifies)"
+          },
+          "body": {
+            "zh": "Cell{\n  lock: {{lock hash = owner_lock_hash}}\n}",
+            "en": "Cell{\n  lock: {{lock hash = owner_lock_hash}}\n}"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "任意",
+            "en": "anything"
+          },
+          "body": {
+            "zh": "不做任何检查",
+            "en": "no rule applied"
+          }
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "lock.args 字节布局（80 / 112 / 128 / 160B）",
+            "en": "lock.args byte layout (80 / 112 / 128 / 160B)"
+          },
+          "layout": [
+            {
+              "name": "owner_lock_hash",
+              "size": "32B",
+              "role": {
+                "zh": "owner 的 lock hash",
+                "en": "owner's lock hash"
+              },
+              "cons": {
+                "zh": "任一输入 lock hash 等于它 → owner 模式，直接通过",
+                "en": "any input with this lock hash → owner mode, pass"
+              },
+              "err": "11",
+              "color": 0,
+              "flex": 3
+            },
+            {
+              "name": "session_lock_hash",
+              "size": "32B",
+              "role": {
+                "zh": "session key cell 的 lock hash",
+                "en": "session key cell lock hash"
+              },
+              "cons": {
+                "zh": "owner 不在场时必须有此 lock 的输入",
+                "en": "required among inputs when owner is absent"
+              },
+              "err": "11",
+              "color": 1,
+              "flex": 3
+            },
+            {
+              "name": "max_per_tx",
+              "size": "8B",
+              "role": {
+                "zh": "每笔最大流出 u64 LE（shannon，含手续费）",
+                "en": "max outflow per tx u64 LE (shannons, fee included)"
+              },
+              "cons": {
+                "zh": "Σgroup 输入 − 找零 ≤ max_per_tx",
+                "en": "Σ group inputs − change ≤ max_per_tx"
+              },
+              "err": "12",
+              "color": 2,
+              "flex": 1
+            },
+            {
+              "name": "min_interval",
+              "size": "8B",
+              "role": {
+                "zh": "最小间隔 u64 LE（区块）",
+                "en": "min interval u64 LE (blocks)"
+              },
+              "cons": {
+                "zh": ">0 时每个 group 输入 since 必须为相对区块数 ≥ 该值",
+                "en": "if > 0 each group input's since must be relative block number ≥ it"
+              },
+              "err": "14",
+              "color": 3,
+              "flex": 1
+            },
+            {
+              "name": "recipient / token…",
+              "size": "0/32/48/80B",
+              "role": {
+                "zh": "80B：无；112B：recipient(32)；128B：token_type_hash(32)+max_per_tx_token u128(16)；160B：token + recipient",
+                "en": "80B: none; 112B: recipient(32); 128B: token_type_hash(32)+max_per_tx_token u128(16); 160B: token + recipient"
+              },
+              "cons": {
+                "zh": "其它长度 → 10",
+                "en": "other lengths → 10"
+              },
+              "err": "10",
+              "color": 4,
+              "flex": 3
+            }
+          ],
+          "hex": [
+            [
+              "owner_lock_hash",
+              "0x1111111111111111111111111111111111111111111111111111111111111111"
+            ],
+            [
+              "session_lock_hash",
+              "0x2222222222222222222222222222222222222222222222222222222222222222"
+            ],
+            [
+              "max_per_tx",
+              "0x00e40b5402000000 (=100 CKB)"
+            ],
+            [
+              "min_interval",
+              "0x0300000000000000 (=3)"
+            ]
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "args 长度 ∈ {80,112,128,160}；script 读取缓冲 256B",
+            "en": "args length ∈ {80,112,128,160}; script buffer 256B"
+          },
+          "err": "10"
+        },
+        {
+          "field": "inputs",
+          "cond": {
+            "zh": "输入中既无 owner_lock_hash 也无 session_lock_hash",
+            "en": "neither owner nor session lock hash among inputs"
+          },
+          "err": "11"
+        }
+      ]
+    },
+    {
+      "tag": "N → ≤1",
+      "title": {
+        "zh": "Session 花费（CKB，开放收款方）",
+        "en": "Session spend (CKB, any payee)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "session-lock cell(s)（group）",
+            "en": "session-lock cell(s) (group)"
+          },
+          "body": {
+            "zh": "Cell{\n  lock: SESSION_LOCK(args 80B),\n  type: {{无}},\n  since: {{min_interval>0 时：相对区块 ≥ min_interval}}\n}",
+            "en": "Cell{\n  lock: SESSION_LOCK(args 80B),\n  type: {{none}},\n  since: {{if min_interval>0: relative blocks ≥ min_interval}}\n}"
+          }
+        },
+        {
+          "label": {
+            "zh": "session key cell",
+            "en": "session key cell"
+          },
+          "body": {
+            "zh": "Cell{\n  lock: {{lock hash = session_lock_hash}}\n}",
+            "en": "Cell{\n  lock: {{lock hash = session_lock_hash}}\n}"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "找零（最多 1 个）",
+            "en": "change (at most 1)"
+          },
+          "body": {
+            "zh": "Cell{\n  lock: {{同一 SESSION_LOCK script}},\n  type: {{无}}\n}",
+            "en": "Cell{\n  lock: {{same SESSION_LOCK script}},\n  type: {{none}}\n}"
+          }
+        },
+        {
+          "label": {
+            "zh": "付款",
+            "en": "payment"
+          },
+          "body": {
+            "zh": "Cell{ lock: 任意 }  // 无收款方限制",
+            "en": "Cell{ lock: any }  // no recipient set"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "since",
+          "cond": {
+            "zh": "min_interval>0 且任一 group 输入 since 非相对区块数或 < min_interval",
+            "en": "min_interval>0 and a group input since is not relative-block or < min_interval"
+          },
+          "err": "14"
+        },
+        {
+          "field": "type",
+          "cond": {
+            "zh": "group 输入或找零带 type script",
+            "en": "group input or change has a type script"
+          },
+          "err": "18"
+        },
+        {
+          "field": "outputs",
+          "cond": {
+            "zh": "回到本 lock 的输出 > 1",
+            "en": "more than 1 output back to this lock"
+          },
+          "err": "16"
+        },
+        {
+          "field": "capacity",
+          "cond": {
+            "zh": "Σgroup 输入容量 − 找零容量（饱和减）> max_per_tx（手续费也算流出）",
+            "en": "Σ group input capacity − change (saturating) > max_per_tx (fee counts)"
+          },
+          "err": "12"
+        },
+        {
+          "field": "capacity",
+          "cond": {
+            "zh": "累加溢出",
+            "en": "checked add overflow"
+          },
+          "err": "15"
+        }
+      ]
+    },
+    {
+      "tag": "recipient",
+      "title": {
+        "zh": "Session 花费（限定收款方，112B / 160B）",
+        "en": "Session spend (recipient-scoped, 112B / 160B)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "session-lock cell(s)",
+            "en": "session-lock cell(s)"
+          },
+          "body": "Cell{\n  lock: { codeHash: SESSION_LOCK (data2),\n          args: {{owner ‖ session ‖ max_per_tx ‖ min_interval ‖ {{recipient 32B}}}} }\n}"
+        },
+        {
+          "label": {
+            "zh": "session key cell",
+            "en": "session key cell"
+          },
+          "body": {
+            "zh": "Cell{ lock: {{session_lock_hash}} }",
+            "en": "Cell{ lock: {{session_lock_hash}} }"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "找零 ≤ 1",
+            "en": "change ≤ 1"
+          },
+          "body": {
+            "zh": "Cell{ lock: 同一 SESSION_LOCK }",
+            "en": "Cell{ lock: same SESSION_LOCK }"
+          }
+        },
+        {
+          "label": {
+            "zh": "付款",
+            "en": "payment"
+          },
+          "body": {
+            "zh": "Cell{\n  lock: {{recipient 或 owner}},\n  type: {{无（token 会话可为 token type）}}\n}",
+            "en": "Cell{\n  lock: {{recipient or owner}},\n  type: {{none (token type allowed in token sessions)}}\n}"
+          }
+        },
+        {
+          "label": {
+            "zh": "session key 找零",
+            "en": "session key change"
+          },
+          "body": {
+            "zh": "Cell{ lock: session_lock_hash }  // 容量 / token 不得增加",
+            "en": "Cell{ lock: session_lock_hash }  // capacity / tokens must not grow"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "lock",
+          "cond": {
+            "zh": "其它输出 lock ∉ {本 lock, session key, recipient, owner}",
+            "en": "other output lock ∉ {this lock, session key, recipient, owner}"
+          },
+          "err": "13"
+        },
+        {
+          "field": "type",
+          "cond": {
+            "zh": "recipient / owner 输出带非 token 的 type",
+            "en": "recipient / owner output has a non-token type"
+          },
+          "err": "18"
+        },
+        {
+          "field": "capacity",
+          "cond": {
+            "zh": "session key lock 输出总容量 > session key lock 输入总容量（防止把额度转给 key）",
+            "en": "session-key outputs capacity > session-key inputs capacity (no siphon to the key)"
+          },
+          "err": "17"
+        },
+        {
+          "field": "capacity",
+          "cond": {
+            "zh": "同上：流出 > max_per_tx",
+            "en": "as above: outflow > max_per_tx"
+          },
+          "err": "12"
+        }
+      ]
+    },
+    {
+      "tag": "token",
+      "title": {
+        "zh": "Token 会话（128B / 160B，xUDT/sUDT 类 u128 金额）",
+        "en": "Token session (128B / 160B, u128 xUDT/sUDT-like amounts)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "session-lock token cell(s)",
+            "en": "session-lock token cell(s)"
+          },
+          "body": {
+            "zh": "Cell{\n  lock: SESSION_LOCK(… ‖ token_type_hash ‖ max_per_tx_token),\n  type: {{token type，hash = token_type_hash}},\n  data: {{amount u128 LE（≥16B）}}\n}",
+            "en": "Cell{\n  lock: SESSION_LOCK(… ‖ token_type_hash ‖ max_per_tx_token),\n  type: {{token type, hash = token_type_hash}},\n  data: {{amount u128 LE (≥16B)}}\n}"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "token 找零 ≤ 1",
+            "en": "token change ≤ 1"
+          },
+          "body": {
+            "zh": "Cell{\n  lock: 同一 SESSION_LOCK,\n  type: {{无或 token type}},\n  data: {{token 时恰好 16B}}\n}",
+            "en": "Cell{\n  lock: same SESSION_LOCK,\n  type: {{none or the token type}},\n  data: {{exactly 16B if token}}\n}"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "type",
+          "cond": {
+            "zh": "group 输入 / 找零带其它 type",
+            "en": "group input / change has another type"
+          },
+          "err": "18"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "token 输入 data < 16B，或 token 找零 data ≠ 16B",
+            "en": "token input data < 16B, or token change data ≠ 16B"
+          },
+          "err": "19"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "Σtoken 输入 − token 找零 > max_per_tx_token",
+            "en": "Σ token in − token change > max_per_tx_token"
+          },
+          "err": "20"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "限定收款方时 session key 的 token 输出 > 输入",
+            "en": "recipient set and session-key token out > in"
+          },
+          "err": "17"
+        },
+        {
+          "field": "capacity",
+          "cond": {
+            "zh": "CKB 容量仍受 max_per_tx 约束",
+            "en": "CKB capacity still bounded by max_per_tx"
+          },
+          "err": "12"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "本 lock 不验签：owner / session key 的签名由它们各自 lock 在同一交易中验证（输入中出现其 lock hash 即视为授权）。",
+      "en": "This lock verifies no signature: owner / session key signatures are checked by their own locks in the same tx (an input with that lock hash counts as authorization)."
+    },
+    {
+      "zh": "过期时间（expiry）只在链下 SDK 中，链上不检查；撤销 = owner 模式花掉 cell。",
+      "en": "Expiry is off-chain (SDK) only, not enforced on chain; revoking = spending the cell in owner mode."
+    },
+    {
+      "zh": "错误码：1 IndexOutOfBound · 2 ItemMissing · 3 LengthNotEnough · 4 Encoding · 10 BadArgs · 11 NotAuthorized · 12 OutflowExceeded · 13 RecipientNotAllowed · 14 RateLimited · 15 CapacityOverflow · 16 TooManyChangeCells · 17 KeyCellGrew · 18 TypedCell · 19 TokenData · 20 TokenOutflowExceeded。",
+      "en": "Error codes: 1 IndexOutOfBound · 2 ItemMissing · 3 LengthNotEnough · 4 Encoding · 10 BadArgs · 11 NotAuthorized · 12 OutflowExceeded · 13 RecipientNotAllowed · 14 RateLimited · 15 CapacityOverflow · 16 TooManyChangeCells · 17 KeyCellGrew · 18 TypedCell · 19 TokenData · 20 TokenOutflowExceeded."
+    },
+    {
+      "zh": "仓库还记录了更早的测试网部署（10/8 0x1ae8…bc20、10/13 0x1cb7…90cd），规则不同，本页不匹配。",
+      "en": "The repo also lists older testnet deployments (8 Oct 0x1ae8…bc20, 13 Oct 0x1cb7…90cd) with different rules; they are not matched here."
+    }
+  ]
+}

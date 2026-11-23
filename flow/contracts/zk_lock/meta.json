@@ -1,0 +1,93 @@
+{
+  "tags": [
+    "zk",
+    "identity",
+    "open-source",
+    "community"
+  ],
+  "contributors": [
+    "CECILIA-MULANDI"
+  ],
+  "source": {
+    "repo": "https://github.com/CECILIA-MULANDI/zk-Lock",
+    "commit": "699c63a7ef424345180d24dfc1764ff7947c728b",
+    "paths": [
+      "crates/zk-lock-core/src/lib.rs",
+      "crates/zk-lock-core/src/error.rs",
+      "contracts/zk-lock/src/main.rs",
+      "contracts/zk-lock-bound/src/main.rs"
+    ],
+    "commit_note": "commit read when writing this spec (default-branch HEAD 2026-11-11); verifier-core read at CECILIA-MULANDI/groth16-ckb@e969ad154ea2c00df57f68238ddfbcbc9ceb1419 (the rev zk-lock-core pins). Deployment constants from README.md \"Pudge testnet\" and web/src/lib/config.ts. The generic code cell data hash 0x6aec96e2… is not listed in the repo (only the zk-lock-bound hash 0x21f2173b… is, in README.md); neither binary was rebuilt here.",
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0x6aec96e2a90e83c3676de9403ef3624664e56983acab83c707e4d53430658f33",
+          "evidence": [],
+          "matches_commit": false
+        },
+        {
+          "data_hash": "0x21f2173b72484484e5fb095e2f5d3b11b9379535cbfbd0e4f592d6244f191c2d",
+          "evidence": [
+            "listed in README.md"
+          ],
+          "matches_commit": false
+        }
+      ],
+      "note": "no binary or checksum at the recorded commit matched the deployed data hash (reproducible build not attempted)"
+    }
+  },
+  "deployments": [
+    {
+      "network": "testnet",
+      "code_hash": "0x24172f2dc2ebd6634fe925a6f0beda7cfd4cdb9aab1214f2e1cbd3127ea1fa7b",
+      "hash_type": "type",
+      "constant_source": "zk-Lock README.md \"Pudge testnet\" (generic zk-lock, cell 0x7d80c7a2…06fb:0) + web/src/lib/config.ts",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x7d80c7a2781328cc766497f9d67b036a4d1295bda9f1de0d329bf08afd0e06fb"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x7d80c7a2781328cc766497f9d67b036a4d1295bda9f1de0d329bf08afd0e06fb"
+      },
+      "type_script": {
+        "args": "0x2fd91958f450471a1d2226d29275667e6b6251c77810257c1f5e171a10f925c0",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x6aec96e2a90e83c3676de9403ef3624664e56983acab83c707e4d53430658f33",
+      "deploy_tx": "0x7d80c7a2781328cc766497f9d67b036a4d1295bda9f1de0d329bf08afd0e06fb",
+      "deploy_block": 22278058
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0xfbb4acb5c3f8fc8b24216dc8dc8d6bb8f8d3ea9aab4b29a210571959a1f9028e",
+      "hash_type": "type",
+      "constant_source": "zk-Lock README.md \"Pudge testnet\" (transaction-binding zk-lock-bound, cell 0x5f21b4d1…4011:0)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x5f21b4d1e6b8a7fa3d0e739fbc7b6d42e660d7e1ef02a857c6ab249f5b004011"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x5f21b4d1e6b8a7fa3d0e739fbc7b6d42e660d7e1ef02a857c6ab249f5b004011"
+      },
+      "type_script": {
+        "args": "0x6efafd32606f9df9a35e8be9ac7632c4a26bbe0779eed4ff5f4ae866ea52c74c",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x21f2173b72484484e5fb095e2f5d3b11b9379535cbfbd0e4f592d6244f191c2d",
+      "deploy_tx": "0x5f21b4d1e6b8a7fa3d0e739fbc7b6d42e660d7e1ef02a857c6ab249f5b004011",
+      "deploy_block": 23029367
+    }
+  ],
+  "checked_at": "2026-11-12"
+}

@@ -1,0 +1,115 @@
+{
+  "title": {
+    "zh": "Lock 代理锁 约束",
+    "en": "Lock Proxy Lock Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：ckb-devrel/ckb-proxy-locks / contracts/lock-proxy-lock/src/entry.rs　·　0x5d41…1d02 (data1，主网与测试网相同)",
+    "en": "Source: ckb-devrel/ckb-proxy-locks / contracts/lock-proxy-lock/src/entry.rs　·　0x5d41…1d02 (data1, same on mainnet and testnet)"
+  },
+  "transitions": [
+    {
+      "tag": "A",
+      "title": {
+        "zh": "由 owner 脚本授权解锁",
+        "en": "Unlock authorised by the owner script"
+      },
+      "inputs": [
+        {
+          "label": "input",
+          "body": "Cell{ lock: { codeHash: PROXY, args: {{owner_hash 32B}} ‖ … } }"
+        },
+        {
+          "label": {
+            "zh": "owner cell",
+            "en": "owner cell"
+          },
+          "body": {
+            "zh": "输入中有 cell 的 lock hash = owner_hash",
+            "en": "an input cell's lock hash = owner_hash"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "outputs：任意",
+            "en": "outputs: any"
+          },
+          "body": {
+            "zh": "任意",
+            "en": "any"
+          }
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "args 字节布局",
+            "en": "args byte layout"
+          },
+          "layout": [
+            {
+              "name": "owner_hash",
+              "size": "32B",
+              "role": {
+                "zh": "owner 脚本哈希",
+                "en": "owner script hash"
+              },
+              "cons": {
+                "zh": "输入中有 cell 的 lock hash 与之相等",
+                "en": "an input cell's lock hash equals it"
+              },
+              "err": "6",
+              "color": 1,
+              "flex": 4
+            },
+            {
+              "name": "…",
+              "size": "*",
+              "role": {
+                "zh": "忽略",
+                "en": "ignored"
+              },
+              "cons": {
+                "zh": "—",
+                "en": "—"
+              },
+              "err": "",
+              "color": 3,
+              "flex": 1
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "≥ 32 字节",
+            "en": "≥ 32 bytes"
+          },
+          "err": "4"
+        },
+        {
+          "field": "owner",
+          "cond": {
+            "zh": "输入中有 cell 的 lock hash = args[0..32]",
+            "en": "an input cell's lock hash = args[0..32]"
+          },
+          "err": "6"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码（error.rs）：1 IndexOutOfBound · 2 ItemMissing · 3 LengthNotEnough · 4 Encoding · 5 Overflow · 6 InvalidUnlock",
+      "en": "Error codes (error.rs): 1 IndexOutOfBound · 2 ItemMissing · 3 LengthNotEnough · 4 Encoding · 5 Overflow · 6 InvalidUnlock"
+    },
+    {
+      "zh": "不检查任何签名：安全性完全来自 args 指向的其他脚本",
+      "en": "No signature is checked: security comes entirely from the script that args points to"
+    }
+  ]
+}

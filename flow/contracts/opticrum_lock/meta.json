@@ -1,0 +1,66 @@
+{
+  "tags": [
+    "defi",
+    "channel",
+    "open-source",
+    "community"
+  ],
+  "contributors": [
+    "ashuralyk"
+  ],
+  "source": {
+    "repo": "https://github.com/Opticrum/ckb-contract-script",
+    "commit": "803523a472041262b6f1b049067550801d136f66",
+    "paths": [
+      "contracts/opticrum/src/main.rs",
+      "contracts/opticrum/src/error.rs",
+      "contracts/opticrum/src/state.rs",
+      "contracts/opticrum/src/utils.rs",
+      "contracts/opticrum/src/verifiers",
+      "opticrum-protocol/src/lib.rs",
+      "deployment/testnet/opticrum.json"
+    ],
+    "commit_note": "commit read when writing this spec (default-branch HEAD 2026-11-12). Framework ckb-cinnabar-verifier pinned at ashuralyk/ckb-cinnabar@f50d8e9 (system error codes 1–11). Testnet code_hash is the type_id from deployment/testnet/opticrum.json; the live code cell is v0.3.2 (0x6a3319f8…:0). Older versions under the same type_id used different args/data layouts.",
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0xdf7c875f63746641995c59b0af914314b924d636ae021dfe9e126fab22d0cdf2",
+          "evidence": [
+            "listed in deployment/testnet/opticrum.json"
+          ],
+          "matches_commit": false
+        }
+      ],
+      "note": "hash appears in the repo only as a deployment record or doc, which does not prove the recorded commit builds this binary (reproducible build not attempted)"
+    }
+  },
+  "deployments": [
+    {
+      "network": "testnet",
+      "code_hash": "0x1f8452818672fbb60f39c72e2d30dadd1814f322dfc21bf552784d83054f0247",
+      "hash_type": "type",
+      "constant_source": "Opticrum deployment/testnet/opticrum.json (type_id, v0.1.1 → v0.3.2 migrations)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x6a3319f835dc32e47ff6aac59235e70de1a4a7e6f52a82768d447978bd82f5c4"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x6a3319f835dc32e47ff6aac59235e70de1a4a7e6f52a82768d447978bd82f5c4"
+      },
+      "type_script": {
+        "args": "0x3b009c195d6dd5617d687a0387bccefae99eac8a1a5e393bf2563a3afb7feb49",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0xdf7c875f63746641995c59b0af914314b924d636ae021dfe9e126fab22d0cdf2",
+      "deploy_tx": "0x6a3319f835dc32e47ff6aac59235e70de1a4a7e6f52a82768d447978bd82f5c4",
+      "deploy_block": 22145886
+    }
+  ],
+  "checked_at": "2026-11-12"
+}

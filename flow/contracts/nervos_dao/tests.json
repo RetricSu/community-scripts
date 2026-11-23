@@ -1,0 +1,12 @@
+[
+  {
+    "tx": "0xbaa72648c975a63097ae1500336475d70aa7ba8f0daf71405f883bd2b6e55dbb",
+    "net": "mainnet",
+    "name": "DAO phase 2"
+  },
+  {
+    "tx": "0x44d70abd4ed8c73c9ec7a6039aa1e35a22ef1455758c45b70bfef5a5fce93838",
+    "net": "mainnet",
+    "name": "DAO phase 1"
+  }
+]

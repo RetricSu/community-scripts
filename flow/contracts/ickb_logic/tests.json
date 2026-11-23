@@ -1,0 +1,3 @@
+[{"tx":"0xdc92e6a30c09e2c537742490cc687528d026e83064b1b654f037598d2ba619c5","net":"mainnet","name":"iCKB phase 1 (deposit + receipt)"},
+ {"tx":"0x69f1d05ca190a813597127badfd3eeb48254436c650c0a25b36eaa45051175ea","net":"mainnet","name":"iCKB phase 2 (receipt → iCKB)"},
+ {"tx":"0xa27b19a9f600e37fc57f8e6d34846dc9bab03eea58aa1264e33431e0a9f1f8f0","net":"mainnet","name":"iCKB burn (iCKB → deposit)"}]

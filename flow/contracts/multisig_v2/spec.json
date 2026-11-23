@@ -1,0 +1,350 @@
+{
+  "title": {
+    "zh": "secp256k1_blake160_multisig_all V2（lock）约束",
+    "en": "secp256k1_blake160_multisig_all V2 (lock) Constraints"
+  },
+  "subtitle": {
+    "zh": "code_hash 0x36c9…0d29，hash_type data1（ckb-sdk MultisigScript::V2 / ckb-devrel ccc）　·　ckb-system-scripts PR #99：改进可选 since 处理；witness 布局与旧版相同（下列约束按旧版源码整理）",
+    "en": "code_hash 0x36c9…0d29, hash_type data1 (ckb-sdk MultisigScript::V2 / ckb-devrel ccc)　·　ckb-system-scripts PR #99: improved optional-since handling; witness layout identical to legacy (constraints below follow the legacy source)"
+  },
+  "transitions": [
+    {
+      "tag": "1 → N",
+      "title": {
+        "zh": "解锁花费 multisig cell",
+        "en": "Unlock & spend a multisig cell"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "input（同一 lock 的 script group，可多个）",
+            "en": "input (script group of the same lock; may be several)"
+          },
+          "body": {
+            "zh": "Cell{\n  capacity: …,\n  lock: { codeHash: MULTISIG,\n          args: {{blake160(multisig_script) 20B}} {{[+ since u64 LE 8B]}} },\n  since: {{满足 args 中的 since（若有）}}\n}",
+            "en": "Cell{\n  capacity: …,\n  lock: { codeHash: MULTISIG,\n          args: {{blake160(multisig_script) 20B}} {{[+ since u64 LE 8B]}} },\n  since: {{satisfies the since in args (if any)}}\n}"
+          }
+        },
+        {
+          "label": {
+            "zh": "witness[group 第 1 个 input 的位置]",
+            "en": "witness[at the group's first input index]"
+          },
+          "body": {
+            "zh": "WitnessArgs{\n  lock: {{multisig_script}} ‖ {{signature[0..M-1]}}\n}\n长度必须 = 4 + 20·N + 65·M",
+            "en": "WitnessArgs{\n  lock: {{multisig_script}} ‖ {{signature[0..M-1]}}\n}\nlength must = 4 + 20·N + 65·M"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "outputs：任意 cell",
+            "en": "outputs: any cells"
+          },
+          "body": {
+            "zh": "Cell{\n  capacity: …,\n  lock: 任意,\n  type: 任意\n}",
+            "en": "Cell{\n  capacity: …,\n  lock: any,\n  type: any\n}"
+          }
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "witness.lock 字节布局（multisig_script ‖ signatures）",
+            "en": "witness.lock byte layout (multisig_script ‖ signatures)"
+          },
+          "layout": [
+            {
+              "name": "S",
+              "size": "1B",
+              "role": {
+                "zh": "保留字段（lock[0]）",
+                "en": "reserved field (lock[0])"
+              },
+              "cons": {
+                "zh": "必须为 0",
+                "en": "must be 0"
+              },
+              "err": "-41",
+              "color": 0
+            },
+            {
+              "name": "R",
+              "size": "1B",
+              "role": {
+                "zh": "require_first_n（lock[1]）：pubkey_hash[0..R-1] 必须全部签名",
+                "en": "require_first_n (lock[1]): pubkey_hash[0..R-1] must all sign"
+              },
+              "cons": "R ≤ M",
+              "err": {
+                "zh": "-44；未满足 -52",
+                "en": "-44; unmet -52"
+              },
+              "color": 1
+            },
+            {
+              "name": "M",
+              "size": "1B",
+              "role": {
+                "zh": "threshold（lock[2]）：需要的签名个数",
+                "en": "threshold (lock[2]): number of required signatures"
+              },
+              "cons": "0 < M ≤ N",
+              "err": "-43",
+              "color": 2
+            },
+            {
+              "name": "N",
+              "size": "1B",
+              "role": {
+                "zh": "pubkeys_cnt（lock[3]）：公钥总数",
+                "en": "pubkeys_cnt (lock[3]): total number of pubkeys"
+              },
+              "cons": "N > 0",
+              "err": "-42",
+              "color": 3
+            },
+            {
+              "name": "pubkey_hash[0..N-1]",
+              "size": {
+                "zh": "20B × N",
+                "en": "20B × N"
+              },
+              "role": {
+                "zh": "blake160(33 字节压缩公钥)，顺序有意义（R 引用前 R 个）",
+                "en": "blake160(33-byte compressed pubkey); order matters (R refers to the first R)"
+              },
+              "cons": {
+                "zh": "每个签名恢复出的公钥哈希须匹配其中一个尚未使用的",
+                "en": "each signature's recovered pubkey hash must match a not-yet-used entry"
+              },
+              "err": "-52",
+              "color": 4,
+              "flex": 4
+            },
+            {
+              "name": "signature[0..M-1]",
+              "size": "65B × M",
+              "role": {
+                "zh": "可恢复 secp256k1 签名：r‖s(64B) + recid(1B)；签名时这部分置 0 参与消息哈希",
+                "en": "recoverable secp256k1 signature: r‖s (64B) + recid (1B); zero-filled when computing the signing message"
+              },
+              "cons": {
+                "zh": "可解析 / 可恢复公钥 / 可序列化",
+                "en": "parsable / pubkey recoverable / serializable"
+              },
+              "err": "-14 / -11 / -15",
+              "color": 5,
+              "flex": 4
+            }
+          ],
+          "note": {
+            "zh": "multisig_script = 前 4+20·N 字节（S|R|M|N|pubkey_hashes）；lock 总长 ≠ 4+20·N+65·M → (-22)；lock < 4 字节 → (-22)",
+            "en": "multisig_script = first 4+20·N bytes (S|R|M|N|pubkey_hashes); lock length ≠ 4+20·N+65·M → (-22); lock < 4 bytes → (-22)"
+          }
+        },
+        {
+          "label": {
+            "zh": "lock.args 推导",
+            "en": "Deriving lock.args"
+          },
+          "layout": [
+            {
+              "name": "blake160(multisig_script)",
+              "size": "20B",
+              "role": {
+                "zh": "blake2b-256(personal=\"ckb-default-hash\")(multisig_script) 取前 20 字节",
+                "en": "first 20 bytes of blake2b-256(personal=\"ckb-default-hash\")(multisig_script)"
+              },
+              "cons": {
+                "zh": "必须等于 args[0..20]",
+                "en": "must equal args[0..20]"
+              },
+              "err": "-51",
+              "color": 4,
+              "flex": 3
+            },
+            {
+              "name": {
+                "zh": "since（可选）",
+                "en": "since (optional)"
+              },
+              "size": "8B u64 LE",
+              "role": {
+                "zh": "时间锁：本 group 所有 input 的 since flags 必须相同，值 ≥ 此值",
+                "en": "time lock: every input in the group must have identical since flags and a value ≥ this"
+              },
+              "cons": {
+                "zh": "args 长度只能 20 或 28",
+                "en": "args length must be 20 or 28"
+              },
+              "err": {
+                "zh": "-1；flags -23；值 -24",
+                "en": "-1; flags -23; value -24"
+              },
+              "color": 2,
+              "flex": 2
+            }
+          ]
+        },
+        {
+          "label": {
+            "zh": "例：2-of-3，R=0（pubkey_hash 为示例值）",
+            "en": "Example: 2-of-3, R=0 (pubkey hashes are placeholders)"
+          },
+          "layout": [
+            {
+              "name": "S=00",
+              "size": "1B",
+              "color": 0
+            },
+            {
+              "name": "R=00",
+              "size": "1B",
+              "color": 1
+            },
+            {
+              "name": "M=02",
+              "size": "1B",
+              "color": 2
+            },
+            {
+              "name": "N=03",
+              "size": "1B",
+              "color": 3
+            },
+            {
+              "name": "11…11 / 22…22 / 33…33",
+              "size": "3 × 20B",
+              "color": 4,
+              "flex": 4
+            }
+          ],
+          "hex": [
+            [
+              "multisig_script",
+              "0x{{00}}{{00}}{{02}}{{03}}111111111111111111111111111111111111111122222222222222222222222222222222222222223333333333333333333333333333333333333333  (64B)"
+            ],
+            [
+              "args (20B)",
+              "0xbf96e998f1616a35247a9ab89bfd3f485af397fe"
+            ],
+            [
+              "args + since (28B)",
+              {
+                "zh": "0xbf96e998f1616a35247a9ab89bfd3f485af397fe6400000000010020  ← since=0x2000010000000064（绝对 epoch 100）LE",
+                "en": "0xbf96e998f1616a35247a9ab89bfd3f485af397fe6400000000010020  ← since=0x2000010000000064 (absolute epoch 100), LE"
+              }
+            ],
+            [
+              {
+                "zh": "witness.lock 长度",
+                "en": "witness.lock length"
+              },
+              {
+                "zh": "4 + 20×3 + 65×2 = 194 字节（签名时后 130 字节为 0）",
+                "en": "4 + 20×3 + 65×2 = 194 bytes (last 130 bytes zeroed while signing)"
+              }
+            ]
+          ],
+          "note": {
+            "zh": "任意 2 个不同成员签名即可；若 R=1，则 pubkey_hash[0] 必须是签名者之一",
+            "en": "any 2 distinct members can sign; if R=1, pubkey_hash[0] must be one of the signers"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "长度为 20 或 28 字节",
+            "en": "length is 20 or 28 bytes"
+          },
+          "err": "-1"
+        },
+        {
+          "field": {
+            "zh": "args 中的 since",
+            "en": "since in args"
+          },
+          "cond": {
+            "zh": "本 group 每个 input 的 since flags 必须与之完全相同",
+            "en": "every input in this group must have exactly the same since flags"
+          },
+          "err": "-23"
+        },
+        {
+          "field": {
+            "zh": "input.since 值",
+            "en": "input.since value"
+          },
+          "cond": {
+            "zh": "≥ args 中的 since 值（epoch 按分数比较）",
+            "en": "≥ the since value in args (epochs compared as fractions)"
+          },
+          "err": "-24"
+        },
+        {
+          "field": "witness",
+          "cond": {
+            "zh": "WitnessArgs 合法且 lock 不为空",
+            "en": "valid WitnessArgs with non-empty lock"
+          },
+          "err": "-2"
+        },
+        {
+          "field": {
+            "zh": "witness 大小",
+            "en": "witness size"
+          },
+          "cond": {
+            "zh": "≤ 32KB；lock ≥ 4 字节；且 lock 长度 = 4 + 20·N + 65·M",
+            "en": "≤ 32KB; lock ≥ 4 bytes; and lock length = 4 + 20·N + 65·M"
+          },
+          "err": "-22"
+        },
+        {
+          "field": "blake160(multisig_script)",
+          "cond": {
+            "zh": "等于 args 前 20 字节",
+            "en": "equals the first 20 bytes of args"
+          },
+          "err": "-51"
+        },
+        {
+          "field": {
+            "zh": "签名",
+            "en": "signatures"
+          },
+          "cond": {
+            "zh": "M 个签名各自恢复出 N 个公钥中不同的一个；前 R 个公钥必须都签名",
+            "en": "the M signatures each recover a distinct one of the N pubkeys; the first R pubkeys must all sign"
+          },
+          "err": "-52"
+        },
+        {
+          "field": {
+            "zh": "签名格式",
+            "en": "signature format"
+          },
+          "cond": {
+            "zh": "无法解析 / 无法恢复公钥 / 无法序列化",
+            "en": "cannot parse / cannot recover pubkey / cannot serialize"
+          },
+          "err": "-14 / -11 / -15"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "签名消息 = blake2b(tx_hash ‖ len(w0) ‖ w0(签名部分置 0) ‖ 本 group 其余 witness 的 len‖内容 ‖ 超出 inputs 数量部分的 witness 的 len‖内容)；len 为 u64 LE",
+      "en": "signing message = blake2b(tx_hash ‖ len(w0) ‖ w0 (signatures zeroed) ‖ len‖content of the group's other witnesses ‖ len‖content of witnesses beyond the inputs count); len is u64 LE"
+    },
+    {
+      "zh": "blake160 = blake2b-256（CKB personalization）取前 20 字节；其他错误码：-3 ERROR_SYSCALL，-21 ERROR_SCRIPT_TOO_LONG",
+      "en": "blake160 = first 20 bytes of blake2b-256 (CKB personalization); other error codes: -3 ERROR_SYSCALL, -21 ERROR_SCRIPT_TOO_LONG"
+    }
+  ]
+}

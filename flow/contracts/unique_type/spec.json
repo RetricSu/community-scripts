@@ -1,0 +1,109 @@
+{
+  "title": {
+    "zh": "Unique Cell 约束",
+    "en": "Unique Cell Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：utxostack/unique-cell / contracts/unique-type/src/entry.rs　·　mainnet 0x2c8c…c628 (data1) / testnet 0x8e34…df8b (type)",
+    "en": "Source: utxostack/unique-cell / contracts/unique-type/src/entry.rs　·　mainnet 0x2c8c…c628 (data1) / testnet 0x8e34…df8b (type)"
+  },
+  "transitions": [
+    {
+      "tag": "A",
+      "title": {
+        "zh": "创建（唯一允许的操作）",
+        "en": "Create (the only allowed operation)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "inputs[0]：任意",
+            "en": "inputs[0]: any"
+          },
+          "body": {
+            "zh": "CellInput{ since, previous_output }\n（不得含该 unique type）",
+            "en": "CellInput{ since, previous_output }\n(must not carry this unique type)"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "唯一输出",
+            "en": "single output"
+          },
+          "body": "Cell{\n  type: { codeHash: UNIQUE_TYPE,\n          args: {{unique_id 20B}} },\n  data: any (e.g. token info, convention)\n}"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "args 字节布局",
+            "en": "args byte layout"
+          },
+          "layout": [
+            {
+              "name": "unique_id",
+              "size": "20B",
+              "role": {
+                "zh": "blake2b(inputs[0] ‖ 首个输出序号 u64 LE)[0..20]",
+                "en": "blake2b(inputs[0] ‖ first output index u64 LE)[0..20]"
+              },
+              "cons": {
+                "zh": "必须恰好相等",
+                "en": "must match exactly"
+              },
+              "err": "6",
+              "color": 1,
+              "flex": 4
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "outputs",
+          "cond": {
+            "zh": "group 输出 ≤ 1",
+            "en": "group outputs ≤ 1"
+          },
+          "err": "8"
+        },
+        {
+          "field": "args",
+          "cond": {
+            "zh": "= blake2b(第一个 CellInput ‖ 首个匹配输出序号)前 20 字节，长度必须为 20",
+            "en": "= first 20 bytes of blake2b(first CellInput ‖ first matching output index); length must be 20"
+          },
+          "err": "6"
+        },
+        {
+          "field": "inputs",
+          "cond": {
+            "zh": "输入中出现该 type 即失败：不可更新、不可销毁",
+            "en": "fails if this type is in inputs: no update, no destroy"
+          },
+          "err": "7"
+        },
+        {
+          "field": "outputs",
+          "cond": {
+            "zh": "只出现在输入时找不到输出",
+            "en": "only in inputs: no matching output"
+          },
+          "err": "4"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码（error.rs）：1 IndexOutOfBound · 2 ItemMissing · 3 LengthNotEnough · 4 Encoding · 6 UniqueTypeIdInvalid · 7 InputUniqueCellForbidden · 8 OnlyOneUniqueOutputCellAllowed",
+      "en": "Error codes (error.rs): 1 IndexOutOfBound · 2 ItemMissing · 3 LengthNotEnough · 4 Encoding · 6 UniqueTypeIdInvalid · 7 InputUniqueCellForbidden · 8 OnlyOneUniqueOutputCellAllowed"
+    },
+    {
+      "zh": "data 内容不被合约检查；RGB++ 用它存 xUDT 代币信息（decimal ‖ name ‖ symbol），属约定，未核实",
+      "en": "Data is not checked by the script; RGB++ stores xUDT token info (decimal ‖ name ‖ symbol) there by convention (unverified)"
+    }
+  ]
+}

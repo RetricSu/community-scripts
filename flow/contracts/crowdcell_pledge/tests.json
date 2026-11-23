@@ -1,0 +1,26 @@
+[
+ {
+  "tx": "0x20807a9966508e3afb86afdb6ad1e7725b2c28e4a5b6c1f45f923779ee911928",
+  "net": "testnet",
+  "name": "Pledge created 400 CKB with receipt (0→1, 2026-10-31 deploy, block 22925033)",
+  "expect": [
+   "crowdcell_pledge"
+  ]
+ },
+ {
+  "tx": "0x36ebac8d2b4d4fe3e0bc459c5f74cd85938511506011e8b0e5fa049ce1e09bdf",
+  "net": "testnet",
+  "name": "Pledge 250 CKB destroyed on release, campaign Success (1→0, block 22925178)",
+  "expect": [
+   "crowdcell_pledge"
+  ]
+ },
+ {
+  "tx": "0x0f226497bef6ff7724b5a1a80f85025db0f617ef1d32ce27dafd83f15af5ca0f",
+  "net": "testnet",
+  "name": "Pledge 150 CKB destroyed on refund, campaign Failed (1→0, block 22925189)",
+  "expect": [
+   "crowdcell_pledge"
+  ]
+ }
+]

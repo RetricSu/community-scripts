@@ -1,0 +1,20 @@
+[
+  {
+    "tx": "0xac085cabb479775bb4f1e3c2bfebd5b9c189b908fbd4fdfe2a8a6dd995238d01",
+    "net": "testnet",
+    "name": "COMP anonymous message (public_key / signature null, since = relative 1)",
+    "expect": ["comp_shared_lock"]
+  },
+  {
+    "tx": "0x07a093a2673d36664369f9fe12a0c528903515f2783c22fbcdd9b75b48e3d50b",
+    "net": "testnet",
+    "name": "COMP signed message (compressed public key + recoverable signature)",
+    "expect": ["comp_shared_lock"]
+  },
+  {
+    "tx": "0x92a4da5af311a26a68cb95f973f7fe423f707366010b9f99e633659b2da470a1",
+    "net": "testnet",
+    "name": "COMP signed message on another channel (max_fee 0.01 CKB, UTF-8 payload)",
+    "expect": ["comp_shared_lock"]
+  }
+]

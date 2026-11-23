@@ -1,0 +1,58 @@
+{
+  "title": {
+    "zh": "Always Success 约束",
+    "en": "Always Success Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：ckb-devrel/ckb-proxy-locks / contracts/always-success/src/entry.rs　·　0x3b52…f7f1 (data1，主网与测试网相同)",
+    "en": "Source: ckb-devrel/ckb-proxy-locks / contracts/always-success/src/entry.rs　·　0x3b52…f7f1 (data1, same on mainnet and testnet)"
+  },
+  "transitions": [
+    {
+      "tag": "A",
+      "title": {
+        "zh": "任意解锁",
+        "en": "Unlock by anyone"
+      },
+      "inputs": [
+        {
+          "label": "input",
+          "body": "Cell{ lock: { codeHash: ALWAYS_SUCCESS, args: any } }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "outputs：任意",
+            "en": "outputs: any"
+          },
+          "body": {
+            "zh": "任意",
+            "en": "any"
+          }
+        }
+      ],
+      "layouts": [],
+      "limits": [
+        {
+          "field": "—",
+          "cond": {
+            "zh": "program_entry 恒返回 0",
+            "en": "program_entry always returns 0"
+          },
+          "err": "0"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码（error.rs）：(none)",
+      "en": "Error codes (error.rs): (none)"
+    },
+    {
+      "zh": "不检查任何签名：安全性完全来自 args 指向的其他脚本",
+      "en": "No signature is checked: security comes entirely from the script that args points to"
+    }
+  ]
+}
