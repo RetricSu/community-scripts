@@ -2,7 +2,7 @@
 
 > Knowledge base of 94 CKB (Nervos) on-chain scripts for AI agents: where each one is deployed on mainnet and testnet (code_hash, hash_type, cell_dep), how to use it (args / cell data / witness byte layouts, the cell transitions it allows, every check it enforces with its error code), and a decoder that explains any transaction in terms of these scripts.
 
-Built from https://github.com/RetricSu/community-scripts at commit d5ac1afd670b443e3a32abef773dfaa4682b1745. Everything linked below is plain Markdown or JSON; the bilingual (zh/en) HTML pages for people start at https://retricsu.github.io/community-scripts/index.html.
+Built from https://github.com/RetricSu/community-scripts at commit 9686fc1b7faaa4530943bbe9f9229b5f42f0f675. Everything linked below is plain Markdown or JSON; the bilingual (zh/en) HTML pages for people start at https://retricsu.github.io/community-scripts/index.html.
 
 ## Decode a transaction
 
