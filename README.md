@@ -57,6 +57,15 @@ pnpm run portal:serve  # 本地预览 http://localhost:4173
 
 新增一个受监控合约只需：`src/deployments/<name>.json`（唯一手写事实源）→ `pnpm run flow:meta <name> --rpc <url>` 生成 meta → 手写 `spec.json`（约束知识本体）。
 
+### 漂移检查的责任划分
+
+两套 CI 各管一段，互不重叠（基线成员名单通过 `flow-lib.resolveFlowId` 自动映射到 flow 目录，无需手工维护清单）：
+
+| 合约范围 | 链上漂移检查 | 修复路径 |
+| --- | --- | --- |
+| 基线拥有的（`src/deployments` 投影的 meta） | `security-monitor.yml`（每日，告警 + 白名单升级自动 PR）；`ci.yml` 的 `gen-flow-meta --check` 门禁保证基线与 flow meta 一致 | 只改基线，flow meta 由投影再生成；**不要**对基线拥有的 meta 跑 `check-deployments.js --write` |
+| 其余 flow 合约（上游手写 meta） | `flow-drift.yml`（每周，源自 gp 上游 `deployments.yml`，检出开/评论 `deployment-drift` issue） | 人肉本地 `--write` 后提 PR，与 gp 上游工作流一致 |
+
 ```bash
 pnpm run flow:meta my_contract --rpc-mainnet https://mainnet.ckb.dev/rpc --rpc-testnet https://testnet.ckb.dev/rpc  # 基线 -> flow meta 投影
 pnpm run flow:meta --all --check                                                            # CI 漂移检查（只读，不写入）

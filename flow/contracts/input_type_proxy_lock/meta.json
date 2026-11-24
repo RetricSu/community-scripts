@@ -56,14 +56,14 @@
       "constant_source": "ckb-devrel/ckb-proxy-locks contracts/input-type-proxy-lock (mainnet and testnet)",
       "cell_dep": {
         "out_point": {
-          "index": "0x0",
-          "tx_hash": "0xa5ef4970ba0a4446b9cd8abb3b650cdfb68bcdf5052966e41384900a8a5ad274"
+          "index": "0x1",
+          "tx_hash": "0xb4f171c9c9caf7401f54a8e56225ae21d95032150a87a4678eac3f66a3137b93"
         },
         "dep_type": "code"
       },
       "code_cell": {
-        "index": "0x0",
-        "tx_hash": "0xa5ef4970ba0a4446b9cd8abb3b650cdfb68bcdf5052966e41384900a8a5ad274"
+        "index": "0x1",
+        "tx_hash": "0xb4f171c9c9caf7401f54a8e56225ae21d95032150a87a4678eac3f66a3137b93"
       },
       "type_script": {
         "args": "0xf6e3f3c4e2ad2f0de67d67c6a0900dfed7789672a7a1868563a39b825310d8bf",
@@ -71,9 +71,9 @@
         "hash_type": "type"
       },
       "data_hash": "0x5123908965c711b0ffd8aec642f1ede329649bda1ebdca6bd24124d3796f768a",
-      "deploy_tx": "0xa5ef4970ba0a4446b9cd8abb3b650cdfb68bcdf5052966e41384900a8a5ad274",
+      "deploy_tx": "0xb4f171c9c9caf7401f54a8e56225ae21d95032150a87a4678eac3f66a3137b93",
       "deploy_block": 22729959
     }
   ],
-  "checked_at": "2026-10-20"
+  "checked_at": "2026-11-24"
 }

@@ -45,3 +45,8 @@ jobs:
           node flow/gen.js --all out
           node --test flow/tests/*.test.js
           node flow/scripts/check.js
+
+      # Overlap contracts (baseline-owned): flow meta mechanical facts must
+      # match the security baseline. Read-only, never writes.
+      - name: Check baseline -> flow projection drift
+        run: node scripts/gen-flow-meta.js --all --check
