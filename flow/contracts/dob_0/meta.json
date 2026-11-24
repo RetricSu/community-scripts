@@ -1,17 +1,23 @@
 {
   "tags": [
-    "type"
+    "nft",
+    "community",
+    "open-source",
+    "p-spore"
   ],
   "contributors": [],
   "source": {
     "repo": "https://github.com/sporeprotocol/spore-dob-0",
-    "commit": null,
-    "paths": [],
+    "commit": "a592680c9a507a014ebf505075cbef0b21382799",
+    "paths": [
+      "src/main.rs"
+    ],
     "binary": {
       "status": "unverified",
       "per": [],
       "note": "generated from community-scripts baseline; provenance not yet verified"
-    }
+    },
+    "commit_note": "default-branch HEAD recorded at community-scripts merge; binary provenance not yet verified"
   },
   "deployments": [
     {

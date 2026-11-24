@@ -1,17 +1,22 @@
 {
   "tags": [
-    "lock"
+    "identity",
+    "community",
+    "open-source"
   ],
   "contributors": [],
   "source": {
     "repo": "https://github.com/ckb-devrel/ccc-locks",
-    "commit": null,
-    "paths": [],
+    "commit": "8c8dc2fc7db45a802af024a5d1817137962480cf",
+    "paths": [
+      "contracts/ccc-btc-lock/src/entry.rs"
+    ],
     "binary": {
       "status": "unverified",
       "per": [],
       "note": "generated from community-scripts baseline; provenance not yet verified"
-    }
+    },
+    "commit_note": "default-branch HEAD recorded at community-scripts merge; binary provenance not yet verified"
   },
   "deployments": [
     {

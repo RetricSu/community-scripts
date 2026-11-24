@@ -1,17 +1,22 @@
 {
   "tags": [
-    "type"
+    "identity",
+    "cryptape",
+    "open-source"
   ],
   "contributors": [],
   "source": {
     "repo": "https://github.com/cryptape/nostr-binding",
-    "commit": null,
-    "paths": [],
+    "commit": "eef134e0a09dd07ccc367eb4eca84c1a5a73fb8b",
+    "paths": [
+      "contracts/nostr-binding/src"
+    ],
     "binary": {
       "status": "unverified",
       "per": [],
       "note": "generated from community-scripts baseline; provenance not yet verified"
-    }
+    },
+    "commit_note": "default-branch HEAD recorded at community-scripts merge; binary provenance not yet verified"
   },
   "deployments": [
     {
