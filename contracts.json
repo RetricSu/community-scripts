@@ -1,6 +1,6 @@
 {
- "generator": "https://github.com/gpBlockchain/ckb-contract-flow-html",
- "commit": "402b2d5c7f31bec65dc00be3913f5d91cf343830",
+ "generator": "https://github.com/RetricSu/community-scripts",
+ "commit": "d5ac1afd670b443e3a32abef773dfaa4682b1745",
  "site": "https://retricsu.github.io/community-scripts/",
  "llms": "https://retricsu.github.io/community-scripts/llms.txt",
  "decoder": "https://retricsu.github.io/community-scripts/decode-tx.js",

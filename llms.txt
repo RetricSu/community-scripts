@@ -2,7 +2,7 @@
 
 > Knowledge base of 94 CKB (Nervos) on-chain scripts for AI agents: where each one is deployed on mainnet and testnet (code_hash, hash_type, cell_dep), how to use it (args / cell data / witness byte layouts, the cell transitions it allows, every check it enforces with its error code), and a decoder that explains any transaction in terms of these scripts.
 
-Built from https://github.com/gpBlockchain/ckb-contract-flow-html at commit 402b2d5c7f31bec65dc00be3913f5d91cf343830. Everything linked below is plain Markdown or JSON; the bilingual (zh/en) HTML pages for people start at https://retricsu.github.io/community-scripts/index.html.
+Built from https://github.com/RetricSu/community-scripts at commit d5ac1afd670b443e3a32abef773dfaa4682b1745. Everything linked below is plain Markdown or JSON; the bilingual (zh/en) HTML pages for people start at https://retricsu.github.io/community-scripts/index.html.
 
 ## Decode a transaction
 
@@ -315,5 +315,5 @@ Only on testnet, not on mainnet: `ccc_btc_lock`, `ccc_eth_lock`, `ccc_sol_lock`,
 
 ## Optional
 
-- [Source repository](https://github.com/gpBlockchain/ckb-contract-flow-html): specs (contracts/<id>/spec.json), plugins, tests, generator
-- [Adding a contract](https://github.com/gpBlockchain/ckb-contract-flow-html/blob/main/docs/ADD_CONTRACT.md) · [agent skill](https://github.com/gpBlockchain/ckb-contract-flow-html/blob/main/skills/ckb-contract-flow/SKILL.md)
+- [Source repository](https://github.com/RetricSu/community-scripts): specs (flow/contracts/<id>/spec.json), plugins, tests, generator
+- [Adding a contract](https://github.com/RetricSu/community-scripts/blob/main/flow/docs/ADD_CONTRACT.md) · [agent skill](https://github.com/RetricSu/community-scripts/blob/main/flow/skills/ckb-contract-flow/SKILL.md)
