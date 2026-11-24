@@ -3,7 +3,7 @@
 CKB 生态核心合约的**统一入口**：94 个合约的约束流转规范 + 纯前端交易解码器 + AI 可读知识库，
 外加一套面向 24 个核心合约的**链上安全防篡改与升级监测预警系统**。
 
-> 🔗 **在线门户：<https://retricsu.github.io/community-scripts/>**
+> 🔗 **在线门户：<https://retricsu.github.io/community-scripts/>**（gp 原版前端：合约目录 + 交易解码入口）
 > · [交易解码器](https://retricsu.github.io/community-scripts/tx.html)
 > · [llms.txt（AI agent 入口）](https://retricsu.github.io/community-scripts/llms.txt)
 >
@@ -17,9 +17,9 @@ CKB 生态核心合约的**统一入口**：94 个合约的约束流转规范 + 
 
 ### ① 合约知识门户（`flow/` + `scripts/`）
 
-原 [`gpBlockchain/ckb-contract-flow-html`](https://github.com/gpBlockchain/ckb-contract-flow-html) 已整体 vendored 进 `flow/`（上游仓库已归档，**本仓库是其唯一 canonical 家**，见 `flow/NOTICE.md`），并与本仓库的监控基线合并为单一门户：
+原 [`gpBlockchain/ckb-contract-flow-html`](https://github.com/gpBlockchain/ckb-contract-flow-html) 已整体 vendored 进 `flow/`（上游仓库已归档，**本仓库是其唯一 canonical 家**，见 `flow/NOTICE.md`），门户即 gp 原版前端，样式与上游一致：
 
-- **合约目录层**：94 个合约的约束流转规范页（`flow/contracts/<id>/spec.json` 生成），中英文双语，支持按网络 / 标签 / 关键字过滤；其中 24 个受监控合约带 🛡 标记
+- **合约目录层**：94 个合约的约束流转规范页（`flow/contracts/<id>/spec.json` 生成），中英文双语，支持按网络 / 标签 / 关键字过滤
 - **交易诊断层**：首页粘贴任意交易哈希，纯浏览器直连 RPC 解码，并按合约插件执行无签名约束校验——不用安装任何东西
 - **AI 可读产物**：`llms.txt`、每个合约一份 `<id>.md`、`contracts.json`、单文件解码器 `decode-tx.js`，供 coding agent 直接消费
 
@@ -160,7 +160,6 @@ flow/                   # 合约知识库（vendored，上游已归档，本仓�
 scripts/                # 门户接合层
 ├── flow-lib.js         # 基线 ↔ flow 身份解析（code_hash 校验）
 ├── gen-flow-meta.js    # 基线 -> flow meta 投影（三种字段策略）
-├── build-portal.js     # 构建时合并，产出统一 portal/index.html
 └── serve-portal.js     # 本地预览静态服务器
 docs/                   # SECURITY_MONITORING.md（完整监测文档）
 .github/workflows/      # portal / security-monitor / flow-drift / ci 四套工作流
