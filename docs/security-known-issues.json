@@ -8,6 +8,27 @@
       "recordedAt": "2026-11-23T00:00:00Z",
       "expiresAt": "2027-02-23T00:00:00Z",
       "recordedBy": "retric (via ctx agent)"
+    },
+    {
+      "fingerprint": "ckb-explorer:testnet:anyone_can_pay:codeHash:CODE_HASH_MISMATCH",
+      "note": "ckb-explorer 测试网脚本表的 Anyone-Can-Pay 条目指向 2020 年 6 月的早期部署（script_out_point 0x4f32b3e3…:0，type hash 0x86a1c698…，约 351 个引用 cell），而生态通用部署（ckb-sdk AGGRON4、ckb-ccc 脚本表、gp flow 知识库、本基线）为 type hash 0x3419a1c0…（dep group 0xec26b0f8…）。已于 2026-11-24 实测链上验证：基线 dep group 解析出的 code cell type hash = 0x3419a1c0…，与 SDK 及 ckb-explorer 之外的全部来源一致；基线无误，属 ckb-explorer 脚本表条目滞后。若 ckb-explorer 更新其 ACP 条目应移除此条。",
+      "recordedAt": "2026-11-24T00:00:00Z",
+      "expiresAt": "2027-02-24T00:00:00Z",
+      "recordedBy": "retric (via ctx agent)"
+    },
+    {
+      "fingerprint": "ckb-explorer:testnet:anyone_can_pay:dataHash:CODE_HASH_MISMATCH",
+      "note": "ckb-explorer 测试网脚本表的 Anyone-Can-Pay 条目指向 2020 年 6 月的早期部署（script_out_point 0x4f32b3e3…:0，type hash 0x86a1c698…，约 351 个引用 cell），而生态通用部署（ckb-sdk AGGRON4、ckb-ccc 脚本表、gp flow 知识库、本基线）为 type hash 0x3419a1c0…（dep group 0xec26b0f8…）。已于 2026-11-24 实测链上验证：基线 dep group 解析出的 code cell type hash = 0x3419a1c0…，与 SDK 及 ckb-explorer 之外的全部来源一致；基线无误，属 ckb-explorer 脚本表条目滞后。若 ckb-explorer 更新其 ACP 条目应移除此条。",
+      "recordedAt": "2026-11-24T00:00:00Z",
+      "expiresAt": "2027-02-24T00:00:00Z",
+      "recordedBy": "retric (via ctx agent)"
+    },
+    {
+      "fingerprint": "ckb-explorer:testnet:anyone_can_pay:typeHash:CODE_HASH_MISMATCH",
+      "note": "ckb-explorer 测试网脚本表的 Anyone-Can-Pay 条目指向 2020 年 6 月的早期部署（script_out_point 0x4f32b3e3…:0，type hash 0x86a1c698…，约 351 个引用 cell），而生态通用部署（ckb-sdk AGGRON4、ckb-ccc 脚本表、gp flow 知识库、本基线）为 type hash 0x3419a1c0…（dep group 0xec26b0f8…）。已于 2026-11-24 实测链上验证：基线 dep group 解析出的 code cell type hash = 0x3419a1c0…，与 SDK 及 ckb-explorer 之外的全部来源一致；基线无误，属 ckb-explorer 脚本表条目滞后。若 ckb-explorer 更新其 ACP 条目应移除此条。",
+      "recordedAt": "2026-11-24T00:00:00Z",
+      "expiresAt": "2027-02-24T00:00:00Z",
+      "recordedBy": "retric (via ctx agent)"
     }
   ]
 }

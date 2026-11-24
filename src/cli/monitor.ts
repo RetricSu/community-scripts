@@ -41,6 +41,8 @@ export interface MonitorCliOptions {
   watch?: string;
   apply?: boolean;
   force?: boolean;
+  /** When false, write a timestamped report only and leave latest-report.json intact. */
+  updateLatest?: boolean;
 }
 
 const ALL_SOURCES = ['docs-nervos', 'rfcs-nervos', 'ckb-explorer', 'sdk-ccc'];
@@ -80,39 +82,45 @@ function selectedSources(value?: string): string[] {
     .filter((v) => v && v !== 'onchain-rpc');
 }
 
-function writeReport(report: MonitorReport, outDir: string): string {
+export function writeReport(
+  report: MonitorReport,
+  outDir: string,
+  options: { updateLatest?: boolean } = {}
+): string {
   fs.mkdirSync(outDir, { recursive: true });
   const stamp = report.finishedAt.replace(/[:.]/g, '-');
   const file = path.join(outDir, `monitor-${stamp}.json`);
   fs.writeFileSync(file, `${JSON.stringify(report, null, 2)}\n`);
-  fs.writeFileSync(
-    path.join(outDir, 'latest-report.json'),
-    `${JSON.stringify(report, null, 2)}\n`
-  );
-  fs.writeFileSync(
-    path.join(outDir, 'latest-status.json'),
-    `${JSON.stringify(
-      {
-        status: report.highestRisk,
-        finishedAt: report.finishedAt,
-        counts: report.counts,
-        knownCount: report.knownCount ?? 0,
-        highestRisk: report.highestRisk,
-        highestUnresolvedRisk:
-          report.highestUnresolvedRisk ?? report.highestRisk,
-        networks: report.networks,
-        sources: report.sources.map((s) => ({
-          id: s.id,
-          network: s.network,
-          ok: s.ok,
-          count: s.count,
-          error: s.error,
-        })),
-      },
-      null,
-      2
-    )}\n`
-  );
+  if (options.updateLatest !== false) {
+    fs.writeFileSync(
+      path.join(outDir, 'latest-report.json'),
+      `${JSON.stringify(report, null, 2)}\n`
+    );
+    fs.writeFileSync(
+      path.join(outDir, 'latest-status.json'),
+      `${JSON.stringify(
+        {
+          status: report.highestRisk,
+          finishedAt: report.finishedAt,
+          counts: report.counts,
+          knownCount: report.knownCount ?? 0,
+          highestRisk: report.highestRisk,
+          highestUnresolvedRisk:
+            report.highestUnresolvedRisk ?? report.highestRisk,
+          networks: report.networks,
+          sources: report.sources.map((s) => ({
+            id: s.id,
+            network: s.network,
+            ok: s.ok,
+            count: s.count,
+            error: s.error,
+          })),
+        },
+        null,
+        2
+      )}\n`
+    );
+  }
   return file;
 }
 
@@ -241,7 +249,9 @@ export async function runMonitorCommand(
     knownIssues,
     onSource: (status) => state.updateSource(status),
   });
-  const file = writeReport(report, options.out ?? './results');
+  const file = writeReport(report, options.out ?? './results', {
+    updateLatest: options.updateLatest,
+  });
   printReport(report, file);
 
   if (options.apply) {
@@ -339,6 +349,7 @@ export function registerMonitorCommands(program: Command): void {
       ...command.optsWithGlobals(),
       ...options,
       sources: 'onchain-rpc',
+      updateLatest: false,
     });
   });
 }

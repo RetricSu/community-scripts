@@ -24,9 +24,9 @@ pnpm run monitor -- --network both --no-notify --fail-on none
 
 巡检完成后，结果将保存在 `results/` 目录下：
 
-- **`results/latest-report.json`**：最近一次完整巡检报告，包含各来源比对差异、P0-P3 风险事件详情、Type ID 升级溯源链路及签名 Lock 信息。
-- **`results/latest-status.json`**：精简版状态摘要，提供给状态监控看板、健康检查探针或 CI 门禁直接消费。
-- **`results/monitor-<timestamp>.json`**：每次巡检生成的带时间戳历史归档报告。
+- **`results/latest-report.json`**：最近一次完整多源巡检报告，包含各来源比对差异、P0-P3 风险事件详情、Type ID 升级溯源链路及签名 Lock 信息。`monitor upgrade` 不会覆盖此文件。
+- **`results/latest-status.json`**：精简版状态摘要，提供给状态监控看板、健康检查探针或 CI 门禁直接消费，同样只由完整巡检更新。
+- **`results/monitor-<timestamp>.json`**：每次巡检（含 upgrade 子命令）生成的带时间戳历史归档报告。
 - **`results/monitor-state.json`**：记录数据源连续失败计数与通知指纹去重状态。
 
 ---
@@ -56,6 +56,15 @@ pnpm run portal:serve  # 本地预览 http://localhost:4173
 | `flow/contracts/<id>/spec.json` 等 | 知识库 | 上游手写格式原样保留，不翻译、不迁移 |
 
 新增一个受监控合约只需：`src/deployments/<name>.json`（唯一手写事实源）→ `pnpm run flow:meta <name> --rpc <url>` 生成 meta → 手写 `spec.json`（约束知识本体）。
+
+### 漂移检查的责任划分
+
+两套 CI 各管一段，互不重叠（基线成员名单通过 `flow-lib.resolveFlowId` 自动映射到 flow 目录，无需手工维护清单）：
+
+| 合约范围 | 链上漂移检查 | 修复路径 |
+| --- | --- | --- |
+| 基线拥有的（`src/deployments` 投影的 meta） | `security-monitor.yml`（每日，告警 + 白名单升级自动 PR）；`ci.yml` 的 `gen-flow-meta --check` 门禁保证基线与 flow meta 一致 | 只改基线，flow meta 由投影再生成；**不要**对基线拥有的 meta 跑 `check-deployments.js --write` |
+| 其余 flow 合约（上游手写 meta） | `flow-drift.yml`（每周，源自 gp 上游 `deployments.yml`，检出开/评论 `deployment-drift` issue） | 人肉本地 `--write` 后提 PR，与 gp 上游工作流一致 |
 
 ```bash
 pnpm run flow:meta my_contract --rpc-mainnet https://mainnet.ckb.dev/rpc --rpc-testnet https://testnet.ckb.dev/rpc  # 基线 -> flow meta 投影
