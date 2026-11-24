@@ -37,3 +37,11 @@ jobs:
 
       - name: Test
         run: pnpm test
+
+      # Vendored gp generator (flow/): build all spec pages, run its unit
+      # tests, then validate HTML/meta/agent outputs (scripts/check.js).
+      - name: Validate flow specs
+        run: |
+          node flow/gen.js --all out
+          node --test flow/tests/*.test.js
+          node flow/scripts/check.js
