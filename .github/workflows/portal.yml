@@ -1,0 +1,68 @@
+name: CKB Contract Hub Portal
+
+# Builds the unified portal (flow specs + tx decoder) and publishes it to
+# GitHub Pages. Security posture is intentionally NOT rendered here — it lives
+# in the security-monitor workflow and its report artifacts. Build and deploy
+# are separate jobs so the vendored generator never runs with write
+# permissions.
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'flow/**'
+      - 'scripts/**'
+      - 'src/deployments/**'
+      - '.github/workflows/portal.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '20'
+
+      - name: Sync baseline -> flow meta projection
+        continue-on-error: true
+        run: node scripts/gen-flow-meta.js --all --rpc-mainnet https://mainnet.ckb.dev/rpc --rpc-testnet https://testnet.ckb.dev/rpc
+
+      - name: Build portal
+        env:
+          # absolute links in llms.txt / <id>.md / decode-tx.js (gp generator
+          # defaults to its own upstream Pages URL without this)
+          SITE_URL: https://retricsu.github.io/community-scripts
+        run: node flow/gen.js --all portal && node scripts/build-portal.js
+
+      - name: Upload portal artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ckb-contract-hub
+          path: portal/
+          retention-days: 7
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # only this job may publish
+    steps:
+      - name: Download portal artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: ckb-contract-hub
+          path: portal/
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@329bcc8f12caed2cefe5a5b80781499a6f3b361b
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./portal

@@ -1,0 +1,268 @@
+{
+  "title": {
+    "zh": "Cells 价格 cell（price-cell-type）约束",
+    "en": "Cells price cell (price-cell-type) Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：LusoCryptoLabs/cells-contracts @34dad3c / contracts/price-cell-type/src/main.rs + cells-core　·　主网 0x97bf…d4f9 / 测试网 0xe105…4294（type，cellula-sdk）",
+    "en": "Source: LusoCryptoLabs/cells-contracts @34dad3c / contracts/price-cell-type/src/main.rs + cells-core　·　mainnet 0x97bf…d4f9 / testnet 0xe105…4294 (type, cellula-sdk)"
+  },
+  "transitions": [
+    {
+      "tag": "0 → 1",
+      "title": {
+        "zh": "创建",
+        "en": "Create"
+      },
+      "inputs": [
+        {
+          "label": "tx.inputs[0]",
+          "body": {
+            "zh": "任意 cell（用于 type id）",
+            "en": "any cell (for the type id)"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "price cell",
+          "body": "Cell{\n  type: { codeHash: PRICE_TYPE, hashType: type,\n          args: {{blake2b(inputs[0] ‖ index u64 LE) 32B}} },\n  data: {{0x01 ‖ bps u32 LE}}\n}"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "data（5 字节）",
+            "en": "data (5 bytes)"
+          },
+          "layout": [
+            {
+              "name": "version",
+              "size": "1B",
+              "role": {
+                "zh": "数据版本",
+                "en": "data version"
+              },
+              "color": 1,
+              "flex": 1,
+              "cons": "= 0x01",
+              "err": "6"
+            },
+            {
+              "name": "factor",
+              "size": "4B LE u32",
+              "role": {
+                "zh": "折扣系数（基点），乘到整张费用表上",
+                "en": "discount factor in basis points, multiplies the whole fee schedule"
+              },
+              "color": 2,
+              "flex": 3,
+              "cons": "126 ≤ bps ≤ 10000",
+              "err": "6"
+            }
+          ],
+          "hex": [
+            [
+              "data",
+              "0x{{01}}{{10270000}}  ← 0x2710 = 10000 bps (full price)"
+            ],
+            [
+              "data",
+              "0x{{01}}{{a00f0000}}  ← 4000 bps = 40%"
+            ]
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": {
+            "zh": "输出数",
+            "en": "outputs"
+          },
+          "cond": {
+            "zh": "恰好 1 个价格 cell 输出",
+            "en": "exactly 1 price cell output"
+          },
+          "err": "3"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "5 字节，version 1，126–10000",
+            "en": "5 bytes, version 1, 126–10000"
+          },
+          "err": "6"
+        },
+        {
+          "field": "args",
+          "cond": {
+            "zh": "= 32 字节 type id",
+            "en": "= 32-byte type id"
+          },
+          "err": "2"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 1",
+      "title": {
+        "zh": "调价",
+        "en": "Update"
+      },
+      "inputs": [
+        {
+          "label": "price cell",
+          "body": "Cell{ type: PRICE_TYPE(id), data: old, since: {{relative ts ≥ 21600 s}} }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "price cell′",
+          "body": "Cell{ lock: {{same}}, capacity: {{≥ old}}, type: same, data: {{new}} }"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "data（5 字节）",
+            "en": "data (5 bytes)"
+          },
+          "layout": [
+            {
+              "name": "version",
+              "size": "1B",
+              "role": {
+                "zh": "数据版本",
+                "en": "data version"
+              },
+              "color": 1,
+              "flex": 1,
+              "cons": "= 0x01",
+              "err": "6"
+            },
+            {
+              "name": "factor",
+              "size": "4B LE u32",
+              "role": {
+                "zh": "折扣系数（基点），乘到整张费用表上",
+                "en": "discount factor in basis points, multiplies the whole fee schedule"
+              },
+              "color": 2,
+              "flex": 3,
+              "cons": "126 ≤ bps ≤ 10000",
+              "err": "6"
+            }
+          ],
+          "hex": [
+            [
+              "data",
+              "0x{{01}}{{10270000}}  ← 0x2710 = 10000 bps (full price)"
+            ],
+            [
+              "data",
+              "0x{{01}}{{a00f0000}}  ← 4000 bps = 40%"
+            ]
+          ]
+        },
+        {
+          "label": "since",
+          "layout": [
+            {
+              "name": "flags",
+              "size": "1B",
+              "role": {
+                "zh": "0xC0 = 相对 + 时间戳",
+                "en": "0xC0 = relative + timestamp"
+              },
+              "color": 1,
+              "flex": 1,
+              "cons": "= 0xC0",
+              "err": "8"
+            },
+            {
+              "name": "seconds",
+              "size": "7B",
+              "role": {
+                "zh": "距上次更新的秒数",
+                "en": "seconds since last update"
+              },
+              "color": 2,
+              "flex": 4,
+              "cons": "≥ 21600",
+              "err": "8"
+            }
+          ],
+          "hex": [
+            [
+              "since",
+              "0x{{c0}}00000000005460  ← 0x5460 = 21600 s"
+            ]
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": {
+            "zh": "数量",
+            "en": "arity"
+          },
+          "cond": {
+            "zh": "恰好 1 进 1 出（不能销毁 / 复制）",
+            "en": "exactly 1 in 1 out (never destroyed / duplicated)"
+          },
+          "err": "3"
+        },
+        {
+          "field": "lock",
+          "cond": {
+            "zh": "不变",
+            "en": "unchanged"
+          },
+          "err": "4"
+        },
+        {
+          "field": "capacity",
+          "cond": {
+            "zh": "不减",
+            "en": "not reduced"
+          },
+          "err": "5"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "新旧都合法",
+            "en": "old and new valid"
+          },
+          "err": "6"
+        },
+        {
+          "field": "factor",
+          "cond": {
+            "zh": "new×16 ∈ [old×15, old×17]（每次 ≤ 1/16）",
+            "en": "new×16 ∈ [old×15, old×17] (≤ 1/16 per step)"
+          },
+          "err": "7"
+        },
+        {
+          "field": "since",
+          "cond": {
+            "zh": "相对时间戳（0xC0）≥ 21,600 s（6 小时）",
+            "en": "relative timestamp (0xC0) ≥ 21,600 s (6 h)"
+          },
+          "err": "8"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码：1 Encoding，2 BadArgs，3 Arity，4 LockChanged，5 CapacityShrunk，6 BadData，7 Step，8 Cooldown（源码注释写“四分之一 / 一天”，实际常量为 1/16 与 6 小时）",
+      "en": "Error codes: 1 Encoding, 2 BadArgs, 3 Arity, 4 LockChanged, 5 CapacityShrunk, 6 BadData, 7 Step, 8 Cooldown (enum comments say “a quarter / a day”; the actual constants are 1/16 and 6 h)"
+    },
+    {
+      "zh": "account-cell-type 以编译进去的 type hash（主网 0x3f1c…7586）在 cell dep 中找该 cell；缺失或非法时按全价。",
+      "en": "account-cell-type finds this cell in cell deps by a compiled-in type hash (mainnet 0x3f1c…7586); missing or malformed means full price."
+    }
+  ]
+}

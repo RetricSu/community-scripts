@@ -8,6 +8,7 @@ import { OnChainAdapter } from '../adapters/onchain/ckb-rpc-adapter';
 import { CccSdkAdapter } from '../adapters/sdk/ccc-sdk-adapter';
 import { Baseline } from '../engine/baseline';
 import { applyAuthorizedUpgrades } from '../engine/baseline-writer';
+import { KnownIssuesRegistry } from '../engine/known-issues';
 import { MonitorRunner } from '../engine/monitor';
 import { MonitorState } from '../engine/state';
 import { DiscordNotifier } from '../notifier/discord';
@@ -34,6 +35,7 @@ export interface MonitorCliOptions {
   deploymentsDir?: string;
   out?: string;
   state?: string;
+  knownIssues?: string;
   notify?: boolean;
   failOn?: string;
   watch?: string;
@@ -44,6 +46,7 @@ export interface MonitorCliOptions {
 }
 
 const ALL_SOURCES = ['docs-nervos', 'rfcs-nervos', 'ckb-explorer', 'sdk-ccc'];
+const DEFAULT_KNOWN_ISSUES_FILE = './docs/security-known-issues.json';
 
 function parseNetworks(value?: string): Network[] {
   if (!value || value === 'both' || value === 'all')
@@ -100,6 +103,10 @@ export function writeReport(
           status: report.highestRisk,
           finishedAt: report.finishedAt,
           counts: report.counts,
+          knownCount: report.knownCount ?? 0,
+          highestRisk: report.highestRisk,
+          highestUnresolvedRisk:
+            report.highestUnresolvedRisk ?? report.highestRisk,
           networks: report.networks,
           sources: report.sources.map((s) => ({
             id: s.id,
@@ -141,6 +148,11 @@ function printReport(report: MonitorReport, file: string): void {
   console.log(
     `P0=${report.counts.P0_CRITICAL} P1=${report.counts.P1_HIGH} P2=${report.counts.P2_MEDIUM} P3=${report.counts.P3_INFO}`
   );
+  if (report.knownCount) {
+    console.log(
+      `已知问题: ${report.knownCount} 条（未解决但已记录，不参与告警和失败判定）| 最高未处理风险: ${report.highestUnresolvedRisk ?? report.highestRisk}`
+    );
+  }
   for (const source of report.sources) {
     console.log(
       `  ${source.ok ? '✅' : '❌'} ${source.id} [${source.network}] ${source.count} entries${source.error ? ` — ${source.error}` : ''}`
@@ -157,6 +169,16 @@ function printReport(report: MonitorReport, file: string): void {
   }
   if (important.length > 30)
     console.log(`\n... ${important.length - 30} more findings in ${file}`);
+  const known = report.mismatches.filter((m) => m.known);
+  for (const m of known.slice(0, 30)) {
+    console.log(
+      `\n[已知·${m.riskLevel}] ${m.network}/${m.scriptName} ${m.kind} (${m.sourceId})`
+    );
+    console.log(`  ${m.description}`);
+    console.log(`  记录: ${m.knownNote ?? '无说明'}`);
+  }
+  if (known.length > 30)
+    console.log(`\n... 其余 ${known.length - 30} 条已知问题见 ${file}`);
   if (report.upgrades.length > 0) {
     console.log('\nUpgrade events:');
     for (const event of report.upgrades) {
@@ -208,12 +230,23 @@ export async function runMonitorCommand(
   const state = new MonitorState(
     options.state ?? './results/monitor-state.json'
   );
+  const knownIssuesFile =
+    options.knownIssues ??
+    process.env.KNOWN_ISSUES_FILE ??
+    DEFAULT_KNOWN_ISSUES_FILE;
+  const knownIssues = KnownIssuesRegistry.load(knownIssuesFile);
+  if (knownIssues.size > 0) {
+    console.log(
+      `📒 Known-issues registry: ${knownIssues.size} entries (${knownIssuesFile})`
+    );
+  }
   const runner = new MonitorRunner();
   const report = await runner.run({
     networks,
     baseline,
     onchain,
     adapters,
+    knownIssues,
     onSource: (status) => state.updateSource(status),
   });
   const file = writeReport(report, options.out ?? './results', {
@@ -246,7 +279,9 @@ export async function runMonitorCommand(
     options.failOn && options.failOn !== 'none'
       ? parseRiskLevel(options.failOn)
       : undefined;
-  if (failOn && isAtLeast(report.highestRisk, failOn)) {
+  // Known issues stay visible in the report but must not fail CI every run.
+  const gate = report.highestUnresolvedRisk ?? report.highestRisk;
+  if (failOn && isAtLeast(gate, failOn)) {
     process.exitCode = 1;
   }
   return report;
@@ -272,6 +307,10 @@ export function registerMonitorCommands(program: Command): void {
         '--state <file>',
         'dedup/failure state file',
         './results/monitor-state.json'
+      )
+      .option(
+        '--known-issues <file>',
+        `known-issues registry JSON (default: ${DEFAULT_KNOWN_ISSUES_FILE}, env KNOWN_ISSUES_FILE)`
       )
       .option(
         '--no-notify',

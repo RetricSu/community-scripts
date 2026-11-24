@@ -1,0 +1,133 @@
+{
+  "title": {
+    "zh": "sUDT（Simple UDT）合约约束",
+    "en": "sUDT (Simple UDT) Contract Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：RFC 0025 Simple UDT · 实现 ckb-production-scripts/c/simple_udt.c@e570c11 · Lina code_hash 0x5e7a…cfd5，hash_type type",
+    "en": "Source: RFC 0025 Simple UDT · implementation ckb-production-scripts/c/simple_udt.c@e570c11 · Lina code_hash 0x5e7a…cfd5, hash_type type"
+  },
+  "transitions": [
+    {
+      "tag": "0 → N",
+      "title": {
+        "zh": "发行 / 增发（owner 模式）",
+        "en": "Issue / Mint (owner mode)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "某个 input：owner cell",
+            "en": "some input: owner cell"
+          },
+          "body": {
+            "zh": "Cell{\n  lock: {{hash(lock) == sUDT.args}},\n  type: 任意\n}",
+            "en": "Cell{\n  lock: {{hash(lock) == sUDT.args}},\n  type: any\n}"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "output：sUDT cell",
+            "en": "output: sUDT cell"
+          },
+          "body": {
+            "zh": "Cell{\n  lock: 任意,\n  type: { codeHash: sUDT, args: {{owner lock hash (32B)}} },\n  data: {{amount: u128 LE (前 16 字节)}}\n}",
+            "en": "Cell{\n  lock: any,\n  type: { codeHash: sUDT, args: {{owner lock hash (32B)}} },\n  data: {{amount: u128 LE (first 16 bytes)}}\n}"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "type.args",
+          "cond": {
+            "zh": "长度恰为 32 字节（owner lock script hash）",
+            "en": "exactly 32 bytes (owner lock script hash)"
+          },
+          "err": "-1"
+        },
+        {
+          "field": {
+            "zh": "owner 模式",
+            "en": "owner mode"
+          },
+          "cond": {
+            "zh": "任一 input 的 lock hash == args 时脚本直接通过，不检查数量",
+            "en": "if any input's lock hash == args, the script succeeds immediately without checking amounts"
+          }
+        }
+      ]
+    },
+    {
+      "tag": "N → M",
+      "title": {
+        "zh": "转账 / 销毁",
+        "en": "Transfer / Burn"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "inputs：sUDT cell（同一 type）",
+            "en": "inputs: sUDT cells (same type)"
+          },
+          "body": {
+            "zh": "Cell{\n  lock: 用户 lock,\n  type: { codeHash: sUDT, args: owner hash },\n  data: {{amount_in (u128 LE)}}\n}",
+            "en": "Cell{\n  lock: user lock,\n  type: { codeHash: sUDT, args: owner hash },\n  data: {{amount_in (u128 LE)}}\n}"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "outputs：sUDT cell（同一 type）",
+            "en": "outputs: sUDT cells (same type)"
+          },
+          "body": {
+            "zh": "Cell{\n  lock: 任意,\n  type: { codeHash: sUDT, args: owner hash },\n  data: {{amount_out (u128 LE)}}\n}",
+            "en": "Cell{\n  lock: any,\n  type: { codeHash: sUDT, args: owner hash },\n  data: {{amount_out (u128 LE)}}\n}"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "data",
+          "cond": {
+            "zh": "长度 ≥ 16 字节，前 16 字节为 u128 LE 数量",
+            "en": "length ≥ 16 bytes; first 16 bytes are the u128 LE amount"
+          },
+          "err": "-2"
+        },
+        {
+          "field": "Σ amount",
+          "cond": {
+            "zh": "累加不得溢出 u128",
+            "en": "summation must not overflow u128"
+          },
+          "err": "-51"
+        },
+        {
+          "field": "Σ amount_in",
+          "cond": {
+            "zh": "≥ Σ amount_out（多出部分即销毁）",
+            "en": "≥ Σ amount_out (the difference is burned)"
+          },
+          "err": "-52"
+        },
+        {
+          "field": "lock",
+          "cond": {
+            "zh": "sUDT 不限制，用户自定",
+            "en": "not restricted by sUDT; user-defined"
+          }
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "其他错误码：-3 ERROR_SYSCALL，-21 ERROR_SCRIPT_TOO_LONG（来自 simple_udt.c）",
+      "en": "Other error codes: -3 ERROR_SYSCALL, -21 ERROR_SCRIPT_TOO_LONG (from simple_udt.c)"
+    }
+  ]
+}

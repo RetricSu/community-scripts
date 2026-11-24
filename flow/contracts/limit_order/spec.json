@@ -1,0 +1,270 @@
+{
+  "title": {
+    "zh": "iCKB limit_order（lock + type）约束",
+    "en": "iCKB limit_order (lock + type) Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：ickb/contracts / scripts/contracts/limit_order/src　·　mainnet code_hash 0x49df…254a（data1）",
+    "en": "Source: ickb/contracts / scripts/contracts/limit_order/src　·　mainnet code_hash 0x49df…254a (data1)"
+  },
+  "transitions": [
+    {
+      "tag": "Mint",
+      "title": {
+        "zh": "挂单：order + master",
+        "en": "Place: order + master"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "用户资产",
+            "en": "user funds"
+          },
+          "body": "Cell{ lock: user, type: UDT? }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "order（第 i 个输出）",
+            "en": "order (output i)"
+          },
+          "body": "Cell{\n  lock: {{LIMIT_ORDER}},\n  type: {{UDT}},\n  data: udt u128 ‖ action=0 ‖ 0×32 ‖ master_distance i32 ‖ OrderInfo\n}"
+        },
+        {
+          "label": {
+            "zh": "master（第 i + distance 个输出）",
+            "en": "master (output i + distance)"
+          },
+          "body": "Cell{ lock: user, type: {{LIMIT_ORDER}} }"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "order data（89B）",
+            "en": "order data (89B)"
+          },
+          "layout": [
+            {
+              "name": "udt_amount",
+              "size": "16B",
+              "role": "u128 LE",
+              "cons": {
+                "zh": "data 恰 89B",
+                "en": "data exactly 89B"
+              },
+              "err": "4",
+              "color": 1,
+              "flex": 2
+            },
+            {
+              "name": "action",
+              "size": "4B",
+              "role": {
+                "zh": "0 mint / 1 match",
+                "en": "0 mint / 1 match"
+              },
+              "cons": "∈ {0,1}",
+              "err": "7",
+              "color": 0
+            },
+            {
+              "name": "tx_hash | padding",
+              "size": "32B",
+              "role": {
+                "zh": "match：master OutPoint.tx_hash；mint：全 0",
+                "en": "match: master OutPoint.tx_hash; mint: zeros"
+              },
+              "cons": {
+                "zh": "mint 时全 0",
+                "en": "zeros on mint"
+              },
+              "err": "8",
+              "color": 3,
+              "flex": 2
+            },
+            {
+              "name": "index | distance",
+              "size": "4B",
+              "role": {
+                "zh": "match：master index u32；mint：distance i32",
+                "en": "match: master index u32; mint: distance i32"
+              },
+              "cons": "—",
+              "err": "21",
+              "color": 2
+            },
+            {
+              "name": "ckb_to_udt",
+              "size": "16B",
+              "role": "ckb_mul u64 ‖ udt_mul u64",
+              "cons": {
+                "zh": "同 0 或同非 0",
+                "en": "both 0 or both non-0"
+              },
+              "err": "9",
+              "color": 4,
+              "flex": 2
+            },
+            {
+              "name": "udt_to_ckb",
+              "size": "16B",
+              "role": "ckb_mul u64 ‖ udt_mul u64",
+              "cons": {
+                "zh": "至少一个方向；双向不凹",
+                "en": "at least one; not concave"
+              },
+              "err": "11 / 12",
+              "color": 5,
+              "flex": 2
+            },
+            {
+              "name": "ckb_min_match_log",
+              "size": "1B",
+              "role": {
+                "zh": "最小成交 = 2^n shannon",
+                "en": "minimum match = 2^n shannons"
+              },
+              "cons": "≤ 64",
+              "err": "10",
+              "color": 2
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "type",
+          "cond": {
+            "zh": "order cell 必须有 UDT type",
+            "en": "order cell must have a UDT type"
+          },
+          "err": "13"
+        },
+        {
+          "field": "master",
+          "cond": {
+            "zh": "同一订单同侧至多 1 个 master / 1 个 order",
+            "en": "per order and side at most 1 master / 1 order"
+          },
+          "err": "6 / 14"
+        },
+        {
+          "field": "cell",
+          "cond": {
+            "zh": "不能同时 lock = type = 本脚本",
+            "en": "not both lock and type = this script"
+          },
+          "err": "15"
+        }
+      ]
+    },
+    {
+      "tag": "Match",
+      "title": {
+        "zh": "撮合：order → order'",
+        "en": "Match: order → order'"
+      },
+      "inputs": [
+        {
+          "label": "order",
+          "body": "Cell{ lock: LIMIT_ORDER, ckb: C, udt: U }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "order'",
+          "body": "Cell{ lock: LIMIT_ORDER, ckb: {{C'}}, udt: {{U'}},\n  data: action=1, master OutPoint, same OrderInfo }"
+        }
+      ],
+      "limits": [
+        {
+          "field": "info",
+          "cond": {
+            "zh": "OrderInfo 与 UDT type 不变",
+            "en": "OrderInfo and UDT type unchanged"
+          },
+          "err": "16"
+        },
+        {
+          "field": "direction",
+          "cond": {
+            "zh": "CKB 减少且 UDT 不减（用 ckb_to_udt），或 UDT 减少且 CKB 不减（用 udt_to_ckb）",
+            "en": "CKB decreases and UDT doesn't (ckb_to_udt), or UDT decreases and CKB doesn't (udt_to_ckb)"
+          },
+          "err": "17"
+        },
+        {
+          "field": "value",
+          "cond": {
+            "zh": "C·ckb_mul + U·udt_mul 不减少",
+            "en": "C·ckb_mul + U·udt_mul does not decrease"
+          },
+          "err": "18"
+        },
+        {
+          "field": "fulfilled",
+          "cond": {
+            "zh": "已完成方向（unoccupied CKB = 0 或 UDT = 0）不能再撮合",
+            "en": "a fulfilled side (unoccupied CKB = 0 or UDT = 0) cannot be matched again"
+          },
+          "err": "19"
+        },
+        {
+          "field": "min match",
+          "cond": {
+            "zh": "部分成交不得低于 2^ckb_min_match_log 等值",
+            "en": "a partial match must be ≥ 2^ckb_min_match_log in value"
+          },
+          "err": "20"
+        }
+      ]
+    },
+    {
+      "tag": "Melt",
+      "title": {
+        "zh": "撤单：order + master 一起花费",
+        "en": "Cancel: spend order + master together"
+      },
+      "inputs": [
+        {
+          "label": "order",
+          "body": "Cell{ lock: LIMIT_ORDER }"
+        },
+        {
+          "label": "master",
+          "body": {
+            "zh": "Cell{ lock: user（签名）, type: LIMIT_ORDER }",
+            "en": "Cell{ lock: user (signs), type: LIMIT_ORDER }"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "outputs",
+          "body": {
+            "zh": "任意",
+            "en": "any"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "config",
+          "cond": {
+            "zh": "每个订单只能是 mint / melt / match 之一",
+            "en": "each order must be exactly one of mint / melt / match"
+          },
+          "err": "21"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码：1–4 系统 · 5 NotEmptyArgs · 6 DuplicatedMaster · 7 InvalidAction · 8 NonZeroPadding · 9 InvalidRatio · 10 InvalidCkbMinMatchLog · 11 ConcaveRatio · 12 BothRatioNull · 13 MissingUdtType · 14 SameMaster · 15 ScriptMisuse · 16 DifferentInfo · 17 InvalidMatch · 18 DecreasingValue · 19 AttemptToChangeFulfilled · 20 InsufficientMatch · 21 InvalidConfiguration",
+      "en": "Error codes: 1–4 syscall · 5 NotEmptyArgs · 6 DuplicatedMaster · 7 InvalidAction · 8 NonZeroPadding · 9 InvalidRatio · 10 InvalidCkbMinMatchLog · 11 ConcaveRatio · 12 BothRatioNull · 13 MissingUdtType · 14 SameMaster · 15 ScriptMisuse · 16 DifferentInfo · 17 InvalidMatch · 18 DecreasingValue · 19 AttemptToChangeFulfilled · 20 InsufficientMatch · 21 InvalidConfiguration"
+    }
+  ]
+}

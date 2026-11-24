@@ -1,0 +1,103 @@
+{
+  "tags": [
+    "token",
+    "nervos",
+    "open-source"
+  ],
+  "contributors": [
+    "XuJiandong"
+  ],
+  "source": {
+    "repo": "https://github.com/nervosnetwork/ckb-production-scripts",
+    "commit": "26b0b4f15bb6eeb268b70d7ae006e244b7c06649",
+    "paths": [
+      "c/xudt_rce.c"
+    ],
+    "commit_note": "default-branch HEAD recorded at backfill 2026-10-21; spec/plugin were written from the default branch shortly before (exact read commit not recorded)",
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0x50bd8d6680b8b9cf98b73f3c08faf8b2a21914311954118ad6609be6e78a1b95",
+          "evidence": [],
+          "matches_commit": false
+        }
+      ],
+      "note": "no binary or checksum at the recorded commit matched the deployed data hash (reproducible build not attempted)"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0x50bd8d6680b8b9cf98b73f3c08faf8b2a21914311954118ad6609be6e78a1b95",
+      "hash_type": "data1",
+      "constant_source": "RFC 0052 (Mirana & Pudge)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0xc07844ce21b38e4b071dd0e1ee3b0e27afd8d7532491327f39b786343f558ab7"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0xc07844ce21b38e4b071dd0e1ee3b0e27afd8d7532491327f39b786343f558ab7"
+      },
+      "type_script": null,
+      "data_hash": "0x50bd8d6680b8b9cf98b73f3c08faf8b2a21914311954118ad6609be6e78a1b95",
+      "deploy_tx": "0xc07844ce21b38e4b071dd0e1ee3b0e27afd8d7532491327f39b786343f558ab7",
+      "deploy_block": 11922670
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0x50bd8d6680b8b9cf98b73f3c08faf8b2a21914311954118ad6609be6e78a1b95",
+      "hash_type": "data1",
+      "constant_source": "RFC 0052 (Mirana & Pudge)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0xbf6fb538763efec2a70a6a3dcb7242787087e1030c4e7d86585bc63a9d337f5f"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0xbf6fb538763efec2a70a6a3dcb7242787087e1030c4e7d86585bc63a9d337f5f"
+      },
+      "type_script": {
+        "args": "0x44ec8b96663e06cc94c8c468a4d46d7d9af69eaf418f6390c9f11bb763dda0ae",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x50bd8d6680b8b9cf98b73f3c08faf8b2a21914311954118ad6609be6e78a1b95",
+      "deploy_tx": "0xbf6fb538763efec2a70a6a3dcb7242787087e1030c4e7d86585bc63a9d337f5f",
+      "deploy_block": 8497330
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0x25c29dc317811a6f6f3985a7a9ebc4838bd388d19d0feeecf0bcd60f6c0975bb",
+      "hash_type": "type",
+      "constant_source": "ccc clientPublicTestnet.advanced.ts (type_id deployment of xUDT)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0xbf6fb538763efec2a70a6a3dcb7242787087e1030c4e7d86585bc63a9d337f5f"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0xbf6fb538763efec2a70a6a3dcb7242787087e1030c4e7d86585bc63a9d337f5f"
+      },
+      "type_script": {
+        "args": "0x44ec8b96663e06cc94c8c468a4d46d7d9af69eaf418f6390c9f11bb763dda0ae",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x50bd8d6680b8b9cf98b73f3c08faf8b2a21914311954118ad6609be6e78a1b95",
+      "deploy_tx": "0xbf6fb538763efec2a70a6a3dcb7242787087e1030c4e7d86585bc63a9d337f5f",
+      "deploy_block": 8497330
+    }
+  ],
+  "checked_at": "2026-10-20"
+}

@@ -1,0 +1,57 @@
+{
+  "tags": [
+    "zk",
+    "open-source",
+    "community"
+  ],
+  "contributors": [
+    "CECILIA-MULANDI"
+  ],
+  "source": {
+    "repo": "https://github.com/CECILIA-MULANDI/groth16-ckb",
+    "commit": "e969ad154ea2c00df57f68238ddfbcbc9ceb1419",
+    "paths": [
+      "script/crates/ckb-script/src/main.rs",
+      "script/crates/verifier-core/src/lib.rs",
+      "script/crates/wire-decode/src/lib.rs",
+      "script/crates/groth16-schema/src",
+      "schemas/groth16.mol"
+    ],
+    "commit_note": "commit read when writing this spec (default-branch HEAD 2026-11-04). No code_hash is published; the testnet deployment is derived on chain from the cell_deps of the e2e tx 0xc658f9e8…3c96 linked in README.md (Phase 3, 2026-05-15). That code cell predates this commit, so the deployed binary may come from earlier source. Pre-audit.",
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0xc884d0c2b45ebe5db3e559b5a2450f52defaf6945f78c5d7e9da6ed0b5852dfb",
+          "evidence": [],
+          "matches_commit": false
+        }
+      ],
+      "note": "no binary or checksum at the recorded commit matched the deployed data hash (reproducible build not attempted)"
+    }
+  },
+  "deployments": [
+    {
+      "network": "testnet",
+      "code_hash": "0xc884d0c2b45ebe5db3e559b5a2450f52defaf6945f78c5d7e9da6ed0b5852dfb",
+      "hash_type": "data1",
+      "constant_source": "no published code_hash: data hash of cell_dep 0x8e849c96…a75e:0 of the e2e tx 0xc658f9e8…3c96 linked in groth16-ckb README.md (Phase 3, Pudge)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x8e849c96509c1805d8bf1e906454151ea9f6c3d118d3e616ebb25c50f7d3a75e"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x8e849c96509c1805d8bf1e906454151ea9f6c3d118d3e616ebb25c50f7d3a75e"
+      },
+      "type_script": null,
+      "data_hash": "0xc884d0c2b45ebe5db3e559b5a2450f52defaf6945f78c5d7e9da6ed0b5852dfb",
+      "deploy_tx": "0x8e849c96509c1805d8bf1e906454151ea9f6c3d118d3e616ebb25c50f7d3a75e",
+      "deploy_block": 21097898
+    }
+  ],
+  "checked_at": "2026-11-12"
+}

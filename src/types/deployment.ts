@@ -55,4 +55,6 @@ export interface ScriptDeployment {
   scriptType: ScriptType;
   mainnet?: DeploymentInfo;
   testnet?: DeploymentInfo;
+  /** Optional pointer into the vendored flow knowledge base (flow/contracts/<flowId>/). */
+  flowId?: string;
 }

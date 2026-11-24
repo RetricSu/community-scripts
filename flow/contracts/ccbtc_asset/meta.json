@@ -1,0 +1,44 @@
+{
+  "tags": [
+    "token",
+    "btc",
+    "community",
+    "no-source"
+  ],
+  "contributors": [],
+  "source": {
+    "status": "no-source",
+    "note": "No public source found, unconfirmed with maintainer",
+    "binary": {
+      "status": "no-source"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0x092c2c4a26ea475a8e860c29cf00502103add677705e2ccd8d6fe5af3caa5ae3",
+      "hash_type": "type",
+      "constant_source": "UTXOSwap docs (utxoswap.gitbook.io/zh, pools API example: BTC xudt typeHash 0x3cd44aec…fa57 → codeHash 0x092c…5ae3); confirmed on chain",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x3ceb520f240b168e0bddf0d89b4bcabbe7d4fa69751057cbe8e4f27239fad0e9"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x3ceb520f240b168e0bddf0d89b4bcabbe7d4fa69751057cbe8e4f27239fad0e9"
+      },
+      "type_script": {
+        "args": "0x74f8fd146cca83d5fa2acd8a2b0bc7f0408a38b79a173c1e8ca1fbdfc95122ff",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0xa99494ada9bc23cdc018141222640d0e698f29ce3684054e85bf8add7cc9ae2c",
+      "deploy_tx": "0x3ceb520f240b168e0bddf0d89b4bcabbe7d4fa69751057cbe8e4f27239fad0e9",
+      "deploy_block": 13135963
+    }
+  ],
+  "checked_at": "2026-11-06"
+}

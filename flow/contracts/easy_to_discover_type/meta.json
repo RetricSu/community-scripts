@@ -1,0 +1,78 @@
+{
+  "tags": [
+    "proxy",
+    "nervos",
+    "open-source",
+    "p-proxy-locks"
+  ],
+  "contributors": [
+    "Hanssen0",
+    "ashuralyk"
+  ],
+  "source": {
+    "repo": "https://github.com/ckb-devrel/ckb-proxy-locks",
+    "commit": "38b7e1df19828f2203c01b30340be26691b70d7a",
+    "paths": [
+      "contracts/easy-to-discover-type/src/entry.rs"
+    ],
+    "commit_note": "default-branch HEAD recorded at backfill 2026-10-21; spec/plugin were written from the default branch shortly before (exact read commit not recorded)",
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0xaba4430cc7110d699007095430a1faa72973edf2322ddbfd4d1d219cacf237af",
+          "evidence": [],
+          "matches_commit": false
+        }
+      ],
+      "note": "no binary or checksum at the recorded commit matched the deployed data hash (reproducible build not attempted)"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0xaba4430cc7110d699007095430a1faa72973edf2322ddbfd4d1d219cacf237af",
+      "hash_type": "data1",
+      "constant_source": "ckb-devrel/ckb-proxy-locks contracts/easy-to-discover-type (mainnet and testnet)",
+      "cell_dep": {
+        "out_point": {
+          "tx_hash": "0xb0ed754fb27d67fd8388c97fed914fb7998eceaa01f3e6f967e498de1ba0ac9b",
+          "index": "0x0"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "tx_hash": "0xb0ed754fb27d67fd8388c97fed914fb7998eceaa01f3e6f967e498de1ba0ac9b",
+        "index": "0x0"
+      },
+      "type_script": null,
+      "data_hash": "0xaba4430cc7110d699007095430a1faa72973edf2322ddbfd4d1d219cacf237af",
+      "deploy_tx": "0xb0ed754fb27d67fd8388c97fed914fb7998eceaa01f3e6f967e498de1ba0ac9b",
+      "deploy_block": 14221033,
+      "via": "documented cell dep"
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0xaba4430cc7110d699007095430a1faa72973edf2322ddbfd4d1d219cacf237af",
+      "hash_type": "data1",
+      "constant_source": "ckb-devrel/ckb-proxy-locks contracts/easy-to-discover-type (mainnet and testnet)",
+      "cell_dep": {
+        "out_point": {
+          "tx_hash": "0x1b4ffcad55ecd36ffb2715b6816b83da73851f1a24fe594f263c4f34dad90792",
+          "index": "0x0"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "tx_hash": "0x1b4ffcad55ecd36ffb2715b6816b83da73851f1a24fe594f263c4f34dad90792",
+        "index": "0x0"
+      },
+      "type_script": null,
+      "data_hash": "0xaba4430cc7110d699007095430a1faa72973edf2322ddbfd4d1d219cacf237af",
+      "deploy_tx": "0x1b4ffcad55ecd36ffb2715b6816b83da73851f1a24fe594f263c4f34dad90792",
+      "deploy_block": 14831057,
+      "via": "documented cell dep"
+    }
+  ],
+  "checked_at": "2026-10-20"
+}

@@ -1,0 +1,197 @@
+{
+  "title": {
+    "zh": "Nostr lock 约束",
+    "en": "Nostr lock Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：nervosnetwork/nostr-binding / contracts/nostr-lock/src　·　mainnet 0x641a…4c68 / testnet 0x6ae5…91d5，hash_type type（ccc）",
+    "en": "Source: nervosnetwork/nostr-binding / contracts/nostr-lock/src　·　mainnet 0x641a…4c68 / testnet 0x6ae5…91d5, hash_type type (ccc)"
+  },
+  "transitions": [
+    {
+      "tag": "A",
+      "title": {
+        "zh": "Nostr 密钥签名解锁（pow_difficulty = 0）",
+        "en": "Unlock with a Nostr key (pow_difficulty = 0)"
+      },
+      "inputs": [
+        {
+          "label": "input",
+          "body": "Cell{\n  lock: { codeHash: NOSTR_LOCK,\n          args: {{0x00}} ‖ {{blake160(schnorr pubkey) 20B}} }\n}"
+        },
+        {
+          "label": "witness[group 0].lock",
+          "body": "Nostr event JSON {\n  id, pubkey, created_at,\n  kind: {{23334}},\n  tags: [[\"ckb_sighash_all\", {{hex(sighash_all)}}], …],\n  content: {{fixed notice}},\n  sig\n}"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "outputs：任意",
+            "en": "outputs: any"
+          },
+          "body": {
+            "zh": "Cell{ lock: 任意 }",
+            "en": "Cell{ lock: any }"
+          }
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "args 字节布局（21B）",
+            "en": "args byte layout (21B)"
+          },
+          "layout": [
+            {
+              "name": "pow_difficulty",
+              "size": "1B",
+              "role": {
+                "zh": "0 = 用密钥解锁；>0 = 任何人用 PoW 解锁",
+                "en": "0 = key unlock; >0 = anyone unlocks with PoW"
+              },
+              "cons": "—",
+              "err": "15",
+              "color": 2
+            },
+            {
+              "name": "pubkey hash",
+              "size": "20B",
+              "role": {
+                "zh": "blake160(schnorr x-only 公钥)",
+                "en": "blake160(schnorr x-only pubkey)"
+              },
+              "cons": {
+                "zh": "= blake160(event.pubkey)",
+                "en": "= blake160(event.pubkey)"
+              },
+              "err": "26",
+              "color": 1,
+              "flex": 4
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "恰为 21 字节",
+            "en": "exactly 21 bytes"
+          },
+          "err": "15"
+        },
+        {
+          "field": "witness",
+          "cond": {
+            "zh": "lock 存在",
+            "en": "lock present"
+          },
+          "err": "27 / 2"
+        },
+        {
+          "field": "event",
+          "cond": {
+            "zh": "合法 JSON 事件",
+            "en": "valid JSON event"
+          },
+          "err": "21 / 20"
+        },
+        {
+          "field": "tags",
+          "cond": {
+            "zh": "含 [\"ckb_sighash_all\", hex(sighash_all)]；sighash_all 与 secp256k1_blake160 相同（witness.lock 置 0）",
+            "en": "contains [\"ckb_sighash_all\", hex(sighash_all)]; sighash_all as in secp256k1_blake160 (witness.lock zeroed)"
+          },
+          "err": "11"
+        },
+        {
+          "field": "id",
+          "cond": {
+            "zh": "= sha256([0,pubkey,created_at,kind,tags,content])",
+            "en": "= sha256([0,pubkey,created_at,kind,tags,content])"
+          },
+          "err": "17"
+        },
+        {
+          "field": "kind / content",
+          "cond": {
+            "zh": "kind = 23334，content = 固定提示文本",
+            "en": "kind = 23334, content = fixed notice"
+          },
+          "err": "12 / 13"
+        },
+        {
+          "field": "sig",
+          "cond": {
+            "zh": "schnorr 签名有效",
+            "en": "valid schnorr signature"
+          },
+          "err": "18 / 19 / 16"
+        }
+      ]
+    },
+    {
+      "tag": "B",
+      "title": {
+        "zh": "PoW 解锁（pow_difficulty > 0）",
+        "en": "PoW unlock (pow_difficulty > 0)"
+      },
+      "inputs": [
+        {
+          "label": "input",
+          "body": "Cell{ lock: NOSTR_LOCK({{difficulty}} ‖ {{0×20}}) }"
+        },
+        {
+          "label": "witness",
+          "body": "event.tags ∋ [\"nonce\", n, \"{{difficulty}}\"]"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "outputs",
+          "body": {
+            "zh": "任意",
+            "en": "any"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "nonce",
+          "cond": {
+            "zh": "存在 3 元素的 nonce tag，且目标难度 = args[0]",
+            "en": "a 3-element nonce tag exists and target = args[0]"
+          },
+          "err": "25 / 23"
+        },
+        {
+          "field": "id",
+          "cond": {
+            "zh": "前导零位 ≥ difficulty",
+            "en": "leading zero bits ≥ difficulty"
+          },
+          "err": "24"
+        },
+        {
+          "field": "args",
+          "cond": {
+            "zh": "args[1..21] 必须全 0",
+            "en": "args[1..21] must be all zero"
+          },
+          "err": "22"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码：1–4 系统 · 10 Unknown · 11 SighashAllMismatched · 12 KindMismatched · 13 ContentMismatched · 14 GenerateSighashAll · 15 InvalidScriptArgs · 16 InvalidPublicKey · 17 InvalidEventId · 18 ValidationFail · 19 InvalidSignatureFormat · 20 UnknownKey · 21 Json · 22 PubkeyNotEmpty · 23 WrongTargetDifficulty · 24 PoWDifficulty · 25 NonceNotFound · 26 PubkeyNotFound · 27 WrongWitnessArgs",
+      "en": "Error codes: 1–4 syscall · 10 Unknown · 11 SighashAllMismatched · 12 KindMismatched · 13 ContentMismatched · 14 GenerateSighashAll · 15 InvalidScriptArgs · 16 InvalidPublicKey · 17 InvalidEventId · 18 ValidationFail · 19 InvalidSignatureFormat · 20 UnknownKey · 21 Json · 22 PubkeyNotEmpty · 23 WrongTargetDifficulty · 24 PoWDifficulty · 25 NonceNotFound · 26 PubkeyNotFound · 27 WrongWitnessArgs"
+    },
+    {
+      "zh": "固定 content：\"Signing a CKB transaction\\n\\nIMPORTANT: Please verify the integrity and authenticity of connected Nostr client before signing this message\\n\"",
+      "en": "Fixed content: \"Signing a CKB transaction\\n\\nIMPORTANT: Please verify the integrity and authenticity of connected Nostr client before signing this message\\n\""
+    }
+  ]
+}

@@ -1,0 +1,228 @@
+{
+  "title": {
+    "zh": "DID CKB 约束",
+    "en": "DID CKB Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：web5fans/did-ckb / contracts/did-ckb-ts/src/entry.rs　·　mainnet 0x4a06…984a / testnet 0x5101…c7c5 (type)",
+    "en": "Source: web5fans/did-ckb / contracts/did-ckb-ts/src/entry.rs　·　mainnet 0x4a06…984a / testnet 0x5101…c7c5 (type)"
+  },
+  "transitions": [
+    {
+      "tag": "A",
+      "title": {
+        "zh": "铸造",
+        "en": "Mint"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "inputs[0]：任意",
+            "en": "inputs[0]: any"
+          },
+          "body": "CellInput{ since, previous_output }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "DID cell",
+          "body": "Cell{\n  type: { codeHash: DID_CKB, args: {{did_id 20B}} ‖ … },\n  data: DidCkbData::V1 { document, local_id? }\n}"
+        },
+        {
+          "label": "witness",
+          "body": "WitnessArgs{ output_type: DidCkbWitness {\n  local_id_authorization: { history, sig, rotation_key_indices } } }"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "args 字节布局",
+            "en": "args byte layout"
+          },
+          "layout": [
+            {
+              "name": "did_id",
+              "size": "20B",
+              "role": {
+                "zh": "type_id 前 20 字节",
+                "en": "first 20 bytes of type_id"
+              },
+              "cons": {
+                "zh": "= blake2b(inputs[0] ‖ 首个 group 输出序号)[0..20]",
+                "en": "= blake2b(inputs[0] ‖ first group output index)[0..20]"
+              },
+              "err": "26",
+              "color": 1,
+              "flex": 4
+            }
+          ]
+        },
+        {
+          "label": {
+            "zh": "data 字节布局",
+            "en": "data byte layout"
+          },
+          "layout": [
+            {
+              "name": "union_id",
+              "size": "4B",
+              "role": {
+                "zh": "0 = DidCkbDataV1",
+                "en": "0 = DidCkbDataV1"
+              },
+              "cons": {
+                "zh": "必须为 0",
+                "en": "must be 0"
+              },
+              "err": "51",
+              "color": 2,
+              "flex": 1
+            },
+            {
+              "name": "document",
+              "size": "Bytes",
+              "role": {
+                "zh": "DID 文档（CBOR）",
+                "en": "DID document (CBOR)"
+              },
+              "cons": {
+                "zh": "合法 CBOR",
+                "en": "valid CBOR"
+              },
+              "err": "52",
+              "color": 3,
+              "flex": 3
+            },
+            {
+              "name": "local_id",
+              "size": "StringOpt",
+              "role": {
+                "zh": "可选 did:plc 标识（UTF-8）",
+                "en": "optional did:plc id (UTF-8)"
+              },
+              "cons": {
+                "zh": "非空时需 PLC 授权",
+                "en": "needs PLC authorisation if set"
+              },
+              "err": "31–46",
+              "color": 4,
+              "flex": 2
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "type_id",
+          "cond": {
+            "zh": "args ≥ 20 字节，group 输入/输出各 ≤ 1，args[0..20] 按 type_id 规则计算",
+            "en": "args ≥ 20 bytes, ≤ 1 group input/output each, args[0..20] by the type_id rule"
+          },
+          "err": "26"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "molecule 合法且 document 为合法 CBOR",
+            "en": "valid molecule and document is valid CBOR"
+          },
+          "err": "51 / 52"
+        },
+        {
+          "field": "local_id",
+          "cond": {
+            "zh": "为空则直接通过；否则 witness 中 PLC 操作历史必须有效，且最后签名覆盖 tx_hash（未检查）",
+            "en": "empty passes; otherwise the PLC operation history in the witness must be valid and the final signature must cover tx_hash (not checked)"
+          },
+          "err": "31–46"
+        }
+      ]
+    },
+    {
+      "tag": "B",
+      "title": {
+        "zh": "更新",
+        "en": "Update"
+      },
+      "inputs": [
+        {
+          "label": "DID cell",
+          "body": "Cell{ type: DID_CKB(args), data: V1 {doc, local_id} }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "DID cell",
+          "body": "Cell{ type: same, data: V1 {doc', local_id} }"
+        }
+      ],
+      "limits": [
+        {
+          "field": "data",
+          "cond": {
+            "zh": "输入输出 data 均合法、document 均为 CBOR",
+            "en": "both data valid, both documents CBOR"
+          },
+          "err": "51 / 52"
+        },
+        {
+          "field": "local_id",
+          "cond": {
+            "zh": "local_id 不得改变",
+            "en": "local_id must not change"
+          },
+          "err": "53"
+        },
+        {
+          "field": "auth",
+          "cond": {
+            "zh": "由 lock 授权（type 不检查签名）",
+            "en": "authorised by the lock (the type checks no signature)"
+          },
+          "err": "—"
+        }
+      ]
+    },
+    {
+      "tag": "C",
+      "title": {
+        "zh": "销毁",
+        "en": "Burn"
+      },
+      "inputs": [
+        {
+          "label": "DID cell",
+          "body": "Cell{ type: DID_CKB }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "无该 type 输出",
+            "en": "no output with that type"
+          },
+          "body": {
+            "zh": "—",
+            "en": "—"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "—",
+          "cond": {
+            "zh": "无额外限制",
+            "en": "no further rule"
+          },
+          "err": "—"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码（error.rs）：21–27 syscall（26 TypeIDError）· 31–46 ckb-did-plc-utils · 51 Molecule · 52 InvalidDocumentCbor · 53 MismatchedFrom",
+      "en": "Error codes (error.rs): 21–27 syscall (26 TypeIDError) · 31–46 ckb-did-plc-utils · 51 Molecule · 52 InvalidDocumentCbor · 53 MismatchedFrom"
+    }
+  ]
+}

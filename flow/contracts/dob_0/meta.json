@@ -1,0 +1,72 @@
+{
+  "tags": [
+    "nft",
+    "community",
+    "open-source",
+    "p-spore"
+  ],
+  "contributors": [],
+  "source": {
+    "repo": "https://github.com/sporeprotocol/spore-dob-0",
+    "commit": "a592680c9a507a014ebf505075cbef0b21382799",
+    "paths": [
+      "src/main.rs"
+    ],
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0x13cac78ad8482202f18f9df4ea707611c35f994375fa03ae79121312dda9925c",
+          "evidence": [
+            "deployed tx + data hash match migration/mainnet/2024-06-24-124552.json",
+            "deployed tx + data hash match migration/testnet/2024-06-12-094426.json"
+          ],
+          "matches_commit": false
+        }
+      ],
+      "note": "deployment provenance confirmed against the repo's own deployment records (migration/mainnet/2024-06-24-124552.json; migration/testnet/2024-06-12-094426.json); no committed binary or checksum at the recorded commit, so the build itself is not verified (reproducible build not attempted)"
+    },
+    "commit_note": "default-branch HEAD recorded at community-scripts merge; binary provenance not yet verified"
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "hash_type": "data1",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x71023885a2178648be6a7f138ee49379000a82cda98dd8adabee99eaaca42fde"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x71023885a2178648be6a7f138ee49379000a82cda98dd8adabee99eaaca42fde"
+      },
+      "data_hash": "0x13cac78ad8482202f18f9df4ea707611c35f994375fa03ae79121312dda9925c",
+      "deploy_tx": "0x71023885a2178648be6a7f138ee49379000a82cda98dd8adabee99eaaca42fde",
+      "deploy_block": 13315126,
+      "code_hash": "0x13cac78ad8482202f18f9df4ea707611c35f994375fa03ae79121312dda9925c"
+    },
+    {
+      "network": "testnet",
+      "hash_type": "data1",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x4a8a0d079f8438bed89e0ece1b14e67ab68e2aa7688a5f4917a59a185e0f8fd5"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x4a8a0d079f8438bed89e0ece1b14e67ab68e2aa7688a5f4917a59a185e0f8fd5"
+      },
+      "data_hash": "0x13cac78ad8482202f18f9df4ea707611c35f994375fa03ae79121312dda9925c",
+      "deploy_tx": "0x4a8a0d079f8438bed89e0ece1b14e67ab68e2aa7688a5f4917a59a185e0f8fd5",
+      "deploy_block": 13560289,
+      "code_hash": "0x13cac78ad8482202f18f9df4ea707611c35f994375fa03ae79121312dda9925c"
+    }
+  ],
+  "checked_at": "2026-11-24"
+}

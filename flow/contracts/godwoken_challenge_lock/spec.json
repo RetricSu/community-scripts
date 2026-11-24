@@ -1,0 +1,267 @@
+{
+  "title": {
+    "zh": "Godwoken 挑战（challenge-lock）约束",
+    "en": "Godwoken challenge (challenge-lock) Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：godwokenrises/godwoken @c2b1f85 / gwos/contracts/challenge-lock/src/entry.rs + verifications/　·　部署：godwoken-info @8ce6390 mainnet_v1 / testnet_v1_1",
+    "en": "Source: godwokenrises/godwoken @c2b1f85 / gwos/contracts/challenge-lock/src/entry.rs + verifications/　·　deployments: godwoken-info @8ce6390 mainnet_v1 / testnet_v1_1"
+  },
+  "transitions": [
+    {
+      "tag": "1 → 0",
+      "title": {
+        "zh": "挑战成立 / 回滚",
+        "en": "Challenge stands / revert"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "input[0] rollup cell",
+            "en": "input[0] rollup cell"
+          },
+          "body": "Cell{\n  capacity: R,\n  lock: rollup lock (mainnet: omni_lock deployment),\n  type: { codeHash: STATE_VALIDATOR, hashType: type, args: type_id 32B },\n  data: GlobalState (190B)\n}"
+        },
+        {
+          "label": {
+            "zh": "input[1] challenge cell",
+            "en": "input[1] challenge cell"
+          },
+          "body": "Cell{\n  capacity: C,\n  lock: CHALLENGE_LOCK(rollup_type_hash ‖ ChallengeLockArgs),\n  type: null,\n  data: 0x\n}"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "output[0] rollup cell′",
+            "en": "output[0] rollup cell′"
+          },
+          "body": "Cell{\n  capacity: R,\n  lock: rollup lock (mainnet: omni_lock deployment),\n  type: { codeHash: STATE_VALIDATOR, hashType: type, args: type_id 32B },\n  data: GlobalState (190B)\n}\n// witness action: {{RollupEnterChallenge | RollupRevert}}"
+        }
+      ],
+      "sections": [
+        {
+          "title": {
+            "zh": "witnesses（WitnessArgs）",
+            "en": "witnesses (WitnessArgs)"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "witnesses[rollup 输出]",
+                "en": "witnesses[rollup output]"
+              },
+              "body": "{ output_type: RollupAction }"
+            }
+          ]
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "args = rollup_type_hash ‖ ChallengeLockArgs（table）",
+            "en": "args = rollup_type_hash ‖ ChallengeLockArgs (table)"
+          },
+          "layout": [
+            {
+              "name": "rollup_type_hash",
+              "size": "32B",
+              "role": {
+                "zh": "rollup cell type hash",
+                "en": "rollup cell type hash"
+              },
+              "color": 1,
+              "flex": 2,
+              "err": "5"
+            },
+            {
+              "name": "target.block_hash",
+              "size": "32B",
+              "role": {
+                "zh": "被挑战区块",
+                "en": "challenged block"
+              },
+              "color": 2,
+              "flex": 2,
+              "err": "32"
+            },
+            {
+              "name": "target.target_index",
+              "size": "4B LE",
+              "role": {
+                "zh": "交易 / 提款序号",
+                "en": "tx / withdrawal index"
+              },
+              "color": 3,
+              "flex": 1
+            },
+            {
+              "name": "target.target_type",
+              "size": "1B",
+              "role": {
+                "zh": "0 交易执行 / 1 交易签名 / 2 提款签名",
+                "en": "0 tx execution / 1 tx signature / 2 withdrawal signature"
+              },
+              "color": 4,
+              "flex": 1,
+              "cons": "0–2",
+              "err": "5"
+            },
+            {
+              "name": "rewards_receiver_lock",
+              "size": "Script",
+              "role": {
+                "zh": "挑战成功时的奖励接收 lock",
+                "en": "reward receiver lock if the challenge succeeds"
+              },
+              "color": 5,
+              "flex": 2,
+              "err": "30"
+            }
+          ],
+          "hex": [
+            [
+              "target",
+              "0x{{9f…(32B)}}{{03000000}}{{01}}  ← tx #3, signature"
+            ]
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "合法 ChallengeLockArgs",
+            "en": "valid ChallengeLockArgs"
+          },
+          "err": "5"
+        },
+        {
+          "field": "rollup",
+          "cond": {
+            "zh": "输出有 rollup cell",
+            "en": "a rollup cell in outputs"
+          },
+          "err": "9"
+        },
+        {
+          "field": {
+            "zh": "动作",
+            "en": "action"
+          },
+          "cond": {
+            "zh": "EnterChallenge / Revert → 通过；SubmitBlock → 失败",
+            "en": "EnterChallenge / Revert → pass; SubmitBlock → fail"
+          },
+          "err": "5"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 0",
+      "title": {
+        "zh": "取消挑战（证明目标正确）",
+        "en": "Cancel challenge (prove the target is valid)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "input[0] rollup cell",
+            "en": "input[0] rollup cell"
+          },
+          "body": "Cell{\n  capacity: R,\n  lock: rollup lock (mainnet: omni_lock deployment),\n  type: { codeHash: STATE_VALIDATOR, hashType: type, args: type_id 32B },\n  data: GlobalState{ status: halting }\n}"
+        },
+        {
+          "label": {
+            "zh": "input[1] challenge cell",
+            "en": "input[1] challenge cell"
+          },
+          "body": "Cell{\n  capacity: C,\n  lock: CHALLENGE_LOCK(…),\n  type: null,\n  data: 0x\n}"
+        },
+        {
+          "label": {
+            "zh": "input[…] 证明用 cell（按 target_type）",
+            "en": "input[…] proof cells (per target_type)"
+          },
+          "body": "e.g. a cell under the L2 account lock (eth-account-lock) whose data is the signing message"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "output[0] rollup cell′",
+            "en": "output[0] rollup cell′"
+          },
+          "body": "Cell{\n  capacity: R,\n  lock: rollup lock (mainnet: omni_lock deployment),\n  type: { codeHash: STATE_VALIDATOR, hashType: type, args: type_id 32B },\n  data: GlobalState (190B)\n}\n// witness action: {{RollupCancelChallenge}}"
+        }
+      ],
+      "sections": [
+        {
+          "title": {
+            "zh": "cell_deps",
+            "en": "cell_deps"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "cell_dep：RollupConfig cell",
+                "en": "cell_dep: RollupConfig cell"
+              },
+              "body": "Cell{ data: RollupConfig (molecule) }\n// load_rollup_config(): found by {{data hash == GlobalState.rollup_config_hash}} → else 10"
+            },
+            {
+              "label": {
+                "zh": "cell_dep：账户 lock / 合约代码",
+                "en": "cell_dep: account lock / backend code"
+              },
+              "body": "for signature / execution verification"
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "rollup",
+          "cond": {
+            "zh": "输入有 rollup cell（读 RollupConfig）",
+            "en": "a rollup cell in inputs (RollupConfig read)"
+          },
+          "err": "9 / 10"
+        },
+        {
+          "field": "target_type",
+          "cond": {
+            "zh": "0–2",
+            "en": "0–2"
+          },
+          "err": "5"
+        },
+        {
+          "field": {
+            "zh": "验证",
+            "en": "verify"
+          },
+          "cond": {
+            "zh": "交易执行 / 交易签名 / 提款签名",
+            "en": "tx execution / tx signature / withdrawal signature"
+          },
+          "err": "13 / 32 / 41"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "⚠ 状态：官方已宣布 Godwoken 退役（2025-06-01 起，Nervos Talk “Sunset of Force Bridge and Godwoken”）；冻结期限延至 2026-01-01 23:59:59 UTC，之后网络冻结、桥前端下线，v0/v1 RPC 节点已关闭。本页仅作历史 / 审计参考。",
+      "en": "⚠ Status: Godwoken was officially sunset (from 2025-06-01, Nervos Talk “Sunset of Force Bridge and Godwoken”); the freeze deadline was extended to 2026-01-01 23:59:59 UTC, after which the network froze, the bridge UI went offline and v0/v1 RPC nodes were shut down. This page is for historical / audit reference."
+    },
+    {
+      "zh": "godwoken-info 中有部署，但未在 L1 上找到使用该 lock 的交易（从未发生挑战），tests.json 为空。",
+      "en": "Deployed per godwoken-info, but no L1 tx using this lock was found (no challenge ever happened); tests.json is empty."
+    },
+    {
+      "zh": "错误码（gw-utils/src/error.rs）：1 IndexOutOfBound，2 ItemMissing，3 LengthNotEnough，4 Encoding，5 InvalidArgs，6 InvalidSince，7 InvalidOutput，8 OwnerCellNotFound，9 RollupCellNotFound，10 RollupConfigNotFound，11 ProofNotFound，13 MerkleProof，14 AmountOverflow，15 InsufficientAmount，16/17 Insufficient{Input,Output}FinalizedAssets，18 SMTKeyMissing，19 InvalidStateCheckpoint，20 InvalidBlock，21 InvalidStatus，22 InvalidStakeCellUnlock，23 InvalidPostGlobalState，24 InvalidChallengeCell，25 InvalidStakeCell，26 InvalidDepositCell，27 InvalidWithdrawalCell，28 InvalidCustodianCell，29 InvalidRevertedBlocks，30 InvalidChallengeReward，32 InvalidChallengeTarget，33 InvalidWithdrawalRequest，34 UnknownEOAScript，39 InvalidTypeID，41 WrongSignature，43 RegistryAddressNotFound，45 NotFinalized。",
+      "en": "Error codes (gw-utils/src/error.rs): 1 IndexOutOfBound, 2 ItemMissing, 3 LengthNotEnough, 4 Encoding, 5 InvalidArgs, 6 InvalidSince, 7 InvalidOutput, 8 OwnerCellNotFound, 9 RollupCellNotFound, 10 RollupConfigNotFound, 11 ProofNotFound, 13 MerkleProof, 14 AmountOverflow, 15 InsufficientAmount, 16/17 Insufficient{Input,Output}FinalizedAssets, 18 SMTKeyMissing, 19 InvalidStateCheckpoint, 20 InvalidBlock, 21 InvalidStatus, 22 InvalidStakeCellUnlock, 23 InvalidPostGlobalState, 24 InvalidChallengeCell, 25 InvalidStakeCell, 26 InvalidDepositCell, 27 InvalidWithdrawalCell, 28 InvalidCustodianCell, 29 InvalidRevertedBlocks, 30 InvalidChallengeReward, 32 InvalidChallengeTarget, 33 InvalidWithdrawalRequest, 34 UnknownEOAScript, 39 InvalidTypeID, 41 WrongSignature, 43 RegistryAddressNotFound, 45 NotFinalized."
+    }
+  ]
+}

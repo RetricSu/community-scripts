@@ -1,0 +1,35 @@
+[
+  {
+    "tx": "0x93de3f4cf5dfc29b2b28cd824fbb758f0947bade4b0a644653e2757ec55f9af2",
+    "net": "mainnet",
+    "name": "mint (class update)",
+    "expect": [
+      "mnft_nft",
+      "mnft_class"
+    ]
+  },
+  {
+    "tx": "0xdffc1ca8ca2a3ccb5cecc07a9ec502bdeef26ab3eb654829e33fef6a5e6ceeba",
+    "net": "mainnet",
+    "name": "transfer"
+  },
+  {
+    "tx": "0x952ffd404bec800ec195122e422a99f5fbb9836f25ad41737538843afb0513e8",
+    "net": "mainnet",
+    "name": "batch transfer"
+  },
+  {
+    "tx": "0x1f895ce8d44dd678bf33207bec17a296f8035b79a61adc1df43516be0c9ad29f",
+    "net": "testnet",
+    "name": "mint (testnet)",
+    "expect": [
+      "mnft_nft",
+      "mnft_class"
+    ]
+  },
+  {
+    "tx": "0x5dd7aec0211d885fa0472d941213332df280937f0b3a4d96269b3c110fe7ba09",
+    "net": "testnet",
+    "name": "update (testnet)"
+  }
+]

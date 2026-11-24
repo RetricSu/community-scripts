@@ -1,0 +1,57 @@
+{
+  "tags": [
+    "identity",
+    "community",
+    "open-source"
+  ],
+  "contributors": [],
+  "source": {
+    "repo": "https://github.com/ckb-devrel/ccc-locks",
+    "commit": "8c8dc2fc7db45a802af024a5d1817137962480cf",
+    "paths": [
+      "contracts/ccc-eth-lock/src/entry.rs"
+    ],
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0x66be3ce5f50be813bc583e733583db33bc1757b462006258471e52e358aced50",
+          "evidence": [
+            "deployed tx + data hash match deployment/testnet/eth-lock/migrations/2024-08-02-064738.json"
+          ],
+          "matches_commit": false
+        }
+      ],
+      "note": "deployment provenance confirmed against the repo's own deployment records (deployment/testnet/eth-lock/migrations/2024-08-02-064738.json); no committed binary or checksum at the recorded commit, so the build itself is not verified (reproducible build not attempted)"
+    },
+    "commit_note": "default-branch HEAD recorded at community-scripts merge; binary provenance not yet verified"
+  },
+  "deployments": [
+    {
+      "network": "testnet",
+      "code_hash": "0x5b1983cf4242009f72e82b37fb6b36790e6d4858474046fc3c798e5142cf8835",
+      "hash_type": "type",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x2e6a50a9ce96c7b9697ed0fd21bd0a736d3df5e62d25137f728d8354a36cb369"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x2e6a50a9ce96c7b9697ed0fd21bd0a736d3df5e62d25137f728d8354a36cb369"
+      },
+      "data_hash": "0x66be3ce5f50be813bc583e733583db33bc1757b462006258471e52e358aced50",
+      "deploy_tx": "0x2e6a50a9ce96c7b9697ed0fd21bd0a736d3df5e62d25137f728d8354a36cb369",
+      "type_script": {
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type",
+        "args": "0x5058db950c52b1094f5494eda477b945426de0a999dfed23000392105adc50b3"
+      },
+      "deploy_block": 14109409
+    }
+  ],
+  "checked_at": "2026-11-23",
+  "generated_from": "src/deployments/ccc_eth_lock.json"
+}

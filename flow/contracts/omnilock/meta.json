@@ -1,0 +1,87 @@
+{
+  "tags": [
+    "identity",
+    "nervos",
+    "open-source"
+  ],
+  "contributors": [
+    "XuJiandong"
+  ],
+  "source": {
+    "repo": "https://github.com/nervosnetwork/omnilock",
+    "commit": "280dd97ac0930ea1ed766a18d49478229347c832",
+    "paths": [
+      "c/omni_lock.c"
+    ],
+    "commit_note": "default-branch HEAD recorded at backfill 2026-10-21; spec/plugin were written from the default branch shortly before (exact read commit not recorded)",
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0x768f306681da232ceb0b94f436c5f813377179762a831c5ad8797bd4fd2d118d",
+          "evidence": [],
+          "matches_commit": false
+        },
+        {
+          "data_hash": "0x6b29b6f10346b43c540e53806ba88ba0fe3a0c3a29d7448ef555840c8f8318fa",
+          "evidence": [],
+          "matches_commit": false
+        }
+      ],
+      "note": "no binary or checksum at the recorded commit matched the deployed data hash (reproducible build not attempted)"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0x9b819793a64463aed77c615d6cb226eea5487ccfc0783043a587254cda2b6f26",
+      "hash_type": "type",
+      "constant_source": "RFC 0042 (mainnet)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0xc76edf469816aa22f416503c38d0b533d2a018e253e379f134c3985b3472c842"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0xc76edf469816aa22f416503c38d0b533d2a018e253e379f134c3985b3472c842"
+      },
+      "type_script": {
+        "args": "0x855508fe0f0ca25b935b070452ecaee48f6c9f1d66cd15f046616b99e948236a",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x768f306681da232ceb0b94f436c5f813377179762a831c5ad8797bd4fd2d118d",
+      "deploy_tx": "0xc76edf469816aa22f416503c38d0b533d2a018e253e379f134c3985b3472c842",
+      "deploy_block": 12017064
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0xf329effd1c475a2978453c8600e1eaf0bc2087ee093c3ee64cc96ec6847752cb",
+      "hash_type": "type",
+      "constant_source": "RFC 0042 (testnet)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0xec18bf0d857c981c3d1f4e17999b9b90c484b303378e94de1a57b0872f5d4602"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0xec18bf0d857c981c3d1f4e17999b9b90c484b303378e94de1a57b0872f5d4602"
+      },
+      "type_script": {
+        "args": "0x761f51fc9cd6a504c32c6ae64b3746594d1af27629b427c5ccf6c9a725a89144",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x6b29b6f10346b43c540e53806ba88ba0fe3a0c3a29d7448ef555840c8f8318fa",
+      "deploy_tx": "0xec18bf0d857c981c3d1f4e17999b9b90c484b303378e94de1a57b0872f5d4602",
+      "deploy_block": 12898141
+    }
+  ],
+  "checked_at": "2026-11-24"
+}

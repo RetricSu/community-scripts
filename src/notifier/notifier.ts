@@ -58,6 +58,7 @@ export class Notifier {
       this.channels.map(async (channel) => {
         const selected = report.mismatches.filter(
           (m) =>
+            !m.known &&
             isAtLeast(m.riskLevel, channel.minLevel) &&
             (!state || state.shouldNotify(channel.id, m))
         );

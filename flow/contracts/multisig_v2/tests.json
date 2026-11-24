@@ -1,0 +1,12 @@
+[
+  {
+    "tx": "0x1a4d5e3838d72dda8b3aa1119116e7c82bedb22098b15500b57c72f4bf119470",
+    "net": "mainnet",
+    "name": "multisig v2 2/3"
+  },
+  {
+    "tx": "0x614c534c2a4012d87e6827c414fb6bd549a6398315aeea9afbf8c63dc6db1cb7",
+    "net": "mainnet",
+    "name": "multisig v2 beta (PR #98)"
+  }
+]

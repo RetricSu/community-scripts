@@ -1,0 +1,41 @@
+{
+  "_doc": "Central tag taxonomy. Each contracts/<id>/meta.json lists tag ids from here (one 'kind', ≥1 'category', network tags derived from deployments, one 'source', one 'maintainer', optional ≤1 'project' for contracts that belong to one multi-script project).",
+  "groups": {
+    "kind": { "label": { "zh": "类型", "en": "Kind" }, "multi": false },
+    "category": { "label": { "zh": "分类", "en": "Category" }, "multi": true },
+    "network": { "label": { "zh": "网络", "en": "Network" }, "multi": true },
+    "source": { "label": { "zh": "源码", "en": "Source" }, "multi": false },
+    "maintainer": { "label": { "zh": "维护方", "en": "Maintainer" }, "multi": false },
+    "project": { "label": { "zh": "项目", "en": "Project" }, "multi": false }
+  },
+  "tags": {
+    "lock": { "group": "kind", "zh": "Lock 脚本", "en": "Lock script" },
+    "type": { "group": "kind", "zh": "Type 脚本", "en": "Type script" },
+    "system": { "group": "category", "zh": "系统 / 创世", "en": "System" },
+    "token": { "group": "category", "zh": "代币 / UDT", "en": "Token / UDT" },
+    "nft": { "group": "category", "zh": "NFT / DOB", "en": "NFT / DOB" },
+    "defi": { "group": "category", "zh": "DeFi", "en": "DeFi" },
+    "identity": { "group": "category", "zh": "身份 / 钱包", "en": "Identity / wallet" },
+    "channel": { "group": "category", "zh": "支付通道 / Fiber", "en": "Payment channel / Fiber" },
+    "btc": { "group": "category", "zh": "BTC / RGB++", "en": "BTC / RGB++" },
+    "proxy": { "group": "category", "zh": "代理 / 工具", "en": "Proxy / utility" },
+    "quantum": { "group": "category", "zh": "抗量子", "en": "Quantum-safe" },
+    "layer2": { "group": "category", "zh": "二层 / Rollup", "en": "Layer 2 / Rollup" },
+    "zk": { "group": "category", "zh": "零知识证明 / ZK", "en": "Zero-knowledge / ZK" },
+    "mainnet": { "group": "network", "zh": "主网", "en": "Mainnet" },
+    "testnet": { "group": "network", "zh": "测试网", "en": "Testnet" },
+    "open-source": { "group": "source", "zh": "开源", "en": "Open source" },
+    "no-source": { "group": "source", "zh": "无公开源码", "en": "No public source" },
+    "nervos": { "group": "maintainer", "zh": "Nervos 官方", "en": "Nervos" },
+    "cryptape": { "group": "maintainer", "zh": "Cryptape", "en": "Cryptape" },
+    "community": { "group": "maintainer", "zh": "社区", "en": "Community" },
+    "p-crowdcell": { "group": "project", "zh": "CrowdCell", "en": "CrowdCell" },
+    "p-cells": { "group": "project", "zh": "Cells（.cell 名称）", "en": "Cells (.cell names)" },
+    "p-godwoken": { "group": "project", "zh": "Godwoken", "en": "Godwoken" },
+    "p-fiber": { "group": "project", "zh": "Fiber", "en": "Fiber" },
+    "p-spore": { "group": "project", "zh": "Spore", "en": "Spore" },
+    "p-ickb": { "group": "project", "zh": "iCKB", "en": "iCKB" },
+    "p-rgbpp": { "group": "project", "zh": "RGB++", "en": "RGB++" },
+    "p-proxy-locks": { "group": "project", "zh": "ckb-proxy-locks", "en": "ckb-proxy-locks" }
+  }
+}

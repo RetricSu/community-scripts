@@ -1,0 +1,164 @@
+{
+  "title": {
+    "zh": "CrowdCell Campaign Lock 约束",
+    "en": "CrowdCell Campaign Lock Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：alesfer001/CrowdCell / contracts/campaign-lock/src/main.rs@acbb40e　·　0xd975…02a3 (data2，仅测试网)　·　社区合约，未经独立审计",
+    "en": "Source: alesfer001/CrowdCell / contracts/campaign-lock/src/main.rs@acbb40e　·　0xd975…02a3 (data2, testnet only)　·　community contract, not independently audited"
+  },
+  "transitions": [
+    {
+      "tag": "A",
+      "title": {
+        "zh": "Active campaign 原样延续（截止前认捐）",
+        "en": "Active campaign carried forward (pre-deadline pledge)"
+      },
+      "inputs": [
+        {
+          "label": "campaign",
+          "body": {
+            "zh": "Cell{ capacity: C, type: {{campaign type}}, lock: { codeHash: CAMPAIGN_LOCK, args: {{deadline_block 8B}} } }\n（同一 lock 的所有 group 输入都须满足）",
+            "en": "Cell{ capacity: C, type: {{campaign type}}, lock: { codeHash: CAMPAIGN_LOCK, args: {{deadline_block 8B}} } }\n(every group input under this lock must qualify)"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "campaign",
+          "body": {
+            "zh": "第一个带同一 campaign type 的输出：Cell{ lock: {{同一 lock}}, data(≥65B)[56] = {{0 Active}}, {{capacity ≥ C}} }",
+            "en": "first output with the same campaign type: Cell{ lock: {{same lock}}, data(≥65B)[56] = {{0 Active}}, {{capacity ≥ C}} }"
+          }
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "lock args 字节布局（≥8B，多出的字节不读取）",
+            "en": "lock args byte layout (≥8B; extra bytes not read)"
+          },
+          "layout": [
+            {
+              "name": "deadline_block",
+              "size": "8B",
+              "role": {
+                "zh": "截止区块 u64 LE",
+                "en": "deadline block u64 LE"
+              },
+              "cons": {
+                "zh": "非延续路径要求 since ≥ 它",
+                "en": "non-carry path needs since ≥ it"
+              },
+              "err": "13",
+              "color": 1,
+              "flex": 2
+            }
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "≥ 8 字节（load_script 失败同为 10）",
+            "en": "≥ 8 bytes (load_script failure is also 10)"
+          },
+          "err": "10"
+        },
+        {
+          "field": "cell reads",
+          "cond": {
+            "zh": "读取 lock、type、data、capacity 失败",
+            "en": "reading lock, type, data or capacity fails"
+          },
+          "err": "14"
+        },
+        {
+          "field": "capacity",
+          "cond": {
+            "zh": "全部 group 输入满足延续条件时：第一个同 type 输出的 capacity ≥ 输入（不满足则转入 B 的截止规则）",
+            "en": "when every group input qualifies: first same-type output has capacity ≥ input (otherwise the B deadline rules apply)"
+          },
+          "err": "15"
+        },
+        {
+          "field": "carry-forward",
+          "cond": {
+            "zh": "延续条件：输入有 type；同 type 的第一个输出同 lock、data ≥ 65 字节且 status = 0 Active；任一不满足即转入 B",
+            "en": "carry-forward: input has a type; first same-type output has the same lock, data ≥ 65 bytes and status 0 Active; any failure falls to B"
+          },
+          "err": ""
+        }
+      ]
+    },
+    {
+      "tag": "B",
+      "title": {
+        "zh": "截止后花费（结算 / 销毁）",
+        "en": "Spend after the deadline (finalize / destroy)"
+      },
+      "inputs": [
+        {
+          "label": "campaign",
+          "body": {
+            "zh": "Cell{ lock: {{deadline_block}} }, {{since（group 首个输入）= 绝对区块号 ≥ deadline_block}}",
+            "en": "Cell{ lock: {{deadline_block}} }, {{since (first group input) = absolute block ≥ deadline_block}}"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "outputs：任意（规则由 campaign 类型脚本约束）",
+            "en": "outputs: any (rules from the campaign type script)"
+          },
+          "body": {
+            "zh": "任意",
+            "en": "any"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "since",
+          "cond": {
+            "zh": "读取失败",
+            "en": "load fails"
+          },
+          "err": "11"
+        },
+        {
+          "field": "since",
+          "cond": {
+            "zh": "第一个 group 输入的 since 必须绝对、标志合法、按区块号",
+            "en": "first group input since must be absolute, valid flags, block number"
+          },
+          "err": "12"
+        },
+        {
+          "field": "since",
+          "cond": {
+            "zh": "区块号 ≥ deadline_block（since = 0 视为区块 0）",
+            "en": "block number ≥ deadline_block (since = 0 counts as block 0)"
+          },
+          "err": "13"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码（main.rs@acbb40e）：10 INVALID_ARGS（args < 8B，或 load_script 失败）· 11 LOAD_SINCE · 12 INVALID_SINCE · 13 SINCE_BELOW_DEADLINE · 14 LOAD_CELL · 15 CAPACITY_DECREASED",
+      "en": "Error codes (main.rs@acbb40e): 10 INVALID_ARGS (args < 8B, or load_script fails) · 11 LOAD_SINCE · 12 INVALID_SINCE · 13 SINCE_BELOW_DEADLINE · 14 LOAD_CELL · 15 CAPACITY_DECREASED"
+    },
+    {
+      "zh": "延续路径要求 group 内每个输入都满足延续条件；只要有一个不满足，整组回落到 B 的截止规则（不报错，由 since 决定）。B 只读取 group 首个输入的 since",
+      "en": "The carry-forward path needs every group input to qualify; if one does not, the whole group falls back to the B deadline rules (no error of its own; since decides). B reads only the first group input's since"
+    },
+    {
+      "zh": "不检查任何签名：谁都可以推进 campaign；内容合法性与 lock 不变（28）由 campaign 类型脚本保证",
+      "en": "No signature is checked: anyone can move the campaign; validity and lock preservation (28) come from the campaign type script"
+    }
+  ]
+}

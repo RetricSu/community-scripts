@@ -1,0 +1,43 @@
+{
+  "tags": [
+    "defi",
+    "community",
+    "no-source"
+  ],
+  "contributors": [],
+  "source": {
+    "status": "no-source",
+    "note": "No public source found, unconfirmed with maintainer",
+    "binary": {
+      "status": "no-source"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0x26622198b66240e437e323e0fecf1c26ba3c8c28a45f03ed3ebb9f7f2bdc0055",
+      "hash_type": "type",
+      "constant_source": "CKB Explorer registry API /api/v2/scripts (explorer.nervos.org, read 2026-11-06); nervosnetwork/ckb-explorer-frontend src/constants/scripts.ts @39f93f2; nervosnetwork/ckb-explorer lib/tasks/migration/fill_contracts_info.rake @0634b74",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0xb22fd5c56a642f2e8447f7fb2bbd4faa85ce09ec9393113b9bdeec2b17cd4f95"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0xb22fd5c56a642f2e8447f7fb2bbd4faa85ce09ec9393113b9bdeec2b17cd4f95"
+      },
+      "type_script": {
+        "args": "0xbf7d081d694251ac5075505957d85d3fee4ddb1e99faa50a24ac575350f23fa4",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x9cf12a6d0977e9e4aeec138ce2eb5b5ffa4ba0a659f119d773690a66d7d3665e",
+      "deploy_tx": "0xb22fd5c56a642f2e8447f7fb2bbd4faa85ce09ec9393113b9bdeec2b17cd4f95",
+      "deploy_block": 14230481
+    }
+  ],
+  "checked_at": "2026-11-06"
+}

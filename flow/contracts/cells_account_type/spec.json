@@ -1,0 +1,1606 @@
+{
+  "title": {
+    "zh": "Cells 名字（account-cell-type）约束",
+    "en": "Cells name (account-cell-type) Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：LusoCryptoLabs/cells-contracts @34dad3c / contracts/account-cell-type/src/main.rs + crates/cells-core　·　主网 0xd96c…fe54 / 测试网 0xe070…d1d9（type，cellula-sdk）",
+    "en": "Source: LusoCryptoLabs/cells-contracts @34dad3c / contracts/account-cell-type/src/main.rs + crates/cells-core　·　mainnet 0xd96c…fe54 / testnet 0xe070…d1d9 (type, cellula-sdk)"
+  },
+  "transitions": [
+    {
+      "tag": "0 → 1",
+      "title": {
+        "zh": "创世 genesis",
+        "en": "Genesis"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "input[*] genesis token",
+            "en": "input[*] genesis token"
+          },
+          "body": "Cell{\n  capacity: any,\n  lock: any,\n  type: {{type-id cell: type hash[0..20] = namespace}},\n  data: any\n}"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "output[0] 根哨兵",
+            "en": "output[0] root sentinel"
+          },
+          "body": "Cell{\n  capacity: any,\n  lock: account-lock (not checked at genesis),\n  type: { codeHash: ACCOUNT_TYPE, hashType: type, args: {{namespace 20B}} },\n  data: AccountData{ version 0x03, witness_hash, {{next = 0}}, expires,\n        {{owner = 0}}, {{manager = 0}}, {{label empty (98B)}} }\n}"
+        }
+      ],
+      "sections": [
+        {
+          "title": {
+            "zh": "witnesses（WitnessArgs）",
+            "en": "witnesses (WitnessArgs)"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "witnesses[0]",
+                "en": "witnesses[0]"
+              },
+              "body": "{ output_type: {{records of output[0]}} }\n// no action is read when there are no AccountCell inputs"
+            }
+          ]
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "data：AccountData v3（98 字节头 + label）",
+            "en": "data: AccountData v3 (98-byte header + label)"
+          },
+          "layout": [
+            {
+              "name": "version",
+              "size": "1B",
+              "role": {
+                "zh": "布局版本",
+                "en": "layout version"
+              },
+              "color": 1,
+              "flex": 1,
+              "cons": "= 0x03",
+              "err": "20"
+            },
+            {
+              "name": "witness_hash",
+              "size": "32B",
+              "role": {
+                "zh": "blake2b(记录 payload)，记录在 witnesses[i].output_type",
+                "en": "blake2b(records payload); records live in witnesses[i].output_type"
+              },
+              "color": 2,
+              "flex": 3,
+              "cons": "= blake2b(witness)",
+              "err": "21"
+            },
+            {
+              "name": "next",
+              "size": "20B",
+              "role": {
+                "zh": "环中后继名字的 id（id = blake2b(label)[0..20]，不存储）",
+                "en": "id of the successor in the ring (id = blake2b(label)[0..20], not stored)"
+              },
+              "color": 3,
+              "flex": 2,
+              "cons": {
+                "zh": "重链规则",
+                "en": "relink rules"
+              },
+              "err": "24 / 25"
+            },
+            {
+              "name": "expires",
+              "size": "5B LE",
+              "role": {
+                "zh": "到期 unix 秒",
+                "en": "expiry, unix seconds"
+              },
+              "color": 4,
+              "flex": 1,
+              "cons": {
+                "zh": "注册 1–10 年",
+                "en": "1–10 years at register"
+              },
+              "err": "39 / 43"
+            },
+            {
+              "name": "owner",
+              "size": "20B",
+              "role": {
+                "zh": "owner lock hash 前 20 字节（同意 = 花费该 lock 下的输入）",
+                "en": "first 20 bytes of the owner lock hash (consent = spending an input under it)"
+              },
+              "color": 5,
+              "flex": 2,
+              "cons": {
+                "zh": "≠ 0，≠ account-lock",
+                "en": "≠ 0, ≠ account-lock"
+              },
+              "err": "38 / 44"
+            },
+            {
+              "name": "manager",
+              "size": "20B",
+              "role": {
+                "zh": "受托人 lock hash 前 20 字节，可改记录；无委托时 = owner",
+                "en": "delegate lock hash prefix; may edit records; = owner when none"
+              },
+              "color": 6,
+              "flex": 2,
+              "cons": {
+                "zh": "≠ 0，≠ account-lock",
+                "en": "≠ 0, ≠ account-lock"
+              },
+              "err": "38 / 44"
+            },
+            {
+              "name": "label",
+              "size": "1–40B",
+              "role": {
+                "zh": "名字（不含 .cell），a-z 0-9 -，最多一个点（子名）",
+                "en": "the name without .cell; a-z 0-9 -, at most one dot (sub-name)"
+              },
+              "color": 1,
+              "flex": 2,
+              "cons": {
+                "zh": "字符集 / 长度 / 深度",
+                "en": "charset / length / depth"
+              },
+              "err": "30 / 31 / 45"
+            }
+          ],
+          "hex": [
+            [
+              "version",
+              "0x{{03}}"
+            ],
+            [
+              "witness_hash",
+              "0x5f0c…(32B)"
+            ],
+            [
+              "next",
+              "0x9a1e…(20B)"
+            ],
+            [
+              "expires",
+              "0x{{80b7c96e00}}  ← 0x6ec9b780 = 1858713472 (2028-11-24 UTC)"
+            ],
+            [
+              "owner",
+              "0x3c4b…(20B)"
+            ],
+            [
+              "manager",
+              "0x3c4b…(20B, = owner)"
+            ],
+            [
+              "label",
+              "0x{{616c696365}}  ← \"alice\""
+            ]
+          ]
+        },
+        {
+          "label": {
+            "zh": "type.args（20 字节）",
+            "en": "type.args (20 bytes)"
+          },
+          "layout": [
+            {
+              "name": "namespace",
+              "size": "20B",
+              "role": {
+                "zh": "genesis token 的 type hash 前 20 字节；也是 commitment 的一部分",
+                "en": "first 20 bytes of the genesis token type hash; also part of the commitment"
+              },
+              "color": 1,
+              "flex": 4,
+              "cons": "≥ 20B",
+              "err": "4"
+            }
+          ],
+          "hex": [
+            [
+              "args",
+              "0x1a2b…(20B)"
+            ]
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "genesis token",
+          "cond": {
+            "zh": "消耗 type hash 前 20 字节 = args 的输入",
+            "en": "consume an input whose type hash[0..20] = args"
+          },
+          "err": "34"
+        },
+        {
+          "field": {
+            "zh": "输出数",
+            "en": "outputs"
+          },
+          "cond": {
+            "zh": "恰好 1 个 AccountCell 输出",
+            "en": "exactly 1 AccountCell output"
+          },
+          "err": "25"
+        },
+        {
+          "field": "id / next",
+          "cond": {
+            "zh": "id = next = 0",
+            "en": "id = next = 0"
+          },
+          "err": "25"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "长度恰为 98（空 label），owner = manager = 0",
+            "en": "exactly 98 bytes (empty label), owner = manager = 0"
+          },
+          "err": "20"
+        },
+        {
+          "field": "witness",
+          "cond": {
+            "zh": "blake2b(witnesses[0].output_type) = witness_hash",
+            "en": "blake2b(witnesses[0].output_type) = witness_hash"
+          },
+          "err": "21"
+        }
+      ],
+      "extras": [
+        {
+          "zh": "源码中 34 GenesisSeedMissing 仍可触发（SPEC.md 说 34 不可达，与代码不符）",
+          "en": "Code 34 GenesisSeedMissing is still reachable in code (SPEC.md says 34 is unreachable — doc/code discrepancy)"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 2",
+      "title": {
+        "zh": "注册 register",
+        "en": "Register"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "input[0] 前驱 AccountCell p",
+            "en": "input[0] predecessor AccountCell p"
+          },
+          "body": "Cell{\n  capacity: P,\n  lock: { codeHash: ACCOUNT_LOCK, hashType: type, args: 0x },\n  type: { codeHash: ACCOUNT_TYPE, hashType: type, args: {{namespace 20B}} },\n  data: AccountData{ version 0x03, witness_hash, next, expires,\n        owner, manager, label,\n        next: N  // x.id ∈ (p.id, N) }\n}"
+        },
+        {
+          "label": {
+            "zh": "input[1] CommitCell（注册者自己的）",
+            "en": "input[1] CommitCell (registrant’s own)"
+          },
+          "body": "Cell{\n  since: {{0xC0… relative timestamp ≥ 60 s}},\n  capacity: any,\n  lock: {{registrant lock: hash[0..20] = x.owner, not anyone-can-pay}},\n  type: null  // not checked,\n  data: {{blake2b(namespace ‖ label ‖ owner20 ‖ secret32)}}  // exactly 32B\n}\n// any input position; found by data match"
+        },
+        {
+          "label": {
+            "zh": "input[2] 付款 cell（注册者）",
+            "en": "input[2] payment cell (registrant)"
+          },
+          "body": "Cell{\n  capacity: fee + rent + tx fee,\n  lock: registrant lock,\n  type: null,\n  data: 0x\n}\n// not checked by the script; just funds the outputs"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "output[0] p′",
+            "en": "output[0] p′"
+          },
+          "body": "Cell{\n  capacity: {{≥ P}},\n  lock: {{{ codeHash: ACCOUNT_LOCK, hashType: type, args: 0x }}},\n  type: { codeHash: ACCOUNT_TYPE, hashType: type, args: {{namespace 20B}} },\n  data: AccountData{ version 0x03, witness_hash, next, expires,\n        owner, manager, label,\n        {{next = x.id}}  // every other field = p }\n}"
+        },
+        {
+          "label": {
+            "zh": "output[1] 新名字 x",
+            "en": "output[1] new name x"
+          },
+          "body": "Cell{\n  capacity: {{≥ 240 CKB}},\n  lock: {{{ codeHash: ACCOUNT_LOCK, hashType: type, args: 0x }}},\n  type: { codeHash: ACCOUNT_TYPE, hashType: type, args: {{namespace 20B}} },\n  data: AccountData{ version 0x03, witness_hash,\n        next: {{p.next}}, expires: {{now + 1–10 y}},\n        owner: {{≠0, ≠ account-lock}}, manager: {{= owner}},\n        label: {{a-z0-9-, 1–40B, ≤1 dot}} }\n}"
+        },
+        {
+          "label": {
+            "zh": "output[2] treasury",
+            "en": "output[2] treasury"
+          },
+          "body": "Cell{\n  capacity: {{Σ pure ≥ fee×factor − referral + sale fees owed}},\n  lock: {{lock hash == TREASURY_LOCK_HASH}} (mainnet 0x57d9…742d),\n  type: {{null}},  // typed or non-empty-data outputs do not count\n  data: 0x\n}"
+        },
+        {
+          "label": {
+            "zh": "output[3] 找零（可选）",
+            "en": "output[3] change (optional)"
+          },
+          "body": "Cell{\n  capacity: rest,\n  lock: registrant lock,\n  type: null,\n  data: 0x\n}"
+        }
+      ],
+      "sections": [
+        {
+          "title": {
+            "zh": "cell_deps",
+            "en": "cell_deps"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "cell_dep：ACCOUNT_TYPE 代码",
+                "en": "cell_dep: ACCOUNT_TYPE code"
+              },
+              "body": "code cell (mainnet 0x3072…bf0b:0)\n// needed by CKB to run the type; not read by the script"
+            },
+            {
+              "label": {
+                "zh": "cell_dep：ACCOUNT_LOCK 代码",
+                "en": "cell_dep: ACCOUNT_LOCK code"
+              },
+              "body": "code cell (mainnet 0x522c…9268:1)\n// needed by CKB to run the lock; not read by the script"
+            },
+            {
+              "label": {
+                "zh": "cell_dep：付款 / 授权 lock 的代码",
+                "en": "cell_dep: code of the payer / owner locks"
+              },
+              "body": "e.g. secp256k1 dep_group — for the other inputs’ locks"
+            },
+            {
+              "label": {
+                "zh": "cell_dep：价格 cell（可选）",
+                "en": "cell_dep: price cell (optional)"
+              },
+              "body": "Cell{ type: hash == {{PRICE_CELL_TYPE_HASH}} (mainnet 0x3f1c…7586),\n      data: 0x01 ‖ bps u32 LE }\n// price_factor(): found by type hash; missing/malformed → full price"
+            },
+            {
+              "label": {
+                "zh": "cell_dep：推荐人名字（可选）",
+                "en": "cell_dep: inviter name (optional)"
+              },
+              "body": "Cell{ type: {{same ACCOUNT_TYPE script}}, data: AccountData{ owner: I } }\n// referral_discount(): every cell dep with this type is a candidate;\n// pays only if I ≠ treasury, no input under I, and pure outputs (no type and empty data) to I ≥ cut"
+            }
+          ]
+        },
+        {
+          "title": {
+            "zh": "header_deps",
+            "en": "header_deps"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "header_deps：CommitCell 所在区块",
+                "en": "header_deps: the CommitCell’s block"
+              },
+              "body": "block hash of input[1]’s creating block\n// header_time_seconds(): load_header(commit input) → now = timestamp/1000\n// term = x.expires − now must be 1–10 years"
+            }
+          ]
+        },
+        {
+          "title": {
+            "zh": "witnesses（WitnessArgs）",
+            "en": "witnesses (WitnessArgs)"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "witnesses[0]",
+                "en": "witnesses[0]"
+              },
+              "body": "{ lock: (input[0] is account-lock: unused),\n  input_type:  {{\"register\"}}           // action, ASCII\n  output_type: {{records of output[0] p′}} // blake2b = p′.witness_hash }"
+            },
+            {
+              "label": {
+                "zh": "witnesses[1]",
+                "en": "witnesses[1]"
+              },
+              "body": "{ lock: signature for input[1]’s lock group,\n  input_type:  {{secret 32B}}              // witnesses[x index].input_type\n  output_type: {{records of output[1] x}} // blake2b = x.witness_hash }"
+            },
+            {
+              "label": {
+                "zh": "witnesses[2…]",
+                "en": "witnesses[2…]"
+              },
+              "body": "other inputs’ lock witnesses (may be empty in the same lock group)"
+            }
+          ]
+        },
+        {
+          "title": {
+            "zh": "子名时额外需要 / sub-name only（label 含一个点，如 shop.alice）",
+            "en": "sub-name only (label has one dot, e.g. shop.alice)"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "额外 cell_dep：父名 AccountCell",
+                "en": "extra cell_dep: parent AccountCell"
+              },
+              "body": "Cell{ type: {{same ACCOUNT_TYPE script}},\n      data: AccountData{ label: {{= parent (\"alice\")}}, owner: PO, expires: PE } }\n// require_parent(): missing → 40"
+            },
+            {
+              "label": {
+                "zh": "额外 input：父 owner 的 cell",
+                "en": "extra input: a cell of the parent owner"
+              },
+              "body": "Cell{ lock: {{hash[0..20] = PO, consenting lock}} }\n// require_owner(PO) → 29; and x.expires ≤ PE → 41\n// fee = parent length line / 5"
+            }
+          ]
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "data：AccountData v3（98 字节头 + label）",
+            "en": "data: AccountData v3 (98-byte header + label)"
+          },
+          "layout": [
+            {
+              "name": "version",
+              "size": "1B",
+              "role": {
+                "zh": "布局版本",
+                "en": "layout version"
+              },
+              "color": 1,
+              "flex": 1,
+              "cons": "= 0x03",
+              "err": "20"
+            },
+            {
+              "name": "witness_hash",
+              "size": "32B",
+              "role": {
+                "zh": "blake2b(记录 payload)，记录在 witnesses[i].output_type",
+                "en": "blake2b(records payload); records live in witnesses[i].output_type"
+              },
+              "color": 2,
+              "flex": 3,
+              "cons": "= blake2b(witness)",
+              "err": "21"
+            },
+            {
+              "name": "next",
+              "size": "20B",
+              "role": {
+                "zh": "环中后继名字的 id（id = blake2b(label)[0..20]，不存储）",
+                "en": "id of the successor in the ring (id = blake2b(label)[0..20], not stored)"
+              },
+              "color": 3,
+              "flex": 2,
+              "cons": {
+                "zh": "重链规则",
+                "en": "relink rules"
+              },
+              "err": "24 / 25"
+            },
+            {
+              "name": "expires",
+              "size": "5B LE",
+              "role": {
+                "zh": "到期 unix 秒",
+                "en": "expiry, unix seconds"
+              },
+              "color": 4,
+              "flex": 1,
+              "cons": {
+                "zh": "注册 1–10 年",
+                "en": "1–10 years at register"
+              },
+              "err": "39 / 43"
+            },
+            {
+              "name": "owner",
+              "size": "20B",
+              "role": {
+                "zh": "owner lock hash 前 20 字节（同意 = 花费该 lock 下的输入）",
+                "en": "first 20 bytes of the owner lock hash (consent = spending an input under it)"
+              },
+              "color": 5,
+              "flex": 2,
+              "cons": {
+                "zh": "≠ 0，≠ account-lock",
+                "en": "≠ 0, ≠ account-lock"
+              },
+              "err": "38 / 44"
+            },
+            {
+              "name": "manager",
+              "size": "20B",
+              "role": {
+                "zh": "受托人 lock hash 前 20 字节，可改记录；无委托时 = owner",
+                "en": "delegate lock hash prefix; may edit records; = owner when none"
+              },
+              "color": 6,
+              "flex": 2,
+              "cons": {
+                "zh": "≠ 0，≠ account-lock",
+                "en": "≠ 0, ≠ account-lock"
+              },
+              "err": "38 / 44"
+            },
+            {
+              "name": "label",
+              "size": "1–40B",
+              "role": {
+                "zh": "名字（不含 .cell），a-z 0-9 -，最多一个点（子名）",
+                "en": "the name without .cell; a-z 0-9 -, at most one dot (sub-name)"
+              },
+              "color": 1,
+              "flex": 2,
+              "cons": {
+                "zh": "字符集 / 长度 / 深度",
+                "en": "charset / length / depth"
+              },
+              "err": "30 / 31 / 45"
+            }
+          ],
+          "hex": [
+            [
+              "version",
+              "0x{{03}}"
+            ],
+            [
+              "witness_hash",
+              "0x5f0c…(32B)"
+            ],
+            [
+              "next",
+              "0x9a1e…(20B)"
+            ],
+            [
+              "expires",
+              "0x{{80b7c96e00}}  ← 0x6ec9b780 = 1858713472 (2028-11-24 UTC)"
+            ],
+            [
+              "owner",
+              "0x3c4b…(20B)"
+            ],
+            [
+              "manager",
+              "0x3c4b…(20B, = owner)"
+            ],
+            [
+              "label",
+              "0x{{616c696365}}  ← \"alice\""
+            ]
+          ]
+        },
+        {
+          "label": {
+            "zh": "witnesses[i]（WitnessArgs，i = 该 AccountCell 的输出序号）",
+            "en": "witnesses[i] (WitnessArgs, i = output index of the AccountCell)"
+          },
+          "layout": [
+            {
+              "name": "witnesses[0].input_type",
+              "size": "ASCII",
+              "role": {
+                "zh": "动作名：register / renew / edit_records / edit_manager / transfer / recycle",
+                "en": "action name: register / renew / edit_records / edit_manager / transfer / recycle"
+              },
+              "color": 1,
+              "flex": 2,
+              "cons": {
+                "zh": "必须可识别",
+                "en": "must be known"
+              },
+              "err": "23"
+            },
+            {
+              "name": "witnesses[i].output_type",
+              "size": "records",
+              "role": {
+                "zh": "记录集：u16 LE 条数，每条 key(u8 len) ‖ label(u8 len) ‖ value(u16 len) ‖ ttl(u32)",
+                "en": "records: u16 LE count; each key(u8 len) ‖ label(u8 len) ‖ value(u16 len) ‖ ttl(u32)"
+              },
+              "color": 2,
+              "flex": 3,
+              "cons": "blake2b = witness_hash",
+              "err": "21"
+            },
+            {
+              "name": "witnesses[x].input_type",
+              "size": "32B",
+              "role": {
+                "zh": "register 时新名字 x 的 commit secret",
+                "en": "commit secret of the new name x (register only)"
+              },
+              "color": 3,
+              "flex": 2,
+              "cons": {
+                "zh": "= 32 字节",
+                "en": "= 32 bytes"
+              },
+              "err": "36"
+            }
+          ],
+          "hex": [
+            [
+              "witnesses[0].input_type",
+              "0x{{7265676973746572}}  ← \"register\""
+            ],
+            [
+              "output_type",
+              "0x{{0100}} 0b 616464726573732e333039 00 2a00 636b62317179… 00000000  ← 1 record: address.309"
+            ]
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": {
+            "zh": "数量",
+            "en": "arity"
+          },
+          "cond": {
+            "zh": "1 个 AccountCell 进，2 个出",
+            "en": "1 AccountCell in, 2 out"
+          },
+          "err": "25"
+        },
+        {
+          "field": "x.id",
+          "cond": {
+            "zh": "≠ 0（根）",
+            "en": "≠ 0 (root)"
+          },
+          "err": "46"
+        },
+        {
+          "field": "x.owner",
+          "cond": {
+            "zh": "非全 0",
+            "en": "not all-zero"
+          },
+          "err": "38"
+        },
+        {
+          "field": "x.owner / manager",
+          "cond": {
+            "zh": "≠ account-lock hash 前 20 字节",
+            "en": "≠ account-lock hash[0..20]"
+          },
+          "err": "44"
+        },
+        {
+          "field": "x.manager",
+          "cond": {
+            "zh": "= x.owner",
+            "en": "= x.owner"
+          },
+          "err": "27"
+        },
+        {
+          "field": "x.id",
+          "cond": {
+            "zh": "严格位于 (p.id, p.next)（环绕）",
+            "en": "strictly inside (p.id, p.next) (wrap-around)"
+          },
+          "err": "24"
+        },
+        {
+          "field": "relink",
+          "cond": {
+            "zh": "p′.id = p.id，p′.next = x.id，x.next = p.next",
+            "en": "p′.id = p.id, p′.next = x.id, x.next = p.next"
+          },
+          "err": "25"
+        },
+        {
+          "field": "p′",
+          "cond": {
+            "zh": "witness_hash / expires / owner / manager / label / lock 不变，capacity 不减",
+            "en": "witness_hash / expires / owner / manager / label / lock unchanged, capacity not reduced"
+          },
+          "err": "27"
+        },
+        {
+          "field": "x.capacity",
+          "cond": {
+            "zh": "≥ 240 CKB",
+            "en": "≥ 240 CKB"
+          },
+          "err": "35"
+        },
+        {
+          "field": "lock",
+          "cond": {
+            "zh": "输出 AccountCell lock = 输入的 account-lock",
+            "en": "output AccountCell lock = the input account-lock"
+          },
+          "err": "48"
+        },
+        {
+          "field": "label",
+          "cond": {
+            "zh": "1–40 字节 / 字符集 / 最多一个点",
+            "en": "1–40 bytes / charset / at most one dot"
+          },
+          "err": "31 / 30 / 45"
+        },
+        {
+          "field": "secret",
+          "cond": {
+            "zh": "witnesses[x].input_type 为 32 字节且有匹配 CommitCell",
+            "en": "witnesses[x].input_type is 32 bytes and a matching CommitCell exists"
+          },
+          "err": "36"
+        },
+        {
+          "field": "CommitCell",
+          "cond": {
+            "zh": "holder = x.owner 且 consents",
+            "en": "holder = x.owner and consents"
+          },
+          "err": "47"
+        },
+        {
+          "field": "CommitCell since",
+          "cond": {
+            "zh": "相对时间戳 ≥ 60 s",
+            "en": "relative timestamp ≥ 60 s"
+          },
+          "err": "37"
+        },
+        {
+          "field": "expires",
+          "cond": {
+            "zh": "期限 ≥ 1 年（以 CommitCell 区块时间为 now）",
+            "en": "term ≥ 1 year (now = CommitCell block time)"
+          },
+          "err": "39"
+        },
+        {
+          "field": "expires",
+          "cond": {
+            "zh": "≤ 10 年",
+            "en": "≤ 10 years"
+          },
+          "err": "43"
+        },
+        {
+          "field": {
+            "zh": "子名",
+            "en": "sub-name"
+          },
+          "cond": {
+            "zh": "父名 cell dep 存在；父 owner 同意；不晚于父到期",
+            "en": "parent cell dep exists; parent owner consents; not outliving the parent"
+          },
+          "err": "40 / 29 / 41"
+        },
+        {
+          "field": "treasury",
+          "cond": {
+            "zh": "纯输出（无 type 且 data 为空）足额",
+            "en": "pure outputs (no type and empty data) paid in full"
+          },
+          "err": "42"
+        }
+      ],
+      "extras": [
+        {
+          "zh": "费用表（每年）：≥5 字符 5,000；4：20,000；3：80,000；2：200,000；1：500,000 CKB；子名 = 父档 / 5；每 5 年免 1 年；价格 cell（cell dep）只能打折；推荐人（cell dep 中的名字）拿 10%。",
+          "en": "Fee per year: ≥5 chars 5,000; 4: 20,000; 3: 80,000; 2: 200,000; 1: 500,000 CKB; sub-name = parent line / 5; one year in five free; the price cell (cell dep) can only discount; an inviter (a name in cell deps) gets 10%."
+        }
+      ]
+    },
+    {
+      "tag": "1 → 1",
+      "title": {
+        "zh": "续期 renew",
+        "en": "Renew"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "input[0] 名字 AccountCell",
+            "en": "input[0] name AccountCell"
+          },
+          "body": "Cell{\n  capacity: P,\n  lock: { codeHash: ACCOUNT_LOCK, hashType: type, args: 0x },\n  type: { codeHash: ACCOUNT_TYPE, hashType: type, args: {{namespace 20B}} },\n  data: AccountData{ version 0x03, witness_hash, next, expires,\n        owner, manager, label }\n}"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "output[0] 名字′",
+            "en": "output[0] name′"
+          },
+          "body": "Cell{\n  capacity: {{≥ P}},\n  lock: {{{ codeHash: ACCOUNT_LOCK, hashType: type, args: 0x }}},\n  type: { codeHash: ACCOUNT_TYPE, hashType: type, args: {{namespace 20B}} },\n  data: AccountData{ {{expires: E′ > E (≤ +10 y)}}; all else unchanged }\n}"
+        },
+        {
+          "label": {
+            "zh": "output[1] treasury",
+            "en": "output[1] treasury"
+          },
+          "body": "Cell{\n  capacity: {{Σ pure ≥ fee(label, years)×factor + sale fees owed}},\n  lock: {{lock hash == TREASURY_LOCK_HASH}},\n  type: {{null}},\n  data: 0x\n}"
+        }
+      ],
+      "sections": [
+        {
+          "title": {
+            "zh": "cell_deps",
+            "en": "cell_deps"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "cell_dep：ACCOUNT_TYPE 代码",
+                "en": "cell_dep: ACCOUNT_TYPE code"
+              },
+              "body": "code cell (mainnet 0x3072…bf0b:0)\n// needed by CKB to run the type; not read by the script"
+            },
+            {
+              "label": {
+                "zh": "cell_dep：ACCOUNT_LOCK 代码",
+                "en": "cell_dep: ACCOUNT_LOCK code"
+              },
+              "body": "code cell (mainnet 0x522c…9268:1)\n// needed by CKB to run the lock; not read by the script"
+            },
+            {
+              "label": {
+                "zh": "cell_dep：付款 / 授权 lock 的代码",
+                "en": "cell_dep: code of the payer / owner locks"
+              },
+              "body": "e.g. secp256k1 dep_group — for the other inputs’ locks"
+            },
+            {
+              "label": {
+                "zh": "cell_dep：价格 cell（可选）",
+                "en": "cell_dep: price cell (optional)"
+              },
+              "body": "Cell{ type: hash == {{PRICE_CELL_TYPE_HASH}} (mainnet 0x3f1c…7586),\n      data: 0x01 ‖ bps u32 LE }\n// price_factor(): found by type hash; missing/malformed → full price"
+            }
+          ]
+        },
+        {
+          "title": {
+            "zh": "witnesses（WitnessArgs）",
+            "en": "witnesses (WitnessArgs)"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "witnesses[0]",
+                "en": "witnesses[0]"
+              },
+              "body": "{ input_type:  {{\"renew\"}},\n  output_type: {{records of output[0]}} // blake2b = witness_hash }"
+            }
+          ]
+        },
+        {
+          "title": {
+            "zh": "子名时额外需要 / sub-name only",
+            "en": "sub-name only"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "额外 cell_dep：父名 AccountCell",
+                "en": "extra cell_dep: parent AccountCell"
+              },
+              "body": "Cell{ type: same ACCOUNT_TYPE, data: { label: {{= parent}}, owner: PO, expires: {{≥ E′}} } }  // 40 / 41"
+            },
+            {
+              "label": {
+                "zh": "额外 input：父 owner 的 cell",
+                "en": "extra input: a cell of the parent owner"
+              },
+              "body": "Cell{ lock: {{hash[0..20] = PO}} }  // 29"
+            }
+          ]
+        }
+      ],
+      "layouts": [],
+      "limits": [
+        {
+          "field": {
+            "zh": "数量",
+            "en": "arity"
+          },
+          "cond": {
+            "zh": "1 进 1 出",
+            "en": "1 in 1 out"
+          },
+          "err": "27"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "只允许 expires 增大；id/next/label/owner/manager/witness_hash 不变",
+            "en": "only expires grows; id/next/label/owner/manager/witness_hash unchanged"
+          },
+          "err": "27"
+        },
+        {
+          "field": "lock / capacity",
+          "cond": {
+            "zh": "lock 不变，capacity 不减",
+            "en": "lock unchanged, capacity not reduced"
+          },
+          "err": "27"
+        },
+        {
+          "field": "expires",
+          "cond": {
+            "zh": "延长 ≤ 10 年",
+            "en": "extension ≤ 10 years"
+          },
+          "err": "43"
+        },
+        {
+          "field": "treasury",
+          "cond": {
+            "zh": "纯输出（无 type 且 data 为空）足额",
+            "en": "pure outputs (no type and empty data) paid in full"
+          },
+          "err": "42"
+        },
+        {
+          "field": {
+            "zh": "子名",
+            "en": "sub-name"
+          },
+          "cond": {
+            "zh": "父名 cell dep；不晚于父；父 owner 同意",
+            "en": "parent cell dep; not outliving it; parent owner consents"
+          },
+          "err": "40 / 41 / 29"
+        }
+      ],
+      "extras": [
+        {
+          "zh": "普通名字任何人可续期；子名只有父 owner 能续。",
+          "en": "Anyone may renew a plain name; only the parent owner can renew a sub-name."
+        }
+      ]
+    },
+    {
+      "tag": "1 → 1",
+      "title": {
+        "zh": "改记录 edit_records",
+        "en": "Edit records"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "input[0] 名字 AccountCell",
+            "en": "input[0] name AccountCell"
+          },
+          "body": "Cell{\n  capacity: P,\n  lock: { codeHash: ACCOUNT_LOCK, hashType: type, args: 0x },\n  type: { codeHash: ACCOUNT_TYPE, hashType: type, args: {{namespace 20B}} },\n  data: AccountData{ version 0x03, witness_hash, next, expires,\n        owner, manager, label }\n}"
+        },
+        {
+          "label": {
+            "zh": "input[1] owner 或 manager 授权 cell",
+            "en": "input[1] owner / manager authorization cell"
+          },
+          "body": "Cell{\n  capacity: any,\n  lock: {{lock hash[0..20] = owner / manager, a consenting lock}},\n  type: any,\n  data: any\n}\n// any position; spending it is the consent (no signature read by the type)"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "output[0] 名字′",
+            "en": "output[0] name′"
+          },
+          "body": "Cell{\n  capacity: {{≥ P}},\n  lock: {{{ codeHash: ACCOUNT_LOCK, hashType: type, args: 0x }}},\n  type: { codeHash: ACCOUNT_TYPE, hashType: type, args: {{namespace 20B}} },\n  data: AccountData{ {{witness_hash may change}}; all else unchanged }\n}"
+        }
+      ],
+      "sections": [
+        {
+          "title": {
+            "zh": "cell_deps",
+            "en": "cell_deps"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "cell_dep：ACCOUNT_TYPE 代码",
+                "en": "cell_dep: ACCOUNT_TYPE code"
+              },
+              "body": "code cell (mainnet 0x3072…bf0b:0)\n// needed by CKB to run the type; not read by the script"
+            },
+            {
+              "label": {
+                "zh": "cell_dep：ACCOUNT_LOCK 代码",
+                "en": "cell_dep: ACCOUNT_LOCK code"
+              },
+              "body": "code cell (mainnet 0x522c…9268:1)\n// needed by CKB to run the lock; not read by the script"
+            },
+            {
+              "label": {
+                "zh": "cell_dep：付款 / 授权 lock 的代码",
+                "en": "cell_dep: code of the payer / owner locks"
+              },
+              "body": "e.g. secp256k1 dep_group — for the other inputs’ locks"
+            }
+          ]
+        },
+        {
+          "title": {
+            "zh": "witnesses（WitnessArgs）",
+            "en": "witnesses (WitnessArgs)"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "witnesses[0]",
+                "en": "witnesses[0]"
+              },
+              "body": "{ input_type:  {{\"edit_records\"}},\n  output_type: {{records of output[0]}} // blake2b = witness_hash }"
+            }
+          ]
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "witnesses[i]（WitnessArgs，i = 该 AccountCell 的输出序号）",
+            "en": "witnesses[i] (WitnessArgs, i = output index of the AccountCell)"
+          },
+          "layout": [
+            {
+              "name": "witnesses[0].input_type",
+              "size": "ASCII",
+              "role": {
+                "zh": "动作名：register / renew / edit_records / edit_manager / transfer / recycle",
+                "en": "action name: register / renew / edit_records / edit_manager / transfer / recycle"
+              },
+              "color": 1,
+              "flex": 2,
+              "cons": {
+                "zh": "必须可识别",
+                "en": "must be known"
+              },
+              "err": "23"
+            },
+            {
+              "name": "witnesses[i].output_type",
+              "size": "records",
+              "role": {
+                "zh": "记录集：u16 LE 条数，每条 key(u8 len) ‖ label(u8 len) ‖ value(u16 len) ‖ ttl(u32)",
+                "en": "records: u16 LE count; each key(u8 len) ‖ label(u8 len) ‖ value(u16 len) ‖ ttl(u32)"
+              },
+              "color": 2,
+              "flex": 3,
+              "cons": "blake2b = witness_hash",
+              "err": "21"
+            },
+            {
+              "name": "witnesses[x].input_type",
+              "size": "32B",
+              "role": {
+                "zh": "register 时新名字 x 的 commit secret",
+                "en": "commit secret of the new name x (register only)"
+              },
+              "color": 3,
+              "flex": 2,
+              "cons": {
+                "zh": "= 32 字节",
+                "en": "= 32 bytes"
+              },
+              "err": "36"
+            }
+          ],
+          "hex": [
+            [
+              "witnesses[0].input_type",
+              "0x{{7265676973746572}}  ← \"register\""
+            ],
+            [
+              "output_type",
+              "0x{{0100}} 0b 616464726573732e333039 00 2a00 636b62317179… 00000000  ← 1 record: address.309"
+            ]
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": {
+            "zh": "数量",
+            "en": "arity"
+          },
+          "cond": {
+            "zh": "1 进 1 出",
+            "en": "1 in 1 out"
+          },
+          "err": "27"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "只允许 witness_hash 变化",
+            "en": "only witness_hash may change"
+          },
+          "err": "27"
+        },
+        {
+          "field": "lock / capacity",
+          "cond": {
+            "zh": "lock 不变，capacity 不减",
+            "en": "lock unchanged, capacity not reduced"
+          },
+          "err": "27"
+        },
+        {
+          "field": {
+            "zh": "授权",
+            "en": "auth"
+          },
+          "cond": {
+            "zh": "owner 或 manager 同意",
+            "en": "owner or manager consents"
+          },
+          "err": "29"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 1",
+      "title": {
+        "zh": "改受托人 edit_manager",
+        "en": "Edit manager"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "input[0] 名字 AccountCell",
+            "en": "input[0] name AccountCell"
+          },
+          "body": "Cell{\n  capacity: P,\n  lock: { codeHash: ACCOUNT_LOCK, hashType: type, args: 0x },\n  type: { codeHash: ACCOUNT_TYPE, hashType: type, args: {{namespace 20B}} },\n  data: AccountData{ version 0x03, witness_hash, next, expires,\n        owner, manager, label }\n}"
+        },
+        {
+          "label": {
+            "zh": "input[1] owner 授权 cell",
+            "en": "input[1] owner authorization cell"
+          },
+          "body": "Cell{\n  capacity: any,\n  lock: {{lock hash[0..20] = owner, a consenting lock}},\n  type: any,\n  data: any\n}\n// any position; spending it is the consent (no signature read by the type)"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "output[0] 名字′",
+            "en": "output[0] name′"
+          },
+          "body": "Cell{\n  capacity: {{≥ P}},\n  lock: {{{ codeHash: ACCOUNT_LOCK, hashType: type, args: 0x }}},\n  type: { codeHash: ACCOUNT_TYPE, hashType: type, args: {{namespace 20B}} },\n  data: AccountData{ {{manager: ≠0, ≠ account-lock}}; all else unchanged }\n}"
+        }
+      ],
+      "sections": [
+        {
+          "title": {
+            "zh": "cell_deps",
+            "en": "cell_deps"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "cell_dep：ACCOUNT_TYPE 代码",
+                "en": "cell_dep: ACCOUNT_TYPE code"
+              },
+              "body": "code cell (mainnet 0x3072…bf0b:0)\n// needed by CKB to run the type; not read by the script"
+            },
+            {
+              "label": {
+                "zh": "cell_dep：ACCOUNT_LOCK 代码",
+                "en": "cell_dep: ACCOUNT_LOCK code"
+              },
+              "body": "code cell (mainnet 0x522c…9268:1)\n// needed by CKB to run the lock; not read by the script"
+            },
+            {
+              "label": {
+                "zh": "cell_dep：付款 / 授权 lock 的代码",
+                "en": "cell_dep: code of the payer / owner locks"
+              },
+              "body": "e.g. secp256k1 dep_group — for the other inputs’ locks"
+            }
+          ]
+        },
+        {
+          "title": {
+            "zh": "witnesses（WitnessArgs）",
+            "en": "witnesses (WitnessArgs)"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "witnesses[0]",
+                "en": "witnesses[0]"
+              },
+              "body": "{ input_type:  {{\"edit_manager\"}},\n  output_type: {{records of output[0]}} // blake2b = witness_hash }"
+            }
+          ]
+        }
+      ],
+      "layouts": [],
+      "limits": [
+        {
+          "field": {
+            "zh": "数量",
+            "en": "arity"
+          },
+          "cond": {
+            "zh": "1 进 1 出",
+            "en": "1 in 1 out"
+          },
+          "err": "27"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "只允许 manager 变化（witness_hash 也不变）",
+            "en": "only manager may change (witness_hash fixed)"
+          },
+          "err": "27"
+        },
+        {
+          "field": "manager",
+          "cond": {
+            "zh": "非全 0",
+            "en": "not all-zero"
+          },
+          "err": "38"
+        },
+        {
+          "field": "manager",
+          "cond": {
+            "zh": "≠ account-lock",
+            "en": "≠ account-lock"
+          },
+          "err": "44"
+        },
+        {
+          "field": "lock / capacity",
+          "cond": {
+            "zh": "lock 不变，capacity 不减",
+            "en": "lock unchanged, capacity not reduced"
+          },
+          "err": "27"
+        },
+        {
+          "field": {
+            "zh": "授权",
+            "en": "auth"
+          },
+          "cond": {
+            "zh": "owner 同意",
+            "en": "owner consents"
+          },
+          "err": "29"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 1",
+      "title": {
+        "zh": "转让 transfer",
+        "en": "Transfer"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "input[0] 名字 AccountCell",
+            "en": "input[0] name AccountCell"
+          },
+          "body": "Cell{\n  capacity: P,\n  lock: { codeHash: ACCOUNT_LOCK, hashType: type, args: 0x },\n  type: { codeHash: ACCOUNT_TYPE, hashType: type, args: {{namespace 20B}} },\n  data: AccountData{ version 0x03, witness_hash, next, expires,\n        owner, manager, label }\n}"
+        },
+        {
+          "label": {
+            "zh": "input[1] 原 owner 授权 cell",
+            "en": "input[1] owner authorization cell"
+          },
+          "body": "Cell{\n  capacity: any,\n  lock: {{lock hash[0..20] = owner, a consenting lock}},\n  type: any,\n  data: any\n}\n// any position; spending it is the consent (no signature read by the type)"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "output[0] 名字′",
+            "en": "output[0] name′"
+          },
+          "body": "Cell{\n  capacity: {{≥ P}},\n  lock: {{{ codeHash: ACCOUNT_LOCK, hashType: type, args: 0x }}},\n  type: { codeHash: ACCOUNT_TYPE, hashType: type, args: {{namespace 20B}} },\n  data: AccountData{ {{owner: B (≠0, ≠ account-lock)}}, {{manager = B}};\n        witness_hash / expires unchanged }\n}"
+        }
+      ],
+      "sections": [
+        {
+          "title": {
+            "zh": "cell_deps",
+            "en": "cell_deps"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "cell_dep：ACCOUNT_TYPE 代码",
+                "en": "cell_dep: ACCOUNT_TYPE code"
+              },
+              "body": "code cell (mainnet 0x3072…bf0b:0)\n// needed by CKB to run the type; not read by the script"
+            },
+            {
+              "label": {
+                "zh": "cell_dep：ACCOUNT_LOCK 代码",
+                "en": "cell_dep: ACCOUNT_LOCK code"
+              },
+              "body": "code cell (mainnet 0x522c…9268:1)\n// needed by CKB to run the lock; not read by the script"
+            },
+            {
+              "label": {
+                "zh": "cell_dep：付款 / 授权 lock 的代码",
+                "en": "cell_dep: code of the payer / owner locks"
+              },
+              "body": "e.g. secp256k1 dep_group — for the other inputs’ locks"
+            }
+          ]
+        },
+        {
+          "title": {
+            "zh": "witnesses（WitnessArgs）",
+            "en": "witnesses (WitnessArgs)"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "witnesses[0]",
+                "en": "witnesses[0]"
+              },
+              "body": "{ input_type:  {{\"transfer\"}},\n  output_type: {{records of output[0]}} // blake2b = witness_hash }"
+            }
+          ]
+        }
+      ],
+      "layouts": [],
+      "limits": [
+        {
+          "field": {
+            "zh": "数量",
+            "en": "arity"
+          },
+          "cond": {
+            "zh": "1 进 1 出",
+            "en": "1 in 1 out"
+          },
+          "err": "27"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "id/next/label/expires/witness_hash 不变（记录随名字走）",
+            "en": "id/next/label/expires/witness_hash unchanged (records travel)"
+          },
+          "err": "27"
+        },
+        {
+          "field": "owner",
+          "cond": {
+            "zh": "非全 0",
+            "en": "not all-zero"
+          },
+          "err": "38"
+        },
+        {
+          "field": "owner",
+          "cond": {
+            "zh": "≠ account-lock",
+            "en": "≠ account-lock"
+          },
+          "err": "44"
+        },
+        {
+          "field": "manager",
+          "cond": {
+            "zh": "= 新 owner",
+            "en": "= new owner"
+          },
+          "err": "27"
+        },
+        {
+          "field": "lock / capacity",
+          "cond": {
+            "zh": "lock 不变，capacity 不减",
+            "en": "lock unchanged, capacity not reduced"
+          },
+          "err": "27"
+        },
+        {
+          "field": {
+            "zh": "授权",
+            "en": "auth"
+          },
+          "cond": {
+            "zh": "原 owner 同意",
+            "en": "current owner consents"
+          },
+          "err": "29"
+        }
+      ]
+    },
+    {
+      "tag": "2 → 1",
+      "title": {
+        "zh": "回收 recycle",
+        "en": "Recycle"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "input[0] 前驱 AccountCell p",
+            "en": "input[0] predecessor p"
+          },
+          "body": "Cell{\n  capacity: P,\n  lock: { codeHash: ACCOUNT_LOCK, hashType: type, args: 0x },\n  type: { codeHash: ACCOUNT_TYPE, hashType: type, args: {{namespace 20B}} },\n  data: AccountData{ version 0x03, witness_hash, next, expires,\n        owner, manager, label,\n        next: x.id }\n}"
+        },
+        {
+          "label": {
+            "zh": "input[1] 过期名字 x",
+            "en": "input[1] expired name x"
+          },
+          "body": "Cell{\n  since: {{0x40… absolute timestamp ≥ x.expires + 2,592,000}},\n  capacity: X,\n  lock: { codeHash: ACCOUNT_LOCK, hashType: type, args: 0x },\n  type: { codeHash: ACCOUNT_TYPE, hashType: type, args: {{namespace 20B}} },\n  data: AccountData{ version 0x03, witness_hash, next, expires,\n        owner, manager, label,\n        next: N }\n}"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "output[0] p′",
+            "en": "output[0] p′"
+          },
+          "body": "Cell{\n  capacity: {{≥ P}},\n  lock: {{{ codeHash: ACCOUNT_LOCK, hashType: type, args: 0x }}},\n  type: { codeHash: ACCOUNT_TYPE, hashType: type, args: {{namespace 20B}} },\n  data: AccountData{ version 0x03, witness_hash, next, expires,\n        owner, manager, label,\n        {{next = N}}; all else = p }\n}"
+        },
+        {
+          "label": {
+            "zh": "output[1…] 任意",
+            "en": "output[1…] anything"
+          },
+          "body": "X capacity: destination not constrained"
+        }
+      ],
+      "sections": [
+        {
+          "title": {
+            "zh": "cell_deps",
+            "en": "cell_deps"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "cell_dep：ACCOUNT_TYPE 代码",
+                "en": "cell_dep: ACCOUNT_TYPE code"
+              },
+              "body": "code cell (mainnet 0x3072…bf0b:0)\n// needed by CKB to run the type; not read by the script"
+            },
+            {
+              "label": {
+                "zh": "cell_dep：ACCOUNT_LOCK 代码",
+                "en": "cell_dep: ACCOUNT_LOCK code"
+              },
+              "body": "code cell (mainnet 0x522c…9268:1)\n// needed by CKB to run the lock; not read by the script"
+            }
+          ]
+        },
+        {
+          "title": {
+            "zh": "witnesses（WitnessArgs）",
+            "en": "witnesses (WitnessArgs)"
+          },
+          "boxes": [
+            {
+              "label": {
+                "zh": "witnesses[0]",
+                "en": "witnesses[0]"
+              },
+              "body": "{ input_type: {{\"recycle\"}},\n  output_type: {{records of output[0] p′}} }"
+            }
+          ]
+        }
+      ],
+      "layouts": [
+        {
+          "label": "since (x input)",
+          "layout": [
+            {
+              "name": "flags",
+              "size": "1B",
+              "role": {
+                "zh": "0x40 = 绝对 + 时间戳",
+                "en": "0x40 = absolute + timestamp"
+              },
+              "color": 1,
+              "flex": 1,
+              "cons": "= 0x40",
+              "err": "28"
+            },
+            {
+              "name": "timestamp",
+              "size": "7B",
+              "role": {
+                "zh": "unix 秒",
+                "en": "unix seconds"
+              },
+              "color": 2,
+              "flex": 4,
+              "cons": "≥ expires + 30d",
+              "err": "28"
+            }
+          ],
+          "hex": [
+            [
+              "since",
+              "0x{{40}}0000006f0c5a00  ← ts 0x6f0c5a00"
+            ]
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": {
+            "zh": "数量",
+            "en": "arity"
+          },
+          "cond": {
+            "zh": "2 进 1 出",
+            "en": "2 in 1 out"
+          },
+          "err": "25"
+        },
+        {
+          "field": "relink",
+          "cond": {
+            "zh": "p′.next = x.next；x.id = p.next",
+            "en": "p′.next = x.next; x.id = p.next"
+          },
+          "err": "25"
+        },
+        {
+          "field": "p′",
+          "cond": {
+            "zh": "label/expires/owner/manager/witness_hash/lock 不变，capacity 不减",
+            "en": "label/expires/owner/manager/witness_hash/lock unchanged, capacity not reduced"
+          },
+          "err": "27"
+        },
+        {
+          "field": "x",
+          "cond": {
+            "zh": "不是根",
+            "en": "not the root"
+          },
+          "err": "46"
+        },
+        {
+          "field": "x since",
+          "cond": {
+            "zh": "绝对时间戳 ≥ expires + 2,592,000 s",
+            "en": "absolute timestamp ≥ expires + 2,592,000 s"
+          },
+          "err": "28"
+        }
+      ],
+      "extras": [
+        {
+          "zh": "任何人可回收；x 的 capacity 去向不受限制。",
+          "en": "Anyone may recycle; where x’s capacity goes is not constrained."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码（cells-core Error）：20 MalformedAccountData，21 WitnessHashMismatch，23 UnknownAction，24 NotInPredecessorRange，25 LinkedListBroken，27 StructuralDrift，28 NotExpired，29 Unauthorized，30 InvalidCharset，31 InvalidLength，34 GenesisSeedMissing，35 InsufficientPrice，36 CommitMissing，37 CommitTooYoung，38 NullOwner，39 ExpiryTooSoon，40 ParentMissing，41 ParentOutlived，42 TreasuryUnpaid，43 TermTooLong，44 OwnerIsCellLock，45 TooDeep，46 RootNotRecyclable，47 CommitNotOwned，48 CellLockNotAccountLock；4 Encoding（系统调用 / args 过短）。",
+      "en": "Error codes (cells-core Error): 20 MalformedAccountData, 21 WitnessHashMismatch, 23 UnknownAction, 24 NotInPredecessorRange, 25 LinkedListBroken, 27 StructuralDrift, 28 NotExpired, 29 Unauthorized, 30 InvalidCharset, 31 InvalidLength, 34 GenesisSeedMissing, 35 InsufficientPrice, 36 CommitMissing, 37 CommitTooYoung, 38 NullOwner, 39 ExpiryTooSoon, 40 ParentMissing, 41 ParentOutlived, 42 TreasuryUnpaid, 43 TermTooLong, 44 OwnerIsCellLock, 45 TooDeep, 46 RootNotRecyclable, 47 CommitNotOwned, 48 CellLockNotAccountLock; 4 Encoding (syscall / args too short)."
+    },
+    {
+      "zh": "同意（consents）：ACP / anyone-can-pay Omnilock / PW-Lock 输入不算同意；input-type-proxy-lock（deed）需其 args 指向的 type cell 在同意的 lock 下被花费（最多 2 层）；sale-lock 输入只同意 transfer。",
+      "en": "Consent: ACP / anyone-can-pay Omnilock / PW-Lock inputs give none; an input-type-proxy-lock (deed) consents only if the type cell in its args is spent under a consenting lock (≤ 2 levels); a sale-lock input consents to transfer only."
+    },
+    {
+      "zh": "不校验签名：授权完全靠“花费 owner lock 下的 cell”。合约可由单 key / multisig 升级（docs/TRUST.md）。",
+      "en": "No signatures checked: authorization is “spend a cell under the owner lock”. The contracts are upgradeable by a key/multisig (docs/TRUST.md)."
+    }
+  ]
+}

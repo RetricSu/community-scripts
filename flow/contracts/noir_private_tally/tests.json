@@ -1,0 +1,4 @@
+[{"tx":"0x58d646231e2dfc66f3cf2d07199ad6863e733489342b811c5473e223be6eca67","net":"testnet","name":"Private tally create at 0","expect":["noir_private_tally"]},
+ {"tx":"0xa93b9ed57c45ca3a031b92b1e0bf68851796c2eb3aabdcab61a14383ca1c4a73","net":"testnet","name":"Private tally update by a hidden amount","expect":["noir_private_tally"]},
+ {"tx":"0xbc062ecc84515e573a5c723f36b081733b8d95c71fb15ef7e414ee2ad766046c","net":"testnet","name":"Private tally cover update (+0)","expect":["noir_private_tally"]},
+ {"tx":"0x5b2d128dab1f3b888f2cc98b2fa844dc67b1e9eec24eeeee354da6bcd029caff","net":"testnet","name":"Private tally update (second account, join path)","expect":["noir_private_tally"]}]

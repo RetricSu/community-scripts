@@ -1,0 +1,29 @@
+{
+  "tags": [
+    "token",
+    "open-source",
+    "community"
+  ],
+  "contributors": [
+    "xcshuan"
+  ],
+  "source": {
+    "repo": "https://github.com/xcshuan/ckb-standard-udt-contracts",
+    "commit": "d6e6da0109e082551af9873c64cda0d1f514c9e3",
+    "paths": [
+      "contracts/sudt-meta/src",
+      "lib/script-utils/src/authority.rs",
+      "lib/script-utils/src/token.rs",
+      "lib/script-utils/src/supply.rs",
+      "lib/types/src/metadata",
+      "lib/types/src/schemas/metadata.mol"
+    ],
+    "commit_note": "commit read when writing this spec (default-branch HEAD, 2026-05-18). No deployment or code_hash is published (dependent code hashes are injected at build time); checksums.txt lists sha256 of release binaries only.",
+    "binary": {
+      "status": "unverified",
+      "note": "no deployment resolved on chain"
+    }
+  },
+  "deployments": [],
+  "checked_at": "2026-11-12"
+}

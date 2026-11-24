@@ -1,0 +1,25 @@
+{
+  "tags": [
+    "layer2",
+    "nervos",
+    "open-source",
+    "p-godwoken"
+  ],
+  "contributors": [
+    "blckngm"
+  ],
+  "source": {
+    "repo": "https://github.com/godwokenrises/godwoken",
+    "commit": "c2b1f8501de16ef93a4d659f384041bcb1f7bd92",
+    "paths": [
+      "gwos/contracts/delegate-cell-lock/src"
+    ],
+    "commit_note": "exact commit read (default-branch HEAD, 2024-01-12). Deployment constants from godwokenrises/godwoken-info @8ce6390133ddfffe9d40d51b7be191418b54958c (mainnet_v1, testnet_v1_1 scripts-deploy-result.json).",
+    "binary": {
+      "status": "unverified",
+      "note": "no deployment resolved on chain"
+    }
+  },
+  "deployments": [],
+  "checked_at": "2026-10-21"
+}

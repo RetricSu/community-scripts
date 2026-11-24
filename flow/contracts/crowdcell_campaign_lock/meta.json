@@ -1,0 +1,59 @@
+{
+  "tags": [
+    "defi",
+    "open-source",
+    "community",
+    "p-crowdcell"
+  ],
+  "contributors": [
+    "alesfer001"
+  ],
+  "source": {
+    "repo": "https://github.com/alesfer001/CrowdCell",
+    "commit": "acbb40ed1426bc8c763eb29c12a83e4bb391b654",
+    "paths": [
+      "contracts/campaign-lock/src/main.rs"
+    ],
+    "commit_note": "branch fix/pledge-deadline-binding (PR alesfer001/CrowdCell#11, after three review rounds), updated 2026-11-04 by the author. Testnet redeploy 2026-10-31; deployment from deployment/deployed-contracts-testnet.json, all hash_type data2. A clean ./scripts/build-contracts.sh at this commit reproduces the deployed code hashes, listed in deployment/checksums-testnet.txt. Originally offered by Ayoub_Lesfer in https://talk.nervos.org/t/11014/2",
+    "binary": {
+      "status": "verified",
+      "per": [
+        {
+          "data_hash": "0xd975780a890b817303a5414167ce235c041a9e63bb5e85f764acc71209fd02a3",
+          "evidence": [
+            "listed in README.md",
+            "listed in deployment/checksums-testnet.txt",
+            "listed in deployment/deployed-contracts-devnet.json",
+            "listed in deployment/deployed-contracts-testnet.json"
+          ],
+          "matches_commit": true
+        }
+      ],
+      "note": "deployed data hash matches a binary / checksum in the repo at the recorded commit"
+    }
+  },
+  "deployments": [
+    {
+      "network": "testnet",
+      "code_hash": "0xd975780a890b817303a5414167ce235c041a9e63bb5e85f764acc71209fd02a3",
+      "hash_type": "data2",
+      "constant_source": "alesfer001/CrowdCell contracts/campaign-lock/src/main.rs@acbb40e; code cell per deployment/deployed-contracts-testnet.json (campaignLock, hash_type data2)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x1ea89700f68f672f950cd43bb764bf7148039d7c8151dad04922437d33d21504"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x1ea89700f68f672f950cd43bb764bf7148039d7c8151dad04922437d33d21504"
+      },
+      "type_script": null,
+      "data_hash": "0xd975780a890b817303a5414167ce235c041a9e63bb5e85f764acc71209fd02a3",
+      "deploy_tx": "0x1ea89700f68f672f950cd43bb764bf7148039d7c8151dad04922437d33d21504",
+      "deploy_block": 22924443
+    }
+  ],
+  "checked_at": "2026-11-04"
+}

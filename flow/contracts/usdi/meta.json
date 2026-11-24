@@ -1,0 +1,90 @@
+{
+  "tags": [
+    "token",
+    "community",
+    "open-source"
+  ],
+  "contributors": [
+    "jjyr",
+    "XuJiandong"
+  ],
+  "source": {
+    "repo": "https://github.com/nervosnetwork/ckb-production-scripts",
+    "commit": "26b0b4f15bb6eeb268b70d7ae006e244b7c06649",
+    "paths": [
+      "c/xudt_rce.c",
+      "c/rce.h",
+      "build.rs"
+    ],
+    "commit_note": "xUDT source; build.rs at this commit pins the xudt_rce binary hash 0x50bd8d66…1b95, which equals the mainnet USDI code cell data hash (pinned since abdcb117, 2023-03-01). Testnet USDI binary not matched.",
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0x50bd8d6680b8b9cf98b73f3c08faf8b2a21914311954118ad6609be6e78a1b95",
+          "evidence": [],
+          "matches_commit": false
+        },
+        {
+          "data_hash": "0x28a734e118e2f972004f44063a2e795088ca2ed1340dc48ad85ac9d84dcc94d8",
+          "evidence": [],
+          "matches_commit": false
+        }
+      ],
+      "note": "no binary or checksum at the recorded commit matched the deployed data hash (reproducible build not attempted)"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0xbfa35a9c38a676682b65ade8f02be164d48632281477e36f8dc2f41f79e56bfc",
+      "hash_type": "type",
+      "constant_source": "CKB Explorer registry API /api/v2/scripts \"USDI Asset\" (mainnet); code cell data hash = xUDT 0x50bd…1b95",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0xf6a5eef65101899db9709c8de1cc28f23c1bee90d857ebe176f6647ef109e20d"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0xf6a5eef65101899db9709c8de1cc28f23c1bee90d857ebe176f6647ef109e20d"
+      },
+      "type_script": {
+        "args": "0x9105ea69838511ca609518d27855c53fed1b5ffaff4cfb334f58b40627d211c4",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x50bd8d6680b8b9cf98b73f3c08faf8b2a21914311954118ad6609be6e78a1b95",
+      "deploy_tx": "0xf6a5eef65101899db9709c8de1cc28f23c1bee90d857ebe176f6647ef109e20d",
+      "deploy_block": 14861099
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0xcc9dc33ef234e14bc788c43a4848556a5fb16401a04662fc55db9bb201987037",
+      "hash_type": "type",
+      "constant_source": "nervosnetwork/ckb-explorer fill_contracts_info.rake \"USDI Asset\" (testnet); code cell data hash 0x28a7…94d8 (not xUDT)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0xaec423c2af7fe844b476333190096b10fc5726e6d9ac58a9b71f71ffac204fee"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0xaec423c2af7fe844b476333190096b10fc5726e6d9ac58a9b71f71ffac204fee"
+      },
+      "type_script": {
+        "args": "0xf0bad0541211603bf14946e09ceac920dd7ed4f862f0ffd53d0d477d6e1d0f0b",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x28a734e118e2f972004f44063a2e795088ca2ed1340dc48ad85ac9d84dcc94d8",
+      "deploy_tx": "0xaec423c2af7fe844b476333190096b10fc5726e6d9ac58a9b71f71ffac204fee",
+      "deploy_block": 15880637
+    }
+  ],
+  "checked_at": "2026-11-06"
+}

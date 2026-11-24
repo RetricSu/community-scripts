@@ -1,0 +1,21 @@
+[
+  {
+    "tx": "0x9ef7f4c50d53d0317082ea532d606af448d7af031efcfe5c90affd360c737176",
+    "net": "mainnet",
+    "name": "issuer create"
+  },
+  {
+    "tx": "0x6df315f0a32e8956275ff6282088b8e1a373a8859b938d66a128c047e3bcd64a",
+    "net": "mainnet",
+    "name": "issuer update + class create",
+    "expect": [
+      "mnft_issuer",
+      "mnft_class"
+    ]
+  },
+  {
+    "tx": "0x02e18bf24b1757fd5172ab6d20744a6ef886b15b4643dd2bb210498d15071963",
+    "net": "testnet",
+    "name": "issuer create (testnet)"
+  }
+]

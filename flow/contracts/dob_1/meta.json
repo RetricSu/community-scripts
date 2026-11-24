@@ -1,0 +1,83 @@
+{
+  "tags": [
+    "nft",
+    "community",
+    "open-source",
+    "p-spore"
+  ],
+  "contributors": [],
+  "source": {
+    "repo": "https://github.com/sporeprotocol/spore-dob-1",
+    "commit": "43ad12a24bdee2df9288d772097f6e0ab2fc22fb",
+    "paths": [
+      "src/main.rs"
+    ],
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0xda3525549b72970b4c95f5b5749357f20d1293d335710b674f09c32f7d54b6dc",
+          "evidence": [
+            "deployed tx + data hash match migration/mainnet/2024-07-15-142055.json",
+            "deployed tx + data hash match migration/testnet/2024-07-15-142016.json"
+          ],
+          "matches_commit": false
+        }
+      ],
+      "note": "deployment provenance confirmed against the repo's own deployment records (migration/mainnet/2024-07-15-142055.json; migration/testnet/2024-07-15-142016.json); no committed binary or checksum at the recorded commit, so the build itself is not verified (reproducible build not attempted)"
+    },
+    "commit_note": "default-branch HEAD recorded at community-scripts merge; binary provenance not yet verified"
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0x1b55845004b2d08956e08d9e10bb1bf23951e6056f8159588f2af03b11b08c07",
+      "hash_type": "type",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x99cc81b5e4c311519173f3f6f771dff64a2f64c97f5f724877c4352cd1b3b32c"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x99cc81b5e4c311519173f3f6f771dff64a2f64c97f5f724877c4352cd1b3b32c"
+      },
+      "data_hash": "0xda3525549b72970b4c95f5b5749357f20d1293d335710b674f09c32f7d54b6dc",
+      "deploy_tx": "0x99cc81b5e4c311519173f3f6f771dff64a2f64c97f5f724877c4352cd1b3b32c",
+      "type_script": {
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type",
+        "args": "0x8892bea4405a1f077921799bc0f4516e0ebaef7aea0dfc6614a8898fb47d5372"
+      },
+      "deploy_block": 13500064
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0xaf4e8350a75cc8e6bc05be67483bee3aa4a27a8d7378b56bda8a82376c9f1d88",
+      "hash_type": "type",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x18c8f1d55906cf9932c5a72ae4dc039e51e41089db6829edb3f92078c6520bc8"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x18c8f1d55906cf9932c5a72ae4dc039e51e41089db6829edb3f92078c6520bc8"
+      },
+      "data_hash": "0xda3525549b72970b4c95f5b5749357f20d1293d335710b674f09c32f7d54b6dc",
+      "deploy_tx": "0x18c8f1d55906cf9932c5a72ae4dc039e51e41089db6829edb3f92078c6520bc8",
+      "type_script": {
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type",
+        "args": "0x784e32cef202b9d4759ea96e80d806f94051e8069fd34d761f452553700138d7"
+      },
+      "deploy_block": 13918428
+    }
+  ],
+  "checked_at": "2026-11-23",
+  "generated_from": "src/deployments/dob_1.json"
+}

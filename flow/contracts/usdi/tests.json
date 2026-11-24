@@ -1,0 +1,2 @@
+[{"tx":"0x2444ef0400844731dde2a76e95d86d71d2e2e78a12217ec6a45e2c4032746ce1","net":"mainnet","name":"USDI transfer (xUDT rules)","expect":["usdi"]},
+ {"tx":"0x73b3dbfc73877a9c8876170a2764a7426c094d51513e62ce2b1ee4d710cda9d4","net":"testnet","name":"USDI testnet (match only)","expect":["usdi"]}]

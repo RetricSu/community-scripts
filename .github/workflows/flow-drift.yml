@@ -1,0 +1,69 @@
+name: Flow deployment drift check
+
+# Ported from gpBlockchain/ckb-contract-flow-html's deployments.yml, scoped:
+# it checks ONLY flow contracts the security baseline does NOT own. Baseline-
+# owned metas are projected from src/deployments (gen-flow-meta.js), guarded
+# by the --check gate in ci.yml, and their on-chain drift is monitored daily
+# by security-monitor.yml — running gp's checker on them too would double-
+# report and any hand fix in flow/ would be overwritten by the next
+# projection. Never run check-deployments.js --write on baseline-owned metas.
+
+on:
+  schedule:
+    - cron: '17 3 * * 1'   # weekly, Monday 03:17 UTC (same cadence as gp upstream)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 20
+
+      - name: Compute non-baseline scope
+        id: scope
+        run: |
+          node <<'EOF' >> "$GITHUB_OUTPUT"
+          const fs = require('fs'), path = require('path');
+          const L = require('./scripts/flow-lib.js');
+          const DEP = path.join(process.cwd(), 'src', 'deployments');
+          const owned = new Set();
+          for (const f of fs.readdirSync(DEP).filter((f) => f.endsWith('.json'))) {
+            const name = f.slice(0, -5);
+            try {
+              const r = L.resolveFlowId(name, JSON.parse(fs.readFileSync(path.join(DEP, f), 'utf8')));
+              if (r) owned.add(r.id);
+            } catch (e) { console.error(`scope: skipping ${name}: ${e.message}`); }
+          }
+          const all = L.flowIds();
+          const scope = all.filter((id) => !owned.has(id));
+          console.log(`ids=${scope.join(',')}`);
+          console.log(`::notice::flow drift scope: ${scope.length} of ${all.length} contracts (baseline owns ${owned.size})`);
+          EOF
+
+      - id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          node flow/scripts/check-deployments.js --only "${{ steps.scope.outputs.ids }}" --report drift.md
+          echo "code=$?" >> "$GITHUB_OUTPUT"
+
+      # same single-issue pattern as gp upstream: comment on the open issue,
+      # open one if none. Drift is fixed by hand (check-deployments.js --write
+      # locally), never by this workflow.
+      - if: steps.check.outputs.code != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="Flow deployment drift detected ($(date -u +%F))"
+          existing=$(gh issue list --state open --label deployment-drift --json number --jq '.[0].number')
+          gh label create deployment-drift --color d93f0b --force >/dev/null 2>&1 || true
+          if [ -n "$existing" ]; then gh issue comment "$existing" --body-file drift.md; else gh issue create --title "$title" --label deployment-drift --body-file drift.md; fi

@@ -1,0 +1,59 @@
+{
+  "tags": [
+    "defi",
+    "open-source",
+    "community",
+    "p-crowdcell"
+  ],
+  "contributors": [
+    "alesfer001"
+  ],
+  "source": {
+    "repo": "https://github.com/alesfer001/CrowdCell",
+    "commit": "acbb40ed1426bc8c763eb29c12a83e4bb391b654",
+    "paths": [
+      "contracts/pledge/src/main.rs"
+    ],
+    "commit_note": "branch fix/pledge-deadline-binding (PR alesfer001/CrowdCell#11, after three review rounds), updated 2026-11-04 by the author. Testnet redeploy 2026-10-31; deployment from deployment/deployed-contracts-testnet.json, all hash_type data2. A clean ./scripts/build-contracts.sh at this commit reproduces the deployed code hashes, listed in deployment/checksums-testnet.txt. Originally offered by Ayoub_Lesfer in https://talk.nervos.org/t/11014/2",
+    "binary": {
+      "status": "verified",
+      "per": [
+        {
+          "data_hash": "0xe45d09f08d0e842340afb004cfb6b6b6414ad387f9cd2f3e0b9abcd6ae8eb024",
+          "evidence": [
+            "listed in README.md",
+            "listed in deployment/checksums-testnet.txt",
+            "listed in deployment/deployed-contracts-devnet.json",
+            "listed in deployment/deployed-contracts-testnet.json"
+          ],
+          "matches_commit": true
+        }
+      ],
+      "note": "deployed data hash matches a binary / checksum in the repo at the recorded commit"
+    }
+  },
+  "deployments": [
+    {
+      "network": "testnet",
+      "code_hash": "0xe45d09f08d0e842340afb004cfb6b6b6414ad387f9cd2f3e0b9abcd6ae8eb024",
+      "hash_type": "data2",
+      "constant_source": "alesfer001/CrowdCell@acbb40e deployment/deployed-contracts-testnet.json (pledge, deployedAt 2026-10-31; code cell 0x49961d44…:0, data hash = code_hash checked on chain); hash_type data2 seen on chain (pledge type scripts in 2026-10-31 txs)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x49961d44d1712cdeade84d86fe2ca2466b8a1d77462a61dcfc9c27944277af3d"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x49961d44d1712cdeade84d86fe2ca2466b8a1d77462a61dcfc9c27944277af3d"
+      },
+      "type_script": null,
+      "data_hash": "0xe45d09f08d0e842340afb004cfb6b6b6414ad387f9cd2f3e0b9abcd6ae8eb024",
+      "deploy_tx": "0x49961d44d1712cdeade84d86fe2ca2466b8a1d77462a61dcfc9c27944277af3d",
+      "deploy_block": 22889827
+    }
+  ],
+  "checked_at": "2026-11-04"
+}

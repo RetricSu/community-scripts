@@ -1,0 +1,1124 @@
+{
+  "title": {
+    "zh": "Opticrum（Fiber 流动性租赁）Lock Script 约束",
+    "en": "Opticrum (Fiber liquidity rental) Lock Script Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：Opticrum/ckb-contract-script @803523a contracts/opticrum/src、opticrum-protocol/src/lib.rs　·　框架 ckb-cinnabar-verifier @f50d8e9　·　testnet type_id 0x1f84…0247（deployment/testnet/opticrum.json）",
+    "en": "Source: Opticrum/ckb-contract-script @803523a contracts/opticrum/src, opticrum-protocol/src/lib.rs　·　framework ckb-cinnabar-verifier @f50d8e9　·　testnet type_id 0x1f84…0247 (deployment/testnet/opticrum.json)"
+  },
+  "transitions": [
+    {
+      "tag": "0 → Order",
+      "title": {
+        "zh": "买方挂单（lock 不执行）",
+        "en": "Buyer posts an Order (lock not executed)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "买方资金",
+            "en": "buyer funds"
+          },
+          "body": {
+            "zh": "任意 cell",
+            "en": "any cells"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": "Order cell",
+          "body": "Cell{\n  lock: OPTICRUM{ args: {{fiber_pubkey ‖ buyer_lock_hash}} },\n  data: {{xudt_amount ‖ channel_capacity ‖ shannons_per_block}}\n}"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "Order lock.args（65B）",
+            "en": "Order lock.args (65B)"
+          },
+          "layout": [
+            {
+              "name": "fiber_pubkey",
+              "size": "33B",
+              "color": 0,
+              "flex": 2,
+              "role": {
+                "zh": "买方 Fiber 节点公钥（压缩 secp256k1）；合约只用于比较 args",
+                "en": "buyer Fiber node pubkey (compressed secp256k1); the contract only compares it as args"
+              },
+              "err": "35"
+            },
+            {
+              "name": "buyer_lock_hash",
+              "size": "32B",
+              "color": 1,
+              "flex": 2,
+              "role": {
+                "zh": "买方 lock hash：取消 / 注资 / 取回的授权",
+                "en": "buyer lock hash: authorizes cancel / inject / withdraw"
+              },
+              "cons": {
+                "zh": "长度合计 = 65",
+                "en": "total length = 65"
+              },
+              "err": "35"
+            }
+          ],
+          "hex": [
+            [
+              "fiber_pubkey",
+              "0x037aa2f692451e2f14f0fb1305e0f2a7e564fde080c44649dfe18c1e12d4e8f262"
+            ],
+            [
+              "buyer_lock_hash",
+              "0x716619d4cc4d8ca5ae7f67b9bf26bdff2acd8a8139fa96a2196e4c2e57cf6753"
+            ]
+          ],
+          "note": {
+            "zh": "示例：testnet tx 0xd5e460e4… 的输入 Order cell",
+            "en": "Example: the input Order cell of testnet tx 0xd5e460e4…"
+          }
+        },
+        {
+          "label": {
+            "zh": "Order data（恰好 32B）",
+            "en": "Order data (exactly 32B)"
+          },
+          "layout": [
+            {
+              "name": "xudt_amount",
+              "size": "16B u128 LE",
+              "color": 0,
+              "flex": 2,
+              "role": {
+                "zh": "提供的 xUDT 租金（CKB 模式为 0）",
+                "en": "xUDT rent offered (0 in CKB mode)"
+              },
+              "err": "25"
+            },
+            {
+              "name": "channel_capacity",
+              "size": "8B u64 LE",
+              "color": 1,
+              "flex": 1,
+              "role": {
+                "zh": "要求的通道容量（shannons）",
+                "en": "requested channel capacity (shannons)"
+              },
+              "err": "25"
+            },
+            {
+              "name": "shannons_per_block",
+              "size": "8B u64 LE",
+              "color": 2,
+              "flex": 1,
+              "role": {
+                "zh": "每块租金",
+                "en": "rent per block"
+              },
+              "err": "25"
+            }
+          ],
+          "hex": [
+            [
+              "xudt_amount",
+              "0x00000000000000000000000000000000"
+            ],
+            [
+              "channel_capacity",
+              "0x0030ef7dba020000 (3 000 000 000 000)"
+            ],
+            [
+              "shannons_per_block",
+              "0xb169010000000000 (92 593)"
+            ]
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": {
+            "zh": "创建",
+            "en": "creation"
+          },
+          "cond": {
+            "zh": "lock 只在被消费时运行：创建时 args / data 不做任何检查，错误格式的 Order 只会在消费时失败",
+            "en": "a lock only runs when spent: args / data are not checked on creation; a malformed Order only fails when spent"
+          },
+          "err": "—"
+        }
+      ]
+    },
+    {
+      "tag": "Order → 0",
+      "title": {
+        "zh": "买方取消挂单",
+        "en": "Buyer cancels the Order"
+      },
+      "inputs": [
+        {
+          "label": "Order cell",
+          "body": "Cell{\n  lock: OPTICRUM{ args: {{… ‖ buyer_lock_hash}} },\n  data: …\n}"
+        },
+        {
+          "label": {
+            "zh": "买方 cell",
+            "en": "buyer cell"
+          },
+          "body": "Cell{ lock: {{hash = buyer_lock_hash}} }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "无 Opticrum 输出",
+            "en": "no Opticrum output"
+          },
+          "body": {
+            "zh": "资金任意去向",
+            "en": "funds go anywhere"
+          }
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "Order lock.args（65B）",
+            "en": "Order lock.args (65B)"
+          },
+          "layout": [
+            {
+              "name": "fiber_pubkey",
+              "size": "33B",
+              "color": 0,
+              "flex": 2,
+              "role": {
+                "zh": "买方 Fiber 节点公钥（压缩 secp256k1）；合约只用于比较 args",
+                "en": "buyer Fiber node pubkey (compressed secp256k1); the contract only compares it as args"
+              },
+              "err": "35"
+            },
+            {
+              "name": "buyer_lock_hash",
+              "size": "32B",
+              "color": 1,
+              "flex": 2,
+              "role": {
+                "zh": "买方 lock hash：取消 / 注资 / 取回的授权",
+                "en": "buyer lock hash: authorizes cancel / inject / withdraw"
+              },
+              "cons": {
+                "zh": "长度合计 = 65",
+                "en": "total length = 65"
+              },
+              "err": "35"
+            }
+          ],
+          "hex": [
+            [
+              "fiber_pubkey",
+              "0x037aa2f692451e2f14f0fb1305e0f2a7e564fde080c44649dfe18c1e12d4e8f262"
+            ],
+            [
+              "buyer_lock_hash",
+              "0x716619d4cc4d8ca5ae7f67b9bf26bdff2acd8a8139fa96a2196e4c2e57cf6753"
+            ]
+          ],
+          "note": {
+            "zh": "示例：testnet tx 0xd5e460e4… 的输入 Order cell",
+            "en": "Example: the input Order cell of testnet tx 0xd5e460e4…"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "lock.args",
+          "cond": {
+            "zh": "长度 65 → Order，133 → Match，其他 → 35",
+            "en": "length 65 → Order, 133 → Match, else → 35"
+          },
+          "err": "35"
+        },
+        {
+          "field": {
+            "zh": "输出 Opticrum cell",
+            "en": "output Opticrum cell"
+          },
+          "cond": {
+            "zh": "第一个 lock code_hash 相同、hash_type = type 的输出（不比较 args）",
+            "en": "the first output whose lock has the same code_hash and hash_type = type (args not compared)"
+          },
+          "err": "—"
+        },
+        {
+          "field": "Order data",
+          "cond": {
+            "zh": "恰好 32B",
+            "en": "exactly 32B"
+          },
+          "err": "25"
+        },
+        {
+          "field": {
+            "zh": "路由",
+            "en": "route"
+          },
+          "cond": {
+            "zh": "Order 且无 Opticrum 输出 → OrderCancel",
+            "en": "Order with no Opticrum output → OrderCancel"
+          },
+          "err": "40"
+        },
+        {
+          "field": {
+            "zh": "授权",
+            "en": "authorization"
+          },
+          "cond": {
+            "zh": "buyer_lock_hash 等于某个输入的 lock hash",
+            "en": "buyer_lock_hash equals some input lock hash"
+          },
+          "err": "36"
+        }
+      ]
+    },
+    {
+      "tag": "Order → Match",
+      "title": {
+        "zh": "卖方开通道并撮合",
+        "en": "Seller opens a channel and matches"
+      },
+      "inputs": [
+        {
+          "label": "Order cell",
+          "body": "Cell{\n  lock: OPTICRUM{ args: {{order_args}} },\n  data: {{xudt_amount ‖ channel_capacity ‖ shannons_per_block}}\n}"
+        },
+        {
+          "label": {
+            "zh": "卖方 cell",
+            "en": "seller cell"
+          },
+          "body": "Cell{ lock: {{hash = seller_lock_hash}} }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "Match cell",
+          "body": "Cell{\n  lock: OPTICRUM{ args: {{order_args}} ‖ {{channel_outpoint}} ‖ {{seller_lock_hash}} },\n  data: xudt_amount ‖ shannons_per_block ‖ {{last_extraction_block = 0}}\n}"
+        }
+      ],
+      "extras": [
+        {
+          "zh": "cell_deps: [ opticrum code, {{Fiber 通道 funding cell = channel_outpoint}} ]",
+          "en": "cell_deps: [ opticrum code, {{Fiber channel funding cell = channel_outpoint}} ]"
+        },
+        {
+          "zh": "header_deps: [ {{Order cell 所在块}}, {{通道 cell 所在块}} ]",
+          "en": "header_deps: [ {{Order cell block}}, {{channel cell block}} ]"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "Match lock.args（133B）",
+            "en": "Match lock.args (133B)"
+          },
+          "layout": [
+            {
+              "name": "order_args",
+              "size": "65B",
+              "color": 0,
+              "flex": 3,
+              "role": {
+                "zh": "= 原 Order args（fiber_pubkey ‖ buyer_lock_hash）",
+                "en": "= the original Order args (fiber_pubkey ‖ buyer_lock_hash)"
+              },
+              "cons": {
+                "zh": "撮合时必须相等",
+                "en": "must be equal on match"
+              },
+              "err": "40"
+            },
+            {
+              "name": "channel_outpoint",
+              "size": "36B",
+              "color": 1,
+              "flex": 2,
+              "role": {
+                "zh": "Fiber 通道 funding cell：tx_hash 32B ‖ index u32 LE",
+                "en": "Fiber channel funding cell: tx_hash 32B ‖ index u32 LE"
+              },
+              "cons": {
+                "zh": "必须在 cell_deps 中",
+                "en": "must be in cell_deps"
+              },
+              "err": "22"
+            },
+            {
+              "name": "seller_lock_hash",
+              "size": "32B",
+              "color": 2,
+              "flex": 2,
+              "role": {
+                "zh": "卖方 lock hash：撮合 / 提取 / 销毁的授权",
+                "en": "seller lock hash: authorizes match / extract / destroy"
+              },
+              "cons": {
+                "zh": "长度合计 = 133",
+                "en": "total length = 133"
+              },
+              "err": "35"
+            }
+          ],
+          "hex": [
+            [
+              "order_args",
+              "0x037aa2…f262 ‖ 0x716619…6753"
+            ],
+            [
+              "channel_outpoint",
+              "0xfade972d2b5d27890345dd06b69985752d85183f417c18916464f29cbb1847e9 ‖ 00000000"
+            ],
+            [
+              "seller_lock_hash",
+              "0x5cbfb4398b8d8c080e6e68da34bce43761229d70c7eff56d8502e755b7516980"
+            ]
+          ],
+          "note": {
+            "zh": "示例：testnet tx 0xd5e460e4… 的输出 Match cell",
+            "en": "Example: the output Match cell of testnet tx 0xd5e460e4…"
+          }
+        },
+        {
+          "label": {
+            "zh": "Match data（≥ 32B，只读前 32B）",
+            "en": "Match data (≥ 32B, only the first 32B are read)"
+          },
+          "layout": [
+            {
+              "name": "xudt_amount",
+              "size": "16B u128 LE",
+              "color": 0,
+              "flex": 2,
+              "role": {
+                "zh": "剩余 xUDT 租金",
+                "en": "remaining xUDT rent"
+              },
+              "cons": {
+                "zh": "撮合时 = Order.xudt_amount",
+                "en": "= Order.xudt_amount on match"
+              },
+              "err": "26"
+            },
+            {
+              "name": "shannons_per_block",
+              "size": "8B u64 LE",
+              "color": 1,
+              "flex": 1,
+              "role": {
+                "zh": "每块租金",
+                "en": "rent per block"
+              },
+              "cons": {
+                "zh": "永不改变",
+                "en": "never changes"
+              },
+              "err": "33"
+            },
+            {
+              "name": "last_extraction_block",
+              "size": "8B u64 LE",
+              "color": 2,
+              "flex": 1,
+              "role": {
+                "zh": "卖方上次提取的块高（0 = 从未）",
+                "en": "block of the seller’s last extraction (0 = never)"
+              },
+              "cons": {
+                "zh": "撮合时 = 0",
+                "en": "= 0 on match"
+              },
+              "err": "28 / 30"
+            }
+          ],
+          "hex": [
+            [
+              "xudt_amount",
+              "0x00000000000000000000000000000000"
+            ],
+            [
+              "shannons_per_block",
+              "0xb169010000000000"
+            ],
+            [
+              "last_extraction_block",
+              "0x0000000000000000"
+            ]
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "lock.args",
+          "cond": {
+            "zh": "长度 65 → Order，133 → Match，其他 → 35",
+            "en": "length 65 → Order, 133 → Match, else → 35"
+          },
+          "err": "35"
+        },
+        {
+          "field": {
+            "zh": "输出 Opticrum cell",
+            "en": "output Opticrum cell"
+          },
+          "cond": {
+            "zh": "第一个 lock code_hash 相同、hash_type = type 的输出（不比较 args）",
+            "en": "the first output whose lock has the same code_hash and hash_type = type (args not compared)"
+          },
+          "err": "—"
+        },
+        {
+          "field": {
+            "zh": "路由",
+            "en": "route"
+          },
+          "cond": {
+            "zh": "输出为 Match、Match.order_args = Order args、xUDT（数量 + type）相同 → OrderMatch；否则 40",
+            "en": "output is Match, Match.order_args = Order args, same xUDT (amount + type) → OrderMatch; else 40"
+          },
+          "err": "40"
+        },
+        {
+          "field": "Match data",
+          "cond": {
+            "zh": "≥ 32B",
+            "en": "≥ 32B"
+          },
+          "err": "28"
+        },
+        {
+          "field": "channel_outpoint",
+          "cond": {
+            "zh": "在 cell_deps 中；该 cell lock 为 Fiber funding（code_hash = testnet 0x6c67…6d7c / mainnet 0xe45b…f4f1 / mock，hash_type type）；capacity ≥ channel_capacity，或 xUDT 模式下同 type 且数量 ≥ xudt_amount",
+            "en": "in cell_deps; its lock is Fiber funding (code_hash = testnet 0x6c67…6d7c / mainnet 0xe45b…f4f1 / mock, hash_type type); capacity ≥ channel_capacity, or in xUDT mode same type and amount ≥ xudt_amount"
+          },
+          "err": "22"
+        },
+        {
+          "field": {
+            "zh": "授权",
+            "en": "authorization"
+          },
+          "cond": {
+            "zh": "seller_lock_hash 在输入中",
+            "en": "seller_lock_hash among inputs"
+          },
+          "err": "37"
+        },
+        {
+          "field": "Match data",
+          "cond": {
+            "zh": "shannons_per_block = Order 的值，last_extraction_block = 0",
+            "en": "shannons_per_block = Order value, last_extraction_block = 0"
+          },
+          "err": "28"
+        },
+        {
+          "field": "capacity",
+          "cond": {
+            "zh": "Order 与 Match 的未占用 capacity 相等",
+            "en": "unoccupied capacity of Order and Match equal"
+          },
+          "err": "23"
+        },
+        {
+          "field": "xudt_amount",
+          "cond": {
+            "zh": "Match = Order",
+            "en": "Match = Order"
+          },
+          "err": "26"
+        },
+        {
+          "field": "header_deps",
+          "cond": {
+            "zh": "含 Order cell 与通道 cell 所在块；缺失 → 29",
+            "en": "contain the Order cell block and the channel cell block; missing → 29"
+          },
+          "err": "29"
+        },
+        {
+          "field": {
+            "zh": "时序",
+            "en": "ordering"
+          },
+          "cond": {
+            "zh": "通道 cell 块高 > Order cell 块高",
+            "en": "channel cell block > Order cell block"
+          },
+          "err": "24"
+        }
+      ]
+    },
+    {
+      "tag": "Match → Match (seller)",
+      "title": {
+        "zh": "卖方提取租金",
+        "en": "Seller extracts rent"
+      },
+      "inputs": [
+        {
+          "label": "Match cell",
+          "body": "Cell{\n  lock: OPTICRUM{ args: order_args ‖ channel_outpoint ‖ seller_lock_hash },\n  data: xudt_amount ‖ rate ‖ {{base}}\n}"
+        },
+        {
+          "label": {
+            "zh": "卖方 cell",
+            "en": "seller cell"
+          },
+          "body": "Cell{ lock: {{hash = seller_lock_hash}} }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "Match cell",
+          "body": {
+            "zh": "Cell{\n  lock: OPTICRUM{ args: {{不变}} },\n  data: xudt_amount ‖ rate ‖ {{tip}}\n  capacity: {{− rate × (tip − base)}}\n}",
+            "en": "Cell{\n  lock: OPTICRUM{ args: {{unchanged}} },\n  data: xudt_amount ‖ rate ‖ {{tip}}\n  capacity: {{− rate × (tip − base)}}\n}"
+          }
+        }
+      ],
+      "extras": [
+        {
+          "zh": "cell_deps: [ opticrum code, {{通道 cell 仍存活}} ]",
+          "en": "cell_deps: [ opticrum code, {{channel cell still live}} ]"
+        },
+        {
+          "zh": "header_deps: [ {{tip 块（索引 0）}}, Match cell 所在块（首次提取时） ]",
+          "en": "header_deps: [ {{tip block (index 0)}}, Match cell block (first extraction) ]"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "Match data（≥ 32B，只读前 32B）",
+            "en": "Match data (≥ 32B, only the first 32B are read)"
+          },
+          "layout": [
+            {
+              "name": "xudt_amount",
+              "size": "16B u128 LE",
+              "color": 0,
+              "flex": 2,
+              "role": {
+                "zh": "剩余 xUDT 租金",
+                "en": "remaining xUDT rent"
+              },
+              "cons": {
+                "zh": "撮合时 = Order.xudt_amount",
+                "en": "= Order.xudt_amount on match"
+              },
+              "err": "26"
+            },
+            {
+              "name": "shannons_per_block",
+              "size": "8B u64 LE",
+              "color": 1,
+              "flex": 1,
+              "role": {
+                "zh": "每块租金",
+                "en": "rent per block"
+              },
+              "cons": {
+                "zh": "永不改变",
+                "en": "never changes"
+              },
+              "err": "33"
+            },
+            {
+              "name": "last_extraction_block",
+              "size": "8B u64 LE",
+              "color": 2,
+              "flex": 1,
+              "role": {
+                "zh": "卖方上次提取的块高（0 = 从未）",
+                "en": "block of the seller’s last extraction (0 = never)"
+              },
+              "cons": {
+                "zh": "撮合时 = 0",
+                "en": "= 0 on match"
+              },
+              "err": "28 / 30"
+            }
+          ],
+          "hex": [
+            [
+              "xudt_amount",
+              "0x00000000000000000000000000000000"
+            ],
+            [
+              "shannons_per_block",
+              "0xb169010000000000"
+            ],
+            [
+              "last_extraction_block",
+              "0x0000000000000000"
+            ]
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "lock.args",
+          "cond": {
+            "zh": "长度 65 → Order，133 → Match，其他 → 35",
+            "en": "length 65 → Order, 133 → Match, else → 35"
+          },
+          "err": "35"
+        },
+        {
+          "field": {
+            "zh": "输出 Opticrum cell",
+            "en": "output Opticrum cell"
+          },
+          "cond": {
+            "zh": "第一个 lock code_hash 相同、hash_type = type 的输出（不比较 args）",
+            "en": "the first output whose lock has the same code_hash and hash_type = type (args not compared)"
+          },
+          "err": "—"
+        },
+        {
+          "field": {
+            "zh": "路由",
+            "en": "route"
+          },
+          "cond": {
+            "zh": "Match args 相同、xUDT（数量 + type）相同 → MatchUpdate",
+            "en": "same Match args and xUDT (amount + type) → MatchUpdate"
+          },
+          "err": "40"
+        },
+        {
+          "field": "Match args",
+          "cond": {
+            "zh": "不变",
+            "en": "unchanged"
+          },
+          "err": "31"
+        },
+        {
+          "field": "shannons_per_block",
+          "cond": {
+            "zh": "不变",
+            "en": "unchanged"
+          },
+          "err": "33"
+        },
+        {
+          "field": {
+            "zh": "授权",
+            "en": "authorization"
+          },
+          "cond": {
+            "zh": "恰好一方：seller 在输入中、buyer 不在；两者都在或都不在 → 38",
+            "en": "exactly one party: seller among inputs, buyer not; both or neither → 38"
+          },
+          "err": "38"
+        },
+        {
+          "field": "channel_outpoint",
+          "cond": {
+            "zh": "仍在 cell_deps 中（通道未关闭）",
+            "en": "still in cell_deps (channel not closed)"
+          },
+          "err": "22"
+        },
+        {
+          "field": {
+            "zh": "耗尽",
+            "en": "exhaustion"
+          },
+          "cond": {
+            "zh": "旧状态未耗尽：剩余价值 > rate × (tip − base)（错误名 MatchNotExhausted，语义相反）",
+            "en": "old state not exhausted: remaining value > rate × (tip − base) (error named MatchNotExhausted, opposite meaning)"
+          },
+          "err": "32"
+        },
+        {
+          "field": {
+            "zh": "提取量",
+            "en": "extraction"
+          },
+          "cond": {
+            "zh": "未占用 capacity 减少量 = rate × (tip − base)；base = last_extraction_block，或为 0 时取 Match cell 所在块",
+            "en": "unoccupied capacity decrease = rate × (tip − base); base = last_extraction_block, or the Match cell block when it is 0"
+          },
+          "err": "27"
+        },
+        {
+          "field": "last_extraction_block",
+          "cond": {
+            "zh": "= header_deps[0] 的块高",
+            "en": "= block number of header_deps[0]"
+          },
+          "err": "30"
+        },
+        {
+          "field": {
+            "zh": "犹豫期",
+            "en": "hesitation"
+          },
+          "cond": {
+            "zh": "首次提取（base = 0）：tip − Match cell 块高 > 3600",
+            "en": "first extraction (base = 0): tip − Match cell block > 3600"
+          },
+          "err": "42"
+        },
+        {
+          "field": "header_deps",
+          "cond": {
+            "zh": "缺失 → 29",
+            "en": "missing → 29"
+          },
+          "err": "29"
+        }
+      ]
+    },
+    {
+      "tag": "Match → Match (buyer)",
+      "title": {
+        "zh": "买方取回 / 注资",
+        "en": "Buyer withdraws / injects"
+      },
+      "inputs": [
+        {
+          "label": "Match cell",
+          "body": "Cell{\n  lock: OPTICRUM{ args: order_args ‖ …  },\n  data: xudt_amount ‖ rate ‖ last_extraction_block\n}"
+        },
+        {
+          "label": {
+            "zh": "买方 cell",
+            "en": "buyer cell"
+          },
+          "body": "Cell{ lock: {{hash = buyer_lock_hash}} }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "Match cell",
+          "body": {
+            "zh": "Cell{\n  lock: OPTICRUM{ args: {{不变}} },\n  data: … ‖ {{last_extraction_block 不变}}\n  capacity: {{全部取回 → 未占用 0 | 增加}}\n}",
+            "en": "Cell{\n  lock: OPTICRUM{ args: {{unchanged}} },\n  data: … ‖ {{last_extraction_block unchanged}}\n  capacity: {{dump all → 0 unoccupied | increase}}\n}"
+          }
+        }
+      ],
+      "extras": [
+        {
+          "zh": "header_deps: [ {{tip 块（索引 0）}}, Match cell 所在块 ]",
+          "en": "header_deps: [ {{tip block (index 0)}}, Match cell block ]"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "Match data（≥ 32B，只读前 32B）",
+            "en": "Match data (≥ 32B, only the first 32B are read)"
+          },
+          "layout": [
+            {
+              "name": "xudt_amount",
+              "size": "16B u128 LE",
+              "color": 0,
+              "flex": 2,
+              "role": {
+                "zh": "剩余 xUDT 租金",
+                "en": "remaining xUDT rent"
+              },
+              "cons": {
+                "zh": "撮合时 = Order.xudt_amount",
+                "en": "= Order.xudt_amount on match"
+              },
+              "err": "26"
+            },
+            {
+              "name": "shannons_per_block",
+              "size": "8B u64 LE",
+              "color": 1,
+              "flex": 1,
+              "role": {
+                "zh": "每块租金",
+                "en": "rent per block"
+              },
+              "cons": {
+                "zh": "永不改变",
+                "en": "never changes"
+              },
+              "err": "33"
+            },
+            {
+              "name": "last_extraction_block",
+              "size": "8B u64 LE",
+              "color": 2,
+              "flex": 1,
+              "role": {
+                "zh": "卖方上次提取的块高（0 = 从未）",
+                "en": "block of the seller’s last extraction (0 = never)"
+              },
+              "cons": {
+                "zh": "撮合时 = 0",
+                "en": "= 0 on match"
+              },
+              "err": "28 / 30"
+            }
+          ],
+          "hex": [
+            [
+              "xudt_amount",
+              "0x00000000000000000000000000000000"
+            ],
+            [
+              "shannons_per_block",
+              "0xb169010000000000"
+            ],
+            [
+              "last_extraction_block",
+              "0x0000000000000000"
+            ]
+          ]
+        }
+      ],
+      "limits": [
+        {
+          "field": "lock.args",
+          "cond": {
+            "zh": "长度 65 → Order，133 → Match，其他 → 35",
+            "en": "length 65 → Order, 133 → Match, else → 35"
+          },
+          "err": "35"
+        },
+        {
+          "field": {
+            "zh": "输出 Opticrum cell",
+            "en": "output Opticrum cell"
+          },
+          "cond": {
+            "zh": "第一个 lock code_hash 相同、hash_type = type 的输出（不比较 args）",
+            "en": "the first output whose lock has the same code_hash and hash_type = type (args not compared)"
+          },
+          "err": "—"
+        },
+        {
+          "field": "Match args",
+          "cond": {
+            "zh": "不变",
+            "en": "unchanged"
+          },
+          "err": "31"
+        },
+        {
+          "field": "shannons_per_block",
+          "cond": {
+            "zh": "不变",
+            "en": "unchanged"
+          },
+          "err": "33"
+        },
+        {
+          "field": {
+            "zh": "授权",
+            "en": "authorization"
+          },
+          "cond": {
+            "zh": "恰好一方：buyer 在输入中、seller 不在",
+            "en": "exactly one party: buyer among inputs, seller not"
+          },
+          "err": "38"
+        },
+        {
+          "field": "last_extraction_block",
+          "cond": {
+            "zh": "不变",
+            "en": "unchanged"
+          },
+          "err": "30"
+        },
+        {
+          "field": "xUDT type",
+          "cond": {
+            "zh": "不变",
+            "en": "unchanged"
+          },
+          "err": "31"
+        },
+        {
+          "field": {
+            "zh": "取回",
+            "en": "withdraw"
+          },
+          "cond": {
+            "zh": "价值减少时必须全部取出（未占用 capacity 与 xUDT 均为 0）",
+            "en": "a decrease must dump everything (unoccupied capacity and xUDT both 0)"
+          },
+          "err": "43"
+        },
+        {
+          "field": {
+            "zh": "取回窗口",
+            "en": "withdraw window"
+          },
+          "cond": {
+            "zh": "仅在犹豫期内：卖方从未提取且 tip − Match cell 块高 ≤ 3600",
+            "en": "only inside the hesitation window: seller never extracted and tip − Match cell block ≤ 3600"
+          },
+          "err": "41"
+        },
+        {
+          "field": {
+            "zh": "注资",
+            "en": "inject"
+          },
+          "cond": {
+            "zh": "价值增加时不得处于犹豫期",
+            "en": "an increase must be outside the hesitation window"
+          },
+          "err": "44"
+        },
+        {
+          "field": {
+            "zh": "空操作",
+            "en": "no-op"
+          },
+          "cond": {
+            "zh": "既不增也不减 → 31",
+            "en": "neither increase nor decrease → 31"
+          },
+          "err": "31"
+        }
+      ]
+    },
+    {
+      "tag": "Match → 0",
+      "title": {
+        "zh": "卖方销毁耗尽的 Match",
+        "en": "Seller destroys an exhausted Match"
+      },
+      "inputs": [
+        {
+          "label": "Match cell",
+          "body": "Cell{\n  lock: OPTICRUM{ args: … ‖ {{seller_lock_hash}} },\n  data: xudt_amount ‖ rate ‖ base\n}"
+        },
+        {
+          "label": {
+            "zh": "卖方 cell",
+            "en": "seller cell"
+          },
+          "body": "Cell{ lock: {{hash = seller_lock_hash}} }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "无 Opticrum 输出",
+            "en": "no Opticrum output"
+          },
+          "body": {
+            "zh": "剩余资金任意去向",
+            "en": "remaining funds go anywhere"
+          }
+        }
+      ],
+      "extras": [
+        {
+          "zh": "header_deps: [ {{tip 块（索引 0）}}, Match cell 所在块 ]",
+          "en": "header_deps: [ {{tip block (index 0)}}, Match cell block ]"
+        }
+      ],
+      "limits": [
+        {
+          "field": "lock.args",
+          "cond": {
+            "zh": "长度 65 → Order，133 → Match，其他 → 35",
+            "en": "length 65 → Order, 133 → Match, else → 35"
+          },
+          "err": "35"
+        },
+        {
+          "field": {
+            "zh": "输出 Opticrum cell",
+            "en": "output Opticrum cell"
+          },
+          "cond": {
+            "zh": "第一个 lock code_hash 相同、hash_type = type 的输出（不比较 args）",
+            "en": "the first output whose lock has the same code_hash and hash_type = type (args not compared)"
+          },
+          "err": "—"
+        },
+        {
+          "field": {
+            "zh": "路由",
+            "en": "route"
+          },
+          "cond": {
+            "zh": "Match 且无 Opticrum 输出 → MatchDestroy",
+            "en": "Match with no Opticrum output → MatchDestroy"
+          },
+          "err": "40"
+        },
+        {
+          "field": {
+            "zh": "授权",
+            "en": "authorization"
+          },
+          "cond": {
+            "zh": "seller_lock_hash 在输入中",
+            "en": "seller_lock_hash among inputs"
+          },
+          "err": "37"
+        },
+        {
+          "field": {
+            "zh": "耗尽",
+            "en": "exhaustion"
+          },
+          "cond": {
+            "zh": "rate × (tip − base) ≥ 剩余价值（xUDT 模式比较 xudt_amount，否则比较未占用 capacity）",
+            "en": "rate × (tip − base) ≥ remaining value (xudt_amount in xUDT mode, else unoccupied capacity)"
+          },
+          "err": "32"
+        },
+        {
+          "field": "header_deps",
+          "cond": {
+            "zh": "缺失 → 29",
+            "en": "missing → 29"
+          },
+          "err": "29"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码：框架 ckb-cinnabar-verifier 1–5 为系统错误、10 NotFoundRootVerifier、11 NotFoundBranchVerifier；合约 error.rs 自 20 起：20 BadOrderCancel、21 BadOrderMatch、22 ChannelCellNotInDep、23 ChannelCapacityMismatch、24 ChannelCreatedBeforeOrder、25 OrderDataNotSet、26 BadXudtAmount、27 BadExtractionAmount、28 MatchDataNotSet、29 HeaderNotSet、30 BadMatchDataUpdate、31 BadMatchUpdate、32 MatchNotExhausted、33 RentPerBlockMismatch、34 MatchNotViable（未使用）、35 BadArgsLength、36 BuyerAuthMissing、37 SellerAuthMissing、38 AuthorizationMissing、39 UnexpectedBranch、40 UnknownState、41 WithdrawWindowExpired、42 HesitationNotElapsed、43 PartialWithdrawNotAllowed、44 InjectDuringHesitation。",
+      "en": "Error codes: framework ckb-cinnabar-verifier 1–5 are system errors, 10 NotFoundRootVerifier, 11 NotFoundBranchVerifier; contract error.rs starts at 20: 20 BadOrderCancel, 21 BadOrderMatch, 22 ChannelCellNotInDep, 23 ChannelCapacityMismatch, 24 ChannelCreatedBeforeOrder, 25 OrderDataNotSet, 26 BadXudtAmount, 27 BadExtractionAmount, 28 MatchDataNotSet, 29 HeaderNotSet, 30 BadMatchDataUpdate, 31 BadMatchUpdate, 32 MatchNotExhausted, 33 RentPerBlockMismatch, 34 MatchNotViable (unused), 35 BadArgsLength, 36 BuyerAuthMissing, 37 SellerAuthMissing, 38 AuthorizationMissing, 39 UnexpectedBranch, 40 UnknownState, 41 WithdrawWindowExpired, 42 HesitationNotElapsed, 43 PartialWithdrawNotAllowed, 44 InjectDuringHesitation."
+    },
+    {
+      "zh": "注释与代码不一致：opticrum-protocol 注释写 “MatchData — 40-byte”，代码 MATCH_DATA_LEN = 32、from_slice 只要求 ≥ 32B。错误 32 MatchNotExhausted 在提取路径表示“已耗尽”（语义相反）。",
+      "en": "Comment/code discrepancies: opticrum-protocol says “MatchData — 40-byte”, but the code uses MATCH_DATA_LEN = 32 and from_slice only requires ≥ 32B. Error 32 MatchNotExhausted means “already exhausted” on the extraction path (opposite meaning)."
+    },
+    {
+      "zh": "路由比较的 xUDT 是 (数量, type) 元组（parse_xudt 读 data[0..16]），因此 xUDT 模式下任何改变 xUDT 数量的 Match 更新都会落入 40 UnknownState；提取 / 取回 / 注资实际只对 CKB 模式可达。这是代码行为，非本页推断的规则。",
+      "en": "Routing compares xUDT as an (amount, type) tuple (parse_xudt reads data[0..16]), so in xUDT mode any Match update that changes the xUDT amount routes to 40 UnknownState; extraction / withdraw / inject are in practice only reachable in CKB mode. This is code behaviour, not a rule inferred by this page."
+    },
+    {
+      "zh": "输出 Opticrum cell 按 “第一个 lock code_hash 相同且 hash_type = type 的输出” 查找，不比较 args：同一交易中有多个 Opticrum cell 时可能取到别的 cell。lock 不检查任何签名，授权仅靠 “对方 lock hash 出现在输入中”。",
+      "en": "The output Opticrum cell is “the first output whose lock has the same code_hash and hash_type = type”; args are not compared, so with several Opticrum cells in one tx another cell may be picked. The lock checks no signature; authorization is only “that party’s lock hash appears among the inputs”."
+    },
+    {
+      "zh": "部署：testnet 通过 type_id 0x1f84…0247 多次迁移（v0.1.1 → v0.3.2）；早期版本的 args（166B）/ data（40–41B）布局不同，本页只解析当前布局。仓库未公布主网部署。",
+      "en": "Deployment: testnet migrated several times under type_id 0x1f84…0247 (v0.1.1 → v0.3.2); earlier versions used different args (166B) / data (40–41B) layouts and this page only decodes the current one. No mainnet deployment is published."
+    }
+  ]
+}

@@ -88,6 +88,12 @@ export interface VerificationMismatch {
   actionRequired: string;
   /** stable id used to de-duplicate alerts across runs */
   fingerprint: string;
+  /** true when the finding is recorded in the known-issues registry: unresolved but acknowledged */
+  known?: boolean;
+  /** note from the known-issues registry entry */
+  knownNote?: string;
+  /** expiry of the known-issues registry entry, if it has one */
+  knownExpiresAt?: string;
 }
 
 export interface UpgradeHop {
@@ -156,4 +162,8 @@ export interface MonitorReport {
   upgrades: UpgradeEvent[];
   counts: Record<RiskLevel, number>;
   highestRisk: RiskLevel;
+  /** findings matched by the known-issues registry (subset of mismatches) */
+  knownCount?: number;
+  /** highest risk among findings not acknowledged as known; equals highestRisk when no registry is used */
+  highestUnresolvedRisk?: RiskLevel;
 }

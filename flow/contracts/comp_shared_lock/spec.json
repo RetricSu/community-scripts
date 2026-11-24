@@ -1,0 +1,973 @@
+{
+  "title": {
+    "zh": "COMP 共享 Lock（Shared Cell）约束",
+    "en": "COMP Shared Lock (Shared Cell) Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：gpBlockchain/comp-shared-lock @fd2370a contracts/comp-shared-lock/src/main.rs、json.rs，docs/contract-design.md　·　testnet 0xbc47…73c1 (type，Type ID)　·　部署见 deployment.json　·　“谁都能用这个 cell，但谁都拿不走它”",
+    "en": "Source: gpBlockchain/comp-shared-lock @fd2370a contracts/comp-shared-lock/src/main.rs, json.rs, docs/contract-design.md　·　testnet 0xbc47…73c1 (type, Type ID)　·　deployment in deployment.json　·　\"Anyone may use the Cell, but nobody may take the Cell\""
+  },
+  "transitions": [
+    {
+      "tag": "0 → 1",
+      "title": {
+        "zh": "创建 COMP 共享 cell（lock 不执行）",
+        "en": "Create a COMP shared cell (lock not executed)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "任意资金 cell",
+            "en": "any funding cells"
+          },
+          "body": {
+            "zh": "由各自的 lock 解锁",
+            "en": "unlocked by their own locks"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "新 COMP cell（可一次建多个）",
+            "en": "new COMP cell(s) (several per tx allowed)"
+          },
+          "body": {
+            "zh": "Cell{\n  capacity: 任意（≥ 占用）,\n  lock: COMP_LOCK{ args: {{channel_hash ‖ max_fee}} },\n  type: 应为 none,\n  data: 任意\n}",
+            "en": "Cell{\n  capacity: any (≥ occupied),\n  lock: COMP_LOCK{ args: {{channel_hash ‖ max_fee}} },\n  type: should be none,\n  data: any\n}"
+          }
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "lock.args 字节布局（40B，输入与后继必须逐字节相同）",
+            "en": "lock.args byte layout (40B, byte-identical in input and successor)"
+          },
+          "layout": [
+            {
+              "name": "channel_hash",
+              "size": "off 0 · 32B · Byte32",
+              "color": 0,
+              "flex": 4,
+              "role": {
+                "zh": "应用状态 / 频道标识，合约不解释其内容",
+                "en": "application state / channel id; opaque to the lock"
+              },
+              "cons": {
+                "zh": "args 总长 = 40；后继 lock 不可改",
+                "en": "args length = 40; immutable in successor"
+              },
+              "err": "6 / 11"
+            },
+            {
+              "name": "max_fee",
+              "size": "off 32 · 8B · u64 LE",
+              "color": 1,
+              "flex": 1,
+              "role": {
+                "zh": "单次转换 COMP cell 最多可损失的 capacity（shannon）",
+                "en": "max capacity the COMP cell may lose per transition (shannon)"
+              },
+              "cons": {
+                "zh": "后继 capacity + max_fee ≥ 输入 capacity",
+                "en": "successor capacity + max_fee ≥ input capacity"
+              },
+              "err": "12"
+            }
+          ],
+          "hex": [
+            [
+              "channel_hash",
+              "0x3bf471b16283375362945f60972e6dd4a998db34b53623457dcaa800b6a42726"
+            ],
+            [
+              "max_fee",
+              "0x40420f0000000000 = 1,000,000 shannon (0.01 CKB)"
+            ]
+          ],
+          "note": {
+            "zh": "示例：deployment.json 的 sharedCell.lockArgs（共享 cell #0）",
+            "en": "Example: sharedCell.lockArgs in deployment.json (shared cell #0)"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "—",
+          "cond": {
+            "zh": "本合约不检查：输出上的 lock 在被花费前不会执行",
+            "en": "not checked by this contract: an output lock does not run until it is spent"
+          },
+          "err": "",
+          "note": {
+            "zh": "非合约规则：若创建时 args ≠ 40 字节或带了 type，该 cell 以后每次花费都会失败（6 / 10），等于永久锁死。测试网上有一次建 10 个、40 个 COMP cell 的创建交易，例如 0x6a2af0eb…7a15。",
+            "en": "Not a contract rule: if a cell is created with args ≠ 40 bytes or with a type, every later spend fails (6 / 10), locking it forever. Testnet has creation txs making 10 or 40 COMP cells at once, e.g. 0x6a2af0eb…7a15."
+          }
+        }
+      ]
+    },
+    {
+      "tag": "1 → 1",
+      "title": {
+        "zh": "匿名消息 / 更新（任何人可发）",
+        "en": "Anonymous message / update (anyone)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "COMP 共享 cell（group 输入，唯一）",
+            "en": "COMP shared cell (group input, the only one)"
+          },
+          "body": {
+            "zh": "Cell{\n  capacity: {{C}},\n  lock: COMP_LOCK{ args: {{channel_hash ‖ max_fee}} },\n  type: {{none}},\n  data: 任意\n}\nsince: {{0x8000000000000001}}",
+            "en": "Cell{\n  capacity: {{C}},\n  lock: COMP_LOCK{ args: {{channel_hash ‖ max_fee}} },\n  type: {{none}},\n  data: any\n}\nsince: {{0x8000000000000001}}"
+          }
+        },
+        {
+          "label": {
+            "zh": "witness[group 0]（可选）",
+            "en": "witness[group 0] (optional)"
+          },
+          "body": {
+            "zh": "缺省，或 WitnessArgs{ lock: None / 空 /\n  {\"public_key\":null,\"signature\":null,\n   \"extensions\":{…}} }",
+            "en": "absent, or WitnessArgs{ lock: None / empty /\n  {\"public_key\":null,\"signature\":null,\n   \"extensions\":{…}} }"
+          }
+        },
+        {
+          "label": "cell_deps",
+          "body": {
+            "zh": "COMP 代码 cell（Type ID 单例）\n0x54d0bc54…db64:0 dep_type code",
+            "en": "COMP code cell (Type ID singleton)\n0x54d0bc54…db64:0 dep_type code"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "后继 COMP cell（唯一）",
+            "en": "successor COMP cell (the only one)"
+          },
+          "body": {
+            "zh": "Cell{\n  capacity: {{≥ C − max_fee}},\n  lock: 与输入相同（不可改）,\n  type: {{none}},\n  data: {{新数据（不检查）}}\n}",
+            "en": "Cell{\n  capacity: {{≥ C − max_fee}},\n  lock: same as input (immutable),\n  type: {{none}},\n  data: {{new data (unchecked)}}\n}"
+          }
+        },
+        {
+          "label": {
+            "zh": "其他输出",
+            "en": "other outputs"
+          },
+          "body": {
+            "zh": "不能再有任何 COMP lock 输出",
+            "en": "no other COMP-locked output"
+          }
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "input.since（8B u64，必须恰好 = 0x8000000000000001）",
+            "en": "input.since (8B u64, must equal exactly 0x8000000000000001)"
+          },
+          "layout": [
+            {
+              "name": "relative flag",
+              "size": "bit 63",
+              "color": 2,
+              "flex": 1,
+              "role": {
+                "zh": "1 = 相对",
+                "en": "1 = relative"
+              },
+              "cons": {
+                "zh": "必须为 1",
+                "en": "must be 1"
+              },
+              "err": "16"
+            },
+            {
+              "name": "metric",
+              "size": "bit 61–62",
+              "color": 3,
+              "flex": 1,
+              "role": {
+                "zh": "00 = 区块号",
+                "en": "00 = block number"
+              },
+              "cons": {
+                "zh": "必须为区块号",
+                "en": "must be block number"
+              },
+              "err": "16"
+            },
+            {
+              "name": "value",
+              "size": "bit 0–55",
+              "color": 4,
+              "flex": 3,
+              "role": {
+                "zh": "相对区块数",
+                "en": "relative block count"
+              },
+              "cons": {
+                "zh": "必须 = 1（0、2、绝对 1 都拒绝）",
+                "en": "must be 1 (0, 2, absolute 1 rejected)"
+              },
+              "err": "16"
+            }
+          ],
+          "hex": [
+            [
+              "since",
+              "0x8000000000000001"
+            ]
+          ],
+          "note": {
+            "zh": "效果：在区块 H 创建的 COMP cell 最早在 H+1 才能被花费，每条 cell 谱系每个区块最多一次转换（不是全局配额）。",
+            "en": "Effect: a COMP cell created in block H is first spendable in H+1, so each cell lineage advances at most once per block (not a global quota)."
+          }
+        },
+        {
+          "label": {
+            "zh": "witness[group 0]：WitnessArgs.lock = UTF-8 JSON 消息",
+            "en": "witness[group 0]: WitnessArgs.lock = UTF-8 JSON message"
+          },
+          "layout": [
+            {
+              "name": "public_key",
+              "size": "\"0x\"+66 hex · 33B",
+              "color": 5,
+              "flex": 2,
+              "role": {
+                "zh": "压缩 SEC1 secp256k1 公钥（0x02/0x03 ‖ x），与 CKB 地址无关；可省略 0x，大小写 hex 都接受",
+                "en": "compressed SEC1 secp256k1 key (0x02/0x03 ‖ x), independent of CKB addresses; 0x optional, either hex case accepted"
+              },
+              "cons": {
+                "zh": "字符串或 null；与 signature 同时存在 / 同时缺省；长度恰好 33 字节",
+                "en": "string or null; present together with signature; exactly 33 bytes"
+              },
+              "err": "13 / 14"
+            },
+            {
+              "name": "signature",
+              "size": "\"0x\"+130 hex · 65B",
+              "color": 6,
+              "flex": 3,
+              "role": {
+                "zh": "r[32] ‖ s[32] ‖ recid[1]，recid ∈ {0..3, 27, 28}",
+                "en": "r[32] ‖ s[32] ‖ recid[1], recid ∈ {0..3, 27, 28}"
+              },
+              "cons": {
+                "zh": "恢复出的压缩公钥必须等于 public_key",
+                "en": "recovered compressed key must equal public_key"
+              },
+              "err": "14 / 15"
+            },
+            {
+              "name": "extensions",
+              "size": "raw JSON",
+              "color": 7,
+              "flex": 3,
+              "role": {
+                "zh": "应用载荷，必须是 object 或 array；签名时按原样字节参与哈希",
+                "en": "application payload, object or array; hashed as raw bytes when signed"
+              },
+              "cons": {
+                "zh": "签名消息必须存在；三个已知键都不可重复",
+                "en": "required for signed messages; none of the three known keys may repeat"
+              },
+              "err": "14"
+            }
+          ],
+          "hex": [
+            [
+              "anonymous",
+              "{\"public_key\":null,\"signature\":null,\"extensions\":{\"protocol\":\"comp\",\"version\":2,\"type\":\"text\",\"payload\":\"hello\"}}"
+            ],
+            [
+              "signed",
+              "{\"public_key\":\"0x03e07dfd…ba61\",\"signature\":\"0xb544e24f…25cb01\",\"extensions\":{\"protocol\":\"comp\",\"version\":2,\"type\":\"text\",\"payload\":\"test\"}}"
+            ]
+          ],
+          "note": {
+            "zh": "示例来自测试网 tx 0xac085cab…8d01（匿名）与 0x07a093a2…d50b（签名）。未知顶层键会被语法校验后忽略。",
+            "en": "Examples from testnet tx 0xac085cab…8d01 (anonymous) and 0x07a093a2…d50b (signed). Unknown top-level keys are syntax-checked then ignored."
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "script",
+          "cond": {
+            "zh": "load_script 成功",
+            "en": "load_script succeeds"
+          },
+          "err": "4",
+          "note": {
+            "zh": "Error::Encoding；所有 syscall 失败（since / type / capacity / tx_hash 读取）也映射为 4",
+            "en": "Error::Encoding; every syscall failure (since / type / capacity / tx_hash load) also maps to 4"
+          }
+        },
+        {
+          "field": "script.args",
+          "cond": {
+            "zh": "长度 = 40（channel_hash 32B ‖ max_fee u64 LE）",
+            "en": "length = 40 (channel_hash 32B ‖ max_fee u64 LE)"
+          },
+          "err": "6"
+        },
+        {
+          "field": "GroupInput",
+          "cond": {
+            "zh": "恰好 1 个（不可合并）",
+            "en": "exactly 1 (no merge)"
+          },
+          "err": "8"
+        },
+        {
+          "field": "group input since",
+          "cond": {
+            "zh": "= 0x8000000000000001（相对 1 个区块）",
+            "en": "= 0x8000000000000001 (relative 1 block)"
+          },
+          "err": "16"
+        },
+        {
+          "field": "inputs",
+          "cond": {
+            "zh": "同 code_hash + hash_type 的 COMP 输入在整笔交易里只能有 1 个（不同 args 的其他 COMP cell 也不行）",
+            "en": "only 1 input in the whole tx may use the COMP code_hash + hash_type (other COMP cells with different args included)"
+          },
+          "err": "7"
+        },
+        {
+          "field": "outputs",
+          "cond": {
+            "zh": "同 code_hash + hash_type 的输出恰好 1 个（后继；0 = 销毁，≥2 = 分叉）",
+            "en": "exactly 1 output with the COMP code_hash + hash_type (successor; 0 = destroy, ≥2 = fork)"
+          },
+          "err": "9"
+        },
+        {
+          "field": "input.type / successor.type",
+          "cond": {
+            "zh": "都必须为空",
+            "en": "both must be absent"
+          },
+          "err": "10"
+        },
+        {
+          "field": "successor.lock",
+          "cond": {
+            "zh": "与输入 lock 逐字节相同（code_hash、hash_type、args）",
+            "en": "byte-identical to the input lock (code_hash, hash_type, args)"
+          },
+          "err": "11",
+          "note": {
+            "zh": "后继按 code_hash + hash_type 查找，所以改了 args 的后继报 11 而不是 9",
+            "en": "the successor is found by code_hash + hash_type, so a successor with changed args fails with 11, not 9"
+          }
+        },
+        {
+          "field": "successor.capacity",
+          "cond": {
+            "zh": "+ max_fee ≥ 输入 capacity（checked_add，溢出视为通过；可增加）",
+            "en": "+ max_fee ≥ input capacity (checked_add; overflow passes; may increase)"
+          },
+          "err": "12"
+        },
+        {
+          "field": "outputs_data[successor]",
+          "cond": {
+            "zh": "不检查（应用自定义）",
+            "en": "not checked (application-owned)"
+          },
+          "err": ""
+        },
+        {
+          "field": "witness[group 0]",
+          "cond": {
+            "zh": "不存在 → 匿名通过；存在但不是合法 WitnessArgs（包括空 0x）→ 失败",
+            "en": "missing → anonymous pass; present but not valid WitnessArgs (including empty 0x) → fail"
+          },
+          "err": "14"
+        },
+        {
+          "field": "WitnessArgs.lock",
+          "cond": {
+            "zh": "None 或空 → 匿名通过；否则必须是 UTF-8 且是完整 JSON object",
+            "en": "None or empty → anonymous pass; otherwise must be UTF-8 and a complete JSON object"
+          },
+          "err": "14"
+        },
+        {
+          "field": "JSON",
+          "cond": {
+            "zh": "public_key / signature 必须是字符串或 null，extensions 必须是 object / array / null；三者都不可重复；不允许尾随字节；嵌套 < 64",
+            "en": "public_key / signature must be string or null, extensions object / array / null; none may repeat; no trailing bytes; nesting < 64"
+          },
+          "err": "14",
+          "note": {
+            "zh": "即使是匿名消息也会先做这一步语法校验",
+            "en": "applies to anonymous messages too"
+          }
+        },
+        {
+          "field": "public_key, signature",
+          "cond": {
+            "zh": "都为 null / 缺省 → 匿名通过；只有一个 → 失败",
+            "en": "both null / absent → anonymous pass; exactly one → fail"
+          },
+          "err": "13"
+        }
+      ]
+    },
+    {
+      "tag": "1 → 1",
+      "title": {
+        "zh": "签名消息（compressed 公钥 + 可恢复签名）",
+        "en": "Signed message (compressed public key + recoverable signature)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "COMP 共享 cell（group 输入，唯一）",
+            "en": "COMP shared cell (group input, the only one)"
+          },
+          "body": {
+            "zh": "Cell{\n  capacity: {{C}},\n  lock: COMP_LOCK{ args: {{channel_hash ‖ max_fee}} },\n  type: {{none}},\n  data: 任意\n}\nsince: {{0x8000000000000001}}",
+            "en": "Cell{\n  capacity: {{C}},\n  lock: COMP_LOCK{ args: {{channel_hash ‖ max_fee}} },\n  type: {{none}},\n  data: any\n}\nsince: {{0x8000000000000001}}"
+          }
+        },
+        {
+          "label": "witness[group 0]",
+          "body": {
+            "zh": "WitnessArgs{ lock: {\n  \"public_key\": {{0x02|03…（33B）}},\n  \"signature\": {{0x…（65B）}},\n  \"extensions\": {{{…}}}\n} }",
+            "en": "WitnessArgs{ lock: {\n  \"public_key\": {{0x02|03… (33B)}},\n  \"signature\": {{0x… (65B)}},\n  \"extensions\": {{{…}}}\n} }"
+          }
+        },
+        {
+          "label": "cell_deps",
+          "body": {
+            "zh": "COMP 代码 cell（Type ID 单例）\n0x54d0bc54…db64:0 dep_type code",
+            "en": "COMP code cell (Type ID singleton)\n0x54d0bc54…db64:0 dep_type code"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "后继 COMP cell（唯一）",
+            "en": "successor COMP cell (the only one)"
+          },
+          "body": {
+            "zh": "Cell{\n  capacity: {{≥ C − max_fee}},\n  lock: 与输入相同（不可改）,\n  type: {{none}},\n  data: {{新数据（不检查）}}\n}",
+            "en": "Cell{\n  capacity: {{≥ C − max_fee}},\n  lock: same as input (immutable),\n  type: {{none}},\n  data: {{new data (unchecked)}}\n}"
+          }
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "witness[group 0]：WitnessArgs.lock = UTF-8 JSON 消息",
+            "en": "witness[group 0]: WitnessArgs.lock = UTF-8 JSON message"
+          },
+          "layout": [
+            {
+              "name": "public_key",
+              "size": "\"0x\"+66 hex · 33B",
+              "color": 5,
+              "flex": 2,
+              "role": {
+                "zh": "压缩 SEC1 secp256k1 公钥（0x02/0x03 ‖ x），与 CKB 地址无关；可省略 0x，大小写 hex 都接受",
+                "en": "compressed SEC1 secp256k1 key (0x02/0x03 ‖ x), independent of CKB addresses; 0x optional, either hex case accepted"
+              },
+              "cons": {
+                "zh": "字符串或 null；与 signature 同时存在 / 同时缺省；长度恰好 33 字节",
+                "en": "string or null; present together with signature; exactly 33 bytes"
+              },
+              "err": "13 / 14"
+            },
+            {
+              "name": "signature",
+              "size": "\"0x\"+130 hex · 65B",
+              "color": 6,
+              "flex": 3,
+              "role": {
+                "zh": "r[32] ‖ s[32] ‖ recid[1]，recid ∈ {0..3, 27, 28}",
+                "en": "r[32] ‖ s[32] ‖ recid[1], recid ∈ {0..3, 27, 28}"
+              },
+              "cons": {
+                "zh": "恢复出的压缩公钥必须等于 public_key",
+                "en": "recovered compressed key must equal public_key"
+              },
+              "err": "14 / 15"
+            },
+            {
+              "name": "extensions",
+              "size": "raw JSON",
+              "color": 7,
+              "flex": 3,
+              "role": {
+                "zh": "应用载荷，必须是 object 或 array；签名时按原样字节参与哈希",
+                "en": "application payload, object or array; hashed as raw bytes when signed"
+              },
+              "cons": {
+                "zh": "签名消息必须存在；三个已知键都不可重复",
+                "en": "required for signed messages; none of the three known keys may repeat"
+              },
+              "err": "14"
+            }
+          ],
+          "hex": [
+            [
+              "anonymous",
+              "{\"public_key\":null,\"signature\":null,\"extensions\":{\"protocol\":\"comp\",\"version\":2,\"type\":\"text\",\"payload\":\"hello\"}}"
+            ],
+            [
+              "signed",
+              "{\"public_key\":\"0x03e07dfd…ba61\",\"signature\":\"0xb544e24f…25cb01\",\"extensions\":{\"protocol\":\"comp\",\"version\":2,\"type\":\"text\",\"payload\":\"test\"}}"
+            ]
+          ],
+          "note": {
+            "zh": "示例来自测试网 tx 0xac085cab…8d01（匿名）与 0x07a093a2…d50b（签名）。未知顶层键会被语法校验后忽略。",
+            "en": "Examples from testnet tx 0xac085cab…8d01 (anonymous) and 0x07a093a2…d50b (signed). Unknown top-level keys are syntax-checked then ignored."
+          }
+        },
+        {
+          "label": {
+            "zh": "签名摘要（签名消息才计算）",
+            "en": "signing digest (signed messages only)"
+          },
+          "layout": [
+            {
+              "name": "message_hash",
+              "size": "32B",
+              "color": 0,
+              "flex": 1,
+              "role": {
+                "zh": "CKB_BLAKE2B(65 个 0x00 ‖ extensions 原始字节)",
+                "en": "CKB_BLAKE2B(65 zero bytes ‖ raw extensions bytes)"
+              },
+              "err": "15"
+            },
+            {
+              "name": "signing_digest",
+              "size": "32B",
+              "color": 1,
+              "flex": 1,
+              "role": {
+                "zh": "CKB_BLAKE2B(tx_hash ‖ message_hash)；tx_hash 覆盖 inputs、outputs、outputs_data、deps、since，不含 witness",
+                "en": "CKB_BLAKE2B(tx_hash ‖ message_hash); tx_hash commits to inputs, outputs, outputs_data, deps, since, not witnesses"
+              },
+              "cons": {
+                "zh": "secp256k1 recover_from_prehash(digest, sig, recid) == public_key",
+                "en": "secp256k1 recover_from_prehash(digest, sig, recid) == public_key"
+              },
+              "err": "15"
+            }
+          ],
+          "note": {
+            "zh": "CKB_BLAKE2B = blake2b-256，personal \"ckb-default-hash\"。public_key 不参与摘要，靠恢复结果相等来绑定。",
+            "en": "CKB_BLAKE2B = blake2b-256 with personal \"ckb-default-hash\". public_key is not hashed; it is bound by equality with the recovered key."
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "script",
+          "cond": {
+            "zh": "load_script 成功",
+            "en": "load_script succeeds"
+          },
+          "err": "4",
+          "note": {
+            "zh": "Error::Encoding；所有 syscall 失败（since / type / capacity / tx_hash 读取）也映射为 4",
+            "en": "Error::Encoding; every syscall failure (since / type / capacity / tx_hash load) also maps to 4"
+          }
+        },
+        {
+          "field": "script.args",
+          "cond": {
+            "zh": "长度 = 40（channel_hash 32B ‖ max_fee u64 LE）",
+            "en": "length = 40 (channel_hash 32B ‖ max_fee u64 LE)"
+          },
+          "err": "6"
+        },
+        {
+          "field": "GroupInput",
+          "cond": {
+            "zh": "恰好 1 个（不可合并）",
+            "en": "exactly 1 (no merge)"
+          },
+          "err": "8"
+        },
+        {
+          "field": "group input since",
+          "cond": {
+            "zh": "= 0x8000000000000001（相对 1 个区块）",
+            "en": "= 0x8000000000000001 (relative 1 block)"
+          },
+          "err": "16"
+        },
+        {
+          "field": "inputs",
+          "cond": {
+            "zh": "同 code_hash + hash_type 的 COMP 输入在整笔交易里只能有 1 个（不同 args 的其他 COMP cell 也不行）",
+            "en": "only 1 input in the whole tx may use the COMP code_hash + hash_type (other COMP cells with different args included)"
+          },
+          "err": "7"
+        },
+        {
+          "field": "outputs",
+          "cond": {
+            "zh": "同 code_hash + hash_type 的输出恰好 1 个（后继；0 = 销毁，≥2 = 分叉）",
+            "en": "exactly 1 output with the COMP code_hash + hash_type (successor; 0 = destroy, ≥2 = fork)"
+          },
+          "err": "9"
+        },
+        {
+          "field": "input.type / successor.type",
+          "cond": {
+            "zh": "都必须为空",
+            "en": "both must be absent"
+          },
+          "err": "10"
+        },
+        {
+          "field": "successor.lock",
+          "cond": {
+            "zh": "与输入 lock 逐字节相同（code_hash、hash_type、args）",
+            "en": "byte-identical to the input lock (code_hash, hash_type, args)"
+          },
+          "err": "11",
+          "note": {
+            "zh": "后继按 code_hash + hash_type 查找，所以改了 args 的后继报 11 而不是 9",
+            "en": "the successor is found by code_hash + hash_type, so a successor with changed args fails with 11, not 9"
+          }
+        },
+        {
+          "field": "successor.capacity",
+          "cond": {
+            "zh": "+ max_fee ≥ 输入 capacity（checked_add，溢出视为通过；可增加）",
+            "en": "+ max_fee ≥ input capacity (checked_add; overflow passes; may increase)"
+          },
+          "err": "12"
+        },
+        {
+          "field": "outputs_data[successor]",
+          "cond": {
+            "zh": "不检查（应用自定义）",
+            "en": "not checked (application-owned)"
+          },
+          "err": ""
+        },
+        {
+          "field": "witness[group 0]",
+          "cond": {
+            "zh": "不存在 → 匿名通过；存在但不是合法 WitnessArgs（包括空 0x）→ 失败",
+            "en": "missing → anonymous pass; present but not valid WitnessArgs (including empty 0x) → fail"
+          },
+          "err": "14"
+        },
+        {
+          "field": "WitnessArgs.lock",
+          "cond": {
+            "zh": "None 或空 → 匿名通过；否则必须是 UTF-8 且是完整 JSON object",
+            "en": "None or empty → anonymous pass; otherwise must be UTF-8 and a complete JSON object"
+          },
+          "err": "14"
+        },
+        {
+          "field": "JSON",
+          "cond": {
+            "zh": "public_key / signature 必须是字符串或 null，extensions 必须是 object / array / null；三者都不可重复；不允许尾随字节；嵌套 < 64",
+            "en": "public_key / signature must be string or null, extensions object / array / null; none may repeat; no trailing bytes; nesting < 64"
+          },
+          "err": "14",
+          "note": {
+            "zh": "即使是匿名消息也会先做这一步语法校验",
+            "en": "applies to anonymous messages too"
+          }
+        },
+        {
+          "field": "public_key, signature",
+          "cond": {
+            "zh": "都为 null / 缺省 → 匿名通过；只有一个 → 失败",
+            "en": "both null / absent → anonymous pass; exactly one → fail"
+          },
+          "err": "13"
+        },
+        {
+          "field": "extensions",
+          "cond": {
+            "zh": "签名消息必须存在且非 null",
+            "en": "must be present and non-null for signed messages"
+          },
+          "err": "14"
+        },
+        {
+          "field": "public_key",
+          "cond": {
+            "zh": "hex（0x 可选）解码后恰好 33 字节",
+            "en": "hex (0x optional) decodes to exactly 33 bytes"
+          },
+          "err": "14"
+        },
+        {
+          "field": "signature",
+          "cond": {
+            "zh": "hex（0x 可选）解码后恰好 65 字节",
+            "en": "hex (0x optional) decodes to exactly 65 bytes"
+          },
+          "err": "14"
+        },
+        {
+          "field": "signature[0..64]",
+          "cond": {
+            "zh": "是合法 (r, s)",
+            "en": "valid (r, s)"
+          },
+          "err": "15"
+        },
+        {
+          "field": "signature[64]",
+          "cond": {
+            "zh": "recid ∈ {0,1,2,3,27,28}（27/28 减 27）",
+            "en": "recid ∈ {0,1,2,3,27,28} (27/28 minus 27)"
+          },
+          "err": "15"
+        },
+        {
+          "field": "recovered key",
+          "cond": {
+            "zh": "= public_key（压缩形式逐字节比较）",
+            "en": "= public_key (compressed, byte comparison)"
+          },
+          "err": "15"
+        }
+      ]
+    },
+    {
+      "tag": "1+N → 1+M",
+      "title": {
+        "zh": "赞助 / 充值（capacity 增加）",
+        "en": "Sponsor / top-up (capacity increases)"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "COMP 共享 cell（group 输入，唯一）",
+            "en": "COMP shared cell (group input, the only one)"
+          },
+          "body": {
+            "zh": "Cell{\n  capacity: {{C}},\n  lock: COMP_LOCK{ args: {{channel_hash ‖ max_fee}} },\n  type: {{none}},\n  data: 任意\n}\nsince: {{0x8000000000000001}}",
+            "en": "Cell{\n  capacity: {{C}},\n  lock: COMP_LOCK{ args: {{channel_hash ‖ max_fee}} },\n  type: {{none}},\n  data: any\n}\nsince: {{0x8000000000000001}}"
+          }
+        },
+        {
+          "label": {
+            "zh": "赞助方输入",
+            "en": "sponsor inputs"
+          },
+          "body": {
+            "zh": "普通 lock 的 cell，\n由其自身 lock + witness 解锁",
+            "en": "normal-lock cells,\nunlocked by their own lock + witness"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "后继 COMP cell（唯一）",
+            "en": "successor COMP cell (the only one)"
+          },
+          "body": {
+            "zh": "Cell{\n  capacity: {{≥ C − max_fee（可 > C）}},\n  lock: 与输入相同（不可改）,\n  type: {{none}},\n  data: {{新数据（不检查）}}\n}",
+            "en": "Cell{\n  capacity: {{≥ C − max_fee (may be > C)}},\n  lock: same as input (immutable),\n  type: {{none}},\n  data: {{new data (unchecked)}}\n}"
+          }
+        },
+        {
+          "label": {
+            "zh": "找零",
+            "en": "change"
+          },
+          "body": {
+            "zh": "普通 lock，不能是 COMP lock",
+            "en": "normal lock, must not be COMP"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "script",
+          "cond": {
+            "zh": "load_script 成功",
+            "en": "load_script succeeds"
+          },
+          "err": "4",
+          "note": {
+            "zh": "Error::Encoding；所有 syscall 失败（since / type / capacity / tx_hash 读取）也映射为 4",
+            "en": "Error::Encoding; every syscall failure (since / type / capacity / tx_hash load) also maps to 4"
+          }
+        },
+        {
+          "field": "script.args",
+          "cond": {
+            "zh": "长度 = 40（channel_hash 32B ‖ max_fee u64 LE）",
+            "en": "length = 40 (channel_hash 32B ‖ max_fee u64 LE)"
+          },
+          "err": "6"
+        },
+        {
+          "field": "GroupInput",
+          "cond": {
+            "zh": "恰好 1 个（不可合并）",
+            "en": "exactly 1 (no merge)"
+          },
+          "err": "8"
+        },
+        {
+          "field": "group input since",
+          "cond": {
+            "zh": "= 0x8000000000000001（相对 1 个区块）",
+            "en": "= 0x8000000000000001 (relative 1 block)"
+          },
+          "err": "16"
+        },
+        {
+          "field": "inputs",
+          "cond": {
+            "zh": "同 code_hash + hash_type 的 COMP 输入在整笔交易里只能有 1 个（不同 args 的其他 COMP cell 也不行）",
+            "en": "only 1 input in the whole tx may use the COMP code_hash + hash_type (other COMP cells with different args included)"
+          },
+          "err": "7"
+        },
+        {
+          "field": "outputs",
+          "cond": {
+            "zh": "同 code_hash + hash_type 的输出恰好 1 个（后继；0 = 销毁，≥2 = 分叉）",
+            "en": "exactly 1 output with the COMP code_hash + hash_type (successor; 0 = destroy, ≥2 = fork)"
+          },
+          "err": "9"
+        },
+        {
+          "field": "input.type / successor.type",
+          "cond": {
+            "zh": "都必须为空",
+            "en": "both must be absent"
+          },
+          "err": "10"
+        },
+        {
+          "field": "successor.lock",
+          "cond": {
+            "zh": "与输入 lock 逐字节相同（code_hash、hash_type、args）",
+            "en": "byte-identical to the input lock (code_hash, hash_type, args)"
+          },
+          "err": "11",
+          "note": {
+            "zh": "后继按 code_hash + hash_type 查找，所以改了 args 的后继报 11 而不是 9",
+            "en": "the successor is found by code_hash + hash_type, so a successor with changed args fails with 11, not 9"
+          }
+        },
+        {
+          "field": "successor.capacity",
+          "cond": {
+            "zh": "+ max_fee ≥ 输入 capacity（checked_add，溢出视为通过；可增加）",
+            "en": "+ max_fee ≥ input capacity (checked_add; overflow passes; may increase)"
+          },
+          "err": "12"
+        },
+        {
+          "field": "sponsor inputs",
+          "cond": {
+            "zh": "不能是 COMP lock（否则 7）",
+            "en": "must not use the COMP lock (else 7)"
+          },
+          "err": "7",
+          "note": {
+            "zh": "资金规则（总输入 ≥ 总输出 + 手续费）由 CKB 共识检查，不是本合约；本合约只限制 COMP cell 自己最多损失 max_fee。测试网上暂未找到这种交易，按 docs/contract-design.md 的“Sponsor”场景整理。",
+            "en": "Funding (total inputs ≥ outputs + fee) is a CKB consensus rule, not this contract; the lock only bounds the COMP cell's own loss by max_fee. No such tx was found on testnet; this card follows the \"Sponsor\" scenario in docs/contract-design.md."
+          }
+        }
+      ]
+    },
+    {
+      "tag": "✗",
+      "title": {
+        "zh": "被拒绝的形态：合并 / 分叉 / 销毁 / 改 lock / 加 type / 超额扣费",
+        "en": "Rejected shapes: merge / fork / destroy / change lock / add type / overspend"
+      },
+      "inputs": [
+        {
+          "label": {
+            "zh": "COMP 输入",
+            "en": "COMP inputs"
+          },
+          "body": {
+            "zh": "{{2 个同 lock}} → 8\n{{2 个不同 args}} → 7\nsince ≠ 相对 1 → 16",
+            "en": "{{2 with same lock}} → 8\n{{2 with different args}} → 7\nsince ≠ relative 1 → 16"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "label": {
+            "zh": "COMP 输出",
+            "en": "COMP outputs"
+          },
+          "body": {
+            "zh": "{{0 个}}（销毁 / 取走）→ 9\n{{≥ 2 个}}（分叉）→ 9\nargs 改动 → 11\n带 type → 10\ncapacity < C − max_fee → 12",
+            "en": "{{0}} (destroy / take) → 9\n{{≥ 2}} (fork) → 9\nchanged args → 11\nwith type → 10\ncapacity < C − max_fee → 12"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "—",
+          "cond": {
+            "zh": "没有任何“回收 / 关闭”路径：COMP cell 只要存在就只能被续写",
+            "en": "no reclaim / close path: a COMP cell can only be continued, never removed"
+          },
+          "err": "9",
+          "note": {
+            "zh": "仓库 scripts/reclaim.mjs 只能回收普通 cell，不能绕过本合约（未逐行核对脚本）。max_fee 只限制单次损失，不限制总损失：反复转换可以把 capacity 逐步消耗到最低占用。",
+            "en": "The repo's scripts/reclaim.mjs cannot bypass this lock (script not reviewed line by line). max_fee bounds per-transition loss only; repeated transitions can drain capacity down to the occupied minimum."
+          }
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码来自 main.rs 的 enum Error（#[repr(i8)]）：1 IndexOutOfBound、2 ItemMissing、3 LengthNotEnough、4 Encoding、6 ArgsEncoding、7 MultipleLockGroups、8 InvalidInputCount、9 InvalidSuccessorCount、10 TypeScriptNotAllowed、11 LockMismatch、12 CapacityExceeded、13 InvalidIdentity、14 WitnessFormat、15 SignatureInvalid、16 InvalidSince。5 没有定义；1–3 在源码里从不返回，只有 4 用于 syscall 失败。",
+      "en": "Error codes from enum Error in main.rs (#[repr(i8)]): 1 IndexOutOfBound, 2 ItemMissing, 3 LengthNotEnough, 4 Encoding, 6 ArgsEncoding, 7 MultipleLockGroups, 8 InvalidInputCount, 9 InvalidSuccessorCount, 10 TypeScriptNotAllowed, 11 LockMismatch, 12 CapacityExceeded, 13 InvalidIdentity, 14 WitnessFormat, 15 SignatureInvalid, 16 InvalidSince. 5 is unused; 1–3 are never returned, only 4 is used for syscall failures."
+    },
+    {
+      "zh": "检查顺序（与 enum 顺序不同）：6 args → 8 group 输入数 → 16 since → 7 COMP 输入数 → 9 后继数 → 10 type → 11 lock → 12 capacity → 14/13/15 witness。所以同时违反多条时报最先命中的那个，例如两个同 lock 的 COMP 输入报 8 而不是 7。",
+      "en": "Check order (differs from the enum order): 6 args → 8 group input count → 16 since → 7 COMP input count → 9 successor count → 10 type → 11 lock → 12 capacity → 14/13/15 witness. When several rules fail, the first one wins, e.g. two COMP inputs with the same lock fail with 8, not 7."
+    },
+    {
+      "zh": "注释 / 文档与代码不一致：README 写 message_bytes = [0;65] ‖ utf8(compact_json(extensions))，main.rs 注释写 canonical_encode(...)，但代码直接哈希 witness 里 extensions 的原始字节，不做压缩或规范化（docs/contract-design.md 写的 raw_json(extensions) 才对）。签名方必须对写进 witness 的原样字节签名。README 的“Validation rules”列表顺序也与实际检查顺序不同（since 列在第 8 条，实际第 3 个检查）。",
+      "en": "Comment / doc vs code: README says message_bytes = [0;65] ‖ utf8(compact_json(extensions)) and the main.rs comment says canonical_encode(...), but the code hashes the raw extensions bytes exactly as they appear in the witness, with no compaction or canonicalization (docs/contract-design.md's raw_json(extensions) is the accurate one). Signers must sign the exact bytes written to the witness. README's \"Validation rules\" list is also not in execution order (since is rule 8 there but the 3rd check in code)."
+    },
+    {
+      "zh": "空 witness（0x）不是“没有 witness”：ckb-std load_witness_args 解析空字节失败 → 14。只有 witness 槽位不存在（下标越界）或 WitnessArgs.lock 为 None / 空才算匿名。",
+      "en": "An empty witness (0x) is not \"no witness\": ckb-std load_witness_args fails to parse empty bytes → 14. Only a missing witness slot (index out of bound) or a None / empty WitnessArgs.lock counts as anonymous."
+    },
+    {
+      "zh": "extensions.payload 的格式（comp text、comp-wall v1 JSON、v2 \"CW2:\"+base64 二进制，见 docs/wall-binary-payload.md）全是前端约定，链上合约不检查；解码器只显示 protocol / version / type 和 payload 长度。",
+      "en": "The extensions.payload formats (comp text, comp-wall v1 JSON, v2 \"CW2:\"+base64 binary per docs/wall-binary-payload.md) are frontend conventions; the on-chain lock does not check them. The decoder only shows protocol / version / type and the payload length."
+    },
+    {
+      "zh": "部署：COMP lock 的 code_hash 是 Type ID 脚本哈希（hash_type type），代码 cell 在 0x54d0bc54…db64:0（2026-08-21 升级，dataHash 0x47cf5e… → 0x81dae1…）。升级前（区块 22154878 之前）的测试网交易 since = 0，旧二进制不要求 since；解码器按当前规则会把它们标成 16。README 里的 v0.1 data2 部署（0x43fd…12d9）是旧 witness 格式，未收录。",
+      "en": "Deployment: the COMP lock code_hash is the Type ID script hash (hash_type type); the code cell is 0x54d0bc54…db64:0 (upgraded 2026-08-21, dataHash 0x47cf5e… → 0x81dae1…). Testnet txs before the upgrade (block < 22154878) use since = 0, which the old binary did not require; the decoder flags them with 16 under the current rules. The README's v0.1 data2 deployment (0x43fd…12d9) uses the old witness schema and is not included."
+    },
+    {
+      "zh": "二进制未核验：链上 data_hash 与 deployment.json 记录一致，但仓库没有提交二进制或 checksum；本地用 rust 1.95.0 + Makefile 的 RUSTFLAGS 在 fd2370a 重编译得到 131672 字节，与链上 131984 字节不同，未能复现。解码器离线检查 args、since、COMP 输入/输出数、type、lock、capacity、witness JSON 结构；secp256k1 恢复为 NOT_CHECKED（会显示 signing_digest）。",
+      "en": "Binary unverified: the on-chain data_hash matches the deployment.json record, but the repo commits no binary or checksum; rebuilding fd2370a locally with rust 1.95.0 and the Makefile RUSTFLAGS gave 131672 bytes vs 131984 on chain, so the build was not reproduced. The decoder checks args, since, COMP input/output counts, type, lock, capacity and witness JSON shape offline; secp256k1 recovery is NOT_CHECKED (signing_digest is shown)."
+    }
+  ]
+}

@@ -1,0 +1,274 @@
+{
+  "title": {
+    "zh": "standard-udt sUDT Type Script 约束",
+    "en": "standard-udt sUDT Type Script Constraints"
+  },
+  "subtitle": {
+    "zh": "来源：xcshuan/ckb-standard-udt-contracts @d6e6da0 contracts/sudt/src、lib/script-utils、lib/types　·　仓库未公布部署（SUDT_CODE_HASH 为构建期常量）",
+    "en": "Source: xcshuan/ckb-standard-udt-contracts @d6e6da0 contracts/sudt/src, lib/script-utils, lib/types　·　no deployment published (SUDT_CODE_HASH is a build-time constant)"
+  },
+  "transitions": [
+    {
+      "tag": "Σin ≥ Σout",
+      "title": {
+        "zh": "转账 / 销毁（sudt 只检查格式）",
+        "en": "Transfer / burn (sudt only checks format)"
+      },
+      "inputs": [
+        {
+          "label": "sUDT",
+          "body": "Cell{\n  type: SUDT{ args: meta_type_hash } (data2),\n  data: {{amount}}\n}"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "sUDT",
+          "body": "Cell{\n  type: SUDT{ args: meta_type_hash } (data2),\n  data: {{amount′}}\n}"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "sUDT cell",
+            "en": "sUDT cell"
+          },
+          "layout": [
+            {
+              "name": "type.args",
+              "size": "32B",
+              "color": 0,
+              "flex": 2,
+              "role": {
+                "zh": "元数据 cell 的 type hash（type id 脚本的 hash）",
+                "en": "type hash of the metadata cell"
+              },
+              "cons": {
+                "zh": "长度 = 32",
+                "en": "length = 32"
+              },
+              "err": "20"
+            },
+            {
+              "name": "data[0..16]",
+              "size": "16B u128 LE",
+              "color": 1,
+              "flex": 2,
+              "role": {
+                "zh": "数量；之后的字节被忽略",
+                "en": "amount; trailing bytes ignored"
+              },
+              "cons": {
+                "zh": "≥ 16B",
+                "en": "≥ 16B"
+              },
+              "err": "30"
+            }
+          ],
+          "note": {
+            "zh": "sudt-meta 只统计 hash_type = data2、code_hash = SUDT_CODE_HASH、args = 元数据 type hash 的 cell",
+            "en": "sudt-meta only counts cells with hash_type = data2, code_hash = SUDT_CODE_HASH, args = metadata type hash"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "= 32B",
+            "en": "= 32B"
+          },
+          "err": "20"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "组内每个 cell ≥ 16B",
+            "en": "every group cell ≥ 16B"
+          },
+          "err": "30"
+        },
+        {
+          "field": "Σ",
+          "cond": {
+            "zh": "u128 求和不溢出",
+            "en": "u128 sums do not overflow"
+          },
+          "err": "31"
+        },
+        {
+          "field": {
+            "zh": "分类",
+            "en": "classification"
+          },
+          "cond": {
+            "zh": "Σ输出 ≤ Σ输入 时 sudt 直接通过；若交易消费元数据 cell，减少量由 sudt-meta 记为协议销毁，否则为用户销毁（不减 supply）",
+            "en": "Σout ≤ Σin passes in sudt; if the tx spends the metadata cell, sudt-meta accounts the decrease as a protocol burn, else it is user destruction (supply unchanged)"
+          },
+          "err": "—"
+        }
+      ]
+    },
+    {
+      "tag": "Σin < Σout",
+      "title": {
+        "zh": "铸造",
+        "en": "Mint"
+      },
+      "inputs": [
+        {
+          "label": "sUDT",
+          "body": "Cell{\n  type: SUDT{ args: meta_type_hash } (data2),\n  data: amount\n}"
+        },
+        {
+          "label": {
+            "zh": "元数据 cell（tracked 必须作为输入）",
+            "en": "metadata cell (must be an input when tracked)"
+          },
+          "body": "Cell{ type: {{hash = args}}, data: SudtMeta }"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "sUDT",
+          "body": "Cell{\n  type: SUDT{ args: meta_type_hash } (data2),\n  data: {{amount + minted}}\n}"
+        }
+      ],
+      "extras": [
+        {
+          "zh": "cell_deps：untracked 时元数据 cell 可在 cell_deps",
+          "en": "cell_deps: when untracked the metadata cell may be a cell_dep"
+        }
+      ],
+      "layouts": [
+        {
+          "label": {
+            "zh": "sUDT cell",
+            "en": "sUDT cell"
+          },
+          "layout": [
+            {
+              "name": "type.args",
+              "size": "32B",
+              "color": 0,
+              "flex": 2,
+              "role": {
+                "zh": "元数据 cell 的 type hash（type id 脚本的 hash）",
+                "en": "type hash of the metadata cell"
+              },
+              "cons": {
+                "zh": "长度 = 32",
+                "en": "length = 32"
+              },
+              "err": "20"
+            },
+            {
+              "name": "data[0..16]",
+              "size": "16B u128 LE",
+              "color": 1,
+              "flex": 2,
+              "role": {
+                "zh": "数量；之后的字节被忽略",
+                "en": "amount; trailing bytes ignored"
+              },
+              "cons": {
+                "zh": "≥ 16B",
+                "en": "≥ 16B"
+              },
+              "err": "30"
+            }
+          ],
+          "note": {
+            "zh": "sudt-meta 只统计 hash_type = data2、code_hash = SUDT_CODE_HASH、args = 元数据 type hash 的 cell",
+            "en": "sudt-meta only counts cells with hash_type = data2, code_hash = SUDT_CODE_HASH, args = metadata type hash"
+          }
+        }
+      ],
+      "limits": [
+        {
+          "field": "args",
+          "cond": {
+            "zh": "= 32B",
+            "en": "= 32B"
+          },
+          "err": "20"
+        },
+        {
+          "field": "data",
+          "cond": {
+            "zh": "≥ 16B",
+            "en": "≥ 16B"
+          },
+          "err": "30"
+        },
+        {
+          "field": {
+            "zh": "定位元数据",
+            "en": "locate metadata"
+          },
+          "cond": {
+            "zh": "先 cell_deps、再输入，type hash = args；同一来源多于一个 → 42；解析失败 → 40",
+            "en": "cell_deps first, then inputs, type hash = args; more than one in a source → 42; parse failure → 40"
+          },
+          "err": "42 / 40"
+        },
+        {
+          "field": {
+            "zh": "首次铸造",
+            "en": "initial mint"
+          },
+          "cond": {
+            "zh": "cell_deps / 输入都没有时，输出中必须有元数据 cell（由 sudt-meta 校验创建）",
+            "en": "if neither has it, the outputs must contain the metadata cell (creation checked by sudt-meta)"
+          },
+          "err": "41"
+        },
+        {
+          "field": "tracked",
+          "cond": {
+            "zh": "元数据必须来自输入（来自 cell_dep → 43）；supply 由 sudt-meta 记账",
+            "en": "metadata must come from an input (cell_dep → 43); supply is accounted by sudt-meta"
+          },
+          "err": "43"
+        },
+        {
+          "field": "untracked",
+          "cond": {
+            "zh": "mint_authority 存在且通过",
+            "en": "mint_authority exists and passes"
+          },
+          "err": "50 / 51 / 52"
+        },
+        {
+          "field": "untracked",
+          "cond": {
+            "zh": "current_supply = 0",
+            "en": "current_supply = 0"
+          },
+          "err": "45"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "zh": "错误码（contracts/sudt/src/error.rs）：1–9 SysError、10 SyscallUnknown、20 InvalidArgs、30 AmountEncoding、31 AmountOverflow、32 SupplyOverflow、33 SupplyUnderflow、40 InvalidMetaData、41 MetaMissing、42 MetaNotUnique、43 MetaInputMissing、44 MetaOutputMissing、45 MetaStateMismatch、50 AuthorityMissing、51 AuthorityFailed、52 UnsupportedAuthorityLocation。32、33、44 在 sudt 中未使用。",
+      "en": "Error codes (contracts/sudt/src/error.rs): 1–9 SysError, 10 SyscallUnknown, 20 InvalidArgs, 30 AmountEncoding, 31 AmountOverflow, 32 SupplyOverflow, 33 SupplyUnderflow, 40 InvalidMetaData, 41 MetaMissing, 42 MetaNotUnique, 43 MetaInputMissing, 44 MetaOutputMissing, 45 MetaStateMismatch, 50 AuthorityMissing, 51 AuthorityFailed, 52 UnsupportedAuthorityLocation. 32, 33 and 44 are unused in sudt."
+    },
+    {
+      "zh": "README 说 sudt 校验“协议销毁分类与用户销毁”，但 entry.rs 只在 Σ输出 > Σ输入 时调用 validate_mint；减少量完全由 sudt-meta（当元数据 cell 被消费时）记账。",
+      "en": "The README says sudt validates “protocol-burn classification and user destruction”, but entry.rs only calls validate_mint when Σout > Σin; decreases are accounted solely by sudt-meta (when the metadata cell is spent)."
+    },
+    {
+      "zh": "sudt 不检查自身 hash_type，而 sudt-meta 只统计 data2 绑定的 cell：用其他 hash_type 引用同一二进制的 sUDT 不会计入 tracked supply。untracked 首次铸造（元数据在输出中）不检查 authority。",
+      "en": "sudt does not check its own hash_type, while sudt-meta only counts data2-bound cells: an sUDT referencing the same binary with another hash_type is not counted in tracked supply. An untracked initial mint (metadata in outputs) checks no authority."
+    },
+    {
+      "zh": "授权方式：InputLock / InputType = 输入中有该 lock / type hash；OutputType = 输出中有该 type hash；DynamicLinking 调用 udt_authorize；Spawn 退出码 0",
+      "en": "Authority: InputLock / InputType = an input has that lock / type hash; OutputType = an output has that type hash; DynamicLinking calls udt_authorize; Spawn must exit 0"
+    },
+    {
+      "zh": "部署：仓库未公布 code_hash；本页 match 为空、无测试交易。",
+      "en": "Deployment: no code_hash is published; match is empty and there is no test tx."
+    }
+  ]
+}

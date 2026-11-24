@@ -1,0 +1,135 @@
+{
+  "tags": [
+    "system",
+    "identity",
+    "nervos",
+    "open-source"
+  ],
+  "contributors": [
+    "jjyr"
+  ],
+  "source": {
+    "repo": "https://github.com/nervosnetwork/ckb-system-scripts",
+    "commit": "72eb92fca090700dcb398cd8cad8fbd8bad40355",
+    "paths": [
+      "c/secp256k1_blake160_multisig_all.c",
+      "c/common.h"
+    ],
+    "commit_note": "default-branch HEAD recorded at backfill 2026-10-21; spec/plugin were written from the default branch shortly before (exact read commit not recorded)",
+    "binary": {
+      "status": "unverified",
+      "per": [
+        {
+          "data_hash": "0x36c971b8d41fbd94aabca77dc75e826729ac98447b46f91e00796155dddb0d29",
+          "evidence": [],
+          "matches_commit": false
+        },
+        {
+          "data_hash": "0x50c8623ef5112510ccdf2d8e480d02d0de7288eb9968f8b019817340c3991145",
+          "evidence": [],
+          "matches_commit": false
+        }
+      ],
+      "note": "no binary or checksum at the recorded commit matched the deployed data hash (reproducible build not attempted)"
+    }
+  },
+  "deployments": [
+    {
+      "network": "mainnet",
+      "code_hash": "0x36c971b8d41fbd94aabca77dc75e826729ac98447b46f91e00796155dddb0d29",
+      "hash_type": "data1",
+      "constant_source": "ckb-sdk MultisigScript::V2; ckb-devrel/ccc (mainnet & testnet)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x6888aa39ab30c570c2c30d9d5684d3769bf77265a7973211a3c087fe8efbf738"
+        },
+        "dep_type": "dep_group"
+      },
+      "code_cell": {
+        "tx_hash": "0x3e27a1a247f2378dd609dbb2f29876350ac2898d22332dac64bfa22d1e5fa282",
+        "index": "0x0"
+      },
+      "type_script": null,
+      "data_hash": "0x36c971b8d41fbd94aabca77dc75e826729ac98447b46f91e00796155dddb0d29",
+      "deploy_tx": "0x3e27a1a247f2378dd609dbb2f29876350ac2898d22332dac64bfa22d1e5fa282",
+      "deploy_block": 15936922
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0x36c971b8d41fbd94aabca77dc75e826729ac98447b46f91e00796155dddb0d29",
+      "hash_type": "data1",
+      "constant_source": "ckb-sdk MultisigScript::V2; ckb-devrel/ccc (mainnet & testnet)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x2eefdeb21f3a3edf697c28a52601b4419806ed60bb427420455cc29a090b26d5"
+        },
+        "dep_type": "dep_group"
+      },
+      "code_cell": {
+        "tx_hash": "0x732857f7ce93ee4d1ea1c6bd540002d12783bf05525b9ff0370d53f018b68685",
+        "index": "0x0"
+      },
+      "type_script": {
+        "args": "0x67666133208c3b5647a9c4cbee32e3fc5388b528a6414adfb04894307c910c2c",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x36c971b8d41fbd94aabca77dc75e826729ac98447b46f91e00796155dddb0d29",
+      "deploy_tx": "0x732857f7ce93ee4d1ea1c6bd540002d12783bf05525b9ff0370d53f018b68685",
+      "deploy_block": 16668158
+    },
+    {
+      "network": "mainnet",
+      "code_hash": "0xd1a9f877aed3f5e07cb9c52b61ab96d06f250ae6883cc7f0a2423db0976fc821",
+      "hash_type": "type",
+      "constant_source": "ccc KnownScript.Secp256k1MultisigV2Beta (PR #98)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0x0a13d8d9c83c3374196ee43d4f0116dac497b0fec3e71c04f7cb7780abc455d8"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0x0a13d8d9c83c3374196ee43d4f0116dac497b0fec3e71c04f7cb7780abc455d8"
+      },
+      "type_script": {
+        "args": "0x351ab02b4feb1c8ef39e99270ca4799d6d45d1fd8708061791f8fa298df13da4",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x50c8623ef5112510ccdf2d8e480d02d0de7288eb9968f8b019817340c3991145",
+      "deploy_tx": "0x0a13d8d9c83c3374196ee43d4f0116dac497b0fec3e71c04f7cb7780abc455d8",
+      "deploy_block": 13948668
+    },
+    {
+      "network": "testnet",
+      "code_hash": "0x765b3ed6ae264b335d07e73ac332bf2c0f38f8d3340ed521cb447b4c42dd5f09",
+      "hash_type": "type",
+      "constant_source": "ccc KnownScript.Secp256k1MultisigV2Beta (PR #98)",
+      "cell_dep": {
+        "out_point": {
+          "index": "0x0",
+          "tx_hash": "0xe6774580c98c8b15799c628f539ed5722f3bc2b17206c2280e15f99be3c1ad71"
+        },
+        "dep_type": "code"
+      },
+      "code_cell": {
+        "index": "0x0",
+        "tx_hash": "0xe6774580c98c8b15799c628f539ed5722f3bc2b17206c2280e15f99be3c1ad71"
+      },
+      "type_script": {
+        "args": "0xbbde6d0d2ac9d299c1b78ef903e85d7f17c638188ca67d0b6135362b3ed0bc13",
+        "code_hash": "0x00000000000000000000000000000000000000000000000000545950455f4944",
+        "hash_type": "type"
+      },
+      "data_hash": "0x50c8623ef5112510ccdf2d8e480d02d0de7288eb9968f8b019817340c3991145",
+      "deploy_tx": "0xe6774580c98c8b15799c628f539ed5722f3bc2b17206c2280e15f99be3c1ad71",
+      "deploy_block": 14236278
+    }
+  ],
+  "checked_at": "2026-10-20"
+}

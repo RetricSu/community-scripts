@@ -1,0 +1,13 @@
+{
+  "name": "ckb-contract-flow-html",
+  "owner": { "name": "gpBlockchain" },
+  "plugins": [
+    {
+      "name": "ckb-contract-flow",
+      "source": "./",
+      "description": "Generate bilingual HTML of CKB contract cell-flow constraints and decode txs locally.",
+      "skills": ["./skills/ckb-contract-flow"],
+      "strict": false
+    }
+  ]
+}
