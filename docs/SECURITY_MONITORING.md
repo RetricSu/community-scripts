@@ -1,40 +1,40 @@
-# CKB 核心合约安全监控与预警系统
+# CKB Core Contract Security Monitoring & Alerting System
 
-实现对应 `docs/SECURITY_MONITORING_PLAN.md`。`src/deployments/*.json` 仍然是唯一的规范部署基线，爬虫规则、别名和白名单均放在适配器或独立配置中。
+Implementation corresponds to `docs/SECURITY_MONITORING_PLAN.md`. `src/deployments/*.json` remains the single canonical deployment baseline; crawler rules, aliases, and whitelists all live in adapters or standalone configs.
 
-## 快速开始
+## Quick Start
 
 ```bash
 pnpm install
 pnpm run build
 
-# 一次完整巡检（主网 + 测试网，所有来源）
+# One full patrol (mainnet + testnet, all sources)
 pnpm run monitor -- --no-notify
 
-# 只巡检主网，指定来源
+# Mainnet only, selected sources
 node dist/src/index.js monitor --network mainnet \
   --sources onchain-rpc,docs-nervos,rfcs-nervos,ckb-explorer,sdk-ccc \
   --no-notify
 
-# 持续守护，每 30 分钟一次
+# Continuous daemon, every 30 minutes
 node dist/src/index.js monitor --watch 1800
 
-# 只跑链上升級追踪；只有白名单升級才允许写回基线
+# On-chain upgrade tracing only; only whitelisted upgrades may write back to the baseline
 pnpm run monitor:upgrade -- --network mainnet --apply --no-notify
 ```
 
-报告写入 `results/`：
+Reports are written to `results/`:
 
-- `monitor-<timestamp>.json`：每一次巡检（含 `monitor upgrade`）都会写一份带时间戳的报告。
-- `latest-report.json`：最近一次**完整**多源巡检报告。`pnpm run monitor:upgrade` 只写时间戳文件，不会覆盖它。
-- `latest-status.json`：给状态页 / CI 使用的摘要，同样只由完整巡检更新。
-- `monitor-state.json`：来源连续失败次数和通知去重状态。
+- `monitor-<timestamp>.json`: every patrol (including `monitor upgrade`) writes a timestamped report.
+- `latest-report.json`: the most recent **full** multi-source patrol report. `pnpm run monitor:upgrade` only writes timestamped files and does not overwrite it.
+- `latest-status.json`: summary for status pages / CI, also updated only by full patrols.
+- `monitor-state.json`: per-source consecutive failure counts and notification dedup state.
 
-默认 `--fail-on P0`，发现 P0 时进程返回非零；可用 `--fail-on P1`、`P2` 或 `none` 调整。**已记录为已知问题（见下节）的发现不参与失败判定**，判定基于最高未处理风险。巡检过程中单个来源失败会被记录为 P2，不会阻断其他来源。
+By default `--fail-on P0` makes the process exit non-zero on P0; use `--fail-on P1`, `P2`, or `none` to adjust. **Findings recorded as known issues (see below) do not participate in failure determination**, which is based on the highest *unresolved* risk. A single source failing during a patrol is recorded as P2 and does not block the other sources.
 
-## 已知问题（known issues）
+## Known Issues
 
-监控是无状态的巡检：同一个未修复的问题每次都会作为新发现出现在报告里。`docs/security-known-issues.json` 是一个随仓库版本化、经 PR 审核的**已知问题登记簿**（治理方式与升级白名单相同），让"已确认但暂未处理"的问题不再重复告警、不再让 CI 每天失败：
+The monitor is a stateless patrol: the same unfixed issue shows up as a new finding in every report. `docs/security-known-issues.json` is a **known-issue ledger** versioned with the repo and reviewed via PR (governed the same way as the upgrade whitelist), so confirmed-but-unresolved issues stop re-alerting and stop failing CI every day:
 
 ```json
 {
@@ -42,7 +42,7 @@ pnpm run monitor:upgrade -- --network mainnet --apply --no-notify
   "issues": [
     {
       "fingerprint": "ckb-explorer:mainnet:xudt:codeHash:CODE_HASH_MISMATCH",
-      "note": "依据：官方公告 / issue 链接",
+      "note": "Rationale: official announcement / issue link",
       "recordedAt": "2026-02-20T00:00:00Z",
       "expiresAt": "2026-03-20T00:00:00Z",
       "recordedBy": "optional"
@@ -51,34 +51,34 @@ pnpm run monitor:upgrade -- --network mainnet --apply --no-notify
 }
 ```
 
-- `fingerprint` 必须**精确等于**发现的指纹（每条报告和告警里都印有 `指纹:` / `fingerprint` 字段）。指纹变化（例如指向新的 OutPoint）即视为新问题，不会沿用旧的已知记录。
-- 命中的发现会保留在报告中并标注 `known` + 记录说明（未解决、但已知），但**不参与告警通知，也不参与 `--fail-on` 失败判定**；控制台和 `latest-status.json` 会单独给出 `knownCount` 与 `highestUnresolvedRisk`。
-- `expiresAt` 可选；过期后该条自动失效，问题会重新作为新发现浮出水面，防止已知记录变成永久压制。
-- 文件路径可用 `--known-issues <file>` 或环境变量 `KNOWN_ISSUES_FILE` 覆盖；文件缺失或损坏时按空登记簿处理，不影响巡检本身。
-- **不要把未人工审计的问题加入登记簿**；P0 级已知问题建议同时设置较近的 `expiresAt` 以强制复审。
+- `fingerprint` must **exactly equal** the finding's fingerprint (every report and alert prints it as `fingerprint`). Any change in the fingerprint (e.g. pointing to a new OutPoint) is treated as a new issue and does not inherit the old known record.
+- Matched findings stay in the report, annotated `known` + the recorded note (unresolved but known), but **do not trigger alert notifications and do not count toward `--fail-on`**; the console and `latest-status.json` report `knownCount` and `highestUnresolvedRisk` separately.
+- `expiresAt` is optional; once expired the entry lapses automatically and the issue resurfaces as a new finding, preventing known records from becoming permanent suppression.
+- The file path can be overridden with `--known-issues <file>` or the `KNOWN_ISSUES_FILE` env var; a missing or corrupted file is treated as an empty ledger and does not affect the patrol itself.
+- **Never add issues to the ledger without manual audit**; for P0 known issues, set a short `expiresAt` to force re-review.
 
-## 来源与适配器
+## Sources & Adapters
 
-| 来源 | 适配器 | 说明 |
+| Source | Adapter | What it does |
 | --- | --- | --- |
-| 链上 RPC | `onchain-rpc` | 逐个检查基线 OutPoint、dep group 成员、DataHash、TypeHash 和 Type ID 当前 Live Cell |
-| 官方文档 | `docs-nervos` | 从 `nervosnetwork/docs.nervos.org` 的 Markdown/MDX 源读取 `ecosystem-scripts` 表格 |
-| Nervos RFC | `rfcs-nervos` | 读取 RFC-0024/0025/0026/0042/0052 的部署表格 |
-| CKB Explorer | `ckb-explorer` | `/api/v2/scripts` + `/api/v2/scripts/general_info`，校验 OutPoint 和死 Cell 标记 |
-| CCC SDK | `sdk-ccc` | 复用 `@ckb-ccc/core` 静态脚本表；原 `CCCValidator` 已委托给此适配器 |
+| On-chain RPC | `onchain-rpc` | Checks each baseline OutPoint one by one, dep group members, DataHash, TypeHash, and the current Type ID live cell |
+| Official docs | `docs-nervos` | Reads the `ecosystem-scripts` tables from the Markdown/MDX sources of `nervosnetwork/docs.nervos.org` |
+| Nervos RFC | `rfcs-nervos` | Reads deployment tables from RFC-0024/0025/0026/0042/0052 |
+| CKB Explorer | `ckb-explorer` | `/api/v2/scripts` + `/api/v2/scripts/general_info`, validates OutPoints and dead-cell flags |
+| CCC SDK | `sdk-ccc` | Reuses the `@ckb-ccc/core` static script table; the original `CCCValidator` has been delegated to this adapter |
 
-新增来源只需实现 `ScriptSourceAdapter.fetchScripts(network)`，输出 `NormalizedScriptInfo[]`，不需要修改部署 JSON 或风险引擎。
+Adding a new source only requires implementing `ScriptSourceAdapter.fetchScripts(network)` returning `NormalizedScriptInfo[]`; no changes to deployment JSONs or the risk engine are needed.
 
-### 链上升級追踪
+### On-chain upgrade tracking
 
-当基线 Cell 死亡时，`UpgradeTracker`：
+When a baseline cell dies, `UpgradeTracker`:
 
-1. 读取创建交易，取得 Type ID / Lock、旧 DataHash 和大小。
-2. 使用 CKB Indexer 按 Type Script（优先）或 Lock Script 查找消费交易，并逐一确认 input 的 `previousOutput`，避免只凭交易列表误判。
-3. 沿相同 Type ID 的 successor Cell 追踪多 hop，记录新 OutPoint、DataHash、大小、区块、输入 Lock 和 Witness 大小。
-4. 消费交易不在白名单时产生 P0；白名单升級产生 P1，并可用 `--apply` 写回基线，交给 PR 审核。
+1. Reads the creation transaction to obtain the Type ID / lock, old DataHash, and size.
+2. Uses the CKB indexer to find the consuming transaction by Type Script (preferred) or Lock Script, confirming each input's `previousOutput` one by one to avoid misjudging from tx lists alone.
+3. Follows the successor cell with the same Type ID across multiple hops, recording the new OutPoint, DataHash, size, block, input lock, and witness size.
+4. Raises P0 when the consuming transaction is not whitelisted; a whitelisted upgrade raises P1 and can be written back to the baseline with `--apply` for PR review.
 
-白名单内置于 `src/engine/upgrade-tracker.ts`，也可以通过 `UPGRADE_WHITELIST_FILE` 提供 JSON 数组：
+The whitelist is built into `src/engine/upgrade-tracker.ts` and can also be provided as a JSON array via `UPGRADE_WHITELIST_FILE`:
 
 ```json
 [
@@ -92,66 +92,66 @@ pnpm run monitor:upgrade -- --network mainnet --apply --no-notify
 ]
 ```
 
-**白名单必须基于官方公告和人工审计填写，不要把未知升級直接加入。** `--force` 仅供人工确认后的紧急情况使用。
+**Whitelists must be filled in based on official announcements and manual audit — never add unknown upgrades directly.** `--force` is only for emergencies after manual confirmation.
 
-报告中的每个升级事件都包含首笔消费交易的 `upgradedAt`（ISO 时间）、`upgradedBlock`、`consumingTxHash`、`oldLock`、`newLock` 和 `signerLocks`；控制台摘要也会简短打印这些字段。多 hop 的完整细节仍在 `hops` 中。
+Every upgrade event in the report includes `upgradedAt` (ISO time), `upgradedBlock`, `consumingTxHash`, `oldLock`, `newLock`, and `signerLocks` of the first consuming transaction; the console summary prints these fields briefly as well. Full multi-hop details remain in `hops`.
 
-已根据官方仓库 migration 记录核对并加入白名单的 Nostr 主网迁移：
+Nostr mainnet migration, verified against official repo migration records and whitelisted:
 
-- `nostr_binding`：2026-01-14 05:10:21 UTC（区块 18373321），交易 `0x86d21ad7…`，migration `2026-01-14-050950.json`。
-- `nostr_lock`：2026-01-14 05:17:51 UTC（区块 18373370），交易 `0x99b116dd…`，migration `2026-01-14-051715.json`。
-- 两者官方记录均为 `cryptape/nostr-binding` 仓库 `deployment/mainnet/*/migrations/` 下的文件；旧 Cell 和新 Cell 的 multisig Lock args 分别为 `0xd4ade5100cf112c9cd3e8da12ae5fc6153293087` 与 `0x269ca034aa160f5265b65318123047bee882f244`。
+- `nostr_binding`: 2026-01-14 05:10:21 UTC (block 18373321), tx `0x86d21ad7…`, migration `2026-01-14-050950.json`.
+- `nostr_lock`: 2026-01-14 05:17:51 UTC (block 18373370), tx `0x99b116dd…`, migration `2026-01-14-051715.json`.
+- Both official records are files under `deployment/mainnet/*/migrations/` in the `cryptape/nostr-binding` repo; the multisig lock args of the old and new cells are `0xd4ade5100cf112c9cd3e8da12ae5fc6153293087` and `0x269ca034aa160f5265b65318123047bee882f244` respectively.
 
-已根据 Lumos SDK 配置记录核对并加入白名单的 Omnilock 测试网两跳升级。这些是 SDK 配置升级记录，不是合约作者签署的公告：
+Omnilock testnet two-hop upgrade, verified against Lumos SDK config records and whitelisted. These are SDK config upgrade records, not contract-author-signed announcements:
 
-- 第一跳消费交易 `0x7d9c9ccd12f40eebe508bbbf24b0d746c991e055f2f1b61c6fe8ca60467ae750`，新 dataHash `0x3f303aa87238dbc34a81a1c42109e07aad9c8e4ab3e8741d87fffca43851b2d7`，记录见 https://github.com/ckb-js/lumos/pull/665 。
-- 第二跳消费交易 `0xec18bf0d857c981c3d1f4e17999b9b90c484b303378e94de1a57b0872f5d4602`，新 dataHash `0x6b29b6f10346b43c540e53806ba88ba0fe3a0c3a29d7448ef555840c8f8318fa`，记录见 https://github.com/ckb-js/lumos/pull/669 。
+- First hop consuming tx `0x7d9c9ccd12f40eebe508bbbf24b0d746c991e055f2f1b61c6fe8ca60467ae750`, new dataHash `0x3f303aa87238dbc34a81a1c42109e07aad9c8e4ab3e8741d87fffca43851b2d7`, recorded at https://github.com/ckb-js/lumos/pull/665 .
+- Second hop consuming tx `0xec18bf0d857c981c3d1f4e17999b9b90c484b303378e94de1a57b0872f5d4602`, new dataHash `0x6b29b6f10346b43c540e53806ba88ba0fe3a0c3a29d7448ef555840c8f8318fa`, recorded at https://github.com/ckb-js/lumos/pull/669 .
 
-## 通知渠道
+## Notification Channels
 
-通过环境变量启用，未配置的渠道自动跳过；同一指纹默认 24 小时内不重复通知，风险级别变化会立即再次通知。
+Enabled via environment variables; unconfigured channels are skipped automatically. The same fingerprint is not re-notified within 24 hours by default; a risk-level change re-notifies immediately.
 
-| 渠道 | 环境变量 | 默认阈值 |
+| Channel | Environment variables | Default threshold |
 | --- | --- | --- |
 | Telegram | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | P1 |
-| 飞书 / Lark | `FEISHU_WEBHOOK_URL`, 可选 `FEISHU_SECRET` | P1 |
+| Lark (Feishu) | `FEISHU_WEBHOOK_URL`, optional `FEISHU_SECRET` | P1 |
 | Discord | `DISCORD_WEBHOOK_URL` | P1 |
 | GitHub Issue | `GITHUB_TOKEN`, `GITHUB_REPOSITORY=owner/repo` | P1 |
-| 通用 Webhook（短信/电话网关） | `ALERT_WEBHOOK_URL`, 可选 `ALERT_WEBHOOK_BEARER_TOKEN` | P0 |
+| Generic webhook (SMS/call gateway) | `ALERT_WEBHOOK_URL`, optional `ALERT_WEBHOOK_BEARER_TOKEN` | P0 |
 
-可用 `TELEGRAM_MIN_LEVEL`、`FEISHU_MIN_LEVEL`、`DISCORD_MIN_LEVEL`、`GITHUB_ISSUE_MIN_LEVEL`、`ALERT_WEBHOOK_MIN_LEVEL` 覆盖阈值。GitHub Issue 按「网络 + 脚本 + 根因」合并开票，正文仍写入每条 finding 的稳定指纹。已有的开放 ticket 不会被修改或关闭；只要其中一条旧指纹（或新的分组标记）还在开放 issue 里，同一组就不会再开新票。
+Thresholds can be overridden with `TELEGRAM_MIN_LEVEL`, `FEISHU_MIN_LEVEL`, `DISCORD_MIN_LEVEL`, `GITHUB_ISSUE_MIN_LEVEL`, `ALERT_WEBHOOK_MIN_LEVEL`. GitHub Issues are grouped and opened by "network + script + root cause"; the stable fingerprint of each finding is still written into the issue body. Existing open tickets are never modified or closed; as long as any old fingerprint (or the new grouping marker) is still in an open issue, no new ticket is opened for that group.
 
-根因分组（开票用，不改变 finding 本身的 fingerprint 或风险等级）：
+Root-cause grouping (used for issue opening only; does not change a finding's own fingerprint or risk level):
 
-- `hash-mismatch`：哈希 / hash_type / dep_type 不一致
-- `celldep-or-record-gap`：死 Cell、缺失或额外的 cellDep、仍活着的替代部署
-- `unknown-code`：指向不匹配代码的活 Cell（与普通替代部署分开）
-- `upgrade-or-destruction`：Type ID 升級或无 Type ID successor 的消费
-- `baseline` / `source`：基线完整性与来源可用性
+- `hash-mismatch`: hash / hash_type / dep_type inconsistency
+- `celldep-or-record-gap`: dead cells, missing or extra cellDeps, still-live alternate deployments
+- `unknown-code`: a live cell pointing to non-matching code (kept separate from plain alternate deployments)
+- `upgrade-or-destruction`: Type ID upgrade or consumption without a Type ID successor
+- `baseline` / `source`: baseline integrity and source availability
 
-RPC 和文档源可配置：
+Configurable for RPC and docs sources:
 
 - `CKB_MAINNET_RPC_URL`, `CKB_TESTNET_RPC_URL`
 - `CKB_MAINNET_EXPLORER_API`, `CKB_TESTNET_EXPLORER_API`
 - `DOCS_REPO`, `DOCS_REF`, `DOCS_PATH`, `RFCS_REPO`, `RFCS_REF`
-- `DEPLOYMENTS_DIR`, `UPGRADE_WHITELIST_FILE`, `GITHUB_TOKEN`（提高 GitHub Raw/API 限额）
+- `DEPLOYMENTS_DIR`, `UPGRADE_WHITELIST_FILE`, `GITHUB_TOKEN` (raises GitHub Raw/API rate limits)
 
-## 风险口径与已知边界
+## Risk Semantics & Known Limits
 
-- 若 UpgradeTracker 沿 Type ID 找到活的 successor，外部源比对使用 successor 的 data/type hash，而不是已死基线 Cell 的旧哈希。这只修正比对极性，不视为授权，也不丢弃 hop / 旧 OutPoint 证据。未在白名单中的升級仍报 `UPGRADE_UNAUTHORIZED`。
-- 外部源的 `code_hash` 与链上实际哈希不一致仍按 P0 报告。文案区分「发现」（哈希不同）和「推断」（投毒、过期目录、历史替代部署都需要确认）。不会因为替代部署仍然活着或签名 Lock 碰巧相同就自动降级。
-- 无 Type ID successor 的 `DEPLOYMENT_DESTROYED` 仍是 P0，但文案不再自动写成「已确认安全事件 / 立刻轮换密钥」。官方无 Type ID 重部署是一种待确认解释；相同官方 Lock 本身不能当作授权或良性重部署的证明。无法解释的消费仍按高严重度未知变更处理。
-- 引用死 Cell 按 P1，因为交易会失败。
-- 不同但仍活着的部署 Cell 单独报告为 drift；直接指向不匹配代码的 `code` Cell 报 P0，额外辅助 dep group 报 P2，避免把 CCC 的 secp256k1 依赖误报为 Omnilock 恶意代码。
-- 基线中 `dataHash` / `typeHash` 为 `"0x"` 或空字符串表示尚未记录，不参与相等判断，只产生补全提示。
-- 公共 RPC、Explorer 和文档仓本身都是外部信任边界；高安全环境应使用自建节点 / 多 RPC 交叉验证，并人工复核 P0。
-- 非 Type ID Cell 被消费时无法可靠证明“升級 successor”，系统会报告销毁或无法追踪，要求人工审计，而不会自动改写基线。
+- If UpgradeTracker finds a live successor along the Type ID, external-source comparison uses the successor's data/type hash instead of the dead baseline cell's old hash. This only corrects comparison polarity; it is not authorization, and hop / old-OutPoint evidence is not discarded. Upgrades not in the whitelist are still reported as `UPGRADE_UNAUTHORIZED`.
+- A `code_hash` from an external source that differs from the on-chain hash is still reported as P0. Wording distinguishes "observation" (hash differs) from "inference" (poisoning, stale directory, historical alternate deployment all require confirmation). No automatic downgrade just because an alternate deployment is still alive or the signer lock happens to match.
+- `DEPLOYMENT_DESTROYED` without a Type ID successor remains P0, but the wording no longer automatically claims "confirmed security incident / rotate keys immediately". An official no-Type-ID redeployment is one explanation pending confirmation; an identical official lock alone is not proof of authorization or a benign redeployment. Unexplained consumption is still treated as a high-severity unknown change.
+- Referencing a dead cell is P1, because the transaction would fail.
+- Alternate deployment cells that differ but are still alive are reported separately as drift; a `code` cell pointing directly to non-matching code is P0, extra auxiliary dep groups are P2 — this avoids misreporting CCC's secp256k1 dependency as malicious Omnilock code.
+- In the baseline, `dataHash` / `typeHash` of `"0x"` or empty string means not yet recorded; they do not participate in equality checks and only produce completion hints.
+- Public RPC, Explorer, and docs repos are all external trust boundaries; high-security environments should use self-hosted nodes / multi-RPC cross-validation and manually review any P0.
+- When a non-Type-ID cell is consumed, no reliable "upgrade successor" can be proven; the system reports destruction or untraceability and requires manual audit, and never rewrites the baseline automatically.
 
-## 自动化
+## Automation
 
-`.github/workflows/security-monitor.yml` 每天 UTC 02:00（北京时间 10:00）运行一次，上传报告并缓存通知状态。若 `monitor upgrade --apply` 产生经过白名单校验的基线变更，工作流通过 `create-pull-request` 生成审核 PR，不会直接推送 master。
+`.github/workflows/security-monitor.yml` runs once daily at 02:00 UTC, uploads reports, and caches notification state. If `monitor upgrade --apply` produces whitelist-validated baseline changes, the workflow uses `create-pull-request` to open a review PR instead of pushing to master directly.
 
-单元测试：
+Unit tests:
 
 ```bash
 pnpm test

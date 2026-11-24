@@ -150,7 +150,7 @@ function printReport(report: MonitorReport, file: string): void {
   );
   if (report.knownCount) {
     console.log(
-      `已知问题: ${report.knownCount} 条（未解决但已记录，不参与告警和失败判定）| 最高未处理风险: ${report.highestUnresolvedRisk ?? report.highestRisk}`
+      `Known issues: ${report.knownCount} (unresolved but recorded; excluded from alerting and failure determination) | Highest unresolved risk: ${report.highestUnresolvedRisk ?? report.highestRisk}`
     );
   }
   for (const source of report.sources) {
@@ -172,13 +172,13 @@ function printReport(report: MonitorReport, file: string): void {
   const known = report.mismatches.filter((m) => m.known);
   for (const m of known.slice(0, 30)) {
     console.log(
-      `\n[已知·${m.riskLevel}] ${m.network}/${m.scriptName} ${m.kind} (${m.sourceId})`
+      `\n[Known·${m.riskLevel}] ${m.network}/${m.scriptName} ${m.kind} (${m.sourceId})`
     );
     console.log(`  ${m.description}`);
-    console.log(`  记录: ${m.knownNote ?? '无说明'}`);
+    console.log(`  Recorded: ${m.knownNote ?? 'no note'}`);
   }
   if (known.length > 30)
-    console.log(`\n... 其余 ${known.length - 30} 条已知问题见 ${file}`);
+    console.log(`\n... ${known.length - 30} more known issues in ${file}`);
   if (report.upgrades.length > 0) {
     console.log('\nUpgrade events:');
     for (const event of report.upgrades) {

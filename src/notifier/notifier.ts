@@ -21,24 +21,24 @@ export function formatAlertText(
   mismatches: VerificationMismatch[]
 ): string {
   const lines = [
-    `CKB 合约安全监控告警 (${report.highestRisk})`,
-    `时间: ${report.finishedAt}`,
-    `网络: ${report.networks.join(', ')}`,
+    `CKB contract security monitor alert (${report.highestRisk})`,
+    `Time: ${report.finishedAt}`,
+    `Networks: ${report.networks.join(', ')}`,
     `P0=${report.counts.P0_CRITICAL} P1=${report.counts.P1_HIGH} P2=${report.counts.P2_MEDIUM} P3=${report.counts.P3_INFO}`,
     '',
   ];
   for (const m of mismatches.slice(0, 20)) {
     lines.push(
       `[${m.riskLevel}] ${m.network}/${m.scriptName} ${m.kind}`,
-      `源: ${m.sourceId} 字段: ${m.field}`,
+      `Source: ${m.sourceId} Field: ${m.field}`,
       m.description,
-      `处置: ${m.actionRequired}`,
-      `指纹: ${m.fingerprint}`,
+      `Action: ${m.actionRequired}`,
+      `Fingerprint: ${m.fingerprint}`,
       ''
     );
   }
   if (mismatches.length > 20) {
-    lines.push(`... 其余 ${mismatches.length - 20} 条见 JSON 报告`);
+    lines.push(`... ${mismatches.length - 20} more in the JSON report`);
   }
   return lines.join('\n');
 }

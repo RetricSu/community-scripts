@@ -43,7 +43,7 @@ test('known-issues registry marks exact fingerprint matches as known', () => {
     issues: [
       {
         fingerprint: FP,
-        note: '官方已确认 Explorer 数据滞后',
+        note: 'Explorer data lag officially confirmed',
         recordedAt: '2026-02-20T00:00:00Z',
         expiresAt: '2026-12-31T00:00:00Z',
       },
@@ -54,7 +54,7 @@ test('known-issues registry marks exact fingerprint matches as known', () => {
   const known = registry.annotate(findings);
   assert.equal(known, 1);
   assert.equal(findings[0].known, true);
-  assert.equal(findings[0].knownNote, '官方已确认 Explorer 数据滞后');
+  assert.equal(findings[0].knownNote, 'Explorer data lag officially confirmed');
   assert.equal(findings[0].knownExpiresAt, '2026-12-31T00:00:00Z');
   assert.equal(findings[1].known, undefined);
 });

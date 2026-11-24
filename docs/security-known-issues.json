@@ -1,31 +1,31 @@
 {
   "version": 1,
-  "comment": "Known-but-unresolved findings. fingerprint must exactly equal VerificationMismatch.fingerprint (printed in every report and alert as 指纹). expiresAt is optional ISO time; once passed the finding resurfaces. See docs/SECURITY_MONITORING.md 已知问题.",
+  "comment": "Known-but-unresolved findings. fingerprint must exactly equal VerificationMismatch.fingerprint (printed in every report and alert as fingerprint). expiresAt is optional ISO time; once passed the finding resurfaces. See docs/SECURITY_MONITORING.md (Known Issues).",
   "issues": [
     {
       "fingerprint": "sdk-ccc:mainnet:nostr_lock:liveness:CELLDEP_DEAD:0x1911208b136957d5f7c1708a8835edfe8ae1d02700d5cb2c3a6aacf4d5906306:0x0",
-      "note": "nostr_lock 已于 2026-01-14 经官方迁移到新部署（见升级白名单内 Nostr 迁移记录，依据 cryptape/nostr-binding 官方 migration 文件）；CCC SDK 静态脚本表尚未同步，仍引用迁移前的死 Cell。待 @ckb-ccc/core 脚本表更新后移除此条。",
+      "note": "nostr_lock was officially migrated to a new deployment on 2026-01-14 (see the Nostr migration record in the upgrade whitelist, based on cryptape/nostr-binding official migration files); the CCC SDK static script table has not been synced yet and still references the pre-migration dead cell. Remove this entry once the @ckb-ccc/core script table is updated.",
       "recordedAt": "2026-11-23T00:00:00Z",
       "expiresAt": "2027-02-23T00:00:00Z",
       "recordedBy": "retric (via ctx agent)"
     },
     {
       "fingerprint": "ckb-explorer:testnet:anyone_can_pay:codeHash:CODE_HASH_MISMATCH",
-      "note": "ckb-explorer 测试网脚本表的 Anyone-Can-Pay 条目指向 2020 年 6 月的早期部署（script_out_point 0x4f32b3e3…:0，type hash 0x86a1c698…，约 351 个引用 cell），而生态通用部署（ckb-sdk AGGRON4、ckb-ccc 脚本表、gp flow 知识库、本基线）为 type hash 0x3419a1c0…（dep group 0xec26b0f8…）。已于 2026-11-24 实测链上验证：基线 dep group 解析出的 code cell type hash = 0x3419a1c0…，与 SDK 及 ckb-explorer 之外的全部来源一致；基线无误，属 ckb-explorer 脚本表条目滞后。若 ckb-explorer 更新其 ACP 条目应移除此条。",
+      "note": "The ckb-explorer testnet script table's Anyone-Can-Pay entry points to an early June 2020 deployment (script_out_point 0x4f32b3e3…:0, type hash 0x86a1c698…, ~351 referencing cells), while the ecosystem-standard deployment (ckb-sdk AGGRON4, ckb-ccc script table, gp flow knowledge base, and this baseline) is type hash 0x3419a1c0… (dep group 0xec26b0f8…). Verified on-chain on 2026-11-24: the code cell type hash resolved from the baseline dep group is 0x3419a1c0…, consistent with every source except ckb-explorer; the baseline is correct and this is a stale ckb-explorer script-table entry. Remove this entry if ckb-explorer updates its ACP entry.",
       "recordedAt": "2026-11-24T00:00:00Z",
       "expiresAt": "2027-02-24T00:00:00Z",
       "recordedBy": "retric (via ctx agent)"
     },
     {
       "fingerprint": "ckb-explorer:testnet:anyone_can_pay:dataHash:CODE_HASH_MISMATCH",
-      "note": "ckb-explorer 测试网脚本表的 Anyone-Can-Pay 条目指向 2020 年 6 月的早期部署（script_out_point 0x4f32b3e3…:0，type hash 0x86a1c698…，约 351 个引用 cell），而生态通用部署（ckb-sdk AGGRON4、ckb-ccc 脚本表、gp flow 知识库、本基线）为 type hash 0x3419a1c0…（dep group 0xec26b0f8…）。已于 2026-11-24 实测链上验证：基线 dep group 解析出的 code cell type hash = 0x3419a1c0…，与 SDK 及 ckb-explorer 之外的全部来源一致；基线无误，属 ckb-explorer 脚本表条目滞后。若 ckb-explorer 更新其 ACP 条目应移除此条。",
+      "note": "The ckb-explorer testnet script table's Anyone-Can-Pay entry points to an early June 2020 deployment (script_out_point 0x4f32b3e3…:0, type hash 0x86a1c698…, ~351 referencing cells), while the ecosystem-standard deployment (ckb-sdk AGGRON4, ckb-ccc script table, gp flow knowledge base, and this baseline) is type hash 0x3419a1c0… (dep group 0xec26b0f8…). Verified on-chain on 2026-11-24: the code cell type hash resolved from the baseline dep group is 0x3419a1c0…, consistent with every source except ckb-explorer; the baseline is correct and this is a stale ckb-explorer script-table entry. Remove this entry if ckb-explorer updates its ACP entry.",
       "recordedAt": "2026-11-24T00:00:00Z",
       "expiresAt": "2027-02-24T00:00:00Z",
       "recordedBy": "retric (via ctx agent)"
     },
     {
       "fingerprint": "ckb-explorer:testnet:anyone_can_pay:typeHash:CODE_HASH_MISMATCH",
-      "note": "ckb-explorer 测试网脚本表的 Anyone-Can-Pay 条目指向 2020 年 6 月的早期部署（script_out_point 0x4f32b3e3…:0，type hash 0x86a1c698…，约 351 个引用 cell），而生态通用部署（ckb-sdk AGGRON4、ckb-ccc 脚本表、gp flow 知识库、本基线）为 type hash 0x3419a1c0…（dep group 0xec26b0f8…）。已于 2026-11-24 实测链上验证：基线 dep group 解析出的 code cell type hash = 0x3419a1c0…，与 SDK 及 ckb-explorer 之外的全部来源一致；基线无误，属 ckb-explorer 脚本表条目滞后。若 ckb-explorer 更新其 ACP 条目应移除此条。",
+      "note": "The ckb-explorer testnet script table's Anyone-Can-Pay entry points to an early June 2020 deployment (script_out_point 0x4f32b3e3…:0, type hash 0x86a1c698…, ~351 referencing cells), while the ecosystem-standard deployment (ckb-sdk AGGRON4, ckb-ccc script table, gp flow knowledge base, and this baseline) is type hash 0x3419a1c0… (dep group 0xec26b0f8…). Verified on-chain on 2026-11-24: the code cell type hash resolved from the baseline dep group is 0x3419a1c0…, consistent with every source except ckb-explorer; the baseline is correct and this is a stale ckb-explorer script-table entry. Remove this entry if ckb-explorer updates its ACP entry.",
       "recordedAt": "2026-11-24T00:00:00Z",
       "expiresAt": "2027-02-24T00:00:00Z",
       "recordedBy": "retric (via ctx agent)"
