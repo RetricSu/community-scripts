@@ -65,13 +65,13 @@
       "cell_dep": {
         "out_point": {
           "index": "0x0",
-          "tx_hash": "0x3d4296df1bd2cc2bd3f483f61ab7ebeac462a2f336f2b944168fe6ba5d81c014"
+          "tx_hash": "0xec18bf0d857c981c3d1f4e17999b9b90c484b303378e94de1a57b0872f5d4602"
         },
         "dep_type": "code"
       },
       "code_cell": {
         "index": "0x0",
-        "tx_hash": "0x3d4296df1bd2cc2bd3f483f61ab7ebeac462a2f336f2b944168fe6ba5d81c014"
+        "tx_hash": "0xec18bf0d857c981c3d1f4e17999b9b90c484b303378e94de1a57b0872f5d4602"
       },
       "type_script": {
         "args": "0x761f51fc9cd6a504c32c6ae64b3746594d1af27629b427c5ccf6c9a725a89144",
@@ -79,7 +79,7 @@
         "hash_type": "type"
       },
       "data_hash": "0x6b29b6f10346b43c540e53806ba88ba0fe3a0c3a29d7448ef555840c8f8318fa",
-      "deploy_tx": "0x3d4296df1bd2cc2bd3f483f61ab7ebeac462a2f336f2b944168fe6ba5d81c014",
+      "deploy_tx": "0xec18bf0d857c981c3d1f4e17999b9b90c484b303378e94de1a57b0872f5d4602",
       "deploy_block": 12898141
     }
   ],
