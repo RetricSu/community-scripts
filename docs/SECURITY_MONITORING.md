@@ -30,7 +30,32 @@ pnpm run monitor:upgrade -- --network mainnet --apply --no-notify
 - `latest-status.json`：给状态页 / CI 使用的摘要。
 - `monitor-state.json`：来源连续失败次数和通知去重状态。
 
-默认 `--fail-on P0`，发现 P0 时进程返回非零；可用 `--fail-on P1`、`P2` 或 `none` 调整。巡检过程中单个来源失败会被记录为 P2，不会阻断其他来源。
+默认 `--fail-on P0`，发现 P0 时进程返回非零；可用 `--fail-on P1`、`P2` 或 `none` 调整。**已记录为已知问题（见下节）的发现不参与失败判定**，判定基于最高未处理风险。巡检过程中单个来源失败会被记录为 P2，不会阻断其他来源。
+
+## 已知问题（known issues）
+
+监控是无状态的巡检：同一个未修复的问题每次都会作为新发现出现在报告里。`docs/security-known-issues.json` 是一个随仓库版本化、经 PR 审核的**已知问题登记簿**（治理方式与升级白名单相同），让"已确认但暂未处理"的问题不再重复告警、不再让 CI 每天失败：
+
+```json
+{
+  "version": 1,
+  "issues": [
+    {
+      "fingerprint": "ckb-explorer:mainnet:xudt:codeHash:CODE_HASH_MISMATCH",
+      "note": "依据：官方公告 / issue 链接",
+      "recordedAt": "2026-02-20T00:00:00Z",
+      "expiresAt": "2026-03-20T00:00:00Z",
+      "recordedBy": "optional"
+    }
+  ]
+}
+```
+
+- `fingerprint` 必须**精确等于**发现的指纹（每条报告和告警里都印有 `指纹:` / `fingerprint` 字段）。指纹变化（例如指向新的 OutPoint）即视为新问题，不会沿用旧的已知记录。
+- 命中的发现会保留在报告中并标注 `known` + 记录说明（未解决、但已知），但**不参与告警通知，也不参与 `--fail-on` 失败判定**；控制台和 `latest-status.json` 会单独给出 `knownCount` 与 `highestUnresolvedRisk`。
+- `expiresAt` 可选；过期后该条自动失效，问题会重新作为新发现浮出水面，防止已知记录变成永久压制。
+- 文件路径可用 `--known-issues <file>` 或环境变量 `KNOWN_ISSUES_FILE` 覆盖；文件缺失或损坏时按空登记簿处理，不影响巡检本身。
+- **不要把未人工审计的问题加入登记簿**；P0 级已知问题建议同时设置较近的 `expiresAt` 以强制复审。
 
 ## 来源与适配器
 
