@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>SHRINCS 抗量子 Lock 约束 / SHRINCS Post-quantum Lock Constraints</title>
+<link rel="alternate" type="text/markdown" href="shrincs_lock.md" title="Markdown for AI agents">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Crect width='28' height='28' rx='8' fill='%233e63dd'/%3E%3Crect x='6.3' y='8.3' width='6.4' height='11.4' rx='2' fill='none' stroke='%23fff' stroke-opacity='.75' stroke-width='1.6'/%3E%3Crect x='15.3' y='8.3' width='6.4' height='11.4' rx='2' fill='%23fff'/%3E%3C/svg%3E">
+<style>
+/* ---- tokens (light) ---- */
+:root{color-scheme:light;
+--bg:#f7f7f8;--surface:#fff;--surface-2:#f9f9fb;--surface-3:#f1f2f4;--cell:#fff;
+--line:#e5e6ea;--line-2:#eeeff2;--line-strong:#d3d5db;
+--fg:#16181d;--fg-2:#3b3f48;--fg-3:#646872;--fg-4:#9093a0;
+--ac:#3e63dd;--ac-hover:#3358d4;--ac-fg:#3a5bc7;--ac-bg:#eef2fe;--ac-line:#c9d5fb;
+--in:#c54a00;--in-bg:#fffaf5;--in-line:#f6dcc6;
+--out:#18794e;--out-bg:#f5fbf7;--out-line:#cce8d6;
+--hl-bg:#fff0b0;--hl-fg:#7f4500;--hl-line:#ecc75a;
+--err:#c9252b;--err-bg:#fff1f1;--err-line:#f5cccc;
+--ok:#18794e;--ok-bg:#e9f6ee;--warn:#9e5600;--warn-bg:#fff3dc;
+--sh-1:0 1px 2px rgba(16,24,40,.04);--sh-2:0 1px 2px rgba(16,24,40,.04),0 8px 20px -6px rgba(16,24,40,.1);
+--sans:-apple-system,BlinkMacSystemFont,"Segoe UI Variable Text","Segoe UI",Inter,"PingFang SC","Hiragino Sans GB","Microsoft YaHei UI","Microsoft YaHei","Noto Sans SC","Noto Sans CJK SC","Source Han Sans SC",Roboto,"Helvetica Neue",Arial,sans-serif;
+--mono:ui-monospace,"SF Mono",SFMono-Regular,"JetBrains Mono","Cascadia Mono","Roboto Mono",Menlo,Consolas,"Liberation Mono","PingFang SC","Microsoft YaHei","Noto Sans SC",monospace}
+/* ---- tokens (dark): system preference unless the reader picked light; or picked dark ---- */
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){color-scheme:dark;
+--bg:#0b0c0e;--surface:#131417;--surface-2:#0f1012;--surface-3:#1d1f23;--cell:#0f1012;
+--line:#25272c;--line-2:#1d1f23;--line-strong:#383b43;
+--fg:#ededef;--fg-2:#c5c7cd;--fg-3:#9a9ea8;--fg-4:#6b6f79;
+--ac:#4f6ef0;--ac-hover:#6380f5;--ac-fg:#9fb2ff;--ac-bg:#161d38;--ac-line:#2b3a73;
+--in:#ff9a5c;--in-bg:#17120e;--in-line:#3d2616;
+--out:#4cd496;--out-bg:#0d1712;--out-line:#1b3b2a;
+--hl-bg:#3a2a05;--hl-fg:#ffd35a;--hl-line:#6a4d10;
+--err:#ff8f8a;--err-bg:#251214;--err-line:#55242a;
+--ok:#4cd496;--ok-bg:#0f2219;--warn:#f6b24d;--warn-bg:#2a1d08;
+--sh-1:0 1px 0 rgba(0,0,0,.3);--sh-2:0 1px 0 rgba(0,0,0,.3),0 10px 28px -8px rgba(0,0,0,.7)}}
+:root[data-theme=dark]{color-scheme:dark;
+--bg:#0b0c0e;--surface:#131417;--surface-2:#0f1012;--surface-3:#1d1f23;--cell:#0f1012;
+--line:#25272c;--line-2:#1d1f23;--line-strong:#383b43;
+--fg:#ededef;--fg-2:#c5c7cd;--fg-3:#9a9ea8;--fg-4:#6b6f79;
+--ac:#4f6ef0;--ac-hover:#6380f5;--ac-fg:#9fb2ff;--ac-bg:#161d38;--ac-line:#2b3a73;
+--in:#ff9a5c;--in-bg:#17120e;--in-line:#3d2616;
+--out:#4cd496;--out-bg:#0d1712;--out-line:#1b3b2a;
+--hl-bg:#3a2a05;--hl-fg:#ffd35a;--hl-line:#6a4d10;
+--err:#ff8f8a;--err-bg:#251214;--err-line:#55242a;
+--ok:#4cd496;--ok-bg:#0f2219;--warn:#f6b24d;--warn-bg:#2a1d08;
+--sh-1:0 1px 0 rgba(0,0,0,.3);--sh-2:0 1px 0 rgba(0,0,0,.3),0 10px 28px -8px rgba(0,0,0,.7)}
+/* ---- base ---- */
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-padding-top:76px;scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.65 var(--sans);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+html[data-lang=zh] [data-l=en],html[data-lang=en] [data-l=zh]{display:none}
+a{color:var(--ac-fg);text-decoration:none}
+a:hover{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+::selection{background:color-mix(in srgb,var(--ac) 24%,transparent)}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+code,kbd,pre,.mono{font-family:var(--mono)}
+img,svg{max-width:100%}
+.small{font-size:13px;color:var(--fg-3);line-height:1.6}
+button,input,select{font:inherit;color:inherit}
+/* ---- top bar ---- */
+.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 80%,transparent);-webkit-backdrop-filter:saturate(1.8) blur(16px);backdrop-filter:saturate(1.8) blur(16px);border-bottom:1px solid var(--line)}
+.top-in{max-width:1168px;height:56px;margin:0 auto;padding:0 24px;display:flex;align-items:center;gap:4px}
+.brand{display:inline-flex;align-items:center;gap:10px;margin-right:auto;color:var(--fg);font-size:15px;font-weight:650;letter-spacing:-.01em;white-space:nowrap}
+.brand:hover{text-decoration:none}
+.logo{width:26px;height:26px;flex:none;border-radius:8px;box-shadow:0 1px 2px rgba(16,24,40,.16),inset 0 0 0 1px rgba(255,255,255,.08)}
+.logo .lg{fill:var(--ac)}
+.nav{display:flex;align-items:center;gap:2px}
+.nav a,.ib{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:32px;padding:0 10px;border:0;border-radius:8px;background:none;color:var(--fg-3);font-size:14px;font-weight:500;cursor:pointer;transition:color .15s,background .15s}
+.nav a:hover,.ib:hover{color:var(--fg);background:var(--surface-3);text-decoration:none}
+html[data-page=index] .nav .n-idx,html[data-page=contract] .nav .n-idx,html[data-page=tx] .nav .n-tx{color:var(--fg)}
+.ib{width:32px;padding:0}
+.ib svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ib .gh{fill:currentColor;stroke:none}
+.i-sun{display:none}
+:root[data-theme=dark] .i-sun{display:block}:root[data-theme=dark] .i-moon{display:none}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .i-sun{display:block}:root:not([data-theme=light]) .i-moon{display:none}}
+#lang{display:inline-flex;align-items:center;height:30px;margin-left:6px;padding:2px;border:1px solid var(--line);border-radius:999px;background:var(--surface-3);font:600 12px/1 var(--sans);cursor:pointer}
+#lang span{display:grid;place-items:center;min-width:30px;height:24px;padding:0 8px;border-radius:999px;color:var(--fg-4);transition:background .2s,color .2s,box-shadow .2s}
+html[data-lang=zh] #lang .lz,html[data-lang=en] #lang .le{background:var(--surface);color:var(--fg);box-shadow:0 1px 2px rgba(16,24,40,.14),0 0 0 1px var(--line)}
+/* ---- page ---- */
+main{max-width:1168px;margin:0 auto;padding:44px 24px 72px}
+.ph{margin:0 0 32px}
+.crumb{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:0 0 14px;font-size:13px;color:var(--fg-4)}
+.crumb a{color:var(--fg-3)}
+.crumb code{padding:1px 7px;border:1px solid var(--line);border-radius:6px;background:var(--surface-3);color:var(--fg-2);font-size:12px}
+h1{margin:0 0 10px;font-size:34px;line-height:1.2;font-weight:700;letter-spacing:-.022em;overflow-wrap:anywhere;text-wrap:balance}
+.sub{color:var(--fg-3);font-size:15px;max-width:880px}
+.lead{margin:0;font-size:16.5px;color:var(--fg-3);max-width:860px;text-wrap:pretty}
+.agent{margin:12px 0 0;color:var(--fg-4);font-size:13px}
+.agent a{font-family:var(--mono);font-size:12.5px}
+.agent .copyl{height:24px;margin-left:8px;vertical-align:middle}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin:-12px 0 24px}
+.toc a{display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 12px 0 4px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg-2);font-size:13px;font-weight:500;transition:border-color .15s,color .15s}
+.toc a:hover{border-color:var(--line-strong);color:var(--fg);text-decoration:none}
+.toc .tg{height:22px;padding:0 6px;font-size:11.5px;border-radius:6px}
+/* ---- cards ---- */
+.card{position:relative;margin:0 0 20px;padding:28px 32px 30px;border:1px solid var(--line);border-radius:16px;background:var(--surface);box-shadow:var(--sh-1)}
+.card>h2{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;margin:0 0 22px;font-size:19px;line-height:1.35;font-weight:650;letter-spacing:-.012em}
+.tg{display:inline-flex;align-items:center;height:26px;padding:0 9px;border:1px solid var(--ac-line);border-radius:8px;background:var(--ac-bg);color:var(--ac-fg);font:600 13px/1 var(--mono);letter-spacing:0;white-space:nowrap}
+/* ---- input → output flow ---- */
+.flow{display:flex;align-items:stretch;gap:12px}
+.col{flex:1 1 auto;min-width:min(200px,100%);display:flex;flex-direction:column;gap:10px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--surface-2)}
+.cin{background:var(--in-bg);border-color:var(--in-line)}
+.cout{background:var(--out-bg);border-color:var(--out-line)}
+.colh{display:flex;align-items:center;gap:8px;padding:2px 4px;color:var(--fg-3);font:650 11.5px/1.4 var(--sans);letter-spacing:.07em;text-transform:uppercase;white-space:nowrap}
+.colh::before{content:'';width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 0 3px color-mix(in srgb,currentColor 18%,transparent)}
+.cin .colh{color:var(--in)}.cout .colh{color:var(--out)}
+.arrow{flex:none;align-self:center;display:grid;place-items:center;width:32px;height:32px;border:1px solid var(--line);border-radius:50%;background:var(--surface);color:var(--fg-3);box-shadow:var(--sh-1)}
+.arrow svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.none{padding:8px 4px;color:var(--fg-4);font-size:13px}
+.cell{margin:0;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--cell);color:var(--fg);font:13px/1.7 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%;overflow-x:auto}
+.cell .n{display:block;margin:-12px -14px 10px;padding:7px 14px;border-bottom:1px solid var(--line-2);border-radius:10px 10px 0 0;background:var(--surface-2);color:var(--fg-3);font:500 11.5px/1.5 var(--mono)}
+.hl{padding:1px 4px;border-radius:4px;background:var(--hl-bg);color:var(--hl-fg);font-weight:600;box-shadow:inset 0 -1px 0 var(--hl-line);-webkit-box-decoration-break:clone;box-decoration-break:clone}
+/* ---- sections, extras ---- */
+.sec{margin-top:22px}
+.sec h3,.limits h3{display:flex;align-items:center;gap:8px;margin:0 0 10px;color:var(--fg-2);font-size:13.5px;font-weight:650}
+.limits h3::before{content:'';width:3px;height:13px;border-radius:2px;background:var(--ac)}
+.secgrid{display:flex;flex-wrap:wrap;gap:12px}
+.secgrid .cell{flex:1 1 320px;background:var(--surface-2)}
+.card>.cell{background:var(--surface-2)}
+.extra{margin-top:12px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);color:var(--fg-2);font:13px/1.6 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere}
+/* ---- byte layout ---- */
+.layout{margin-top:16px;padding:16px 18px 12px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.layout>.n{display:block;margin-bottom:12px;color:var(--fg);font-size:14px;font-weight:600}
+.strip{display:flex;gap:3px;margin:0 0 12px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.seg{flex-shrink:0;min-width:56px;padding:8px 6px 7px;border-radius:4px;text-align:center;background:color-mix(in srgb,var(--k) 15%,var(--surface));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--k) 32%,transparent)}
+.seg:first-child{border-top-left-radius:9px;border-bottom-left-radius:9px}
+.seg:last-child{border-top-right-radius:9px;border-bottom-right-radius:9px}
+.seg b{display:block;color:var(--fg);font:600 12px/1.35 var(--mono);overflow-wrap:anywhere}
+.seg small{display:block;margin-top:2px;color:var(--fg-3);font:11px/1.3 var(--mono)}
+.c0{--k:#8a93a6}.c1{--k:#3b82f6}.c2{--k:#eaa312}.c3{--k:#20ad78}.c4{--k:#8b5cf6}.c5{--k:#ef4f6c}.c6{--k:#12b4c2}.c7{--k:#85b81a}
+.dot{display:inline-block;flex:none;width:8px;height:8px;border-radius:3px;background:var(--k)}
+/* field / limit / check rows share one aligned grid */
+.fields,.limits ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:fit-content(36%) minmax(0,1fr) auto;column-gap:20px}
+.fields li,.limits li{grid-column:1/-1;display:grid;grid-template-columns:subgrid;align-items:baseline;padding:8px 0;border-top:1px solid var(--line-2)}
+.fields{font-size:13.5px}
+.fields li:first-child{border-top:0}
+.fk{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 8px}
+.fk .dot{align-self:center}
+.fk b,.limits b{color:var(--fg);font:600 13px/1.6 var(--mono);overflow-wrap:anywhere}
+.sz{color:var(--fg-4);font:11.5px var(--mono)}
+.fd,.lc{color:var(--fg-2);overflow-wrap:anywhere}
+.cons{margin-left:8px;color:var(--hl-fg);font-weight:500}
+.fd>.cons:first-child{margin-left:0}
+.limits{margin-top:26px}
+.limits ul{font-size:14px;border-top:1px solid var(--line)}
+.limits li:first-child{border-top:0}
+.lc .note{display:block;margin-top:2px}
+.e{justify-self:end;padding:1px 7px;border:1px solid var(--err-line);border-radius:6px;background:var(--err-bg);color:var(--err);font:500 12px/1.55 var(--mono);white-space:nowrap;font-variant-numeric:tabular-nums}
+.e:empty{display:none}
+.note{color:var(--fg-3);font-size:13px}
+.layout>.note{margin:10px 0 2px}
+.hex{display:grid;grid-template-columns:fit-content(34%) minmax(0,1fr);column-gap:16px;margin-top:12px;padding:8px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);font:12.5px/1.7 var(--mono);overflow-x:auto}
+.hex>div{grid-column:1/-1;display:grid;grid-template-columns:subgrid;padding:3px 0}
+.hex>div+div{border-top:1px dashed var(--line)}
+.hk{color:var(--fg-3);overflow-wrap:anywhere}
+.hv{color:var(--fg);word-break:break-all}
+/* ---- page notes, footer ---- */
+.notes{display:flex;gap:12px;margin:4px 0 0;padding:16px 20px;border:1px solid var(--line);border-radius:14px;background:var(--surface-2);color:var(--fg-3);font-size:13.5px;line-height:1.75}
+.notes::before{content:'i';flex:none;display:grid;place-items:center;width:18px;height:18px;margin-top:3px;border:1.5px solid var(--fg-4);border-radius:50%;color:var(--fg-4);font:700 11px/1 Georgia,serif}
+.foot{display:flex;justify-content:center;margin:48px 0 0;padding-top:24px;border-top:1px solid var(--line)}
+.foot a{display:inline-flex;align-items:center;gap:8px;color:var(--fg-3);font-size:13px}
+.foot svg{width:16px;height:16px;fill:currentColor}
+/* ---- tags, badges, credits ---- */
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 0}
+.tag{display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border:1px solid transparent;border-radius:999px;background:var(--surface-3);color:var(--fg-2);font:500 12px/1.5 var(--sans);white-space:nowrap;cursor:default}
+.tag.g-kind{border-color:var(--ac-line);background:var(--ac-bg);color:var(--ac-fg)}
+.tag.g-project{border-color:var(--line-strong);background:var(--surface);color:var(--fg);font-weight:600}
+.tag[data-tag=mainnet]::before,.tag[data-tag=testnet]::before,.tag[data-f=mainnet]::before,.tag[data-f=testnet]::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--ok)}
+.tag[data-tag=testnet]::before,.tag[data-f=testnet]::before{background:var(--warn)}
+.tag[role=button]{cursor:pointer}
+.tag[role=button]::after{content:'';width:5px;height:5px;margin:-3px 1px 0 1px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);opacity:.6;transition:transform .2s}
+.tag[role=button][aria-expanded=true]::after{margin-top:3px;transform:rotate(-135deg)}
+.projp{margin:10px 0 0;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);color:var(--fg-2);font-size:13.5px}
+.projp>b{color:var(--fg)}
+.projp ul{list-style:none;margin:8px 0;padding:0}
+.projp li{display:grid;grid-template-columns:minmax(120px,max-content) minmax(0,1fr);column-gap:14px;padding:2px 0}
+.projp .pk{color:var(--fg-3)}
+.projp a{overflow-wrap:anywhere}
+.badge{--b:var(--fg-3);display:inline-flex;align-items:center;gap:5px;padding:1px 8px;border:1px solid color-mix(in srgb,var(--b) 30%,transparent);border-radius:999px;background:color-mix(in srgb,var(--b) 9%,transparent);color:var(--b);font:500 11.5px/1.5 var(--sans);white-space:nowrap;vertical-align:middle}
+.badge::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
+.b-verified{--b:var(--ok)}.b-unverified{--b:var(--warn)}.b-mismatch{--b:var(--err)}.b-no-source,.b-builtin{--b:var(--fg-3)}
+.credit{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:12px 0 0;color:var(--fg-3);font-size:13px}
+.av{display:inline-flex;line-height:0}
+.av img{border-radius:50%;box-shadow:0 0 0 2px var(--surface);background:var(--surface-3)}
+/* ---- provenance ---- */
+.prov>summary{display:flex;align-items:center;gap:10px;list-style:none;cursor:pointer;color:var(--fg);font-size:17px;font-weight:650;letter-spacing:-.01em}
+.prov>summary::-webkit-details-marker{display:none}
+.prov>summary::before{content:'';width:7px;height:7px;margin:0 4px 0 2px;border-right:1.8px solid var(--fg-4);border-bottom:1.8px solid var(--fg-4);transform:rotate(-45deg);transition:transform .2s}
+.prov[open]>summary::before{transform:rotate(45deg)}
+.prov[open]>summary{margin-bottom:16px}
+.kv{display:grid;grid-template-columns:minmax(96px,max-content) minmax(0,1fr);column-gap:16px;margin:6px 0;font-size:13px;line-height:1.7}
+.kv>:first-child{color:var(--fg-3)}
+.kv>:last-child{min-width:0;overflow-wrap:anywhere;color:var(--fg-2)}
+.kv small,.prov td small{color:var(--fg-4)}
+.tbl{margin:14px 0 10px;border:1px solid var(--line);border-radius:10px;overflow-x:auto;scrollbar-width:thin}
+.prov table{width:100%;border-collapse:collapse;font-size:12.5px}
+.prov th{padding:8px 12px;border-bottom:1px solid var(--line);background:var(--surface-2);color:var(--fg-3);font-size:12px;font-weight:600;text-align:left;white-space:nowrap}
+.prov td{padding:8px 12px;border-top:1px solid var(--line-2);color:var(--fg-2);font-family:var(--mono);white-space:nowrap}
+.prov tr:nth-child(2) td{border-top:0}
+.prov code{font-size:12px}
+/* ---- forms & buttons ---- */
+.inp,.bar{border:1px solid var(--line-strong);border-radius:12px;background:var(--surface);box-shadow:var(--sh-1);transition:border-color .15s,box-shadow .15s}
+.inp{display:block;width:100%;height:42px;padding:0 14px;color:var(--fg);font-size:14px;outline:none}
+.inp:focus,.bar:focus-within{border-color:var(--ac);box-shadow:0 0 0 4px color-mix(in srgb,var(--ac) 16%,transparent)}
+.bar{display:flex;align-items:center;gap:4px;padding:4px}
+.bar input{flex:1 1 auto;min-width:0;height:38px;padding:0 10px;border:0;background:none;color:var(--fg);font:14px var(--mono);outline:none}
+.bar select{flex:none;max-width:50%;height:38px;padding:0 30px 0 12px;border:0;border-radius:8px;background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='%238f939c' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 9px center/14px;color:var(--fg-2);font-size:13.5px;-webkit-appearance:none;appearance:none;cursor:pointer;text-overflow:ellipsis}
+.bar input+select,.bar select+input{border-left:1px solid var(--line);border-radius:0}
+.bar select:hover{background-color:var(--surface-3)}
+.bar :focus-visible{outline:none}
+.bar select:focus-visible{background-color:var(--surface-3)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:38px;padding:0 18px;border:0;border-radius:9px;background:var(--ac);color:#fff;font:600 14px/1 var(--sans);white-space:nowrap;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 1px 2px rgba(16,24,40,.18);transition:background .15s}
+.btn:hover{background:var(--ac-hover)}
+.btn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.copyl{display:inline-flex;align-items:center;gap:4px;height:28px;padding:0 11px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg-2);font-size:12.5px;font-weight:500;cursor:pointer;transition:border-color .15s,color .15s}
+.copyl:hover{border-color:var(--line-strong);color:var(--fg)}
+.copyl .okm{display:none}
+.copyl[data-ok]{border-color:color-mix(in srgb,var(--ok) 40%,transparent);color:var(--ok)}
+.copyl[data-ok] .okm{display:inline}
+/* ---- index ---- */
+.hero{position:relative;margin:0 0 36px;padding:26px 28px 22px;border:1px solid var(--line);border-radius:18px;background:radial-gradient(120% 160% at 0% 0%,var(--ac-bg) 0%,transparent 55%),var(--surface);box-shadow:var(--sh-1);overflow:hidden}
+.hero-h{display:flex;align-items:flex-start;gap:14px;margin:0 0 18px}
+.hero-ic{flex:none;display:grid;place-items:center;width:40px;height:40px;border:1px solid var(--ac-line);border-radius:12px;background:var(--surface);color:var(--ac-fg);box-shadow:var(--sh-1)}
+.hero-ic svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.hero h2{margin:0 0 2px;font-size:18px;line-height:1.4;font-weight:650;letter-spacing:-.01em}
+.hero p{margin:0;color:var(--fg-3);font-size:14px}
+.hero-link{display:inline-flex;margin-top:12px;font-size:13px;font-weight:500}
+.sh{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;margin:0 0 14px}
+.sh h2{margin:0;font-size:20px;font-weight:650;letter-spacing:-.012em}
+.sh-a{margin-left:auto;font-size:13px;font-weight:500}
+.fpanel{padding:20px 22px 18px}
+.search{position:relative}
+.search::before{content:'';position:absolute;left:15px;top:50%;width:16px;height:16px;margin-top:-8px;background:var(--fg-4);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-3.5-3.5'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-3.5-3.5'/%3E%3C/svg%3E") center/contain no-repeat;pointer-events:none}
+.search .inp{height:44px;padding:0 44px 0 42px;font-size:15px;-webkit-appearance:none;appearance:none}
+.kbd{position:absolute;right:12px;top:50%;transform:translateY(-50%);padding:1px 7px;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;background:var(--surface-2);color:var(--fg-4);font:500 11.5px/1.5 var(--mono);pointer-events:none;transition:opacity .15s}
+.search .inp:focus~.kbd,.search .inp:not(:placeholder-shown)~.kbd{opacity:0}
+.filters{display:grid;gap:8px;margin:16px 0 0}
+.fg{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-height:30px;padding-left:88px}
+.fg>b{position:absolute;left:0;top:5px;width:80px;color:var(--fg-3);font-size:12.5px;font-weight:600;line-height:20px}
+button.tag{height:30px;padding:0 12px;border:1px solid var(--line);background:var(--surface);color:var(--fg-2);font-size:12.5px;cursor:pointer;transition:border-color .15s,background .15s,color .15s}
+button.tag:hover{border-color:var(--line-strong);color:var(--fg)}
+button.tag.g-kind,button.tag.g-project{border-color:var(--line);background:var(--surface);color:var(--fg-2);font-weight:500}
+button.tag[aria-pressed=true]{border-color:var(--fg);background:var(--fg);color:var(--surface)}
+#projsel .projp{margin-top:14px}
+.cntrow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:20px 2px 12px;color:var(--fg-3);font-size:13px}
+#cnt{color:var(--fg-2);font-weight:600;font-variant-numeric:tabular-nums}
+.cards{list-style:none;margin:0 0 44px;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(262px,1fr));gap:12px}
+.ci{position:relative;display:flex;flex-wrap:wrap;align-items:center;align-content:flex-start;gap:4px 10px;padding:16px 16px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:var(--sh-1);transition:border-color .15s,box-shadow .2s,transform .2s}
+.ci:hover{border-color:var(--line-strong);box-shadow:var(--sh-2);transform:translateY(-2px)}
+.ci>a{flex:1 1 100%;color:var(--fg);font-size:14.5px;font-weight:600;line-height:1.45;overflow-wrap:anywhere}
+.ci>a:hover{text-decoration:none}
+.ci>a::after{content:'';position:absolute;inset:0;border-radius:inherit}
+.ci>.mono{order:1;flex:1 1 auto;min-width:0;color:var(--fg-4);font-size:12px;overflow-wrap:anywhere}
+.ci>.badge{order:2;flex:none;margin-left:auto}
+.ci>.tags,.ci>.projp,.ci>.avs{order:3;flex:1 1 100%}
+.ci .tags{gap:4px;margin:6px 0 0}
+.ci .tag{padding:1px 7px;font-size:11.5px}
+.ci .tag[role=button],.ci .projp,.ci .av{position:relative;z-index:1}
+.avs{display:flex;margin-top:6px;padding-left:2px}
+.avs .av+.av{margin-left:-5px}
+.empty{display:grid;justify-items:center;gap:4px;margin:0;padding:36px 20px;border:1px dashed var(--line-strong);border-radius:14px;color:var(--fg-3);font-size:13.5px;text-align:center}
+.empty b{color:var(--fg);font-size:15px;font-weight:600}
+.more{margin-top:14px;color:var(--fg-3);font-size:13px}
+.cnt{padding:0 7px;border-radius:999px;background:var(--surface-3);color:var(--fg-3);font:600 11.5px/20px var(--sans);font-variant-numeric:tabular-nums}
+.more>summary,.exs>summary{display:inline-flex;align-items:center;gap:8px;list-style:none;cursor:pointer;color:var(--fg-2);font-size:13.5px;font-weight:600}
+.more>summary::-webkit-details-marker,.exs>summary::-webkit-details-marker{display:none}
+.more>summary::before,.exs>summary::before{content:'';width:6px;height:6px;margin:0 3px 0 1px;border-right:1.6px solid var(--fg-4);border-bottom:1.6px solid var(--fg-4);transform:rotate(-45deg);transition:transform .2s}
+.more[open]>summary::before,.exs[open]>summary::before{transform:rotate(45deg)}
+/* AI generator: intro + steps on the left, repo field → live sentence → copy on the right */
+.gen{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);align-items:center;gap:26px 48px;margin:0 0 20px;padding:36px 32px 24px;border:1px solid var(--line);border-radius:18px;background:radial-gradient(60% 80% at 100% 0%,var(--ac-bg) 0%,transparent 72%),var(--surface);box-shadow:var(--sh-1);overflow:hidden}
+.gen::before{content:'';position:absolute;z-index:-1;inset:0;background:radial-gradient(circle,color-mix(in srgb,var(--fg) 14%,transparent) 1px,transparent 1.6px) 0 0/18px 18px;-webkit-mask:linear-gradient(105deg,transparent 40%,#000 90%);mask:linear-gradient(105deg,transparent 40%,#000 90%)}
+.eyebrow{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 11px 0 9px;border:1px solid var(--ac-line);border-radius:999px;background:var(--ac-bg);color:var(--ac-fg);font-size:12px;font-weight:600}
+.eyebrow svg{width:14px;height:14px;fill:currentColor}
+.gen h2{margin:16px 0 10px;font-size:25px;line-height:1.3;font-weight:700;letter-spacing:-.022em}
+.gen-t>p{margin:0;max-width:46ch;color:var(--fg-3);font-size:14.5px;line-height:1.7;text-wrap:pretty}
+.steps{list-style:none;display:grid;gap:14px;margin:24px 0 0;padding:0;counter-reset:st}
+.steps li{position:relative;display:grid;grid-template-columns:24px minmax(0,1fr);column-gap:12px;color:var(--fg-3);font-size:13px;line-height:1.5;counter-increment:st}
+.steps li::before{content:counter(st);grid-row:span 2;display:grid;place-items:center;width:24px;height:24px;border:1px solid var(--line-strong);border-radius:50%;background:var(--surface);color:var(--fg-2);font:600 12px/1 var(--sans)}
+.steps li:not(:last-child)::after{content:'';position:absolute;left:11.5px;top:28px;bottom:-10px;width:1px;background:var(--line)}
+.steps b{color:var(--fg);font-size:14px;font-weight:600}
+.gen-box{border:1px solid var(--line);border-radius:16px;background:var(--surface);box-shadow:var(--sh-2);transition:border-color .15s,box-shadow .15s}
+.gen-box:has(input:focus){border-color:var(--ac);box-shadow:0 0 0 4px color-mix(in srgb,var(--ac) 14%,transparent),var(--sh-2)}
+.gen-f{display:flex;align-items:center;gap:8px;height:52px;padding:0 16px;border-bottom:1px solid var(--line-2);border-radius:15px 15px 0 0;background:var(--surface-2);color:var(--fg-3);font-size:12.5px;font-weight:600;white-space:nowrap;cursor:text}
+.gen-f svg{flex:none;width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}
+.gen-f input{flex:1 1 auto;min-width:0;height:24px;margin-left:6px;padding:0 0 0 14px;border:0;border-left:1px solid var(--line-strong);border-radius:0;background:none;color:var(--fg);font:14px var(--mono);outline:none}
+.gen-f input::placeholder{color:var(--fg-4)}
+.gen-p{margin:0;padding:18px 20px 6px;color:var(--fg);font-size:15.5px;line-height:1.9;overflow-wrap:anywhere}
+.tk{display:inline-flex;align-items:center;gap:5px;margin:0 1px;padding:0 8px;border:1px solid var(--line);border-radius:7px;background:var(--surface-2);color:var(--fg-2);font:500 13px/24px var(--mono);vertical-align:1px;transition:border-color .15s,color .15s}
+.tk:hover{border-color:var(--ac-line);color:var(--ac-fg);text-decoration:none}
+.tk svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}
+.tk-r{margin:0 1px;padding:2px 7px;border:1px solid var(--ac-line);border-radius:7px;background:var(--ac-bg);color:var(--ac-fg);font:500 13.5px var(--mono);-webkit-box-decoration-break:clone;box-decoration-break:clone;cursor:text}
+.tk-e{border-style:dashed;border-color:color-mix(in srgb,var(--ac) 50%,transparent);background:none;font-family:var(--sans);white-space:nowrap}
+.gen-a{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px 12px 20px;color:var(--fg-4);font-size:12.5px}
+.gen-a .btn{flex:none;height:36px;padding:0 15px}
+.i-ok,.l-ok,[data-ok] .i-cp,[data-ok] .l-cp{display:none}
+[data-ok] .i-ok,[data-ok] .l-ok{display:inline}
+.gen-more{grid-column:1/-1;margin:0;padding-top:16px;border-top:1px solid var(--line-2)}
+.gen-more>.small{margin:12px 0 0}
+.inst{list-style:none;display:grid;grid-template-columns:max-content minmax(0,1fr) auto;gap:8px 14px;margin:12px 0;padding:0}
+.inst li{grid-column:1/-1;display:grid;grid-template-columns:subgrid;align-items:center}
+.inst li>span{color:var(--fg-3);font-size:12.5px;font-weight:600}
+.inst code{min-width:0;padding:6px 12px;border:1px solid var(--line);border-radius:9px;background:var(--surface-2);color:var(--fg);font-size:12.5px;line-height:1.6;white-space:nowrap;overflow-x:auto;scrollbar-width:thin}
+.cpi{display:grid;place-items:center;width:32px;height:32px;padding:0;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg-3);cursor:pointer;transition:border-color .15s,color .15s}
+.cpi:hover{border-color:var(--line-strong);color:var(--fg)}
+.cpi svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.cpi[data-ok]{border-color:color-mix(in srgb,var(--ok) 40%,transparent);color:var(--ok)}
+.people{list-style:none;display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px;padding:0}
+.people li{display:inline-flex;align-items:center;gap:8px;padding:4px 6px 4px 4px;border:1px solid var(--line);border-radius:999px;background:var(--surface-2);font-size:13.5px}
+.people .k{min-width:20px;padding:0 6px;border-radius:999px;background:var(--surface-3);color:var(--fg-3);font:600 11.5px/20px var(--sans);text-align:center;font-variant-numeric:tabular-nums}
+/* ---- responsive ---- */
+@media (max-width:860px){
+ .flow{flex-direction:column;gap:8px}
+ .arrow{transform:rotate(90deg)}
+}
+@media (max-width:920px){
+ .gen{grid-template-columns:minmax(0,1fr);gap:24px;padding:30px 32px 22px}
+ .gen-t>p{max-width:none}
+}
+@media (max-width:760px){
+ .gen{padding:24px 16px 16px;border-radius:14px}
+ .gen h2{font-size:21px}
+}
+@media (max-width:640px){
+ .gen-f{flex-wrap:wrap;height:auto;row-gap:6px;padding:12px 14px}
+ .gen-f input{flex-basis:100%;height:28px;margin:0;padding:0;border-left:0}
+ .gen-p{padding:14px 14px 4px;font-size:15px}
+ .gen-a{padding:8px 10px 10px 14px}
+ .inst{grid-template-columns:minmax(0,1fr) auto}
+ .inst li>span{grid-column:1/-1}
+ .inst li>span:empty{display:none}
+}
+@media (max-width:760px){
+ .top-in{padding:0 12px}
+ .brand span,.nav .n-idx{display:none}
+ main{padding:28px 14px 48px}
+ h1{font-size:25px}
+ .lead{font-size:15px}
+ .card{padding:20px 16px 22px;border-radius:14px;margin-bottom:16px}
+ .card>h2{font-size:17px;margin-bottom:16px}
+ .col{padding:10px}
+ .cell{padding:10px 12px;font-size:12.5px}
+ .cell .n{margin:-10px -12px 8px;padding:6px 12px}
+ .layout{padding:14px 12px 10px}
+ .strip{flex-wrap:wrap}.seg{min-width:calc(25% - 3px);flex:1 1 auto!important}
+ .seg,.seg:first-child,.seg:last-child{border-radius:6px}
+ .fields,.limits ul,.hex{display:block}
+ .fields li,.limits li{display:block}
+ .fk{margin-bottom:2px}
+ .limits b{display:block}
+ .e{display:inline-block;margin:3px 0 0 8px;vertical-align:1px}
+ .e:empty{display:none}
+ .cons{margin-left:0;display:block}
+ .hex{padding:8px 12px;font-size:12px}
+ .hex>div{display:block}
+ .hk{display:block}
+ .hero{padding:20px 16px 18px;border-radius:16px}
+ .fg{padding-left:0}
+ .fg>b{position:static;width:100%;line-height:1.4}
+ .notes{padding:14px 16px}
+}
+@media (max-width:640px){
+ .bar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:0;border:0;background:none;box-shadow:none}
+ .bar:focus-within{box-shadow:none}
+ .bar input,.bar select,.bar input+select,.bar select+input{height:44px;border:1px solid var(--line-strong);border-radius:10px;background-color:var(--surface);max-width:none}
+ .bar input:focus,.bar select:focus{border-color:var(--ac)}
+ #hx,#net{grid-column:1/-1}
+ .bar .btn{height:44px}
+}
+@supports not (color:color-mix(in srgb,red 50%,blue)){.top{background:var(--bg)}.seg{background:var(--surface-3);box-shadow:inset 0 0 0 1px var(--line)}.badge{background:var(--surface);border-color:var(--line)}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
+@media print{.top,.hero,.foot{display:none}.card,.ci{box-shadow:none;break-inside:avoid}body{background:#fff}}
+</style>
+<script>(function(){var k='ckb-flow-lang',tk='ckb-flow-theme',d=document.documentElement,l=null,t=null;try{l=localStorage.getItem(k);t=localStorage.getItem(tk)}catch(e){}if(l!=='zh'&&l!=='en')l=/^zh/i.test(navigator.language||'')?'zh':'en';d.setAttribute('data-lang',l);d.lang=l==='zh'?'zh-CN':'en';if(t==='light'||t==='dark')d.setAttribute('data-theme',t);
+var p=typeof location!=='undefined'?location.pathname:'';d.setAttribute('data-page',/tx\.html$/.test(p)?'tx':/(^|\/)(index\.html)?$/.test(p)?'index':'contract');
+window.toggleLang=function(){var n=d.getAttribute('data-lang')==='zh'?'en':'zh';d.setAttribute('data-lang',n);d.lang=n==='zh'?'zh-CN':'en';try{localStorage.setItem(k,n)}catch(e){}};
+window.toggleTheme=function(){var c=d.getAttribute('data-theme')||(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'),n=c==='dark'?'light':'dark';d.setAttribute('data-theme',n);try{localStorage.setItem(tk,n)}catch(e){}};})();</script></head><body>
+<header class="top"><div class="top-in">
+<a class="brand" href="index.html"><svg class="logo" viewBox="0 0 28 28" aria-hidden="true"><rect class="lg" width="28" height="28" rx="8"></rect><rect x="6.3" y="8.3" width="6.4" height="11.4" rx="2" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="1.6"></rect><rect x="15.3" y="8.3" width="6.4" height="11.4" rx="2" fill="#fff"></rect></svg><span>CKB Contract Flow</span></a>
+<nav class="nav"><a class="n-idx" href="index.html"><span data-l="zh">合约</span><span data-l="en">Contracts</span></a><a class="n-tx" href="tx.html"><span data-l="zh">交易解码</span><span data-l="en">Decoder</span></a>
+<a class="ib" href="https://github.com/gpBlockchain/ckb-contract-flow-html" target="_blank" rel="noopener" aria-label="GitHub" title="GitHub"><svg viewBox="0 0 16 16" aria-hidden="true"><path class="gh" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg></a>
+<button class="ib" type="button" onclick="toggleTheme()" aria-label="Toggle dark mode / 切换深色模式" title="Light / Dark"><svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2z"></path></svg><svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"></path></svg></button></nav>
+<button id="lang" type="button" onclick="toggleLang()" aria-label="Switch language / 切换语言"><span class="lz">中</span><span class="le">EN</span></button>
+</div></header>
+<main>
+<header class="ph"><nav class="crumb"><a href="index.html"><span data-l="zh">合约</span><span data-l="en">Contracts</span></a><span aria-hidden="true">/</span><code>shrincs_lock</code></nav>
+<h1><span data-l="zh">SHRINCS 抗量子 Lock 约束</span><span data-l="en">SHRINCS Post-quantum Lock Constraints</span></h1>
+<div class="sub"><span data-l="zh">来源：XuJiandong/shrincs-lock @d9326f5 contracts/shrincs-lock/src/main.rs、docs/shrincs-lock-spec.md　·　testnet 0x3874…96ac (type)　·　部署见 README.md / deployment/testnet/migrations/2026-09-07-012703.json</span><span data-l="en">Source: XuJiandong/shrincs-lock @d9326f5 contracts/shrincs-lock/src/main.rs, docs/shrincs-lock-spec.md　·　testnet 0x3874…96ac (type)　·　deployment in README.md / deployment/testnet/migrations/2026-09-07-012703.json</span><div class="tags"><span class="tag g-kind" data-tag="lock"><span data-l="zh">Lock 脚本</span><span data-l="en">Lock script</span></span><span class="tag g-category" data-tag="identity"><span data-l="zh">身份 / 钱包</span><span data-l="en">Identity / wallet</span></span><span class="tag g-category" data-tag="quantum"><span data-l="zh">抗量子</span><span data-l="en">Quantum-safe</span></span><span class="tag g-network" data-tag="testnet"><span data-l="zh">测试网</span><span data-l="en">Testnet</span></span><span class="tag g-source" data-tag="open-source"><span data-l="zh">开源</span><span data-l="en">Open source</span></span><span class="tag g-maintainer" data-tag="community"><span data-l="zh">社区</span><span data-l="en">Community</span></span></div><div class="credit"><span data-l="zh">贡献者：</span><span data-l="en">Contributed by </span><a class="av" href="https://github.com/XuJiandong" title="@XuJiandong"><img loading="lazy" width="20" height="20" alt="@XuJiandong" src="https://github.com/XuJiandong.png?size=40"></a> <a href="https://github.com/XuJiandong">@XuJiandong</a></div></div>
+<p class="agent"><span data-l="zh">给 AI agent：</span><span data-l="en">For AI agents:</span> <a href="shrincs_lock.md">shrincs_lock.md</a> · <a href="llms.txt">llms.txt</a><button class="copyl agent-cp" type="button" data-zh="先阅读 https://retricsu.github.io/community-scripts/shrincs_lock.md（CKB 合约 shrincs_lock 的文档：部署、用法、约束与错误码；全部合约见 https://retricsu.github.io/community-scripts/llms.txt），再回答我的问题：" data-en="First read https://retricsu.github.io/community-scripts/shrincs_lock.md (docs for the CKB contract shrincs_lock: deployments, how to use it, constraints and error codes; all contracts: https://retricsu.github.io/community-scripts/llms.txt), then answer my question: "><span data-l="zh">复制给 AI</span><span data-l="en">Copy for AI</span><span class="okm"> ✓</span></button></p>
+</header>
+
+<div class="card" id="t1">
+<h2><span class="tg">1 → N</span><span data-l="zh">SHRINCS 签名解锁（有状态 324B / 无状态 2568B）</span><span data-l="en">SHRINCS signature unlock (stateful 324B / stateless 2568B)</span></h2>
+<div class="flow">
+<div class="col cin"><div class="colh"><span data-l="zh">Inputs 输入</span><span data-l="en">Inputs</span></div><div class="cell"><span class="n"><span data-l="zh">SHRINCS cell（group 输入）</span><span data-l="en">SHRINCS cell (group input)</span></span>Cell{
+  lock: SHRINCS_LOCK{ args: <span class="hl">pubkey 32B = seed ‖ root</span> }
+}</div>
+<div class="cell"><span class="n"><span data-l="zh">witness[group 0]</span><span data-l="en">witness[group 0]</span></span><span data-l="zh">WitnessArgs{
+  lock: <span class="hl">SHRINCS 签名</span>,
+  input_type: …（计入签名消息）,
+  output_type: …（计入签名消息）
+}</span><span data-l="en">WitnessArgs{
+  lock: <span class="hl">SHRINCS signature</span>,
+  input_type: … (signed),
+  output_type: … (signed)
+}</span></div></div>
+<div class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></div>
+<div class="col cout"><div class="colh"><span data-l="zh">Outputs 输出</span><span data-l="en">Outputs</span></div><div class="cell"><span class="n"><span data-l="zh">outputs：任意</span><span data-l="en">outputs: any</span></span><span data-l="zh">由签名消息覆盖（tx_hash）</span><span data-l="en">covered by the signed message (tx_hash)</span></div></div>
+</div>
+
+<div class="layout"><span class="n"><span data-l="zh">lock.args 字节布局（SHRINCS 公钥，32B）</span><span data-l="en">lock.args byte layout (SHRINCS public key, 32B)</span></span>
+<div class="strip"><div class="seg c0" style="flex:1"><b>seed</b><small>16B</small></div><div class="seg c1" style="flex:1"><b>root</b><small>16B</small></div></div>
+<ul class="fields"><li><span class="fk"><span class="dot c0"></span><b>seed</b><span class="sz">16B</span></span><span class="fd"><span data-l="zh">公钥 seed（PublicKey.seed）</span><span data-l="en">public-key seed (PublicKey.seed)</span><span class="cons"><span data-l="zh">args 总长 = 32</span><span data-l="en">args length = 32</span></span></span><span class="e">74</span></li><li><span class="fk"><span class="dot c1"></span><b>root</b><span class="sz">16B</span></span><span class="fd"><span data-l="zh">压缩根（PublicKey.root）</span><span data-l="en">compressed root (PublicKey.root)</span><span class="cons"><span data-l="zh">args 总长 = 32</span><span data-l="en">args length = 32</span></span></span><span class="e">74</span></li></ul>
+<div class="hex"><div><span class="hk">seed</span><span class="hv">0xc56884e13db7dd53a4dba68f768b2b45</span></div><div><span class="hk">root</span><span class="hv">0x0cce73dd6228f313a4f1398875c9166c</span></div></div>
+<div class="note"><span data-l="zh">示例：测试网 tx 0xc3993e2a…a8a2 输入的 lock.args</span><span data-l="en">Example: input lock.args of testnet tx 0xc3993e2a…a8a2</span></div></div>
+<div class="layout"><span class="n"><span data-l="zh">签名消息 = blake2b-256(personal "ckb-shrincs-msg-", CKB_TX_MESSAGE_ALL)</span><span data-l="en">signing message = blake2b-256(personal "ckb-shrincs-msg-", CKB_TX_MESSAGE_ALL)</span></span>
+<div class="strip"><div class="seg c0" style="flex:1"><b>tx_hash</b><small>32B</small></div><div class="seg c1" style="flex:2"><b>inputs</b><small>Σ</small></div><div class="seg c2" style="flex:2"><b>w0.input_type / output_type</b><small>len ‖ bytes</small></div><div class="seg c3" style="flex:1"><b>group witnesses[1..]</b><small>u32 len ‖ w</small></div><div class="seg c4" style="flex:1"><b>extra witnesses</b><small>u32 len ‖ w</small></div></div>
+<ul class="fields"><li><span class="fk"><span class="dot c0"></span><b>tx_hash</b><span class="sz">32B</span></span><span class="fd"><span data-l="zh">交易哈希</span><span data-l="en">transaction hash</span></span><span class="e">71</span></li><li><span class="fk"><span class="dot c1"></span><b>inputs</b><span class="sz">Σ</span></span><span class="fd"><span data-l="zh">每个输入：CellOutput ‖ u32 len(data) ‖ data</span><span data-l="en">every input: CellOutput ‖ u32 len(data) ‖ data</span></span><span class="e">71</span></li><li><span class="fk"><span class="dot c2"></span><b>w0.input_type / output_type</b><span class="sz">len ‖ bytes</span></span><span class="fd"><span data-l="zh">group 第一个 witness 的 input_type、output_type（molecule BytesOpt），不含 lock</span><span data-l="en">input_type, output_type (molecule BytesOpt) of the group's first witness; lock excluded</span><span class="cons"><span data-l="zh">witness 是合法 WitnessArgs</span><span data-l="en">witness is valid WitnessArgs</span></span></span><span class="e">72</span></li><li><span class="fk"><span class="dot c3"></span><b>group witnesses[1..]</b><span class="sz">u32 len ‖ w</span></span><span class="fd"><span data-l="zh">group 其余 witness</span><span data-l="en">remaining group witnesses</span><span class="cons"><span data-l="zh">长度 ≤ u32::MAX</span><span data-l="en">length ≤ u32::MAX</span></span></span><span class="e">75</span></li><li><span class="fk"><span class="dot c4"></span><b>extra witnesses</b><span class="sz">u32 len ‖ w</span></span><span class="fd"><span data-l="zh">下标 ≥ 输入数的 witness</span><span data-l="en">witnesses beyond the input count</span></span><span class="e">71</span></li></ul>
+
+<div class="note"><span data-l="zh">按 RFC PR #446（CKB_TX_MESSAGE_ALL）；读取失败返回 71（Syscall）</span><span data-l="en">Per RFC PR #446 (CKB_TX_MESSAGE_ALL); load failures return 71 (Syscall)</span></div></div>
+<div class="layout"><span class="n"><span data-l="zh">witness.lock：SHRINCS 签名（SHRINCS_B 参数集）</span><span data-l="en">witness.lock: SHRINCS signature (SHRINCS_B parameter set)</span></span>
+<div class="strip"><div class="seg c5" style="flex:3"><b>signature</b><small>324B / 2568B</small></div></div>
+<ul class="fields"><li><span class="fk"><span class="dot c5"></span><b>signature</b><span class="sz">324B / 2568B</span></span><span class="fd"><span data-l="zh">有状态签名 324B，或无状态签名 2568B（README 参数表）</span><span data-l="en">stateful 324B or stateless 2568B (README parameter table)</span><span class="cons"><span data-l="zh">shrincs_verify::&lt;SHRINCS_B&gt;(msg, sig, pk) 通过</span><span data-l="en">shrincs_verify::&lt;SHRINCS_B&gt;(msg, sig, pk) passes</span></span></span><span class="e">76</span></li></ul>
+
+<div class="note"><span data-l="zh">签名内部结构由 shrincs-rs 1.1.0 crate 定义，不在本仓库源码中；合约不检查长度，只把整个 lock 字节交给 verify</span><span data-l="en">The internal signature layout is defined by the shrincs-rs 1.1.0 crate, not in this repo; the contract does not check the length and passes the whole lock bytes to verify</span></div></div>
+
+<div class="limits"><h3><span data-l="zh">限制</span><span data-l="en">Constraints</span></h3><ul>
+<li><b>witness[group 0]</b><span class="lc"><span data-l="zh">可加载</span><span data-l="en">loadable</span><span class="note"><span data-l="zh">Error::Syscall = 71</span><span data-l="en">Error::Syscall = 71</span></span></span><span class="e">71</span></li>
+<li><b>witness[group 0]</b><span class="lc"><span data-l="zh">是合法 molecule WitnessArgs</span><span data-l="en">is valid molecule WitnessArgs</span></span><span class="e">72</span></li>
+<li><b>CKB_TX_MESSAGE_ALL</b><span class="lc"><span data-l="zh">tx_hash / 输入 cell / witness 均可加载</span><span data-l="en">tx_hash / input cells / witnesses loadable</span></span><span class="e">71</span></li>
+<li><b>CKB_TX_MESSAGE_ALL</b><span class="lc"><span data-l="zh">每段长度可放进 u32</span><span data-l="en">each length fits in u32</span></span><span class="e">75</span></li>
+<li><b>WitnessArgs.lock</b><span class="lc"><span data-l="zh">必须存在（签名）</span><span data-l="en">must be present (signature)</span></span><span class="e">73</span></li>
+<li><b>script</b><span class="lc"><span data-l="zh">load_script 成功</span><span data-l="en">load_script succeeds</span></span><span class="e">71</span></li>
+<li><b>script.args</b><span class="lc"><span data-l="zh">长度 = 32（seed 16B ‖ root 16B）</span><span data-l="en">length = 32 (seed 16B ‖ root 16B)</span></span><span class="e">74</span></li>
+<li><b>signature</b><span class="lc"><span data-l="zh">SHRINCS_B 验证通过</span><span data-l="en">SHRINCS_B verification passes</span></span><span class="e">76</span></li>
+</ul></div>
+</div><div class="card"><details class="prov" open><summary><span data-l="zh">部署与来源</span><span data-l="en">Deployments &amp; source</span> <span class="badge b-verified" title="binary vs source"><span data-l="zh">已核验</span><span data-l="en">verified</span></span></summary>
+<div class="kv"><span><span data-l="zh">源码</span><span data-l="en">source</span></span><div><a href="https://github.com/XuJiandong/shrincs-lock/tree/d9326f524216acf3c6972e82ea600041631efeed">XuJiandong/shrincs-lock@d9326f52</a> · <a href="https://github.com/XuJiandong/shrincs-lock/blob/d9326f524216acf3c6972e82ea600041631efeed/contracts/shrincs-lock/src/main.rs">contracts/shrincs-lock/src/main.rs</a> · <a href="https://github.com/XuJiandong/shrincs-lock/blob/d9326f524216acf3c6972e82ea600041631efeed/docs/shrincs-lock-spec.md">docs/shrincs-lock-spec.md</a> · <a href="https://github.com/XuJiandong/shrincs-lock/blob/d9326f524216acf3c6972e82ea600041631efeed/checksums.txt">checksums.txt</a> <small>(commit read when writing this spec (default-branch HEAD 2026-09-10). Deployment from README.md "Deployment" + deployment/testnet/migrations/2026-09-07-012703.json. sha256 of the testnet code cell data (1dae35ca1ae42da9d3bb14e1ecb1c95ef31a06389a4fde4d252374d13d5f1d14) equals build/release/shrincs-lock in checksums.txt at this commit (checksums are sha256, so check-deployments cannot match them; binary status set by hand).)</small></div></div>
+<div class="kv"><span><span data-l="zh">二进制核验</span><span data-l="en">binary check</span></span><div><span class="badge b-verified" title="binary vs source"><span data-l="zh">已核验</span><span data-l="en">verified</span></span> <small>verified by hand via sha256 checksums.txt (check-deployments compares blake2b only and would rewrite this as unverified)</small><br><small>0x9ab6e4b3ca…44e66c13: sha256 1dae35ca1ae42da9d3bb14e1ecb1c95ef31a06389a4fde4d252374d13d5f1d14 of the code cell data is listed for build/release/shrincs-lock in checksums.txt at d9326f5; listed in deployment/testnet/migrations/2026-09-07-012703.json</small></div></div>
+<div class="tbl"><table><tr><th><span data-l="zh">网络</span><span data-l="en">network</span></th><th>code_hash</th><th>cell_dep</th><th>type_id args</th><th><span data-l="zh">数据哈希</span><span data-l="en">data hash</span></th><th><span data-l="zh">部署交易</span><span data-l="en">deploy tx</span></th></tr><tr><td>testnet</td><td><code>0x387496fafe46562bb3bb2fa4446f1fc1054ba2f1b4df229a88056d5422a196ac</code> <small>type</small></td><td><a href="https://testnet.explorer.nervos.org/transaction/0x3216d00b72e8229d7dbb46a93ea47bd0c650f2bdae42be2f92837328413da48e">0x3216d00b72…413da48e</a>:0 <small>code</small></td><td><code>0x1b979ea50f…7cce0fcc</code></td><td><code>0x9ab6e4b3ca…44e66c13</code></td><td><a href="https://testnet.explorer.nervos.org/transaction/0x3216d00b72e8229d7dbb46a93ea47bd0c650f2bdae42be2f92837328413da48e">0x3216d00b72…413da48e</a> <small>#22334945</small></td></tr></table></div>
+<div class="small"><span data-l="zh">链上数据核对于 </span><span data-l="en">on-chain data checked </span>2026-11-12</div></details></div>
+<div class="notes"><div><span data-l="zh">错误码来自 contracts/shrincs-lock/src/main.rs 的 enum Error（#[repr(i8)]，71 起递增）：71 Syscall、72 WitnessParse、73 SignatureMissing、74 PubkeyLength、75 CkbTxMessageAll、76 ShrincsVerify。注意：args 长度在计算签名消息之后才检查。</span><span data-l="en">Error codes from enum Error in contracts/shrincs-lock/src/main.rs (#[repr(i8)], counting from 71): 71 Syscall, 72 WitnessParse, 73 SignatureMissing, 74 PubkeyLength, 75 CkbTxMessageAll, 76 ShrincsVerify. Note: the args length is checked only after the signing message is computed.</span><br><span data-l="zh">有状态签名依赖签名设备本地保存计数器（README），链上合约不跟踪状态；同一 group 只验证第一个 witness 的签名。</span><span data-l="en">Stateful signatures rely on a counter kept on the signing device (README); the on-chain script tracks no state. Only the first witness of the group carries the signature.</span><br><span data-l="zh">解码器离线检查 args 长度、WitnessArgs 结构与签名存在；签名消息与 SHRINCS 验证为 NOT_CHECKED。二进制：链上 code cell 数据的 sha256 = checksums.txt 中 build/release/shrincs-lock 的值（手工核验）。</span><span data-l="en">The decoder checks args length, WitnessArgs shape and that a signature is present offline; the signing message and SHRINCS verification are NOT_CHECKED. Binary: sha256 of the on-chain code cell data equals build/release/shrincs-lock in checksums.txt (verified by hand).</span></div></div>
+<footer class="foot"><a href="https://github.com/gpBlockchain/ckb-contract-flow-html" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>gpBlockchain/ckb-contract-flow-html</a></footer>
+<script>(function(){if(typeof document==='undefined'||!document.addEventListener)return;document.addEventListener('click',function(e){var c=e.target.closest&&e.target.closest('.tags .tag[role=button]');if(!c)return;var t=c.getAttribute('data-tag'),n=c.closest('.tags').nextElementSibling;while(n&&n.classList.contains('projp')){if(n.getAttribute('data-projp')===t){n.hidden=!n.hidden;c.setAttribute('aria-expanded',!n.hidden)}n=n.nextElementSibling}});document.addEventListener('keydown',function(e){if((e.key==='Enter'||e.key===' ')&&e.target.matches&&e.target.matches('.tags .tag[role=button]')){e.preventDefault();e.target.click()}})})();</script>
+<script>(function(){if(typeof document==='undefined'||!document.addEventListener)return;document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.agent-cp');if(!b)return;var t=b.getAttribute(document.documentElement.getAttribute('data-lang')==='zh'?'data-zh':'data-en'),ok=function(){b.setAttribute('data-ok','1');setTimeout(function(){b.removeAttribute('data-ok')},1500)};if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,function(){prompt('Copy',t)});else prompt('Copy',t)})})();</script>
+</main></body></html>

@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Opticrum（Fiber 流动性租赁）Lock Script 约束 / Opticrum (Fiber liquidity rental) Lock Script Constraints</title>
+<link rel="alternate" type="text/markdown" href="opticrum_lock.md" title="Markdown for AI agents">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Crect width='28' height='28' rx='8' fill='%233e63dd'/%3E%3Crect x='6.3' y='8.3' width='6.4' height='11.4' rx='2' fill='none' stroke='%23fff' stroke-opacity='.75' stroke-width='1.6'/%3E%3Crect x='15.3' y='8.3' width='6.4' height='11.4' rx='2' fill='%23fff'/%3E%3C/svg%3E">
+<style>
+/* ---- tokens (light) ---- */
+:root{color-scheme:light;
+--bg:#f7f7f8;--surface:#fff;--surface-2:#f9f9fb;--surface-3:#f1f2f4;--cell:#fff;
+--line:#e5e6ea;--line-2:#eeeff2;--line-strong:#d3d5db;
+--fg:#16181d;--fg-2:#3b3f48;--fg-3:#646872;--fg-4:#9093a0;
+--ac:#3e63dd;--ac-hover:#3358d4;--ac-fg:#3a5bc7;--ac-bg:#eef2fe;--ac-line:#c9d5fb;
+--in:#c54a00;--in-bg:#fffaf5;--in-line:#f6dcc6;
+--out:#18794e;--out-bg:#f5fbf7;--out-line:#cce8d6;
+--hl-bg:#fff0b0;--hl-fg:#7f4500;--hl-line:#ecc75a;
+--err:#c9252b;--err-bg:#fff1f1;--err-line:#f5cccc;
+--ok:#18794e;--ok-bg:#e9f6ee;--warn:#9e5600;--warn-bg:#fff3dc;
+--sh-1:0 1px 2px rgba(16,24,40,.04);--sh-2:0 1px 2px rgba(16,24,40,.04),0 8px 20px -6px rgba(16,24,40,.1);
+--sans:-apple-system,BlinkMacSystemFont,"Segoe UI Variable Text","Segoe UI",Inter,"PingFang SC","Hiragino Sans GB","Microsoft YaHei UI","Microsoft YaHei","Noto Sans SC","Noto Sans CJK SC","Source Han Sans SC",Roboto,"Helvetica Neue",Arial,sans-serif;
+--mono:ui-monospace,"SF Mono",SFMono-Regular,"JetBrains Mono","Cascadia Mono","Roboto Mono",Menlo,Consolas,"Liberation Mono","PingFang SC","Microsoft YaHei","Noto Sans SC",monospace}
+/* ---- tokens (dark): system preference unless the reader picked light; or picked dark ---- */
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){color-scheme:dark;
+--bg:#0b0c0e;--surface:#131417;--surface-2:#0f1012;--surface-3:#1d1f23;--cell:#0f1012;
+--line:#25272c;--line-2:#1d1f23;--line-strong:#383b43;
+--fg:#ededef;--fg-2:#c5c7cd;--fg-3:#9a9ea8;--fg-4:#6b6f79;
+--ac:#4f6ef0;--ac-hover:#6380f5;--ac-fg:#9fb2ff;--ac-bg:#161d38;--ac-line:#2b3a73;
+--in:#ff9a5c;--in-bg:#17120e;--in-line:#3d2616;
+--out:#4cd496;--out-bg:#0d1712;--out-line:#1b3b2a;
+--hl-bg:#3a2a05;--hl-fg:#ffd35a;--hl-line:#6a4d10;
+--err:#ff8f8a;--err-bg:#251214;--err-line:#55242a;
+--ok:#4cd496;--ok-bg:#0f2219;--warn:#f6b24d;--warn-bg:#2a1d08;
+--sh-1:0 1px 0 rgba(0,0,0,.3);--sh-2:0 1px 0 rgba(0,0,0,.3),0 10px 28px -8px rgba(0,0,0,.7)}}
+:root[data-theme=dark]{color-scheme:dark;
+--bg:#0b0c0e;--surface:#131417;--surface-2:#0f1012;--surface-3:#1d1f23;--cell:#0f1012;
+--line:#25272c;--line-2:#1d1f23;--line-strong:#383b43;
+--fg:#ededef;--fg-2:#c5c7cd;--fg-3:#9a9ea8;--fg-4:#6b6f79;
+--ac:#4f6ef0;--ac-hover:#6380f5;--ac-fg:#9fb2ff;--ac-bg:#161d38;--ac-line:#2b3a73;
+--in:#ff9a5c;--in-bg:#17120e;--in-line:#3d2616;
+--out:#4cd496;--out-bg:#0d1712;--out-line:#1b3b2a;
+--hl-bg:#3a2a05;--hl-fg:#ffd35a;--hl-line:#6a4d10;
+--err:#ff8f8a;--err-bg:#251214;--err-line:#55242a;
+--ok:#4cd496;--ok-bg:#0f2219;--warn:#f6b24d;--warn-bg:#2a1d08;
+--sh-1:0 1px 0 rgba(0,0,0,.3);--sh-2:0 1px 0 rgba(0,0,0,.3),0 10px 28px -8px rgba(0,0,0,.7)}
+/* ---- base ---- */
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-padding-top:76px;scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.65 var(--sans);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+html[data-lang=zh] [data-l=en],html[data-lang=en] [data-l=zh]{display:none}
+a{color:var(--ac-fg);text-decoration:none}
+a:hover{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+::selection{background:color-mix(in srgb,var(--ac) 24%,transparent)}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+code,kbd,pre,.mono{font-family:var(--mono)}
+img,svg{max-width:100%}
+.small{font-size:13px;color:var(--fg-3);line-height:1.6}
+button,input,select{font:inherit;color:inherit}
+/* ---- top bar ---- */
+.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 80%,transparent);-webkit-backdrop-filter:saturate(1.8) blur(16px);backdrop-filter:saturate(1.8) blur(16px);border-bottom:1px solid var(--line)}
+.top-in{max-width:1168px;height:56px;margin:0 auto;padding:0 24px;display:flex;align-items:center;gap:4px}
+.brand{display:inline-flex;align-items:center;gap:10px;margin-right:auto;color:var(--fg);font-size:15px;font-weight:650;letter-spacing:-.01em;white-space:nowrap}
+.brand:hover{text-decoration:none}
+.logo{width:26px;height:26px;flex:none;border-radius:8px;box-shadow:0 1px 2px rgba(16,24,40,.16),inset 0 0 0 1px rgba(255,255,255,.08)}
+.logo .lg{fill:var(--ac)}
+.nav{display:flex;align-items:center;gap:2px}
+.nav a,.ib{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:32px;padding:0 10px;border:0;border-radius:8px;background:none;color:var(--fg-3);font-size:14px;font-weight:500;cursor:pointer;transition:color .15s,background .15s}
+.nav a:hover,.ib:hover{color:var(--fg);background:var(--surface-3);text-decoration:none}
+html[data-page=index] .nav .n-idx,html[data-page=contract] .nav .n-idx,html[data-page=tx] .nav .n-tx{color:var(--fg)}
+.ib{width:32px;padding:0}
+.ib svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ib .gh{fill:currentColor;stroke:none}
+.i-sun{display:none}
+:root[data-theme=dark] .i-sun{display:block}:root[data-theme=dark] .i-moon{display:none}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .i-sun{display:block}:root:not([data-theme=light]) .i-moon{display:none}}
+#lang{display:inline-flex;align-items:center;height:30px;margin-left:6px;padding:2px;border:1px solid var(--line);border-radius:999px;background:var(--surface-3);font:600 12px/1 var(--sans);cursor:pointer}
+#lang span{display:grid;place-items:center;min-width:30px;height:24px;padding:0 8px;border-radius:999px;color:var(--fg-4);transition:background .2s,color .2s,box-shadow .2s}
+html[data-lang=zh] #lang .lz,html[data-lang=en] #lang .le{background:var(--surface);color:var(--fg);box-shadow:0 1px 2px rgba(16,24,40,.14),0 0 0 1px var(--line)}
+/* ---- page ---- */
+main{max-width:1168px;margin:0 auto;padding:44px 24px 72px}
+.ph{margin:0 0 32px}
+.crumb{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:0 0 14px;font-size:13px;color:var(--fg-4)}
+.crumb a{color:var(--fg-3)}
+.crumb code{padding:1px 7px;border:1px solid var(--line);border-radius:6px;background:var(--surface-3);color:var(--fg-2);font-size:12px}
+h1{margin:0 0 10px;font-size:34px;line-height:1.2;font-weight:700;letter-spacing:-.022em;overflow-wrap:anywhere;text-wrap:balance}
+.sub{color:var(--fg-3);font-size:15px;max-width:880px}
+.lead{margin:0;font-size:16.5px;color:var(--fg-3);max-width:860px;text-wrap:pretty}
+.agent{margin:12px 0 0;color:var(--fg-4);font-size:13px}
+.agent a{font-family:var(--mono);font-size:12.5px}
+.agent .copyl{height:24px;margin-left:8px;vertical-align:middle}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin:-12px 0 24px}
+.toc a{display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 12px 0 4px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg-2);font-size:13px;font-weight:500;transition:border-color .15s,color .15s}
+.toc a:hover{border-color:var(--line-strong);color:var(--fg);text-decoration:none}
+.toc .tg{height:22px;padding:0 6px;font-size:11.5px;border-radius:6px}
+/* ---- cards ---- */
+.card{position:relative;margin:0 0 20px;padding:28px 32px 30px;border:1px solid var(--line);border-radius:16px;background:var(--surface);box-shadow:var(--sh-1)}
+.card>h2{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;margin:0 0 22px;font-size:19px;line-height:1.35;font-weight:650;letter-spacing:-.012em}
+.tg{display:inline-flex;align-items:center;height:26px;padding:0 9px;border:1px solid var(--ac-line);border-radius:8px;background:var(--ac-bg);color:var(--ac-fg);font:600 13px/1 var(--mono);letter-spacing:0;white-space:nowrap}
+/* ---- input → output flow ---- */
+.flow{display:flex;align-items:stretch;gap:12px}
+.col{flex:1 1 auto;min-width:min(200px,100%);display:flex;flex-direction:column;gap:10px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--surface-2)}
+.cin{background:var(--in-bg);border-color:var(--in-line)}
+.cout{background:var(--out-bg);border-color:var(--out-line)}
+.colh{display:flex;align-items:center;gap:8px;padding:2px 4px;color:var(--fg-3);font:650 11.5px/1.4 var(--sans);letter-spacing:.07em;text-transform:uppercase;white-space:nowrap}
+.colh::before{content:'';width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 0 3px color-mix(in srgb,currentColor 18%,transparent)}
+.cin .colh{color:var(--in)}.cout .colh{color:var(--out)}
+.arrow{flex:none;align-self:center;display:grid;place-items:center;width:32px;height:32px;border:1px solid var(--line);border-radius:50%;background:var(--surface);color:var(--fg-3);box-shadow:var(--sh-1)}
+.arrow svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.none{padding:8px 4px;color:var(--fg-4);font-size:13px}
+.cell{margin:0;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--cell);color:var(--fg);font:13px/1.7 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%;overflow-x:auto}
+.cell .n{display:block;margin:-12px -14px 10px;padding:7px 14px;border-bottom:1px solid var(--line-2);border-radius:10px 10px 0 0;background:var(--surface-2);color:var(--fg-3);font:500 11.5px/1.5 var(--mono)}
+.hl{padding:1px 4px;border-radius:4px;background:var(--hl-bg);color:var(--hl-fg);font-weight:600;box-shadow:inset 0 -1px 0 var(--hl-line);-webkit-box-decoration-break:clone;box-decoration-break:clone}
+/* ---- sections, extras ---- */
+.sec{margin-top:22px}
+.sec h3,.limits h3{display:flex;align-items:center;gap:8px;margin:0 0 10px;color:var(--fg-2);font-size:13.5px;font-weight:650}
+.limits h3::before{content:'';width:3px;height:13px;border-radius:2px;background:var(--ac)}
+.secgrid{display:flex;flex-wrap:wrap;gap:12px}
+.secgrid .cell{flex:1 1 320px;background:var(--surface-2)}
+.card>.cell{background:var(--surface-2)}
+.extra{margin-top:12px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);color:var(--fg-2);font:13px/1.6 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere}
+/* ---- byte layout ---- */
+.layout{margin-top:16px;padding:16px 18px 12px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.layout>.n{display:block;margin-bottom:12px;color:var(--fg);font-size:14px;font-weight:600}
+.strip{display:flex;gap:3px;margin:0 0 12px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.seg{flex-shrink:0;min-width:56px;padding:8px 6px 7px;border-radius:4px;text-align:center;background:color-mix(in srgb,var(--k) 15%,var(--surface));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--k) 32%,transparent)}
+.seg:first-child{border-top-left-radius:9px;border-bottom-left-radius:9px}
+.seg:last-child{border-top-right-radius:9px;border-bottom-right-radius:9px}
+.seg b{display:block;color:var(--fg);font:600 12px/1.35 var(--mono);overflow-wrap:anywhere}
+.seg small{display:block;margin-top:2px;color:var(--fg-3);font:11px/1.3 var(--mono)}
+.c0{--k:#8a93a6}.c1{--k:#3b82f6}.c2{--k:#eaa312}.c3{--k:#20ad78}.c4{--k:#8b5cf6}.c5{--k:#ef4f6c}.c6{--k:#12b4c2}.c7{--k:#85b81a}
+.dot{display:inline-block;flex:none;width:8px;height:8px;border-radius:3px;background:var(--k)}
+/* field / limit / check rows share one aligned grid */
+.fields,.limits ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:fit-content(36%) minmax(0,1fr) auto;column-gap:20px}
+.fields li,.limits li{grid-column:1/-1;display:grid;grid-template-columns:subgrid;align-items:baseline;padding:8px 0;border-top:1px solid var(--line-2)}
+.fields{font-size:13.5px}
+.fields li:first-child{border-top:0}
+.fk{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 8px}
+.fk .dot{align-self:center}
+.fk b,.limits b{color:var(--fg);font:600 13px/1.6 var(--mono);overflow-wrap:anywhere}
+.sz{color:var(--fg-4);font:11.5px var(--mono)}
+.fd,.lc{color:var(--fg-2);overflow-wrap:anywhere}
+.cons{margin-left:8px;color:var(--hl-fg);font-weight:500}
+.fd>.cons:first-child{margin-left:0}
+.limits{margin-top:26px}
+.limits ul{font-size:14px;border-top:1px solid var(--line)}
+.limits li:first-child{border-top:0}
+.lc .note{display:block;margin-top:2px}
+.e{justify-self:end;padding:1px 7px;border:1px solid var(--err-line);border-radius:6px;background:var(--err-bg);color:var(--err);font:500 12px/1.55 var(--mono);white-space:nowrap;font-variant-numeric:tabular-nums}
+.e:empty{display:none}
+.note{color:var(--fg-3);font-size:13px}
+.layout>.note{margin:10px 0 2px}
+.hex{display:grid;grid-template-columns:fit-content(34%) minmax(0,1fr);column-gap:16px;margin-top:12px;padding:8px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);font:12.5px/1.7 var(--mono);overflow-x:auto}
+.hex>div{grid-column:1/-1;display:grid;grid-template-columns:subgrid;padding:3px 0}
+.hex>div+div{border-top:1px dashed var(--line)}
+.hk{color:var(--fg-3);overflow-wrap:anywhere}
+.hv{color:var(--fg);word-break:break-all}
+/* ---- page notes, footer ---- */
+.notes{display:flex;gap:12px;margin:4px 0 0;padding:16px 20px;border:1px solid var(--line);border-radius:14px;background:var(--surface-2);color:var(--fg-3);font-size:13.5px;line-height:1.75}
+.notes::before{content:'i';flex:none;display:grid;place-items:center;width:18px;height:18px;margin-top:3px;border:1.5px solid var(--fg-4);border-radius:50%;color:var(--fg-4);font:700 11px/1 Georgia,serif}
+.foot{display:flex;justify-content:center;margin:48px 0 0;padding-top:24px;border-top:1px solid var(--line)}
+.foot a{display:inline-flex;align-items:center;gap:8px;color:var(--fg-3);font-size:13px}
+.foot svg{width:16px;height:16px;fill:currentColor}
+/* ---- tags, badges, credits ---- */
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 0}
+.tag{display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border:1px solid transparent;border-radius:999px;background:var(--surface-3);color:var(--fg-2);font:500 12px/1.5 var(--sans);white-space:nowrap;cursor:default}
+.tag.g-kind{border-color:var(--ac-line);background:var(--ac-bg);color:var(--ac-fg)}
+.tag.g-project{border-color:var(--line-strong);background:var(--surface);color:var(--fg);font-weight:600}
+.tag[data-tag=mainnet]::before,.tag[data-tag=testnet]::before,.tag[data-f=mainnet]::before,.tag[data-f=testnet]::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--ok)}
+.tag[data-tag=testnet]::before,.tag[data-f=testnet]::before{background:var(--warn)}
+.tag[role=button]{cursor:pointer}
+.tag[role=button]::after{content:'';width:5px;height:5px;margin:-3px 1px 0 1px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);opacity:.6;transition:transform .2s}
+.tag[role=button][aria-expanded=true]::after{margin-top:3px;transform:rotate(-135deg)}
+.projp{margin:10px 0 0;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);color:var(--fg-2);font-size:13.5px}
+.projp>b{color:var(--fg)}
+.projp ul{list-style:none;margin:8px 0;padding:0}
+.projp li{display:grid;grid-template-columns:minmax(120px,max-content) minmax(0,1fr);column-gap:14px;padding:2px 0}
+.projp .pk{color:var(--fg-3)}
+.projp a{overflow-wrap:anywhere}
+.badge{--b:var(--fg-3);display:inline-flex;align-items:center;gap:5px;padding:1px 8px;border:1px solid color-mix(in srgb,var(--b) 30%,transparent);border-radius:999px;background:color-mix(in srgb,var(--b) 9%,transparent);color:var(--b);font:500 11.5px/1.5 var(--sans);white-space:nowrap;vertical-align:middle}
+.badge::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
+.b-verified{--b:var(--ok)}.b-unverified{--b:var(--warn)}.b-mismatch{--b:var(--err)}.b-no-source,.b-builtin{--b:var(--fg-3)}
+.credit{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:12px 0 0;color:var(--fg-3);font-size:13px}
+.av{display:inline-flex;line-height:0}
+.av img{border-radius:50%;box-shadow:0 0 0 2px var(--surface);background:var(--surface-3)}
+/* ---- provenance ---- */
+.prov>summary{display:flex;align-items:center;gap:10px;list-style:none;cursor:pointer;color:var(--fg);font-size:17px;font-weight:650;letter-spacing:-.01em}
+.prov>summary::-webkit-details-marker{display:none}
+.prov>summary::before{content:'';width:7px;height:7px;margin:0 4px 0 2px;border-right:1.8px solid var(--fg-4);border-bottom:1.8px solid var(--fg-4);transform:rotate(-45deg);transition:transform .2s}
+.prov[open]>summary::before{transform:rotate(45deg)}
+.prov[open]>summary{margin-bottom:16px}
+.kv{display:grid;grid-template-columns:minmax(96px,max-content) minmax(0,1fr);column-gap:16px;margin:6px 0;font-size:13px;line-height:1.7}
+.kv>:first-child{color:var(--fg-3)}
+.kv>:last-child{min-width:0;overflow-wrap:anywhere;color:var(--fg-2)}
+.kv small,.prov td small{color:var(--fg-4)}
+.tbl{margin:14px 0 10px;border:1px solid var(--line);border-radius:10px;overflow-x:auto;scrollbar-width:thin}
+.prov table{width:100%;border-collapse:collapse;font-size:12.5px}
+.prov th{padding:8px 12px;border-bottom:1px solid var(--line);background:var(--surface-2);color:var(--fg-3);font-size:12px;font-weight:600;text-align:left;white-space:nowrap}
+.prov td{padding:8px 12px;border-top:1px solid var(--line-2);color:var(--fg-2);font-family:var(--mono);white-space:nowrap}
+.prov tr:nth-child(2) td{border-top:0}
+.prov code{font-size:12px}
+/* ---- forms & buttons ---- */
+.inp,.bar{border:1px solid var(--line-strong);border-radius:12px;background:var(--surface);box-shadow:var(--sh-1);transition:border-color .15s,box-shadow .15s}
+.inp{display:block;width:100%;height:42px;padding:0 14px;color:var(--fg);font-size:14px;outline:none}
+.inp:focus,.bar:focus-within{border-color:var(--ac);box-shadow:0 0 0 4px color-mix(in srgb,var(--ac) 16%,transparent)}
+.bar{display:flex;align-items:center;gap:4px;padding:4px}
+.bar input{flex:1 1 auto;min-width:0;height:38px;padding:0 10px;border:0;background:none;color:var(--fg);font:14px var(--mono);outline:none}
+.bar select{flex:none;max-width:50%;height:38px;padding:0 30px 0 12px;border:0;border-radius:8px;background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='%238f939c' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 9px center/14px;color:var(--fg-2);font-size:13.5px;-webkit-appearance:none;appearance:none;cursor:pointer;text-overflow:ellipsis}
+.bar input+select,.bar select+input{border-left:1px solid var(--line);border-radius:0}
+.bar select:hover{background-color:var(--surface-3)}
+.bar :focus-visible{outline:none}
+.bar select:focus-visible{background-color:var(--surface-3)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:38px;padding:0 18px;border:0;border-radius:9px;background:var(--ac);color:#fff;font:600 14px/1 var(--sans);white-space:nowrap;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 1px 2px rgba(16,24,40,.18);transition:background .15s}
+.btn:hover{background:var(--ac-hover)}
+.btn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.copyl{display:inline-flex;align-items:center;gap:4px;height:28px;padding:0 11px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg-2);font-size:12.5px;font-weight:500;cursor:pointer;transition:border-color .15s,color .15s}
+.copyl:hover{border-color:var(--line-strong);color:var(--fg)}
+.copyl .okm{display:none}
+.copyl[data-ok]{border-color:color-mix(in srgb,var(--ok) 40%,transparent);color:var(--ok)}
+.copyl[data-ok] .okm{display:inline}
+/* ---- index ---- */
+.hero{position:relative;margin:0 0 36px;padding:26px 28px 22px;border:1px solid var(--line);border-radius:18px;background:radial-gradient(120% 160% at 0% 0%,var(--ac-bg) 0%,transparent 55%),var(--surface);box-shadow:var(--sh-1);overflow:hidden}
+.hero-h{display:flex;align-items:flex-start;gap:14px;margin:0 0 18px}
+.hero-ic{flex:none;display:grid;place-items:center;width:40px;height:40px;border:1px solid var(--ac-line);border-radius:12px;background:var(--surface);color:var(--ac-fg);box-shadow:var(--sh-1)}
+.hero-ic svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.hero h2{margin:0 0 2px;font-size:18px;line-height:1.4;font-weight:650;letter-spacing:-.01em}
+.hero p{margin:0;color:var(--fg-3);font-size:14px}
+.hero-link{display:inline-flex;margin-top:12px;font-size:13px;font-weight:500}
+.sh{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;margin:0 0 14px}
+.sh h2{margin:0;font-size:20px;font-weight:650;letter-spacing:-.012em}
+.sh-a{margin-left:auto;font-size:13px;font-weight:500}
+.fpanel{padding:20px 22px 18px}
+.search{position:relative}
+.search::before{content:'';position:absolute;left:15px;top:50%;width:16px;height:16px;margin-top:-8px;background:var(--fg-4);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-3.5-3.5'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-3.5-3.5'/%3E%3C/svg%3E") center/contain no-repeat;pointer-events:none}
+.search .inp{height:44px;padding:0 44px 0 42px;font-size:15px;-webkit-appearance:none;appearance:none}
+.kbd{position:absolute;right:12px;top:50%;transform:translateY(-50%);padding:1px 7px;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;background:var(--surface-2);color:var(--fg-4);font:500 11.5px/1.5 var(--mono);pointer-events:none;transition:opacity .15s}
+.search .inp:focus~.kbd,.search .inp:not(:placeholder-shown)~.kbd{opacity:0}
+.filters{display:grid;gap:8px;margin:16px 0 0}
+.fg{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-height:30px;padding-left:88px}
+.fg>b{position:absolute;left:0;top:5px;width:80px;color:var(--fg-3);font-size:12.5px;font-weight:600;line-height:20px}
+button.tag{height:30px;padding:0 12px;border:1px solid var(--line);background:var(--surface);color:var(--fg-2);font-size:12.5px;cursor:pointer;transition:border-color .15s,background .15s,color .15s}
+button.tag:hover{border-color:var(--line-strong);color:var(--fg)}
+button.tag.g-kind,button.tag.g-project{border-color:var(--line);background:var(--surface);color:var(--fg-2);font-weight:500}
+button.tag[aria-pressed=true]{border-color:var(--fg);background:var(--fg);color:var(--surface)}
+#projsel .projp{margin-top:14px}
+.cntrow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:20px 2px 12px;color:var(--fg-3);font-size:13px}
+#cnt{color:var(--fg-2);font-weight:600;font-variant-numeric:tabular-nums}
+.cards{list-style:none;margin:0 0 44px;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(262px,1fr));gap:12px}
+.ci{position:relative;display:flex;flex-wrap:wrap;align-items:center;align-content:flex-start;gap:4px 10px;padding:16px 16px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:var(--sh-1);transition:border-color .15s,box-shadow .2s,transform .2s}
+.ci:hover{border-color:var(--line-strong);box-shadow:var(--sh-2);transform:translateY(-2px)}
+.ci>a{flex:1 1 100%;color:var(--fg);font-size:14.5px;font-weight:600;line-height:1.45;overflow-wrap:anywhere}
+.ci>a:hover{text-decoration:none}
+.ci>a::after{content:'';position:absolute;inset:0;border-radius:inherit}
+.ci>.mono{order:1;flex:1 1 auto;min-width:0;color:var(--fg-4);font-size:12px;overflow-wrap:anywhere}
+.ci>.badge{order:2;flex:none;margin-left:auto}
+.ci>.tags,.ci>.projp,.ci>.avs{order:3;flex:1 1 100%}
+.ci .tags{gap:4px;margin:6px 0 0}
+.ci .tag{padding:1px 7px;font-size:11.5px}
+.ci .tag[role=button],.ci .projp,.ci .av{position:relative;z-index:1}
+.avs{display:flex;margin-top:6px;padding-left:2px}
+.avs .av+.av{margin-left:-5px}
+.empty{display:grid;justify-items:center;gap:4px;margin:0;padding:36px 20px;border:1px dashed var(--line-strong);border-radius:14px;color:var(--fg-3);font-size:13.5px;text-align:center}
+.empty b{color:var(--fg);font-size:15px;font-weight:600}
+.more{margin-top:14px;color:var(--fg-3);font-size:13px}
+.cnt{padding:0 7px;border-radius:999px;background:var(--surface-3);color:var(--fg-3);font:600 11.5px/20px var(--sans);font-variant-numeric:tabular-nums}
+.more>summary,.exs>summary{display:inline-flex;align-items:center;gap:8px;list-style:none;cursor:pointer;color:var(--fg-2);font-size:13.5px;font-weight:600}
+.more>summary::-webkit-details-marker,.exs>summary::-webkit-details-marker{display:none}
+.more>summary::before,.exs>summary::before{content:'';width:6px;height:6px;margin:0 3px 0 1px;border-right:1.6px solid var(--fg-4);border-bottom:1.6px solid var(--fg-4);transform:rotate(-45deg);transition:transform .2s}
+.more[open]>summary::before,.exs[open]>summary::before{transform:rotate(45deg)}
+/* AI generator: intro + steps on the left, repo field → live sentence → copy on the right */
+.gen{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);align-items:center;gap:26px 48px;margin:0 0 20px;padding:36px 32px 24px;border:1px solid var(--line);border-radius:18px;background:radial-gradient(60% 80% at 100% 0%,var(--ac-bg) 0%,transparent 72%),var(--surface);box-shadow:var(--sh-1);overflow:hidden}
+.gen::before{content:'';position:absolute;z-index:-1;inset:0;background:radial-gradient(circle,color-mix(in srgb,var(--fg) 14%,transparent) 1px,transparent 1.6px) 0 0/18px 18px;-webkit-mask:linear-gradient(105deg,transparent 40%,#000 90%);mask:linear-gradient(105deg,transparent 40%,#000 90%)}
+.eyebrow{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 11px 0 9px;border:1px solid var(--ac-line);border-radius:999px;background:var(--ac-bg);color:var(--ac-fg);font-size:12px;font-weight:600}
+.eyebrow svg{width:14px;height:14px;fill:currentColor}
+.gen h2{margin:16px 0 10px;font-size:25px;line-height:1.3;font-weight:700;letter-spacing:-.022em}
+.gen-t>p{margin:0;max-width:46ch;color:var(--fg-3);font-size:14.5px;line-height:1.7;text-wrap:pretty}
+.steps{list-style:none;display:grid;gap:14px;margin:24px 0 0;padding:0;counter-reset:st}
+.steps li{position:relative;display:grid;grid-template-columns:24px minmax(0,1fr);column-gap:12px;color:var(--fg-3);font-size:13px;line-height:1.5;counter-increment:st}
+.steps li::before{content:counter(st);grid-row:span 2;display:grid;place-items:center;width:24px;height:24px;border:1px solid var(--line-strong);border-radius:50%;background:var(--surface);color:var(--fg-2);font:600 12px/1 var(--sans)}
+.steps li:not(:last-child)::after{content:'';position:absolute;left:11.5px;top:28px;bottom:-10px;width:1px;background:var(--line)}
+.steps b{color:var(--fg);font-size:14px;font-weight:600}
+.gen-box{border:1px solid var(--line);border-radius:16px;background:var(--surface);box-shadow:var(--sh-2);transition:border-color .15s,box-shadow .15s}
+.gen-box:has(input:focus){border-color:var(--ac);box-shadow:0 0 0 4px color-mix(in srgb,var(--ac) 14%,transparent),var(--sh-2)}
+.gen-f{display:flex;align-items:center;gap:8px;height:52px;padding:0 16px;border-bottom:1px solid var(--line-2);border-radius:15px 15px 0 0;background:var(--surface-2);color:var(--fg-3);font-size:12.5px;font-weight:600;white-space:nowrap;cursor:text}
+.gen-f svg{flex:none;width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}
+.gen-f input{flex:1 1 auto;min-width:0;height:24px;margin-left:6px;padding:0 0 0 14px;border:0;border-left:1px solid var(--line-strong);border-radius:0;background:none;color:var(--fg);font:14px var(--mono);outline:none}
+.gen-f input::placeholder{color:var(--fg-4)}
+.gen-p{margin:0;padding:18px 20px 6px;color:var(--fg);font-size:15.5px;line-height:1.9;overflow-wrap:anywhere}
+.tk{display:inline-flex;align-items:center;gap:5px;margin:0 1px;padding:0 8px;border:1px solid var(--line);border-radius:7px;background:var(--surface-2);color:var(--fg-2);font:500 13px/24px var(--mono);vertical-align:1px;transition:border-color .15s,color .15s}
+.tk:hover{border-color:var(--ac-line);color:var(--ac-fg);text-decoration:none}
+.tk svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}
+.tk-r{margin:0 1px;padding:2px 7px;border:1px solid var(--ac-line);border-radius:7px;background:var(--ac-bg);color:var(--ac-fg);font:500 13.5px var(--mono);-webkit-box-decoration-break:clone;box-decoration-break:clone;cursor:text}
+.tk-e{border-style:dashed;border-color:color-mix(in srgb,var(--ac) 50%,transparent);background:none;font-family:var(--sans);white-space:nowrap}
+.gen-a{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px 12px 20px;color:var(--fg-4);font-size:12.5px}
+.gen-a .btn{flex:none;height:36px;padding:0 15px}
+.i-ok,.l-ok,[data-ok] .i-cp,[data-ok] .l-cp{display:none}
+[data-ok] .i-ok,[data-ok] .l-ok{display:inline}
+.gen-more{grid-column:1/-1;margin:0;padding-top:16px;border-top:1px solid var(--line-2)}
+.gen-more>.small{margin:12px 0 0}
+.inst{list-style:none;display:grid;grid-template-columns:max-content minmax(0,1fr) auto;gap:8px 14px;margin:12px 0;padding:0}
+.inst li{grid-column:1/-1;display:grid;grid-template-columns:subgrid;align-items:center}
+.inst li>span{color:var(--fg-3);font-size:12.5px;font-weight:600}
+.inst code{min-width:0;padding:6px 12px;border:1px solid var(--line);border-radius:9px;background:var(--surface-2);color:var(--fg);font-size:12.5px;line-height:1.6;white-space:nowrap;overflow-x:auto;scrollbar-width:thin}
+.cpi{display:grid;place-items:center;width:32px;height:32px;padding:0;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg-3);cursor:pointer;transition:border-color .15s,color .15s}
+.cpi:hover{border-color:var(--line-strong);color:var(--fg)}
+.cpi svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.cpi[data-ok]{border-color:color-mix(in srgb,var(--ok) 40%,transparent);color:var(--ok)}
+.people{list-style:none;display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px;padding:0}
+.people li{display:inline-flex;align-items:center;gap:8px;padding:4px 6px 4px 4px;border:1px solid var(--line);border-radius:999px;background:var(--surface-2);font-size:13.5px}
+.people .k{min-width:20px;padding:0 6px;border-radius:999px;background:var(--surface-3);color:var(--fg-3);font:600 11.5px/20px var(--sans);text-align:center;font-variant-numeric:tabular-nums}
+/* ---- responsive ---- */
+@media (max-width:860px){
+ .flow{flex-direction:column;gap:8px}
+ .arrow{transform:rotate(90deg)}
+}
+@media (max-width:920px){
+ .gen{grid-template-columns:minmax(0,1fr);gap:24px;padding:30px 32px 22px}
+ .gen-t>p{max-width:none}
+}
+@media (max-width:760px){
+ .gen{padding:24px 16px 16px;border-radius:14px}
+ .gen h2{font-size:21px}
+}
+@media (max-width:640px){
+ .gen-f{flex-wrap:wrap;height:auto;row-gap:6px;padding:12px 14px}
+ .gen-f input{flex-basis:100%;height:28px;margin:0;padding:0;border-left:0}
+ .gen-p{padding:14px 14px 4px;font-size:15px}
+ .gen-a{padding:8px 10px 10px 14px}
+ .inst{grid-template-columns:minmax(0,1fr) auto}
+ .inst li>span{grid-column:1/-1}
+ .inst li>span:empty{display:none}
+}
+@media (max-width:760px){
+ .top-in{padding:0 12px}
+ .brand span,.nav .n-idx{display:none}
+ main{padding:28px 14px 48px}
+ h1{font-size:25px}
+ .lead{font-size:15px}
+ .card{padding:20px 16px 22px;border-radius:14px;margin-bottom:16px}
+ .card>h2{font-size:17px;margin-bottom:16px}
+ .col{padding:10px}
+ .cell{padding:10px 12px;font-size:12.5px}
+ .cell .n{margin:-10px -12px 8px;padding:6px 12px}
+ .layout{padding:14px 12px 10px}
+ .strip{flex-wrap:wrap}.seg{min-width:calc(25% - 3px);flex:1 1 auto!important}
+ .seg,.seg:first-child,.seg:last-child{border-radius:6px}
+ .fields,.limits ul,.hex{display:block}
+ .fields li,.limits li{display:block}
+ .fk{margin-bottom:2px}
+ .limits b{display:block}
+ .e{display:inline-block;margin:3px 0 0 8px;vertical-align:1px}
+ .e:empty{display:none}
+ .cons{margin-left:0;display:block}
+ .hex{padding:8px 12px;font-size:12px}
+ .hex>div{display:block}
+ .hk{display:block}
+ .hero{padding:20px 16px 18px;border-radius:16px}
+ .fg{padding-left:0}
+ .fg>b{position:static;width:100%;line-height:1.4}
+ .notes{padding:14px 16px}
+}
+@media (max-width:640px){
+ .bar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:0;border:0;background:none;box-shadow:none}
+ .bar:focus-within{box-shadow:none}
+ .bar input,.bar select,.bar input+select,.bar select+input{height:44px;border:1px solid var(--line-strong);border-radius:10px;background-color:var(--surface);max-width:none}
+ .bar input:focus,.bar select:focus{border-color:var(--ac)}
+ #hx,#net{grid-column:1/-1}
+ .bar .btn{height:44px}
+}
+@supports not (color:color-mix(in srgb,red 50%,blue)){.top{background:var(--bg)}.seg{background:var(--surface-3);box-shadow:inset 0 0 0 1px var(--line)}.badge{background:var(--surface);border-color:var(--line)}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
+@media print{.top,.hero,.foot{display:none}.card,.ci{box-shadow:none;break-inside:avoid}body{background:#fff}}
+</style>
+<script>(function(){var k='ckb-flow-lang',tk='ckb-flow-theme',d=document.documentElement,l=null,t=null;try{l=localStorage.getItem(k);t=localStorage.getItem(tk)}catch(e){}if(l!=='zh'&&l!=='en')l=/^zh/i.test(navigator.language||'')?'zh':'en';d.setAttribute('data-lang',l);d.lang=l==='zh'?'zh-CN':'en';if(t==='light'||t==='dark')d.setAttribute('data-theme',t);
+var p=typeof location!=='undefined'?location.pathname:'';d.setAttribute('data-page',/tx\.html$/.test(p)?'tx':/(^|\/)(index\.html)?$/.test(p)?'index':'contract');
+window.toggleLang=function(){var n=d.getAttribute('data-lang')==='zh'?'en':'zh';d.setAttribute('data-lang',n);d.lang=n==='zh'?'zh-CN':'en';try{localStorage.setItem(k,n)}catch(e){}};
+window.toggleTheme=function(){var c=d.getAttribute('data-theme')||(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'),n=c==='dark'?'light':'dark';d.setAttribute('data-theme',n);try{localStorage.setItem(tk,n)}catch(e){}};})();</script></head><body>
+<header class="top"><div class="top-in">
+<a class="brand" href="index.html"><svg class="logo" viewBox="0 0 28 28" aria-hidden="true"><rect class="lg" width="28" height="28" rx="8"></rect><rect x="6.3" y="8.3" width="6.4" height="11.4" rx="2" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="1.6"></rect><rect x="15.3" y="8.3" width="6.4" height="11.4" rx="2" fill="#fff"></rect></svg><span>CKB Contract Flow</span></a>
+<nav class="nav"><a class="n-idx" href="index.html"><span data-l="zh">合约</span><span data-l="en">Contracts</span></a><a class="n-tx" href="tx.html"><span data-l="zh">交易解码</span><span data-l="en">Decoder</span></a>
+<a class="ib" href="https://github.com/gpBlockchain/ckb-contract-flow-html" target="_blank" rel="noopener" aria-label="GitHub" title="GitHub"><svg viewBox="0 0 16 16" aria-hidden="true"><path class="gh" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg></a>
+<button class="ib" type="button" onclick="toggleTheme()" aria-label="Toggle dark mode / 切换深色模式" title="Light / Dark"><svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2z"></path></svg><svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"></path></svg></button></nav>
+<button id="lang" type="button" onclick="toggleLang()" aria-label="Switch language / 切换语言"><span class="lz">中</span><span class="le">EN</span></button>
+</div></header>
+<main>
+<header class="ph"><nav class="crumb"><a href="index.html"><span data-l="zh">合约</span><span data-l="en">Contracts</span></a><span aria-hidden="true">/</span><code>opticrum_lock</code></nav>
+<h1><span data-l="zh">Opticrum（Fiber 流动性租赁）Lock Script 约束</span><span data-l="en">Opticrum (Fiber liquidity rental) Lock Script Constraints</span></h1>
+<div class="sub"><span data-l="zh">来源：Opticrum/ckb-contract-script @803523a contracts/opticrum/src、opticrum-protocol/src/lib.rs　·　框架 ckb-cinnabar-verifier @f50d8e9　·　testnet type_id 0x1f84…0247（deployment/testnet/opticrum.json）</span><span data-l="en">Source: Opticrum/ckb-contract-script @803523a contracts/opticrum/src, opticrum-protocol/src/lib.rs　·　framework ckb-cinnabar-verifier @f50d8e9　·　testnet type_id 0x1f84…0247 (deployment/testnet/opticrum.json)</span><div class="tags"><span class="tag g-kind" data-tag="lock"><span data-l="zh">Lock 脚本</span><span data-l="en">Lock script</span></span><span class="tag g-category" data-tag="defi"><span data-l="zh">DeFi</span><span data-l="en">DeFi</span></span><span class="tag g-category" data-tag="channel"><span data-l="zh">支付通道 / Fiber</span><span data-l="en">Payment channel / Fiber</span></span><span class="tag g-network" data-tag="testnet"><span data-l="zh">测试网</span><span data-l="en">Testnet</span></span><span class="tag g-source" data-tag="open-source"><span data-l="zh">开源</span><span data-l="en">Open source</span></span><span class="tag g-maintainer" data-tag="community"><span data-l="zh">社区</span><span data-l="en">Community</span></span></div><div class="credit"><span data-l="zh">贡献者：</span><span data-l="en">Contributed by </span><a class="av" href="https://github.com/ashuralyk" title="@ashuralyk"><img loading="lazy" width="20" height="20" alt="@ashuralyk" src="https://github.com/ashuralyk.png?size=40"></a> <a href="https://github.com/ashuralyk">@ashuralyk</a></div></div>
+<p class="agent"><span data-l="zh">给 AI agent：</span><span data-l="en">For AI agents:</span> <a href="opticrum_lock.md">opticrum_lock.md</a> · <a href="llms.txt">llms.txt</a><button class="copyl agent-cp" type="button" data-zh="先阅读 https://retricsu.github.io/community-scripts/opticrum_lock.md（CKB 合约 opticrum_lock 的文档：部署、用法、约束与错误码；全部合约见 https://retricsu.github.io/community-scripts/llms.txt），再回答我的问题：" data-en="First read https://retricsu.github.io/community-scripts/opticrum_lock.md (docs for the CKB contract opticrum_lock: deployments, how to use it, constraints and error codes; all contracts: https://retricsu.github.io/community-scripts/llms.txt), then answer my question: "><span data-l="zh">复制给 AI</span><span data-l="en">Copy for AI</span><span class="okm"> ✓</span></button></p>
+</header>
+<nav class="toc"><a href="#t1"><span class="tg">0 → Order</span><span data-l="zh">买方挂单（lock 不执行）</span><span data-l="en">Buyer posts an Order (lock not executed)</span></a><a href="#t2"><span class="tg">Order → 0</span><span data-l="zh">买方取消挂单</span><span data-l="en">Buyer cancels the Order</span></a><a href="#t3"><span class="tg">Order → Match</span><span data-l="zh">卖方开通道并撮合</span><span data-l="en">Seller opens a channel and matches</span></a><a href="#t4"><span class="tg">Match → Match (seller)</span><span data-l="zh">卖方提取租金</span><span data-l="en">Seller extracts rent</span></a><a href="#t5"><span class="tg">Match → Match (buyer)</span><span data-l="zh">买方取回 / 注资</span><span data-l="en">Buyer withdraws / injects</span></a><a href="#t6"><span class="tg">Match → 0</span><span data-l="zh">卖方销毁耗尽的 Match</span><span data-l="en">Seller destroys an exhausted Match</span></a></nav>
+<div class="card" id="t1">
+<h2><span class="tg">0 → Order</span><span data-l="zh">买方挂单（lock 不执行）</span><span data-l="en">Buyer posts an Order (lock not executed)</span></h2>
+<div class="flow">
+<div class="col cin"><div class="colh"><span data-l="zh">Inputs 输入</span><span data-l="en">Inputs</span></div><div class="cell"><span class="n"><span data-l="zh">买方资金</span><span data-l="en">buyer funds</span></span><span data-l="zh">任意 cell</span><span data-l="en">any cells</span></div></div>
+<div class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></div>
+<div class="col cout"><div class="colh"><span data-l="zh">Outputs 输出</span><span data-l="en">Outputs</span></div><div class="cell"><span class="n">Order cell</span>Cell{
+  lock: OPTICRUM{ args: <span class="hl">fiber_pubkey ‖ buyer_lock_hash</span> },
+  data: <span class="hl">xudt_amount ‖ channel_capacity ‖ shannons_per_block</span>
+}</div></div>
+</div>
+
+<div class="layout"><span class="n"><span data-l="zh">Order lock.args（65B）</span><span data-l="en">Order lock.args (65B)</span></span>
+<div class="strip"><div class="seg c0" style="flex:2"><b>fiber_pubkey</b><small>33B</small></div><div class="seg c1" style="flex:2"><b>buyer_lock_hash</b><small>32B</small></div></div>
+<ul class="fields"><li><span class="fk"><span class="dot c0"></span><b>fiber_pubkey</b><span class="sz">33B</span></span><span class="fd"><span data-l="zh">买方 Fiber 节点公钥（压缩 secp256k1）；合约只用于比较 args</span><span data-l="en">buyer Fiber node pubkey (compressed secp256k1); the contract only compares it as args</span></span><span class="e">35</span></li><li><span class="fk"><span class="dot c1"></span><b>buyer_lock_hash</b><span class="sz">32B</span></span><span class="fd"><span data-l="zh">买方 lock hash：取消 / 注资 / 取回的授权</span><span data-l="en">buyer lock hash: authorizes cancel / inject / withdraw</span><span class="cons"><span data-l="zh">长度合计 = 65</span><span data-l="en">total length = 65</span></span></span><span class="e">35</span></li></ul>
+<div class="hex"><div><span class="hk">fiber_pubkey</span><span class="hv">0x037aa2f692451e2f14f0fb1305e0f2a7e564fde080c44649dfe18c1e12d4e8f262</span></div><div><span class="hk">buyer_lock_hash</span><span class="hv">0x716619d4cc4d8ca5ae7f67b9bf26bdff2acd8a8139fa96a2196e4c2e57cf6753</span></div></div>
+<div class="note"><span data-l="zh">示例：testnet tx 0xd5e460e4… 的输入 Order cell</span><span data-l="en">Example: the input Order cell of testnet tx 0xd5e460e4…</span></div></div>
+<div class="layout"><span class="n"><span data-l="zh">Order data（恰好 32B）</span><span data-l="en">Order data (exactly 32B)</span></span>
+<div class="strip"><div class="seg c0" style="flex:2"><b>xudt_amount</b><small>16B u128 LE</small></div><div class="seg c1" style="flex:1"><b>channel_capacity</b><small>8B u64 LE</small></div><div class="seg c2" style="flex:1"><b>shannons_per_block</b><small>8B u64 LE</small></div></div>
+<ul class="fields"><li><span class="fk"><span class="dot c0"></span><b>xudt_amount</b><span class="sz">16B u128 LE</span></span><span class="fd"><span data-l="zh">提供的 xUDT 租金（CKB 模式为 0）</span><span data-l="en">xUDT rent offered (0 in CKB mode)</span></span><span class="e">25</span></li><li><span class="fk"><span class="dot c1"></span><b>channel_capacity</b><span class="sz">8B u64 LE</span></span><span class="fd"><span data-l="zh">要求的通道容量（shannons）</span><span data-l="en">requested channel capacity (shannons)</span></span><span class="e">25</span></li><li><span class="fk"><span class="dot c2"></span><b>shannons_per_block</b><span class="sz">8B u64 LE</span></span><span class="fd"><span data-l="zh">每块租金</span><span data-l="en">rent per block</span></span><span class="e">25</span></li></ul>
+<div class="hex"><div><span class="hk">xudt_amount</span><span class="hv">0x00000000000000000000000000000000</span></div><div><span class="hk">channel_capacity</span><span class="hv">0x0030ef7dba020000 (3 000 000 000 000)</span></div><div><span class="hk">shannons_per_block</span><span class="hv">0xb169010000000000 (92 593)</span></div></div>
+</div>
+
+<div class="limits"><h3><span data-l="zh">限制</span><span data-l="en">Constraints</span></h3><ul>
+<li><b><span data-l="zh">创建</span><span data-l="en">creation</span></b><span class="lc"><span data-l="zh">lock 只在被消费时运行：创建时 args / data 不做任何检查，错误格式的 Order 只会在消费时失败</span><span data-l="en">a lock only runs when spent: args / data are not checked on creation; a malformed Order only fails when spent</span></span><span class="e">—</span></li>
+</ul></div>
+</div>
+
+<div class="card" id="t2">
+<h2><span class="tg">Order → 0</span><span data-l="zh">买方取消挂单</span><span data-l="en">Buyer cancels the Order</span></h2>
+<div class="flow">
+<div class="col cin"><div class="colh"><span data-l="zh">Inputs 输入</span><span data-l="en">Inputs</span></div><div class="cell"><span class="n">Order cell</span>Cell{
+  lock: OPTICRUM{ args: <span class="hl">… ‖ buyer_lock_hash</span> },
+  data: …
+}</div>
+<div class="cell"><span class="n"><span data-l="zh">买方 cell</span><span data-l="en">buyer cell</span></span>Cell{ lock: <span class="hl">hash = buyer_lock_hash</span> }</div></div>
+<div class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></div>
+<div class="col cout"><div class="colh"><span data-l="zh">Outputs 输出</span><span data-l="en">Outputs</span></div><div class="cell"><span class="n"><span data-l="zh">无 Opticrum 输出</span><span data-l="en">no Opticrum output</span></span><span data-l="zh">资金任意去向</span><span data-l="en">funds go anywhere</span></div></div>
+</div>
+
+<div class="layout"><span class="n"><span data-l="zh">Order lock.args（65B）</span><span data-l="en">Order lock.args (65B)</span></span>
+<div class="strip"><div class="seg c0" style="flex:2"><b>fiber_pubkey</b><small>33B</small></div><div class="seg c1" style="flex:2"><b>buyer_lock_hash</b><small>32B</small></div></div>
+<ul class="fields"><li><span class="fk"><span class="dot c0"></span><b>fiber_pubkey</b><span class="sz">33B</span></span><span class="fd"><span data-l="zh">买方 Fiber 节点公钥（压缩 secp256k1）；合约只用于比较 args</span><span data-l="en">buyer Fiber node pubkey (compressed secp256k1); the contract only compares it as args</span></span><span class="e">35</span></li><li><span class="fk"><span class="dot c1"></span><b>buyer_lock_hash</b><span class="sz">32B</span></span><span class="fd"><span data-l="zh">买方 lock hash：取消 / 注资 / 取回的授权</span><span data-l="en">buyer lock hash: authorizes cancel / inject / withdraw</span><span class="cons"><span data-l="zh">长度合计 = 65</span><span data-l="en">total length = 65</span></span></span><span class="e">35</span></li></ul>
+<div class="hex"><div><span class="hk">fiber_pubkey</span><span class="hv">0x037aa2f692451e2f14f0fb1305e0f2a7e564fde080c44649dfe18c1e12d4e8f262</span></div><div><span class="hk">buyer_lock_hash</span><span class="hv">0x716619d4cc4d8ca5ae7f67b9bf26bdff2acd8a8139fa96a2196e4c2e57cf6753</span></div></div>
+<div class="note"><span data-l="zh">示例：testnet tx 0xd5e460e4… 的输入 Order cell</span><span data-l="en">Example: the input Order cell of testnet tx 0xd5e460e4…</span></div></div>
+
+<div class="limits"><h3><span data-l="zh">限制</span><span data-l="en">Constraints</span></h3><ul>
+<li><b>lock.args</b><span class="lc"><span data-l="zh">长度 65 → Order，133 → Match，其他 → 35</span><span data-l="en">length 65 → Order, 133 → Match, else → 35</span></span><span class="e">35</span></li>
+<li><b><span data-l="zh">输出 Opticrum cell</span><span data-l="en">output Opticrum cell</span></b><span class="lc"><span data-l="zh">第一个 lock code_hash 相同、hash_type = type 的输出（不比较 args）</span><span data-l="en">the first output whose lock has the same code_hash and hash_type = type (args not compared)</span></span><span class="e">—</span></li>
+<li><b>Order data</b><span class="lc"><span data-l="zh">恰好 32B</span><span data-l="en">exactly 32B</span></span><span class="e">25</span></li>
+<li><b><span data-l="zh">路由</span><span data-l="en">route</span></b><span class="lc"><span data-l="zh">Order 且无 Opticrum 输出 → OrderCancel</span><span data-l="en">Order with no Opticrum output → OrderCancel</span></span><span class="e">40</span></li>
+<li><b><span data-l="zh">授权</span><span data-l="en">authorization</span></b><span class="lc"><span data-l="zh">buyer_lock_hash 等于某个输入的 lock hash</span><span data-l="en">buyer_lock_hash equals some input lock hash</span></span><span class="e">36</span></li>
+</ul></div>
+</div>
+
+<div class="card" id="t3">
+<h2><span class="tg">Order → Match</span><span data-l="zh">卖方开通道并撮合</span><span data-l="en">Seller opens a channel and matches</span></h2>
+<div class="flow">
+<div class="col cin"><div class="colh"><span data-l="zh">Inputs 输入</span><span data-l="en">Inputs</span></div><div class="cell"><span class="n">Order cell</span>Cell{
+  lock: OPTICRUM{ args: <span class="hl">order_args</span> },
+  data: <span class="hl">xudt_amount ‖ channel_capacity ‖ shannons_per_block</span>
+}</div>
+<div class="cell"><span class="n"><span data-l="zh">卖方 cell</span><span data-l="en">seller cell</span></span>Cell{ lock: <span class="hl">hash = seller_lock_hash</span> }</div></div>
+<div class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></div>
+<div class="col cout"><div class="colh"><span data-l="zh">Outputs 输出</span><span data-l="en">Outputs</span></div><div class="cell"><span class="n">Match cell</span>Cell{
+  lock: OPTICRUM{ args: <span class="hl">order_args</span> ‖ <span class="hl">channel_outpoint</span> ‖ <span class="hl">seller_lock_hash</span> },
+  data: xudt_amount ‖ shannons_per_block ‖ <span class="hl">last_extraction_block = 0</span>
+}</div></div>
+</div>
+
+<div class="layout"><span class="n"><span data-l="zh">Match lock.args（133B）</span><span data-l="en">Match lock.args (133B)</span></span>
+<div class="strip"><div class="seg c0" style="flex:3"><b>order_args</b><small>65B</small></div><div class="seg c1" style="flex:2"><b>channel_outpoint</b><small>36B</small></div><div class="seg c2" style="flex:2"><b>seller_lock_hash</b><small>32B</small></div></div>
+<ul class="fields"><li><span class="fk"><span class="dot c0"></span><b>order_args</b><span class="sz">65B</span></span><span class="fd"><span data-l="zh">= 原 Order args（fiber_pubkey ‖ buyer_lock_hash）</span><span data-l="en">= the original Order args (fiber_pubkey ‖ buyer_lock_hash)</span><span class="cons"><span data-l="zh">撮合时必须相等</span><span data-l="en">must be equal on match</span></span></span><span class="e">40</span></li><li><span class="fk"><span class="dot c1"></span><b>channel_outpoint</b><span class="sz">36B</span></span><span class="fd"><span data-l="zh">Fiber 通道 funding cell：tx_hash 32B ‖ index u32 LE</span><span data-l="en">Fiber channel funding cell: tx_hash 32B ‖ index u32 LE</span><span class="cons"><span data-l="zh">必须在 cell_deps 中</span><span data-l="en">must be in cell_deps</span></span></span><span class="e">22</span></li><li><span class="fk"><span class="dot c2"></span><b>seller_lock_hash</b><span class="sz">32B</span></span><span class="fd"><span data-l="zh">卖方 lock hash：撮合 / 提取 / 销毁的授权</span><span data-l="en">seller lock hash: authorizes match / extract / destroy</span><span class="cons"><span data-l="zh">长度合计 = 133</span><span data-l="en">total length = 133</span></span></span><span class="e">35</span></li></ul>
+<div class="hex"><div><span class="hk">order_args</span><span class="hv">0x037aa2…f262 ‖ 0x716619…6753</span></div><div><span class="hk">channel_outpoint</span><span class="hv">0xfade972d2b5d27890345dd06b69985752d85183f417c18916464f29cbb1847e9 ‖ 00000000</span></div><div><span class="hk">seller_lock_hash</span><span class="hv">0x5cbfb4398b8d8c080e6e68da34bce43761229d70c7eff56d8502e755b7516980</span></div></div>
+<div class="note"><span data-l="zh">示例：testnet tx 0xd5e460e4… 的输出 Match cell</span><span data-l="en">Example: the output Match cell of testnet tx 0xd5e460e4…</span></div></div>
+<div class="layout"><span class="n"><span data-l="zh">Match data（≥ 32B，只读前 32B）</span><span data-l="en">Match data (≥ 32B, only the first 32B are read)</span></span>
+<div class="strip"><div class="seg c0" style="flex:2"><b>xudt_amount</b><small>16B u128 LE</small></div><div class="seg c1" style="flex:1"><b>shannons_per_block</b><small>8B u64 LE</small></div><div class="seg c2" style="flex:1"><b>last_extraction_block</b><small>8B u64 LE</small></div></div>
+<ul class="fields"><li><span class="fk"><span class="dot c0"></span><b>xudt_amount</b><span class="sz">16B u128 LE</span></span><span class="fd"><span data-l="zh">剩余 xUDT 租金</span><span data-l="en">remaining xUDT rent</span><span class="cons"><span data-l="zh">撮合时 = Order.xudt_amount</span><span data-l="en">= Order.xudt_amount on match</span></span></span><span class="e">26</span></li><li><span class="fk"><span class="dot c1"></span><b>shannons_per_block</b><span class="sz">8B u64 LE</span></span><span class="fd"><span data-l="zh">每块租金</span><span data-l="en">rent per block</span><span class="cons"><span data-l="zh">永不改变</span><span data-l="en">never changes</span></span></span><span class="e">33</span></li><li><span class="fk"><span class="dot c2"></span><b>last_extraction_block</b><span class="sz">8B u64 LE</span></span><span class="fd"><span data-l="zh">卖方上次提取的块高（0 = 从未）</span><span data-l="en">block of the seller’s last extraction (0 = never)</span><span class="cons"><span data-l="zh">撮合时 = 0</span><span data-l="en">= 0 on match</span></span></span><span class="e">28 / 30</span></li></ul>
+<div class="hex"><div><span class="hk">xudt_amount</span><span class="hv">0x00000000000000000000000000000000</span></div><div><span class="hk">shannons_per_block</span><span class="hv">0xb169010000000000</span></div><div><span class="hk">last_extraction_block</span><span class="hv">0x0000000000000000</span></div></div>
+</div>
+<div class="extra"><span data-l="zh">cell_deps: [ opticrum code, <span class="hl">Fiber 通道 funding cell = channel_outpoint</span> ]</span><span data-l="en">cell_deps: [ opticrum code, <span class="hl">Fiber channel funding cell = channel_outpoint</span> ]</span></div>
+<div class="extra"><span data-l="zh">header_deps: [ <span class="hl">Order cell 所在块</span>, <span class="hl">通道 cell 所在块</span> ]</span><span data-l="en">header_deps: [ <span class="hl">Order cell block</span>, <span class="hl">channel cell block</span> ]</span></div>
+<div class="limits"><h3><span data-l="zh">限制</span><span data-l="en">Constraints</span></h3><ul>
+<li><b>lock.args</b><span class="lc"><span data-l="zh">长度 65 → Order，133 → Match，其他 → 35</span><span data-l="en">length 65 → Order, 133 → Match, else → 35</span></span><span class="e">35</span></li>
+<li><b><span data-l="zh">输出 Opticrum cell</span><span data-l="en">output Opticrum cell</span></b><span class="lc"><span data-l="zh">第一个 lock code_hash 相同、hash_type = type 的输出（不比较 args）</span><span data-l="en">the first output whose lock has the same code_hash and hash_type = type (args not compared)</span></span><span class="e">—</span></li>
+<li><b><span data-l="zh">路由</span><span data-l="en">route</span></b><span class="lc"><span data-l="zh">输出为 Match、Match.order_args = Order args、xUDT（数量 + type）相同 → OrderMatch；否则 40</span><span data-l="en">output is Match, Match.order_args = Order args, same xUDT (amount + type) → OrderMatch; else 40</span></span><span class="e">40</span></li>
+<li><b>Match data</b><span class="lc"><span data-l="zh">≥ 32B</span><span data-l="en">≥ 32B</span></span><span class="e">28</span></li>
+<li><b>channel_outpoint</b><span class="lc"><span data-l="zh">在 cell_deps 中；该 cell lock 为 Fiber funding（code_hash = testnet 0x6c67…6d7c / mainnet 0xe45b…f4f1 / mock，hash_type type）；capacity ≥ channel_capacity，或 xUDT 模式下同 type 且数量 ≥ xudt_amount</span><span data-l="en">in cell_deps; its lock is Fiber funding (code_hash = testnet 0x6c67…6d7c / mainnet 0xe45b…f4f1 / mock, hash_type type); capacity ≥ channel_capacity, or in xUDT mode same type and amount ≥ xudt_amount</span></span><span class="e">22</span></li>
+<li><b><span data-l="zh">授权</span><span data-l="en">authorization</span></b><span class="lc"><span data-l="zh">seller_lock_hash 在输入中</span><span data-l="en">seller_lock_hash among inputs</span></span><span class="e">37</span></li>
+<li><b>Match data</b><span class="lc"><span data-l="zh">shannons_per_block = Order 的值，last_extraction_block = 0</span><span data-l="en">shannons_per_block = Order value, last_extraction_block = 0</span></span><span class="e">28</span></li>
+<li><b>capacity</b><span class="lc"><span data-l="zh">Order 与 Match 的未占用 capacity 相等</span><span data-l="en">unoccupied capacity of Order and Match equal</span></span><span class="e">23</span></li>
+<li><b>xudt_amount</b><span class="lc"><span data-l="zh">Match = Order</span><span data-l="en">Match = Order</span></span><span class="e">26</span></li>
+<li><b>header_deps</b><span class="lc"><span data-l="zh">含 Order cell 与通道 cell 所在块；缺失 → 29</span><span data-l="en">contain the Order cell block and the channel cell block; missing → 29</span></span><span class="e">29</span></li>
+<li><b><span data-l="zh">时序</span><span data-l="en">ordering</span></b><span class="lc"><span data-l="zh">通道 cell 块高 &gt; Order cell 块高</span><span data-l="en">channel cell block &gt; Order cell block</span></span><span class="e">24</span></li>
+</ul></div>
+</div>
+
+<div class="card" id="t4">
+<h2><span class="tg">Match → Match (seller)</span><span data-l="zh">卖方提取租金</span><span data-l="en">Seller extracts rent</span></h2>
+<div class="flow">
+<div class="col cin"><div class="colh"><span data-l="zh">Inputs 输入</span><span data-l="en">Inputs</span></div><div class="cell"><span class="n">Match cell</span>Cell{
+  lock: OPTICRUM{ args: order_args ‖ channel_outpoint ‖ seller_lock_hash },
+  data: xudt_amount ‖ rate ‖ <span class="hl">base</span>
+}</div>
+<div class="cell"><span class="n"><span data-l="zh">卖方 cell</span><span data-l="en">seller cell</span></span>Cell{ lock: <span class="hl">hash = seller_lock_hash</span> }</div></div>
+<div class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></div>
+<div class="col cout"><div class="colh"><span data-l="zh">Outputs 输出</span><span data-l="en">Outputs</span></div><div class="cell"><span class="n">Match cell</span><span data-l="zh">Cell{
+  lock: OPTICRUM{ args: <span class="hl">不变</span> },
+  data: xudt_amount ‖ rate ‖ <span class="hl">tip</span>
+  capacity: <span class="hl">− rate × (tip − base)</span>
+}</span><span data-l="en">Cell{
+  lock: OPTICRUM{ args: <span class="hl">unchanged</span> },
+  data: xudt_amount ‖ rate ‖ <span class="hl">tip</span>
+  capacity: <span class="hl">− rate × (tip − base)</span>
+}</span></div></div>
+</div>
+
+<div class="layout"><span class="n"><span data-l="zh">Match data（≥ 32B，只读前 32B）</span><span data-l="en">Match data (≥ 32B, only the first 32B are read)</span></span>
+<div class="strip"><div class="seg c0" style="flex:2"><b>xudt_amount</b><small>16B u128 LE</small></div><div class="seg c1" style="flex:1"><b>shannons_per_block</b><small>8B u64 LE</small></div><div class="seg c2" style="flex:1"><b>last_extraction_block</b><small>8B u64 LE</small></div></div>
+<ul class="fields"><li><span class="fk"><span class="dot c0"></span><b>xudt_amount</b><span class="sz">16B u128 LE</span></span><span class="fd"><span data-l="zh">剩余 xUDT 租金</span><span data-l="en">remaining xUDT rent</span><span class="cons"><span data-l="zh">撮合时 = Order.xudt_amount</span><span data-l="en">= Order.xudt_amount on match</span></span></span><span class="e">26</span></li><li><span class="fk"><span class="dot c1"></span><b>shannons_per_block</b><span class="sz">8B u64 LE</span></span><span class="fd"><span data-l="zh">每块租金</span><span data-l="en">rent per block</span><span class="cons"><span data-l="zh">永不改变</span><span data-l="en">never changes</span></span></span><span class="e">33</span></li><li><span class="fk"><span class="dot c2"></span><b>last_extraction_block</b><span class="sz">8B u64 LE</span></span><span class="fd"><span data-l="zh">卖方上次提取的块高（0 = 从未）</span><span data-l="en">block of the seller’s last extraction (0 = never)</span><span class="cons"><span data-l="zh">撮合时 = 0</span><span data-l="en">= 0 on match</span></span></span><span class="e">28 / 30</span></li></ul>
+<div class="hex"><div><span class="hk">xudt_amount</span><span class="hv">0x00000000000000000000000000000000</span></div><div><span class="hk">shannons_per_block</span><span class="hv">0xb169010000000000</span></div><div><span class="hk">last_extraction_block</span><span class="hv">0x0000000000000000</span></div></div>
+</div>
+<div class="extra"><span data-l="zh">cell_deps: [ opticrum code, <span class="hl">通道 cell 仍存活</span> ]</span><span data-l="en">cell_deps: [ opticrum code, <span class="hl">channel cell still live</span> ]</span></div>
+<div class="extra"><span data-l="zh">header_deps: [ <span class="hl">tip 块（索引 0）</span>, Match cell 所在块（首次提取时） ]</span><span data-l="en">header_deps: [ <span class="hl">tip block (index 0)</span>, Match cell block (first extraction) ]</span></div>
+<div class="limits"><h3><span data-l="zh">限制</span><span data-l="en">Constraints</span></h3><ul>
+<li><b>lock.args</b><span class="lc"><span data-l="zh">长度 65 → Order，133 → Match，其他 → 35</span><span data-l="en">length 65 → Order, 133 → Match, else → 35</span></span><span class="e">35</span></li>
+<li><b><span data-l="zh">输出 Opticrum cell</span><span data-l="en">output Opticrum cell</span></b><span class="lc"><span data-l="zh">第一个 lock code_hash 相同、hash_type = type 的输出（不比较 args）</span><span data-l="en">the first output whose lock has the same code_hash and hash_type = type (args not compared)</span></span><span class="e">—</span></li>
+<li><b><span data-l="zh">路由</span><span data-l="en">route</span></b><span class="lc"><span data-l="zh">Match args 相同、xUDT（数量 + type）相同 → MatchUpdate</span><span data-l="en">same Match args and xUDT (amount + type) → MatchUpdate</span></span><span class="e">40</span></li>
+<li><b>Match args</b><span class="lc"><span data-l="zh">不变</span><span data-l="en">unchanged</span></span><span class="e">31</span></li>
+<li><b>shannons_per_block</b><span class="lc"><span data-l="zh">不变</span><span data-l="en">unchanged</span></span><span class="e">33</span></li>
+<li><b><span data-l="zh">授权</span><span data-l="en">authorization</span></b><span class="lc"><span data-l="zh">恰好一方：seller 在输入中、buyer 不在；两者都在或都不在 → 38</span><span data-l="en">exactly one party: seller among inputs, buyer not; both or neither → 38</span></span><span class="e">38</span></li>
+<li><b>channel_outpoint</b><span class="lc"><span data-l="zh">仍在 cell_deps 中（通道未关闭）</span><span data-l="en">still in cell_deps (channel not closed)</span></span><span class="e">22</span></li>
+<li><b><span data-l="zh">耗尽</span><span data-l="en">exhaustion</span></b><span class="lc"><span data-l="zh">旧状态未耗尽：剩余价值 &gt; rate × (tip − base)（错误名 MatchNotExhausted，语义相反）</span><span data-l="en">old state not exhausted: remaining value &gt; rate × (tip − base) (error named MatchNotExhausted, opposite meaning)</span></span><span class="e">32</span></li>
+<li><b><span data-l="zh">提取量</span><span data-l="en">extraction</span></b><span class="lc"><span data-l="zh">未占用 capacity 减少量 = rate × (tip − base)；base = last_extraction_block，或为 0 时取 Match cell 所在块</span><span data-l="en">unoccupied capacity decrease = rate × (tip − base); base = last_extraction_block, or the Match cell block when it is 0</span></span><span class="e">27</span></li>
+<li><b>last_extraction_block</b><span class="lc"><span data-l="zh">= header_deps[0] 的块高</span><span data-l="en">= block number of header_deps[0]</span></span><span class="e">30</span></li>
+<li><b><span data-l="zh">犹豫期</span><span data-l="en">hesitation</span></b><span class="lc"><span data-l="zh">首次提取（base = 0）：tip − Match cell 块高 &gt; 3600</span><span data-l="en">first extraction (base = 0): tip − Match cell block &gt; 3600</span></span><span class="e">42</span></li>
+<li><b>header_deps</b><span class="lc"><span data-l="zh">缺失 → 29</span><span data-l="en">missing → 29</span></span><span class="e">29</span></li>
+</ul></div>
+</div>
+
+<div class="card" id="t5">
+<h2><span class="tg">Match → Match (buyer)</span><span data-l="zh">买方取回 / 注资</span><span data-l="en">Buyer withdraws / injects</span></h2>
+<div class="flow">
+<div class="col cin"><div class="colh"><span data-l="zh">Inputs 输入</span><span data-l="en">Inputs</span></div><div class="cell"><span class="n">Match cell</span>Cell{
+  lock: OPTICRUM{ args: order_args ‖ …  },
+  data: xudt_amount ‖ rate ‖ last_extraction_block
+}</div>
+<div class="cell"><span class="n"><span data-l="zh">买方 cell</span><span data-l="en">buyer cell</span></span>Cell{ lock: <span class="hl">hash = buyer_lock_hash</span> }</div></div>
+<div class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></div>
+<div class="col cout"><div class="colh"><span data-l="zh">Outputs 输出</span><span data-l="en">Outputs</span></div><div class="cell"><span class="n">Match cell</span><span data-l="zh">Cell{
+  lock: OPTICRUM{ args: <span class="hl">不变</span> },
+  data: … ‖ <span class="hl">last_extraction_block 不变</span>
+  capacity: <span class="hl">全部取回 → 未占用 0 | 增加</span>
+}</span><span data-l="en">Cell{
+  lock: OPTICRUM{ args: <span class="hl">unchanged</span> },
+  data: … ‖ <span class="hl">last_extraction_block unchanged</span>
+  capacity: <span class="hl">dump all → 0 unoccupied | increase</span>
+}</span></div></div>
+</div>
+
+<div class="layout"><span class="n"><span data-l="zh">Match data（≥ 32B，只读前 32B）</span><span data-l="en">Match data (≥ 32B, only the first 32B are read)</span></span>
+<div class="strip"><div class="seg c0" style="flex:2"><b>xudt_amount</b><small>16B u128 LE</small></div><div class="seg c1" style="flex:1"><b>shannons_per_block</b><small>8B u64 LE</small></div><div class="seg c2" style="flex:1"><b>last_extraction_block</b><small>8B u64 LE</small></div></div>
+<ul class="fields"><li><span class="fk"><span class="dot c0"></span><b>xudt_amount</b><span class="sz">16B u128 LE</span></span><span class="fd"><span data-l="zh">剩余 xUDT 租金</span><span data-l="en">remaining xUDT rent</span><span class="cons"><span data-l="zh">撮合时 = Order.xudt_amount</span><span data-l="en">= Order.xudt_amount on match</span></span></span><span class="e">26</span></li><li><span class="fk"><span class="dot c1"></span><b>shannons_per_block</b><span class="sz">8B u64 LE</span></span><span class="fd"><span data-l="zh">每块租金</span><span data-l="en">rent per block</span><span class="cons"><span data-l="zh">永不改变</span><span data-l="en">never changes</span></span></span><span class="e">33</span></li><li><span class="fk"><span class="dot c2"></span><b>last_extraction_block</b><span class="sz">8B u64 LE</span></span><span class="fd"><span data-l="zh">卖方上次提取的块高（0 = 从未）</span><span data-l="en">block of the seller’s last extraction (0 = never)</span><span class="cons"><span data-l="zh">撮合时 = 0</span><span data-l="en">= 0 on match</span></span></span><span class="e">28 / 30</span></li></ul>
+<div class="hex"><div><span class="hk">xudt_amount</span><span class="hv">0x00000000000000000000000000000000</span></div><div><span class="hk">shannons_per_block</span><span class="hv">0xb169010000000000</span></div><div><span class="hk">last_extraction_block</span><span class="hv">0x0000000000000000</span></div></div>
+</div>
+<div class="extra"><span data-l="zh">header_deps: [ <span class="hl">tip 块（索引 0）</span>, Match cell 所在块 ]</span><span data-l="en">header_deps: [ <span class="hl">tip block (index 0)</span>, Match cell block ]</span></div>
+<div class="limits"><h3><span data-l="zh">限制</span><span data-l="en">Constraints</span></h3><ul>
+<li><b>lock.args</b><span class="lc"><span data-l="zh">长度 65 → Order，133 → Match，其他 → 35</span><span data-l="en">length 65 → Order, 133 → Match, else → 35</span></span><span class="e">35</span></li>
+<li><b><span data-l="zh">输出 Opticrum cell</span><span data-l="en">output Opticrum cell</span></b><span class="lc"><span data-l="zh">第一个 lock code_hash 相同、hash_type = type 的输出（不比较 args）</span><span data-l="en">the first output whose lock has the same code_hash and hash_type = type (args not compared)</span></span><span class="e">—</span></li>
+<li><b>Match args</b><span class="lc"><span data-l="zh">不变</span><span data-l="en">unchanged</span></span><span class="e">31</span></li>
+<li><b>shannons_per_block</b><span class="lc"><span data-l="zh">不变</span><span data-l="en">unchanged</span></span><span class="e">33</span></li>
+<li><b><span data-l="zh">授权</span><span data-l="en">authorization</span></b><span class="lc"><span data-l="zh">恰好一方：buyer 在输入中、seller 不在</span><span data-l="en">exactly one party: buyer among inputs, seller not</span></span><span class="e">38</span></li>
+<li><b>last_extraction_block</b><span class="lc"><span data-l="zh">不变</span><span data-l="en">unchanged</span></span><span class="e">30</span></li>
+<li><b>xUDT type</b><span class="lc"><span data-l="zh">不变</span><span data-l="en">unchanged</span></span><span class="e">31</span></li>
+<li><b><span data-l="zh">取回</span><span data-l="en">withdraw</span></b><span class="lc"><span data-l="zh">价值减少时必须全部取出（未占用 capacity 与 xUDT 均为 0）</span><span data-l="en">a decrease must dump everything (unoccupied capacity and xUDT both 0)</span></span><span class="e">43</span></li>
+<li><b><span data-l="zh">取回窗口</span><span data-l="en">withdraw window</span></b><span class="lc"><span data-l="zh">仅在犹豫期内：卖方从未提取且 tip − Match cell 块高 ≤ 3600</span><span data-l="en">only inside the hesitation window: seller never extracted and tip − Match cell block ≤ 3600</span></span><span class="e">41</span></li>
+<li><b><span data-l="zh">注资</span><span data-l="en">inject</span></b><span class="lc"><span data-l="zh">价值增加时不得处于犹豫期</span><span data-l="en">an increase must be outside the hesitation window</span></span><span class="e">44</span></li>
+<li><b><span data-l="zh">空操作</span><span data-l="en">no-op</span></b><span class="lc"><span data-l="zh">既不增也不减 → 31</span><span data-l="en">neither increase nor decrease → 31</span></span><span class="e">31</span></li>
+</ul></div>
+</div>
+
+<div class="card" id="t6">
+<h2><span class="tg">Match → 0</span><span data-l="zh">卖方销毁耗尽的 Match</span><span data-l="en">Seller destroys an exhausted Match</span></h2>
+<div class="flow">
+<div class="col cin"><div class="colh"><span data-l="zh">Inputs 输入</span><span data-l="en">Inputs</span></div><div class="cell"><span class="n">Match cell</span>Cell{
+  lock: OPTICRUM{ args: … ‖ <span class="hl">seller_lock_hash</span> },
+  data: xudt_amount ‖ rate ‖ base
+}</div>
+<div class="cell"><span class="n"><span data-l="zh">卖方 cell</span><span data-l="en">seller cell</span></span>Cell{ lock: <span class="hl">hash = seller_lock_hash</span> }</div></div>
+<div class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></div>
+<div class="col cout"><div class="colh"><span data-l="zh">Outputs 输出</span><span data-l="en">Outputs</span></div><div class="cell"><span class="n"><span data-l="zh">无 Opticrum 输出</span><span data-l="en">no Opticrum output</span></span><span data-l="zh">剩余资金任意去向</span><span data-l="en">remaining funds go anywhere</span></div></div>
+</div>
+
+
+<div class="extra"><span data-l="zh">header_deps: [ <span class="hl">tip 块（索引 0）</span>, Match cell 所在块 ]</span><span data-l="en">header_deps: [ <span class="hl">tip block (index 0)</span>, Match cell block ]</span></div>
+<div class="limits"><h3><span data-l="zh">限制</span><span data-l="en">Constraints</span></h3><ul>
+<li><b>lock.args</b><span class="lc"><span data-l="zh">长度 65 → Order，133 → Match，其他 → 35</span><span data-l="en">length 65 → Order, 133 → Match, else → 35</span></span><span class="e">35</span></li>
+<li><b><span data-l="zh">输出 Opticrum cell</span><span data-l="en">output Opticrum cell</span></b><span class="lc"><span data-l="zh">第一个 lock code_hash 相同、hash_type = type 的输出（不比较 args）</span><span data-l="en">the first output whose lock has the same code_hash and hash_type = type (args not compared)</span></span><span class="e">—</span></li>
+<li><b><span data-l="zh">路由</span><span data-l="en">route</span></b><span class="lc"><span data-l="zh">Match 且无 Opticrum 输出 → MatchDestroy</span><span data-l="en">Match with no Opticrum output → MatchDestroy</span></span><span class="e">40</span></li>
+<li><b><span data-l="zh">授权</span><span data-l="en">authorization</span></b><span class="lc"><span data-l="zh">seller_lock_hash 在输入中</span><span data-l="en">seller_lock_hash among inputs</span></span><span class="e">37</span></li>
+<li><b><span data-l="zh">耗尽</span><span data-l="en">exhaustion</span></b><span class="lc"><span data-l="zh">rate × (tip − base) ≥ 剩余价值（xUDT 模式比较 xudt_amount，否则比较未占用 capacity）</span><span data-l="en">rate × (tip − base) ≥ remaining value (xudt_amount in xUDT mode, else unoccupied capacity)</span></span><span class="e">32</span></li>
+<li><b>header_deps</b><span class="lc"><span data-l="zh">缺失 → 29</span><span data-l="en">missing → 29</span></span><span class="e">29</span></li>
+</ul></div>
+</div><div class="card"><details class="prov" open><summary><span data-l="zh">部署与来源</span><span data-l="en">Deployments &amp; source</span> <span class="badge b-unverified" title="binary vs source"><span data-l="zh">未核验</span><span data-l="en">unverified</span></span></summary>
+<div class="kv"><span><span data-l="zh">源码</span><span data-l="en">source</span></span><div><a href="https://github.com/Opticrum/ckb-contract-script/tree/803523a472041262b6f1b049067550801d136f66">Opticrum/ckb-contract-script@803523a4</a> · <a href="https://github.com/Opticrum/ckb-contract-script/blob/803523a472041262b6f1b049067550801d136f66/contracts/opticrum/src/main.rs">contracts/opticrum/src/main.rs</a> · <a href="https://github.com/Opticrum/ckb-contract-script/blob/803523a472041262b6f1b049067550801d136f66/contracts/opticrum/src/error.rs">contracts/opticrum/src/error.rs</a> · <a href="https://github.com/Opticrum/ckb-contract-script/blob/803523a472041262b6f1b049067550801d136f66/contracts/opticrum/src/state.rs">contracts/opticrum/src/state.rs</a> · <a href="https://github.com/Opticrum/ckb-contract-script/blob/803523a472041262b6f1b049067550801d136f66/contracts/opticrum/src/utils.rs">contracts/opticrum/src/utils.rs</a> · <a href="https://github.com/Opticrum/ckb-contract-script/blob/803523a472041262b6f1b049067550801d136f66/contracts/opticrum/src/verifiers">contracts/opticrum/src/verifiers</a> · <a href="https://github.com/Opticrum/ckb-contract-script/blob/803523a472041262b6f1b049067550801d136f66/opticrum-protocol/src/lib.rs">opticrum-protocol/src/lib.rs</a> · <a href="https://github.com/Opticrum/ckb-contract-script/blob/803523a472041262b6f1b049067550801d136f66/deployment/testnet/opticrum.json">deployment/testnet/opticrum.json</a> <small>(commit read when writing this spec (default-branch HEAD 2026-11-12). Framework ckb-cinnabar-verifier pinned at ashuralyk/ckb-cinnabar@f50d8e9 (system error codes 1–11). Testnet code_hash is the type_id from deployment/testnet/opticrum.json; the live code cell is v0.3.2 (0x6a3319f8…:0). Older versions under the same type_id used different args/data layouts.)</small></div></div>
+<div class="kv"><span><span data-l="zh">二进制核验</span><span data-l="en">binary check</span></span><div><span class="badge b-unverified" title="binary vs source"><span data-l="zh">未核验</span><span data-l="en">unverified</span></span> <small>hash appears in the repo only as a deployment record or doc, which does not prove the recorded commit builds this binary (reproducible build not attempted)</small><br><small>0xdf7c875f63…22d0cdf2: listed in deployment/testnet/opticrum.json</small></div></div>
+<div class="tbl"><table><tr><th><span data-l="zh">网络</span><span data-l="en">network</span></th><th>code_hash</th><th>cell_dep</th><th>type_id args</th><th><span data-l="zh">数据哈希</span><span data-l="en">data hash</span></th><th><span data-l="zh">部署交易</span><span data-l="en">deploy tx</span></th></tr><tr><td>testnet</td><td><code>0x1f8452818672fbb60f39c72e2d30dadd1814f322dfc21bf552784d83054f0247</code> <small>type</small></td><td><a href="https://testnet.explorer.nervos.org/transaction/0x6a3319f835dc32e47ff6aac59235e70de1a4a7e6f52a82768d447978bd82f5c4">0x6a3319f835…bd82f5c4</a>:0 <small>code</small></td><td><code>0x3b009c195d…fb7feb49</code></td><td><code>0xdf7c875f63…22d0cdf2</code></td><td><a href="https://testnet.explorer.nervos.org/transaction/0x6a3319f835dc32e47ff6aac59235e70de1a4a7e6f52a82768d447978bd82f5c4">0x6a3319f835…bd82f5c4</a> <small>#22145886</small></td></tr></table></div>
+<div class="small"><span data-l="zh">链上数据核对于 </span><span data-l="en">on-chain data checked </span>2026-11-12</div></details></div>
+<div class="notes"><div><span data-l="zh">错误码：框架 ckb-cinnabar-verifier 1–5 为系统错误、10 NotFoundRootVerifier、11 NotFoundBranchVerifier；合约 error.rs 自 20 起：20 BadOrderCancel、21 BadOrderMatch、22 ChannelCellNotInDep、23 ChannelCapacityMismatch、24 ChannelCreatedBeforeOrder、25 OrderDataNotSet、26 BadXudtAmount、27 BadExtractionAmount、28 MatchDataNotSet、29 HeaderNotSet、30 BadMatchDataUpdate、31 BadMatchUpdate、32 MatchNotExhausted、33 RentPerBlockMismatch、34 MatchNotViable（未使用）、35 BadArgsLength、36 BuyerAuthMissing、37 SellerAuthMissing、38 AuthorizationMissing、39 UnexpectedBranch、40 UnknownState、41 WithdrawWindowExpired、42 HesitationNotElapsed、43 PartialWithdrawNotAllowed、44 InjectDuringHesitation。</span><span data-l="en">Error codes: framework ckb-cinnabar-verifier 1–5 are system errors, 10 NotFoundRootVerifier, 11 NotFoundBranchVerifier; contract error.rs starts at 20: 20 BadOrderCancel, 21 BadOrderMatch, 22 ChannelCellNotInDep, 23 ChannelCapacityMismatch, 24 ChannelCreatedBeforeOrder, 25 OrderDataNotSet, 26 BadXudtAmount, 27 BadExtractionAmount, 28 MatchDataNotSet, 29 HeaderNotSet, 30 BadMatchDataUpdate, 31 BadMatchUpdate, 32 MatchNotExhausted, 33 RentPerBlockMismatch, 34 MatchNotViable (unused), 35 BadArgsLength, 36 BuyerAuthMissing, 37 SellerAuthMissing, 38 AuthorizationMissing, 39 UnexpectedBranch, 40 UnknownState, 41 WithdrawWindowExpired, 42 HesitationNotElapsed, 43 PartialWithdrawNotAllowed, 44 InjectDuringHesitation.</span><br><span data-l="zh">注释与代码不一致：opticrum-protocol 注释写 “MatchData — 40-byte”，代码 MATCH_DATA_LEN = 32、from_slice 只要求 ≥ 32B。错误 32 MatchNotExhausted 在提取路径表示“已耗尽”（语义相反）。</span><span data-l="en">Comment/code discrepancies: opticrum-protocol says “MatchData — 40-byte”, but the code uses MATCH_DATA_LEN = 32 and from_slice only requires ≥ 32B. Error 32 MatchNotExhausted means “already exhausted” on the extraction path (opposite meaning).</span><br><span data-l="zh">路由比较的 xUDT 是 (数量, type) 元组（parse_xudt 读 data[0..16]），因此 xUDT 模式下任何改变 xUDT 数量的 Match 更新都会落入 40 UnknownState；提取 / 取回 / 注资实际只对 CKB 模式可达。这是代码行为，非本页推断的规则。</span><span data-l="en">Routing compares xUDT as an (amount, type) tuple (parse_xudt reads data[0..16]), so in xUDT mode any Match update that changes the xUDT amount routes to 40 UnknownState; extraction / withdraw / inject are in practice only reachable in CKB mode. This is code behaviour, not a rule inferred by this page.</span><br><span data-l="zh">输出 Opticrum cell 按 “第一个 lock code_hash 相同且 hash_type = type 的输出” 查找，不比较 args：同一交易中有多个 Opticrum cell 时可能取到别的 cell。lock 不检查任何签名，授权仅靠 “对方 lock hash 出现在输入中”。</span><span data-l="en">The output Opticrum cell is “the first output whose lock has the same code_hash and hash_type = type”; args are not compared, so with several Opticrum cells in one tx another cell may be picked. The lock checks no signature; authorization is only “that party’s lock hash appears among the inputs”.</span><br><span data-l="zh">部署：testnet 通过 type_id 0x1f84…0247 多次迁移（v0.1.1 → v0.3.2）；早期版本的 args（166B）/ data（40–41B）布局不同，本页只解析当前布局。仓库未公布主网部署。</span><span data-l="en">Deployment: testnet migrated several times under type_id 0x1f84…0247 (v0.1.1 → v0.3.2); earlier versions used different args (166B) / data (40–41B) layouts and this page only decodes the current one. No mainnet deployment is published.</span></div></div>
+<footer class="foot"><a href="https://github.com/gpBlockchain/ckb-contract-flow-html" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>gpBlockchain/ckb-contract-flow-html</a></footer>
+<script>(function(){if(typeof document==='undefined'||!document.addEventListener)return;document.addEventListener('click',function(e){var c=e.target.closest&&e.target.closest('.tags .tag[role=button]');if(!c)return;var t=c.getAttribute('data-tag'),n=c.closest('.tags').nextElementSibling;while(n&&n.classList.contains('projp')){if(n.getAttribute('data-projp')===t){n.hidden=!n.hidden;c.setAttribute('aria-expanded',!n.hidden)}n=n.nextElementSibling}});document.addEventListener('keydown',function(e){if((e.key==='Enter'||e.key===' ')&&e.target.matches&&e.target.matches('.tags .tag[role=button]')){e.preventDefault();e.target.click()}})})();</script>
+<script>(function(){if(typeof document==='undefined'||!document.addEventListener)return;document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.agent-cp');if(!b)return;var t=b.getAttribute(document.documentElement.getAttribute('data-lang')==='zh'?'data-zh':'data-en'),ok=function(){b.setAttribute('data-ok','1');setTimeout(function(){b.removeAttribute('data-ok')},1500)};if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,function(){prompt('Copy',t)});else prompt('Copy',t)})})();</script>
+</main></body></html>

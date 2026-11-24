@@ -1,0 +1,319 @@
+# CKB Contract Flow
+
+> Knowledge base of 94 CKB (Nervos) on-chain scripts for AI agents: where each one is deployed on mainnet and testnet (code_hash, hash_type, cell_dep), how to use it (args / cell data / witness byte layouts, the cell transitions it allows, every check it enforces with its error code), and a decoder that explains any transaction in terms of these scripts.
+
+Built from https://github.com/gpBlockchain/ckb-contract-flow-html at commit 402b2d5c7f31bec65dc00be3913f5d91cf343830. Everything linked below is plain Markdown or JSON; the bilingual (zh/en) HTML pages for people start at https://retricsu.github.io/community-scripts/index.html.
+
+## Decode a transaction
+
+Needs Node.js ≥ 18 and access to a CKB RPC; zero dependencies; it only reads from the RPC.
+
+```sh
+curl -fsSL https://retricsu.github.io/community-scripts/decode-tx.js -o decode-tx.js
+node decode-tx.js 0x<tx hash>               # mainnet, https://mainnet.ckb.dev/rpc
+node decode-tx.js 0x<tx hash> --testnet     # testnet, https://testnet.ckb.dev/rpc
+node decode-tx.js 0x<tx hash> --rpc <url>   # any CKB node
+node decode-tx.js 0x<tx hash> --json        # JSON instead of Markdown
+```
+
+It lists every cell, groups them by lock / type script, names the contract behind each script with a link to its doc, prints the fields its plugin parses (amounts, args, DAO phase, …) and runs the signature-free checks: ✓ pass, ✗ fail, ○ not checked (signatures and other VM-only rules), `[code]` = the script's error code. Same code as the browser decoder https://retricsu.github.io/community-scripts/tx.html (source: scripts/decode-tx.js, lib/ckb.js, contracts/*/plugin.js).
+
+Without Node: call the RPC `get_transaction`, look up each lock / type script's `code_hash` + `hash_type` in the tables below (or in https://retricsu.github.io/community-scripts/contracts.json), then read that contract's doc.
+
+## Contract docs
+
+`https://retricsu.github.io/community-scripts/<id>.md`, one per contract (`id` as in the tables; all linked in the last section): deployments with copy-ready `script` + `cell_dep` JSON, byte layouts, transitions (inputs → outputs), constraints with error codes, notes, example transactions and source. https://retricsu.github.io/community-scripts/contracts.json has every contract and deployment as JSON.
+
+## Mainnet: 73 contracts, 80 deployments
+
+Only on mainnet, not on testnet: `btc_spv_type_lock`, `ccbtc_asset`, `ickb_logic`, `limit_order`, `nexisdao_type_lock`, `owned_owner`, `stablepp_asset`, `stablepp_intent_lock`, `stablepp_pool`, `stablepp_vault_lock`. One row per deployment (a contract can have several code_hashes).
+
+| id | name | kind | code_hash | hash_type | category |
+| --- | --- | --- | --- | --- | --- |
+| `acp` | Anyone-can-pay | lock | `0xd369597ff47f29fbc0d47d2e3775370d1250b85140c670e4718af712983a2354` | type | token, identity |
+| `always_success` | Always Success | lock | `0x3b521cc4b552f109d092d8cc468a8048acb53c5952dbe769d2b2f9cf6e47f7f1` | data1 | proxy, ckb-proxy-locks |
+| `btc_spv_type_lock` | Bitcoin SPV Type Lock | type | `0xa76e227da81b97d23deabf0d8964aa41c042f4bcf2db2b8bd873fe8521de741d` | type | btc, RGB++ |
+| `btc_time_lock` | BTC time lock | lock | `0x70d64497a075bd651e98ac030455ea200637ee325a12ad08aff03f1a117e5a62` | type | btc, RGB++ |
+| `ccbtc_asset` | ccBTC Asset | type | `0x092c2c4a26ea475a8e860c29cf00502103add677705e2ccd8d6fe5af3caa5ae3` | type | token, btc |
+| `cells_account_lock` | Cells name lock (account-lock) | lock | `0x9f0f0ba142b58cba2fe047546cfd8481d5b1769437cd3533e6458b21b61871ab` | type | identity, Cells (.cell names) |
+| `cells_account_type` | Cells name (account-cell-type) | type | `0xd96cee56727a2bb9a21408c154d278df5095fb4b4dcfd50516156424479bfe54` | type | identity, Cells (.cell names) |
+| `cells_price_type` | Cells price cell (price-cell-type) | type | `0x97bf5f760cf72f918f13704d7184933b79d4ddc1fd85075762373e531152d4f9` | type | identity, Cells (.cell names) |
+| `cells_sale_lock` | Cells listing (sale-lock) | lock | `0x086c8f4e9d4272e3dfbaca399792f730e6604591e87931ee6d67047a3c900879` | type | identity, Cells (.cell names) |
+| `cheque` | Cheque | lock | `0xe4d4ecc6e5f9a059bf2f7a82cca292083aebc0c421566a52484fe2ec51a9fb0c` | type | token, defi |
+| `ckbfs_v2` | CKBFS V2 | type | `0x31e6376287d223b8c0410d562fb422f04d1d617b2947596a14c3d2efb7218d3a` | data1 | proxy |
+| `ckbfs_v2` | CKBFS V2 | type | `0xfd2058c9a0c0183354cf637e25d2707ffa9bb6fa2ba9b29f4ebc6be3e54ad7eb` | type | proxy |
+| `ckbfs_v3` | CKBFS V3 | type | `0xb5d13ffe0547c78021c01fe24dce2e959a1ed8edbca3cb93dd2e9f57fb56d695` | data1 | proxy |
+| `ckbfs_v3` | CKBFS V3 | type | `0xcc5411e8b70e551d7a3dd806256533cff6bc12118b48dd7b2d5d2292c3651add` | type | proxy |
+| `cluster` | Spore Cluster | type | `0x7366a61534fa7c7e6225ecc0d828ea3b5366adec2b58206f2ee84995fe030075` | data1 | nft, Spore |
+| `cota` | CoTA | type | `0x1122a4fb54697cf2e6e3a96c9d80fd398a936559b90954c6e88eb7ba0cf652df` | type | nft |
+| `cota_registry` | CoTA Registry (deprecated) | type | `0x90ca618be6c15f5857d3cbd09f9f24ca6770af047ba9ee70989ec3b229419ac7` | type | nft |
+| `did_ckb` | DID CKB | type | `0x4a06164dc34dccade5afe3e847a97b6db743e79f5477fa3295acf02849c5984a` | type | identity |
+| `dob_0` | dob_0 | undefined | `0x13cac78ad8482202f18f9df4ea707611c35f994375fa03ae79121312dda9925c` | data1 | nft, Spore |
+| `dob_1` | dob_1 | undefined | `0x1b55845004b2d08956e08d9e10bb1bf23951e6056f8159588f2af03b11b08c07` | type | nft, Spore |
+| `dotbit_income` | .bit IncomeCell Type | type | `0x6c1d69a358954fc471a2ffa82a98aed5a4912e6002a5e761524f2304ab53bf39` | type | identity |
+| `dotbit_reverse_record` | .bit ReverseRecordCell Type | type | `0xebc9e13658f6df13593cf59b7e9cd159602b6c3c7d54b14dea43bae600ebae11` | type | identity |
+| `dotbit_time_index_state` | .bit Time Index State Type | type | `0x3a468d53352eb855521dabed0dc7036929bfe72766ad58f801edfbae564f7b43` | type | identity |
+| `dotbit_time_info` | .bit Time Info Type | type | `0x9e537bf5b8ec044ca3f53355e879f3fd8832217e4a9b41d9994cf0c547241a79` | type | identity |
+| `easy_to_discover_type` | Easy-to-discover Type | type | `0xaba4430cc7110d699007095430a1faa72973edf2322ddbfd4d1d219cacf237af` | data1 | proxy, ckb-proxy-locks |
+| `fiber_commitment_lock` | Fiber Commitment Lock | lock | `0x2d45c4d3ed3e942f1945386ee82a5d1b7e4bb16d7fe1ab015421174ab747406c` | type | channel, Fiber |
+| `fiber_funding_lock` | Fiber Funding Lock | lock | `0xe45b1f8f21bff23137035a3ab751d75b36a981deec3e7820194b9c042967f4f1` | type | channel, Fiber |
+| `flashsigner` | FlashSigner lock | lock | `0x081dbffa88dab54ba426d231ca64eb760cea2fe9e16761a1da400da1b2cbe128` | type | identity |
+| `force_bridge_lock` | Force Bridge bridge lockscript | lock | `0x93bc7a915d3d8f8b9678bc6c7a1751738c99ce6e66bba4dfab56672f6d691789` | type | token |
+| `godwoken_challenge_lock` | Godwoken challenge (challenge-lock) | lock | `0x628b5f956b46ae27b50819a9ebab79ce5f957e6899ba0c75b8e142de2ed0dcd2` | type | layer2, Godwoken |
+| `godwoken_custodian_lock` | Godwoken custodian (custodian-lock) | lock | `0x000f87062a2fe9bb4a6cc475212ea11014b84deb32e0375ee51e6ec4a553e009` | type | layer2, Godwoken |
+| `godwoken_deposit_lock` | Godwoken deposit request (deposit-lock) | lock | `0xff602581f07667eef54232cce850cbca2c418b3418611c132fca849d1edcd775` | type | layer2, Godwoken |
+| `godwoken_eth_account_lock` | Godwoken Ethereum account lock (eth-account-lock) | lock | `0x096df264f38fff07f3acd318995abc2c71ae0e504036fe32bc38d5b6037364d4` | type | layer2, Godwoken |
+| `godwoken_stake_lock` | Godwoken block-producer stake (stake-lock) | lock | `0xb619184ab9142c51b0ee75f4e24bcec3d077eefe513115bad68836d06738fd2c` | type | layer2, Godwoken |
+| `godwoken_state_validator` | Godwoken rollup cell (state-validator) | type | `0xfef1d086d9f74d143c60bf03bd04bab29200dbf484c801c72774f2056d4c6718` | type | layer2, Godwoken |
+| `godwoken_withdrawal_lock` | Godwoken withdrawal (withdrawal-lock) | lock | `0x3714af858b8b82b2bb8f13d51f3cffede2dd8d352a6938334bb79e6b845e3658` | type | layer2, Godwoken |
+| `ickb_logic` | iCKB logic | type | `0x2a8100ab5990fa055ab1b50891702e1e895c7bd1df6322cd725c1a6115873bd3` | data1 | token, defi, iCKB |
+| `input_type_proxy_lock` | Input Type Proxy Lock | lock | `0x5123908965c711b0ffd8aec642f1ede329649bda1ebdca6bd24124d3796f768a` | data1 | proxy, ckb-proxy-locks |
+| `joyid` | JoyID lock | lock | `0xd00c84f0ec8fd441c38bc3f87a371f547190f2fcff88e642bc5bf54b9e318323` | type | identity |
+| `limit_order` | iCKB limit order | lock | `0x49dfb6afee5cc8ac4225aeea8cb8928b150caf3cd92fea33750683c74b13254a` | data1 | defi, iCKB |
+| `lock_proxy_lock` | Lock Proxy Lock | lock | `0x5d41e32e224c15f152b7e6529100ebeac83b162f5f692a5365774dad2c1a1d02` | data1 | proxy, ckb-proxy-locks |
+| `mnft_class` | M-NFT Class | type | `0xd51e6eaf48124c601f41abe173f1da550b4cbca9c6a166781906a287abbb3d9a` | type | nft |
+| `mnft_issuer` | M-NFT Issuer | type | `0x24b04faf80ded836efc05247778eec4ec02548dab6e2012c0107374aa3f68b81` | type | nft |
+| `mnft_nft` | M-NFT NFT | type | `0x2b24f0d644ccbdd77bbf86b27c8cca02efa0ad051e447c212636d9ee7acaaec9` | type | nft |
+| `multisig_legacy` | Multisig (legacy) | lock | `0x5c5069eb0857efc65e1bca0c07df34c31663b3622fd3876c876320fc9634e2a8` | type | system, identity |
+| `multisig_v2` | Multisig V2 | lock | `0x36c971b8d41fbd94aabca77dc75e826729ac98447b46f91e00796155dddb0d29` | data1 | system, identity |
+| `multisig_v2` | Multisig V2 | lock | `0xd1a9f877aed3f5e07cb9c52b61ab96d06f250ae6883cc7f0a2423db0976fc821` | type | system, identity |
+| `nervos_dao` | NervosDAO | type | `0x82d76d1b75fe2fd9a27dfbaa65a039221a380d76c926f378d3f81cf3e7e13f2e` | type | system, defi |
+| `nexisdao_type_lock` | NexisDAO dCKB Type Lock | lock | `0x8baa01f58baab0cb58fc319136ea4f6866ed59c323fa94bf7d6b72bea21c74de` | data | defi |
+| `nostr_binding` | nostr_binding | undefined | `0xb56ea08c4b10b454ed3389bb0e504ecfc57dcfe3089a5030654525a2def2108e` | type | identity |
+| `nostr_lock` | Nostr lock | lock | `0x641a89ad2f77721b803cd50d01351c1f308444072d5fa20088567196c0574c68` | type | identity |
+| `omnilock` | Omnilock | lock | `0x9b819793a64463aed77c615d6cb226eea5487ccfc0783043a587254cda2b6f26` | type | identity |
+| `omnilock_v1` | Omnilock V1 | lock | `0xa4398768d87bd17aea1361edc3accd6a0117774dc4ebc813bfa173e8ac0d086d` | type | identity |
+| `omnilock_v1` | Omnilock V1 | lock | `0x9f3aeaf2fc439549cbc870c653374943af96a0658bd6b51be8d8983183e6f52f` | type | identity |
+| `output_type_proxy_lock` | Output Type Proxy Lock | lock | `0x2df53b592db3ae3685b7787adcfef0332a611edb83ca3feca435809964c3aff2` | data1 | proxy, ckb-proxy-locks |
+| `owned_owner` | iCKB owned owner | lock | `0xacc79e07d107831feef4c70c9e683dac5644d5993b9cb106dca6e74baa381bd0` | data1 | defi, iCKB |
+| `pw_lock` | PW lock | lock | `0xbf43c3602455798c1a61a596e0d95278864c552fafe231c063b3fabf97a8febc` | type | identity |
+| `rgbpp_lock` | RGB++ lock | lock | `0xbc6c568a1a0d0a09f6844dc9d74ddb4343c32143ff25f727c59edf4fb72d6936` | type | btc, RGB++ |
+| `secp256k1_blake160` | SECP256K1/blake160 | lock | `0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8` | type | system, identity |
+| `single_use_lock` | Single Use Lock | lock | `0x8290467a512e5b9a6b816469b0edabba1f4ac474e28ffdd604c2a7c76446bbaf` | data1 | proxy, ckb-proxy-locks |
+| `sphincs_lock` | Quantum-resistant SPHINCS+ Lock | lock | `0x302d35982f865ebcbedb9a9360e40530ed32adb8e10b42fbbe70d8312ff7cedf` | type | identity, quantum |
+| `spore` | Spore | type | `0x4a4dce1df3dffff7f8b2cd7dff7303df3b6150c9788cb75dcf6747247132b9f5` | data1 | nft, Spore |
+| `spore` | Spore | type | `0xcfba73b58b6f30e70caed8a999748781b164ef9a1e218424a6fb55ebf641cb33` | type | nft, Spore |
+| `stablepp_asset` | Stable++ Asset | type | `0x26a33e0815888a4a0614a0b7d09fa951e0993ff21e55905510104a0b1312032b` | type | token, defi |
+| `stablepp_intent_lock` | Stable++ Intent Lock | lock | `0x56fb632a13abdad7308d2e034baae1cb049e8e8ff23cc7c0b69449f617549733` | type | defi |
+| `stablepp_pool` | Stable++ Pool | type | `0x26622198b66240e437e323e0fecf1c26ba3c8c28a45f03ed3ebb9f7f2bdc0055` | type | defi |
+| `stablepp_vault_lock` | Stable++ Vault Lock | lock | `0xff352022029a6ecf03e8a838b979a46e1231f05f9a3df9b4198f7eeb4afc2e67` | type | defi |
+| `stablepp_vault_lock` | Stable++ Vault Lock | lock | `0x4ed68fcb7eaa4ff78d46a2fad88a32ce9caffd4b96a0a4bba96ff4871f018675` | type | defi |
+| `sudt` | sUDT | type | `0x5e7a36a77e68eecc013dfa2fe6a23f3b6c344b04005808694ae6dd45eea4cfd5` | type | token |
+| `time_lock` | Time Lock (proxy-locks) | lock | `0x6fac4b2e89360a1e692efcddcb3a28656d8446549fb83da6d896db8b714f4451` | data1 | proxy, ckb-proxy-locks |
+| `type_burn_lock` | Type Burn Lock | lock | `0xff78bae0abf17d7a404c0be0f9ad9c9185b3f88dcc60403453d5ba8e1f22f53a` | data1 | proxy, ckb-proxy-locks |
+| `type_id` | Type ID | type | `0x00000000000000000000000000000000000000000000000000545950455f4944` | type | system |
+| `unipass` | UniPass lock (deprecated) | lock | `0xd01f5152c267b7f33b9795140c2467742e8424e49ebe2331caec197f7281b60a` | type | identity |
+| `unipass` | UniPass lock (deprecated) | lock | `0x614d40a86e1b29a8f4d8d93b9f3b390bf740803fa19a69f1c95716e029ea09b3` | type | identity |
+| `unique_type` | Unique Cell | type | `0x2c8c11c985da60b0a330c61a85507416d6382c130ba67f0c47ab071e00aec628` | data1 | token, btc |
+| `usdi` | USDI Asset (xUDT binary) | type | `0xbfa35a9c38a676682b65ade8f02be164d48632281477e36f8dc2f41f79e56bfc` | type | token |
+| `utxoswap_intent_lock` | UTXOSwap Intent Lock | lock | `0x3547c9aa563804e47ba3ebd37e6012e447c91a238f7aa71b1a75319f11df060e` | type | defi |
+| `utxoswap_proxy_lock` | UTXOSwap pool proxy lock (sequencer proxy lock) | lock | `0x7ef6e226ca9a3514ac76759f0b1550e70c9aa10aff89111fedf2c9d800d256f7` | type | defi |
+| `xudt` | xUDT | type | `0x50bd8d6680b8b9cf98b73f3c08faf8b2a21914311954118ad6609be6e78a1b95` | data1 | token |
+| `zero_lock` | Zero Lock (all-zero code hash) | lock | `0x0000000000000000000000000000000000000000000000000000000000000000` | data | system |
+
+## Testnet: 79 contracts, 90 deployments
+
+Only on testnet, not on mainnet: `ccc_btc_lock`, `ccc_eth_lock`, `ccc_sol_lock`, `comp_shared_lock`, `crowdcell_campaign`, `crowdcell_campaign_lock`, `crowdcell_pledge`, `crowdcell_pledge_lock`, `crowdcell_receipt`, `groth16_verifier`, `noir_owned_counter`, `noir_private_tally`, `opticrum_lock`, `session_lock`, `shrincs_lock`, `zk_lock`. One row per deployment (a contract can have several code_hashes).
+
+| id | name | kind | code_hash | hash_type | category |
+| --- | --- | --- | --- | --- | --- |
+| `acp` | Anyone-can-pay | lock | `0x3419a1c09eb2567f6552ee7a8ecffd64155cffe0f1796e6e61ec088d740c1356` | type | token, identity |
+| `always_success` | Always Success | lock | `0x3b521cc4b552f109d092d8cc468a8048acb53c5952dbe769d2b2f9cf6e47f7f1` | data1 | proxy, ckb-proxy-locks |
+| `btc_time_lock` | BTC time lock | lock | `0x00cdf8fab0f8ac638758ebf5ea5e4052b1d71e8a77b9f43139718621f6849326` | type | btc, RGB++ |
+| `btc_time_lock` | BTC time lock | lock | `0x80a09eca26d77cea1f5a69471c59481be7404febf40ee90f886c36a948385b55` | type | btc, RGB++ |
+| `ccc_btc_lock` | ccc_btc_lock | undefined | `0x8f026d6113b24800e04bfb33703f98dfaa6db6719097ab5d3050db9cf4fec45e` | type | identity |
+| `ccc_eth_lock` | ccc_eth_lock | undefined | `0x5b1983cf4242009f72e82b37fb6b36790e6d4858474046fc3c798e5142cf8835` | type | identity |
+| `ccc_sol_lock` | ccc_sol_lock | undefined | `0x98870bb4f49768bbd5bcf48b7cd189ab8a2cf2649869715c00a5d3cedd9db86b` | type | identity |
+| `cells_account_lock` | Cells name lock (account-lock) | lock | `0xede6a3d80717c3d7927eea678d095abbe68dbb08ca6fdbbbdd9de906455a4afd` | type | identity, Cells (.cell names) |
+| `cells_account_type` | Cells name (account-cell-type) | type | `0xe0706b176678181d982290d93dfcd82098e60cceaa4a87f10f32dcbcc91df1d9` | type | identity, Cells (.cell names) |
+| `cells_price_type` | Cells price cell (price-cell-type) | type | `0xe1057caf161b3c720fcdb80190e89c6efc36b6b4256b3c99635fda63a9dd4294` | type | identity, Cells (.cell names) |
+| `cells_sale_lock` | Cells listing (sale-lock) | lock | `0x498ab6b49b6b25b3c47fcea74bd8a4447bc4efda6417809152a846e058ad0ae4` | type | identity, Cells (.cell names) |
+| `cheque` | Cheque | lock | `0x60d5f39efce409c587cb9ea359cefdead650ca128f0bd9cb3855348f98c70d5b` | type | token, defi |
+| `ckbfs_v2` | CKBFS V2 | type | `0x31e6376287d223b8c0410d562fb422f04d1d617b2947596a14c3d2efb7218d3a` | data1 | proxy |
+| `ckbfs_v2` | CKBFS V2 | type | `0x7c6dcab8268201f064dc8676b5eafa60ca2569e5c6209dcbab0eb64a9cb3aaa3` | type | proxy |
+| `ckbfs_v3` | CKBFS V3 | type | `0xb5d13ffe0547c78021c01fe24dce2e959a1ed8edbca3cb93dd2e9f57fb56d695` | data1 | proxy |
+| `ckbfs_v3` | CKBFS V3 | type | `0xaebf5a7b541da9603c2066a9768d3d18fea2e7f3c1943821611545155fecc671` | type | proxy |
+| `cluster` | Spore Cluster | type | `0x0bbe768b519d8ea7b96d58f1182eb7e6ef96c541fbd9526975077ee09f049058` | data1 | nft, Spore |
+| `cluster` | Spore Cluster | type | `0x598d793defef36e2eeba54a9b45130e4ca92822e1d193671f490950c3b856080` | data1 | nft, Spore |
+| `comp_shared_lock` | COMP Shared Lock (public cell) | lock | `0xbc475946ff0e50276ca152c423cc260b8817de1c42a3be2eafffc55765f873c1` | type | proxy |
+| `cota` | CoTA | type | `0x89cd8003a0eaf8e65e0c31525b7d1d5c1becefd2ea75bb4cff87810ae37764d8` | type | nft |
+| `cota_registry` | CoTA Registry (deprecated) | type | `0x9302db6cc1344b81a5efee06962abcb40427ecfcbe69d471b01b2658ed948075` | type | nft |
+| `crowdcell_campaign` | CrowdCell campaign | type | `0xd50ca43249515bb0ebe8534f4d7f74520e4fb7c1163d488c288672ffd7e7a8f5` | data2 | defi, CrowdCell |
+| `crowdcell_campaign_lock` | CrowdCell campaign lock | lock | `0xd975780a890b817303a5414167ce235c041a9e63bb5e85f764acc71209fd02a3` | data2 | defi, CrowdCell |
+| `crowdcell_pledge` | CrowdCell pledge type | type | `0xe45d09f08d0e842340afb004cfb6b6b6414ad387f9cd2f3e0b9abcd6ae8eb024` | data2 | defi, CrowdCell |
+| `crowdcell_pledge_lock` | CrowdCell pledge lock | lock | `0xc28d8042a1cf39d02db0cbc769a26faad80b39563c2d2de40536ddb66ae3a525` | data2 | defi, CrowdCell |
+| `crowdcell_receipt` | CrowdCell receipt | type | `0x523716e6c46501480391965a9305d2be33045ce3be19300f62546ff3aa8bf8b5` | data2 | defi, CrowdCell |
+| `did_ckb` | DID CKB | type | `0x510150477b10d6ab551a509b71265f3164e9fd4137fcb5a4322f49f03092c7c5` | type | identity |
+| `dob_0` | dob_0 | undefined | `0x13cac78ad8482202f18f9df4ea707611c35f994375fa03ae79121312dda9925c` | data1 | nft, Spore |
+| `dob_1` | dob_1 | undefined | `0xaf4e8350a75cc8e6bc05be67483bee3aa4a27a8d7378b56bda8a82376c9f1d88` | type | nft, Spore |
+| `dotbit_income` | .bit IncomeCell Type | type | `0x08d1cdc6ab92d9cabe0096a2c7642f73d0ef1b24c94c43f21c6c3a32ffe0bb5e` | type | identity |
+| `dotbit_reverse_record` | .bit ReverseRecordCell Type | type | `0x61711416468fa5211ead5f24c6f3efadfbbc332274c5d40e50c6feadcb5f9606` | type | identity |
+| `dotbit_time_index_state` | .bit Time Index State Type | type | `0x554cff969f3148e3c620749384004e9692e67c429f621554d139b505a281c7b8` | type | identity |
+| `dotbit_time_info` | .bit Time Info Type | type | `0x96248cdefb09eed910018a847cfb51ad044c2d7db650112931760e3ef34a7e9a` | type | identity |
+| `easy_to_discover_type` | Easy-to-discover Type | type | `0xaba4430cc7110d699007095430a1faa72973edf2322ddbfd4d1d219cacf237af` | data1 | proxy, ckb-proxy-locks |
+| `fiber_commitment_lock` | Fiber Commitment Lock | lock | `0x740dee83f87c6f309824d8fd3fbdd3c8380ee6fc9acc90b1a748438afcdf81d8` | type | channel, Fiber |
+| `fiber_funding_lock` | Fiber Funding Lock | lock | `0x6c67887fe201ee0c7853f1682c0b77c0e6214044c156c7558269390a8afa6d7c` | type | channel, Fiber |
+| `flashsigner` | FlashSigner lock | lock | `0x577a5e5930e2ecdd6200765f3442e6119dc99e87df474f22f13cab819c80b242` | type | identity |
+| `force_bridge_lock` | Force Bridge bridge lockscript | lock | `0x2170ffdb67574651c7bc51455d98f29394f2ee134a306c84533732f52e0eb50e` | type | token |
+| `godwoken_challenge_lock` | Godwoken challenge (challenge-lock) | lock | `0x5a86c3bf1e8648b6a6f8abe6875720ccf9745ab225b68fa7c195f9d6635dea80` | type | layer2, Godwoken |
+| `godwoken_custodian_lock` | Godwoken custodian (custodian-lock) | lock | `0x85ae4db0dd83f428a31deb342e4000af37ce2c9645d9e619df00096e3c50a2bb` | type | layer2, Godwoken |
+| `godwoken_deposit_lock` | Godwoken deposit request (deposit-lock) | lock | `0x50704b84ecb4c4b12b43c7acb260ddd69171c21b4c0ba15f3c469b7d143f6f18` | type | layer2, Godwoken |
+| `godwoken_eth_account_lock` | Godwoken Ethereum account lock (eth-account-lock) | lock | `0x07521d0aa8e66ef441ebc31204d86bb23fc83e9edc58c19dbb1b0ebe64336ec0` | type | layer2, Godwoken |
+| `godwoken_stake_lock` | Godwoken block-producer stake (stake-lock) | lock | `0x7f5a09b8bd0e85bcf2ccad96411ccba2f289748a1c16900b0635c2ed9126f288` | type | layer2, Godwoken |
+| `godwoken_state_validator` | Godwoken rollup cell (state-validator) | type | `0x1e44736436b406f8e48a30dfbddcf044feb0c9eebfe63b0f81cb5bb727d84854` | type | layer2, Godwoken |
+| `godwoken_withdrawal_lock` | Godwoken withdrawal (withdrawal-lock) | lock | `0x06ae0706bb2d7997d66224741d3ec7c173dbb2854a6d2cf97088796b677269c6` | type | layer2, Godwoken |
+| `groth16_verifier` | groth16-ckb verifier | type | `0xc884d0c2b45ebe5db3e559b5a2450f52defaf6945f78c5d7e9da6ed0b5852dfb` | data1 | zk |
+| `input_type_proxy_lock` | Input Type Proxy Lock | lock | `0x5123908965c711b0ffd8aec642f1ede329649bda1ebdca6bd24124d3796f768a` | data1 | proxy, ckb-proxy-locks |
+| `joyid` | JoyID lock | lock | `0xd23761b364210735c19c60561d213fb3beae2fd6172743719eff6920e020baac` | type | identity |
+| `lock_proxy_lock` | Lock Proxy Lock | lock | `0x5d41e32e224c15f152b7e6529100ebeac83b162f5f692a5365774dad2c1a1d02` | data1 | proxy, ckb-proxy-locks |
+| `mnft_class` | M-NFT Class | type | `0x095b8c0b4e51a45f953acd1fcd1e39489f2675b4bc94e7af27bb38958790e3fc` | type | nft |
+| `mnft_issuer` | M-NFT Issuer | type | `0xb59879b6ea6fff985223117fa499ce84f8cfb028c4ffdfdf5d3ec19e905a11ed` | type | nft |
+| `mnft_nft` | M-NFT NFT | type | `0xb1837b5ad01a88558731953062d1f5cb547adf89ece01e8934a9f0aeed2d959f` | type | nft |
+| `multisig_legacy` | Multisig (legacy) | lock | `0x5c5069eb0857efc65e1bca0c07df34c31663b3622fd3876c876320fc9634e2a8` | type | system, identity |
+| `multisig_v2` | Multisig V2 | lock | `0x36c971b8d41fbd94aabca77dc75e826729ac98447b46f91e00796155dddb0d29` | data1 | system, identity |
+| `multisig_v2` | Multisig V2 | lock | `0x765b3ed6ae264b335d07e73ac332bf2c0f38f8d3340ed521cb447b4c42dd5f09` | type | system, identity |
+| `nervos_dao` | NervosDAO | type | `0x82d76d1b75fe2fd9a27dfbaa65a039221a380d76c926f378d3f81cf3e7e13f2e` | type | system, defi |
+| `noir_owned_counter` | Noir owned counter | type | `0x79d7e7614ff1689cb6c6fbbd376ab2fa959dc92394abea35cbafb1bd2b7d0a88` | data1 | zk |
+| `noir_private_tally` | Noir private tally (v2) | type | `0x3cc448db51cdc14453fff7bdf2c3d39e1dd7a238091b982069d20e169e8337d1` | data1 | zk |
+| `nostr_binding` | nostr_binding | undefined | `0x4105801324b70b3a1508ded8958aba66a6faf68cab26f863b4902b50dfb8b9ab` | type | identity |
+| `nostr_lock` | Nostr lock | lock | `0x6ae5ee0cb887b2df5a9a18137315b9bdc55be8d52637b2de0624092d5f0c91d5` | type | identity |
+| `omnilock` | Omnilock | lock | `0xf329effd1c475a2978453c8600e1eaf0bc2087ee093c3ee64cc96ec6847752cb` | type | identity |
+| `omnilock_v1` | Omnilock V1 | lock | `0x79f90bb5e892d80dd213439eeab551120eb417678824f282b4ffb5f21bad2e1e` | type | identity |
+| `opticrum_lock` | Opticrum (Fiber liquidity rental) lock | lock | `0x1f8452818672fbb60f39c72e2d30dadd1814f322dfc21bf552784d83054f0247` | type | defi, channel |
+| `output_type_proxy_lock` | Output Type Proxy Lock | lock | `0x2df53b592db3ae3685b7787adcfef0332a611edb83ca3feca435809964c3aff2` | data1 | proxy, ckb-proxy-locks |
+| `pw_lock` | PW lock | lock | `0x58c5f491aba6d61678b7cf7edf4910b1f5e00ec0cde2f42e0abb4fd9aff25a63` | type | identity |
+| `rgbpp_lock` | RGB++ lock | lock | `0x61ca7a4796a4eb19ca4f0d065cb9b10ddcf002f10f7cbb810c706cb6bb5c3248` | type | btc, RGB++ |
+| `rgbpp_lock` | RGB++ lock | lock | `0xd07598deec7ce7b5665310386b4abd06a6d48843e953c5cc2112ad0d5a220364` | type | btc, RGB++ |
+| `secp256k1_blake160` | SECP256K1/blake160 | lock | `0x9bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce8` | type | system, identity |
+| `session_lock` | Session lock (session keys) | lock | `0xab419466529ea479590d4be7b23580ce2ddc640ba902735c9ad9a22dc64c08ce` | data2 | identity |
+| `shrincs_lock` | SHRINCS post-quantum lock | lock | `0x387496fafe46562bb3bb2fa4446f1fc1054ba2f1b4df229a88056d5422a196ac` | type | identity, quantum |
+| `single_use_lock` | Single Use Lock | lock | `0x8290467a512e5b9a6b816469b0edabba1f4ac474e28ffdd604c2a7c76446bbaf` | data1 | proxy, ckb-proxy-locks |
+| `sphincs_lock` | Quantum-resistant SPHINCS+ Lock | lock | `0x147ecbb5c5127d982ee1362d2c2bb4267803da2eb006d150e88af6caaa0a7eaf` | data1 | identity, quantum |
+| `spore` | Spore | type | `0x685a60219309029d01310311dba953d67029170ca4848a4ff638e57002130a0d` | data1 | nft, Spore |
+| `spore` | Spore | type | `0xbbad126377d45f90a8ee120da988a2d7332c78ba8fd679aab478a19d6c133494` | data1 | nft, Spore |
+| `spore` | Spore | type | `0x0b1f412fbae26853ff7d082d422c2bdd9e2ff94ee8aaec11240a5b34cc6e890f` | type | nft, Spore |
+| `sudt` | sUDT | type | `0xc5e5dcf215925f7ef4dfaf5f4b4f105bc321c02776d6e7d52a1db3fcd9d011a4` | type | token |
+| `time_lock` | Time Lock (proxy-locks) | lock | `0x6fac4b2e89360a1e692efcddcb3a28656d8446549fb83da6d896db8b714f4451` | data1 | proxy, ckb-proxy-locks |
+| `type_burn_lock` | Type Burn Lock | lock | `0xff78bae0abf17d7a404c0be0f9ad9c9185b3f88dcc60403453d5ba8e1f22f53a` | data1 | proxy, ckb-proxy-locks |
+| `type_id` | Type ID | type | `0x00000000000000000000000000000000000000000000000000545950455f4944` | type | system |
+| `unipass` | UniPass lock (deprecated) | lock | `0x3e1eb7ed4809b2d60650be96a40abfbdafb3fb942b7b37ec7709e64e2cd0a783` | type | identity |
+| `unipass` | UniPass lock (deprecated) | lock | `0x124a60cd799e1fbca664196de46b3f7f0ecb7138133dcaea4893c51df5b02be6` | type | identity |
+| `unique_type` | Unique Cell | type | `0x8e341bcfec6393dcd41e635733ff2dca00a6af546949f70c57a706c0f344df8b` | type | token, btc |
+| `usdi` | USDI Asset (xUDT binary) | type | `0xcc9dc33ef234e14bc788c43a4848556a5fb16401a04662fc55db9bb201987037` | type | token |
+| `utxoswap_intent_lock` | UTXOSwap Intent Lock | lock | `0x4e9c30c8d6ce275740fbe69eae49c3d8c213578c5bd066f4938fe3c7dec6e101` | type | defi |
+| `utxoswap_proxy_lock` | UTXOSwap pool proxy lock (sequencer proxy lock) | lock | `0x30e2c8a0cc9c27b2b2125ecf3aabe74acd692fe2b6635bcee02dab6973fbb593` | type | defi |
+| `xudt` | xUDT | type | `0x50bd8d6680b8b9cf98b73f3c08faf8b2a21914311954118ad6609be6e78a1b95` | data1 | token |
+| `xudt` | xUDT | type | `0x25c29dc317811a6f6f3985a7a9ebc4838bd388d19d0feeecf0bcd60f6c0975bb` | type | token |
+| `zero_lock` | Zero Lock (all-zero code hash) | lock | `0x0000000000000000000000000000000000000000000000000000000000000000` | data | system |
+| `zk_lock` | zk-Lock (Groth16 proof lock) | lock | `0x24172f2dc2ebd6634fe925a6f0beda7cfd4cdb9aab1214f2e1cbd3127ea1fa7b` | type | identity, zk |
+| `zk_lock` | zk-Lock (Groth16 proof lock) | lock | `0xfbb4acb5c3f8fc8b24216dc8dc8d6bb8f8d3ea9aab4b29a210571959a1f9028e` | type | identity, zk |
+
+## No deployment recorded: 5 contracts
+
+- [CKBSwap constant-product AMM (state type)](https://retricsu.github.io/community-scripts/ckbswap_amm.md) — type · token, defi
+- [Cobuild OTX lock](https://retricsu.github.io/community-scripts/cobuild_otx_lock.md) — lock · identity
+- [Godwoken delegate-cell lock](https://retricsu.github.io/community-scripts/godwoken_delegate_cell_lock.md) — lock · layer2, Godwoken
+- [standard-udt sUDT type](https://retricsu.github.io/community-scripts/std_sudt.md) — type · token
+- [standard-udt sUDT metadata type](https://retricsu.github.io/community-scripts/std_sudt_meta.md) — type · token
+
+## What each contract does
+
+- [Anyone-can-pay](https://retricsu.github.io/community-scripts/acp.md) `acp` — lock · token, identity · mainnet, testnet: `A` Owner spends with signature; `B` Payment unlock without signature (anyone can deposit)
+- [Always Success](https://retricsu.github.io/community-scripts/always_success.md) `always_success` — lock · proxy, ckb-proxy-locks · mainnet, testnet: `A` Unlock by anyone
+- [Bitcoin SPV Type Lock](https://retricsu.github.io/community-scripts/btc_spv_type_lock.md) `btc_spv_type_lock` — type · btc, RGB++ · mainnet: `0 → 1 + n` Create an SPV instance; `2 → 2` Update: overwrite the oldest client; `m → m` Reorg (m > 2)
+- [BTC time lock](https://retricsu.github.io/community-scripts/btc_time_lock.md) `btc_time_lock` — lock · btc, RGB++ · mainnet, testnet: `1 → 1` Release to a CKB lock after enough BTC confirmations
+- [ccBTC Asset](https://retricsu.github.io/community-scripts/ccbtc_asset.md) `ccbtc_asset` — type · token, btc · mainnet: `?` Identification only: facts verifiable on chain
+- [ccc_btc_lock](https://retricsu.github.io/community-scripts/ccc_btc_lock.md) `ccc_btc_lock` — undefined · identity · testnet: no cell-flow spec yet (deployments and decoder only)
+- [ccc_eth_lock](https://retricsu.github.io/community-scripts/ccc_eth_lock.md) `ccc_eth_lock` — undefined · identity · testnet: no cell-flow spec yet (deployments and decoder only)
+- [ccc_sol_lock](https://retricsu.github.io/community-scripts/ccc_sol_lock.md) `ccc_sol_lock` — undefined · identity · testnet: no cell-flow spec yet (deployments and decoder only)
+- [Cells name lock (account-lock)](https://retricsu.github.io/community-scripts/cells_account_lock.md) `cells_account_lock` — lock · identity, Cells (.cell names) · mainnet, testnet: `A` Unlock by anyone
+- [Cells name (account-cell-type)](https://retricsu.github.io/community-scripts/cells_account_type.md) `cells_account_type` — type · identity, Cells (.cell names) · mainnet, testnet: `0 → 1` Genesis; `1 → 2` Register; `1 → 1` Renew; `1 → 1` Edit records; `1 → 1` Edit manager; `1 → 1` Transfer; `2 → 1` Recycle
+- [Cells price cell (price-cell-type)](https://retricsu.github.io/community-scripts/cells_price_type.md) `cells_price_type` — type · identity, Cells (.cell names) · mainnet, testnet: `0 → 1` Create; `1 → 1` Update
+- [Cells listing (sale-lock)](https://retricsu.github.io/community-scripts/cells_sale_lock.md) `cells_sale_lock` — lock · identity, Cells (.cell names) · mainnet, testnet: `0 → 1` List; `1 → 0` Cancel / relist (seller path); `1 → 0` Buy (payment path)
+- [Cheque](https://retricsu.github.io/community-scripts/cheque.md) `cheque` — lock · token, defi · mainnet, testnet: `0 → 1` Sender creates a cheque; `1 → 0` Receiver claims; `1 → 0` Sender withdraws (after 6 epochs)
+- [CKBFS V2](https://retricsu.github.io/community-scripts/ckbfs_v2.md) `ckbfs_v2` — type · proxy · mainnet, testnet: `0 → 1` Publish (create); `1 → 1` Append; `1 → 1` Transfer; `1 → 0` Destroy: forbidden
+- [CKBFS V3](https://retricsu.github.io/community-scripts/ckbfs_v3.md) `ckbfs_v3` — type · proxy · mainnet, testnet: `0 → 1` Publish (create); `1 → 1` Append / transfer; `1 → 0` Destroy: forbidden
+- [CKBSwap constant-product AMM (state type)](https://retricsu.github.io/community-scripts/ckbswap_amm.md) `ckbswap_amm` — type · token, defi · not deployed: `0 → State` Create a pool (genesis); `State → State (ADD)` Add liquidity; `State → State (REMOVE)` Remove liquidity; `State → State (SWAP)` Swap (SWAP_IN exact input / SWAP_OUT exact output); `lock roles` State lock (role 1) and reserve lock (role 2)
+- [Spore Cluster](https://retricsu.github.io/community-scripts/cluster.md) `cluster` — type · nft, Spore · mainnet, testnet: `0 → 1` Create; `1 → 1` Transfer / authorize a spore mint; `1 → 0` Destroy (forbidden)
+- [Cobuild OTX lock](https://retricsu.github.io/community-scripts/cobuild_otx_lock.md) `cobuild_otx_lock` — lock · identity · not deployed: `A` Tx-level unlock: SighashAll / SighashAllOnly (no OTX, or this lock has inputs outside the OTX range); `B` OTX unlock: base_seals / append-segment seals (all of this lock's inputs inside the OTX range)
+- [COMP Shared Lock (public cell)](https://retricsu.github.io/community-scripts/comp_shared_lock.md) `comp_shared_lock` — lock · proxy · testnet: `0 → 1` Create a COMP shared cell (lock not executed); `1 → 1` Anonymous message / update (anyone); `1 → 1` Signed message (compressed public key + recoverable signature); `1+N → 1+M` Sponsor / top-up (capacity increases); `✗` Rejected shapes: merge / fork / destroy / change lock / add type / overspend
+- [CoTA](https://retricsu.github.io/community-scripts/cota.md) `cota` — type · nft · mainnet, testnet: no cell-flow spec yet (deployments and decoder only)
+- [CoTA Registry (deprecated)](https://retricsu.github.io/community-scripts/cota_registry.md) `cota_registry` — type · nft · mainnet, testnet: `?` Identification only: facts verifiable on chain
+- [CrowdCell campaign](https://retricsu.github.io/community-scripts/crowdcell_campaign.md) `crowdcell_campaign` — type · defi, CrowdCell · testnet: `0 → 1` Create campaign; `1 → 1` Pledge: accumulator update (Active → Active); `1 → 2` Finalize: Active → Success / Failed; `2 → 0` Destroy a finalized campaign
+- [CrowdCell campaign lock](https://retricsu.github.io/community-scripts/crowdcell_campaign_lock.md) `crowdcell_campaign_lock` — lock · defi, CrowdCell · testnet: `A` Active campaign carried forward (pre-deadline pledge); `B` Spend after the deadline (finalize / destroy)
+- [CrowdCell pledge type](https://retricsu.github.io/community-scripts/crowdcell_pledge.md) `crowdcell_pledge` — type · defi, CrowdCell · testnet: `0 → 1` Create pledge; `n → 1` Merge (≥2 inputs → 1 output); `1 → 1` Partial refund (amount decreases); `1 → 0` Destroy (on release or refund settlement); `m → k` Other shapes
+- [CrowdCell pledge lock](https://retricsu.github.io/community-scripts/crowdcell_pledge_lock.md) `crowdcell_pledge_lock` — lock · defi, CrowdCell · testnet: `A` Before deadline: merge (input since = 0); `B` After deadline + Success: release to creator; `C` After deadline + Failed (or no cell_dep after grace): refund
+- [CrowdCell receipt](https://retricsu.github.io/community-scripts/crowdcell_receipt.md) `crowdcell_receipt` — type · defi, CrowdCell · testnet: `0 → 1` Create receipt with a pledge; `1 → 0` Destroy receipt to reclaim its deposit; `1 → 1` Modify
+- [DID CKB](https://retricsu.github.io/community-scripts/did_ckb.md) `did_ckb` — type · identity · mainnet, testnet: `A` Mint; `B` Update; `C` Burn
+- [dob_0](https://retricsu.github.io/community-scripts/dob_0.md) `dob_0` — undefined · nft, Spore · mainnet, testnet: no cell-flow spec yet (deployments and decoder only)
+- [dob_1](https://retricsu.github.io/community-scripts/dob_1.md) `dob_1` — undefined · nft, Spore · mainnet, testnet: no cell-flow spec yet (deployments and decoder only)
+- [.bit IncomeCell Type](https://retricsu.github.io/community-scripts/dotbit_income.md) `dotbit_income` — type · identity · mainnet, testnet: `0 → 1` create_income: create an IncomeCell; `n → m` consolidate_income: merge income records; `* → *` Used inside other actions
+- [.bit ReverseRecordCell Type](https://retricsu.github.io/community-scripts/dotbit_reverse_record.md) `dotbit_reverse_record` — type · identity · mainnet, testnet: `n → 0` retract_reverse_record: retract reverse records
+- [.bit Time Index State Type](https://retricsu.github.io/community-scripts/dotbit_time_index_state.md) `dotbit_time_index_state` — type · identity · mainnet, testnet: `0 → 1` Create; `1 → 1` Update: index advances one; `1 → 0` Recycle
+- [.bit Time Info Type](https://retricsu.github.io/community-scripts/dotbit_time_info.md) `dotbit_time_info` — type · identity · mainnet, testnet: `0 → 1` Create (in the same tx as the Index State); `1 → 1` Update: write a new time / height; `1 → 0` Recycle
+- [Easy-to-discover Type](https://retricsu.github.io/community-scripts/easy_to_discover_type.md) `easy_to_discover_type` — type · proxy, ckb-proxy-locks · mainnet, testnet: `A` A cell indexed by its data hash
+- [Fiber Commitment Lock](https://retricsu.github.io/community-scripts/fiber_commitment_lock.md) `fiber_commitment_lock` — lock · channel, Fiber · mainnet, testnet: `A` Revocation (unlock_count = 0): punish an old commitment with a newer version; `B` Settlement (unlock_count ≥ 1): pending HTLCs and party balances
+- [Fiber Funding Lock](https://retricsu.github.io/community-scripts/fiber_funding_lock.md) `fiber_funding_lock` — lock · channel, Fiber · mainnet, testnet: `A` Channel funding → commitment tx (2-of-2 aggregated Schnorr)
+- [FlashSigner lock](https://retricsu.github.io/community-scripts/flashsigner.md) `flashsigner` — lock · identity · mainnet, testnet: `?` Identification only: facts verifiable on chain
+- [Force Bridge bridge lockscript](https://retricsu.github.io/community-scripts/force_bridge_lock.md) `force_bridge_lock` — lock · token · mainnet, testnet: `1 → N` Unlock: authorised by the owner cell lock (committee multisig)
+- [Godwoken challenge (challenge-lock)](https://retricsu.github.io/community-scripts/godwoken_challenge_lock.md) `godwoken_challenge_lock` — lock · layer2, Godwoken · mainnet, testnet: `1 → 0` Challenge stands / revert; `1 → 0` Cancel challenge (prove the target is valid)
+- [Godwoken custodian (custodian-lock)](https://retricsu.github.io/community-scripts/godwoken_custodian_lock.md) `godwoken_custodian_lock` — lock · layer2, Godwoken · mainnet, testnet: `1 → *` Finalized: used by the rollup; `1 → 1` Not finalized: deposit block reverted, restore the deposit cell
+- [Godwoken delegate-cell lock](https://retricsu.github.io/community-scripts/godwoken_delegate_cell_lock.md) `godwoken_delegate_cell_lock` — lock · layer2, Godwoken · not deployed: `A` Unlock
+- [Godwoken deposit request (deposit-lock)](https://retricsu.github.io/community-scripts/godwoken_deposit_lock.md) `godwoken_deposit_lock` — lock · layer2, Godwoken · mainnet, testnet: `0 → 1` Request deposit; `1 → 0` Collected by the rollup; `1 → 0` Cancel after timeout
+- [Godwoken Ethereum account lock (eth-account-lock)](https://retricsu.github.io/community-scripts/godwoken_eth_account_lock.md) `godwoken_eth_account_lock` — lock · layer2, Godwoken · mainnet, testnet: `1 → 0` Verify an L2 signature when cancelling a challenge
+- [Godwoken block-producer stake (stake-lock)](https://retricsu.github.io/community-scripts/godwoken_stake_lock.md) `godwoken_stake_lock` — lock · layer2, Godwoken · mainnet, testnet: `1 → 1` Reused by the rollup when producing a block; `1 → 0` Producer withdraws
+- [Godwoken rollup cell (state-validator)](https://retricsu.github.io/community-scripts/godwoken_state_validator.md) `godwoken_state_validator` — type · layer2, Godwoken · mainnet, testnet: `0 → 1` Initialize rollup cell; `1 → 1` Submit L2 block (RollupSubmitBlock); `1 → 1` Enter / cancel challenge, revert
+- [Godwoken withdrawal (withdrawal-lock)](https://retricsu.github.io/community-scripts/godwoken_withdrawal_lock.md) `godwoken_withdrawal_lock` — lock · layer2, Godwoken · mainnet, testnet: `1 → 1` Claim after finality (UnlockWithdrawalViaFinalize); `1 → 1` Block reverted (UnlockWithdrawalViaRevert)
+- [groth16-ckb verifier](https://retricsu.github.io/community-scripts/groth16_verifier.md) `groth16_verifier` — type · zk · testnet: `0 → 1` Create a trigger cell (no verification); `1 → *` Consume a trigger cell: verify the Groth16 proof
+- [iCKB logic](https://retricsu.github.io/community-scripts/ickb_logic.md) `ickb_logic` — type · token, defi, iCKB · mainnet: `Phase 1` Deposit CKB → deposit + receipt; `Phase 2` Receipt → iCKB (xUDT); `Burn` iCKB → withdraw a deposit
+- [Input Type Proxy Lock](https://retricsu.github.io/community-scripts/input_type_proxy_lock.md) `input_type_proxy_lock` — lock · proxy, ckb-proxy-locks · mainnet, testnet: `A` Unlock authorised by the owner script
+- [JoyID lock](https://retricsu.github.io/community-scripts/joyid.md) `joyid` — lock · identity · mainnet, testnet: no cell-flow spec yet (deployments and decoder only)
+- [iCKB limit order](https://retricsu.github.io/community-scripts/limit_order.md) `limit_order` — lock · defi, iCKB · mainnet: `Mint` Place: order + master; `Match` Match: order → order'; `Melt` Cancel: spend order + master together
+- [Lock Proxy Lock](https://retricsu.github.io/community-scripts/lock_proxy_lock.md) `lock_proxy_lock` — lock · proxy, ckb-proxy-locks · mainnet, testnet: `A` Unlock authorised by the owner script
+- [M-NFT Class](https://retricsu.github.io/community-scripts/mnft_class.md) `mnft_class` — type · nft · mainnet, testnet: `0 → n` Create classes (issuer 1 → 1); `n → n` Update class (e.g. when minting NFTs); `n → 0` Destroy class
+- [M-NFT Issuer](https://retricsu.github.io/community-scripts/mnft_issuer.md) `mnft_issuer` — type · nft · mainnet, testnet: `0 → 1` Create issuer; `1 → 1` Update issuer; `1 → 0` Destroy issuer
+- [M-NFT NFT](https://retricsu.github.io/community-scripts/mnft_nft.md) `mnft_nft` — type · nft · mainnet, testnet: `0 → n` Mint (class 1 → 1); `n → n` Update / transfer / claim / lock; `n → 0` Destroy
+- [Multisig (legacy)](https://retricsu.github.io/community-scripts/multisig_legacy.md) `multisig_legacy` — lock · system, identity · mainnet, testnet: `1 → N` Unlock & spend a multisig cell
+- [Multisig V2](https://retricsu.github.io/community-scripts/multisig_v2.md) `multisig_v2` — lock · system, identity · mainnet, testnet: `1 → N` Unlock & spend a multisig cell
+- [NervosDAO](https://retricsu.github.io/community-scripts/nervos_dao.md) `nervos_dao` — type · system, defi · mainnet, testnet: `0 → 1` Deposit; `1 → 1` Withdraw Phase 1; `1 → 0` Withdraw Phase 2
+- [NexisDAO dCKB Type Lock](https://retricsu.github.io/community-scripts/nexisdao_type_lock.md) `nexisdao_type_lock` — lock · defi · mainnet: `1 → *` Unlock: the named type must appear in the tx
+- [Noir owned counter](https://retricsu.github.io/community-scripts/noir_owned_counter.md) `noir_owned_counter` — type · zk · testnet: `0 → 1` Create counter (count = 0); `1 → 1` Proof-authorized update (count + 1)
+- [Noir private tally (v2)](https://retricsu.github.io/community-scripts/noir_private_tally.md) `noir_private_tally` — type · zk · testnet: `0 → 1` Create a tally (proof of the initial commitment, c_old = 0); `1 → 1` Update: add a hidden amount (incl. +0 cover update)
+- [nostr_binding](https://retricsu.github.io/community-scripts/nostr_binding.md) `nostr_binding` — undefined · identity · mainnet, testnet: no cell-flow spec yet (deployments and decoder only)
+- [Nostr lock](https://retricsu.github.io/community-scripts/nostr_lock.md) `nostr_lock` — lock · identity · mainnet, testnet: `A` Unlock with a Nostr key (pow_difficulty = 0); `B` PoW unlock (pow_difficulty > 0)
+- [Omnilock](https://retricsu.github.io/community-scripts/omnilock.md) `omnilock` — lock · identity · mainnet, testnet: `A` Normal unlock (auth signature); `B` ACP mode (bit1, no signature); `C` Administrator mode (omni_identity)
+- [Omnilock V1](https://retricsu.github.io/community-scripts/omnilock_v1.md) `omnilock_v1` — lock · identity · mainnet, testnet: `A` Normal unlock (auth signature); `B` ACP mode (bit1, no signature); `C` Administrator mode (omni_identity)
+- [Opticrum (Fiber liquidity rental) lock](https://retricsu.github.io/community-scripts/opticrum_lock.md) `opticrum_lock` — lock · defi, channel · testnet: `0 → Order` Buyer posts an Order (lock not executed); `Order → 0` Buyer cancels the Order; `Order → Match` Seller opens a channel and matches; `Match → Match (seller)` Seller extracts rent; `Match → Match (buyer)` Buyer withdraws / injects; `Match → 0` Seller destroys an exhausted Match
+- [Output Type Proxy Lock](https://retricsu.github.io/community-scripts/output_type_proxy_lock.md) `output_type_proxy_lock` — lock · proxy, ckb-proxy-locks · mainnet, testnet: `A` Unlock authorised by the owner script
+- [iCKB owned owner](https://retricsu.github.io/community-scripts/owned_owner.md) `owned_owner` — lock · defi, iCKB · mainnet: `0 → 2` Create: withdrawal request + owner token; `2 → 0` Claim: unlock the withdrawal request with the owner
+- [PW lock](https://retricsu.github.io/community-scripts/pw_lock.md) `pw_lock` — lock · identity · mainnet, testnet: `A` Spend with an Ethereum signature; `B` Payment without signature (same as anyone_can_pay)
+- [RGB++ lock](https://retricsu.github.io/community-scripts/rgbpp_lock.md) `rgbpp_lock` — lock · btc, RGB++ · mainnet, testnet: `N → M` Isomorphic transfer (BTC tx drives the CKB tx)
+- [SECP256K1/blake160](https://retricsu.github.io/community-scripts/secp256k1_blake160.md) `secp256k1_blake160` — lock · system, identity · mainnet, testnet: `1 → N` Unlock & spend
+- [Session lock (session keys)](https://retricsu.github.io/community-scripts/session_lock.md) `session_lock` — lock · identity · testnet: `owner` Owner mode: spend anything / revoke; `N → ≤1` Session spend (CKB, any payee); `recipient` Session spend (recipient-scoped, 112B / 160B); `token` Token session (128B / 160B, u128 xUDT/sUDT-like amounts)
+- [SHRINCS post-quantum lock](https://retricsu.github.io/community-scripts/shrincs_lock.md) `shrincs_lock` — lock · identity, quantum · testnet: `1 → N` SHRINCS signature unlock (stateful 324B / stateless 2568B)
+- [Single Use Lock](https://retricsu.github.io/community-scripts/single_use_lock.md) `single_use_lock` — lock · proxy, ckb-proxy-locks · mainnet, testnet: `A` Spend together with a given OutPoint
+- [Quantum-resistant SPHINCS+ Lock](https://retricsu.github.io/community-scripts/sphincs_lock.md) `sphincs_lock` — lock · identity, quantum · mainnet, testnet: `A` M-of-N SPHINCS+ (SLH-DSA, FIPS 205) multisig unlock; single key is the 1-of-1 case
+- [Spore](https://retricsu.github.io/community-scripts/spore.md) `spore` — type · nft, Spore · mainnet, testnet: `0 → 1` Mint; `1 → 1` Transfer; `1 → 0` Burn
+- [Stable++ Asset](https://retricsu.github.io/community-scripts/stablepp_asset.md) `stablepp_asset` — type · token, defi · mainnet: `?` Identification only: facts verifiable on chain
+- [Stable++ Intent Lock](https://retricsu.github.io/community-scripts/stablepp_intent_lock.md) `stablepp_intent_lock` — lock · defi · mainnet: `?` Identification only: facts verifiable on chain
+- [Stable++ Pool](https://retricsu.github.io/community-scripts/stablepp_pool.md) `stablepp_pool` — type · defi · mainnet: `?` Identification only: facts verifiable on chain
+- [Stable++ Vault Lock](https://retricsu.github.io/community-scripts/stablepp_vault_lock.md) `stablepp_vault_lock` — lock · defi · mainnet: `?` Identification only: facts verifiable on chain
+- [standard-udt sUDT type](https://retricsu.github.io/community-scripts/std_sudt.md) `std_sudt` — type · token · not deployed: `Σin ≥ Σout` Transfer / burn (sudt only checks format); `Σin < Σout` Mint
+- [standard-udt sUDT metadata type](https://retricsu.github.io/community-scripts/std_sudt_meta.md) `std_sudt_meta` — type · token · not deployed: `0 → Meta` Create metadata (optionally with the initial mint); `Meta → Meta` Update metadata / account mints and protocol burns; `Meta → 0` Destroy metadata (reclaim CKB)
+- [sUDT](https://retricsu.github.io/community-scripts/sudt.md) `sudt` — type · token · mainnet, testnet: `0 → N` Issue / Mint (owner mode); `N → M` Transfer / Burn
+- [Time Lock (proxy-locks)](https://retricsu.github.io/community-scripts/time_lock.md) `time_lock` — lock · proxy, ckb-proxy-locks · mainnet, testnet: `A` Unlock by a given lock after a time
+- [Type Burn Lock](https://retricsu.github.io/community-scripts/type_burn_lock.md) `type_burn_lock` — lock · proxy, ckb-proxy-locks · mainnet, testnet: `A` Unlock by burning a given type
+- [Type ID](https://retricsu.github.io/community-scripts/type_id.md) `type_id` — type · system · mainnet, testnet: `0 → 1` Create; `1 → 1` Update; `1 → 0` Destroy
+- [UniPass lock (deprecated)](https://retricsu.github.io/community-scripts/unipass.md) `unipass` — lock · identity · mainnet, testnet: `?` Identification only: facts verifiable on chain
+- [Unique Cell](https://retricsu.github.io/community-scripts/unique_type.md) `unique_type` — type · token, btc · mainnet, testnet: `A` Create (the only allowed operation)
+- [USDI Asset (xUDT binary)](https://retricsu.github.io/community-scripts/usdi.md) `usdi` — type · token · mainnet, testnet: `0 → N` Issue / Mint (owner mode); `N → M` Transfer / Burn
+- [UTXOSwap Intent Lock](https://retricsu.github.io/community-scripts/utxoswap_intent_lock.md) `utxoswap_intent_lock` — lock · defi · mainnet, testnet: `?` Identification only: facts verifiable on chain
+- [UTXOSwap pool proxy lock (sequencer proxy lock)](https://retricsu.github.io/community-scripts/utxoswap_proxy_lock.md) `utxoswap_proxy_lock` — lock · defi · mainnet, testnet: `?` Identification only: facts verifiable on chain
+- [xUDT](https://retricsu.github.io/community-scripts/xudt.md) `xudt` — type · token · mainnet, testnet: `0 → N` Issue / Mint (owner mode); `N → M` Transfer / Burn
+- [Zero Lock (all-zero code hash)](https://retricsu.github.io/community-scripts/zero_lock.md) `zero_lock` — lock · system · mainnet, testnet: `0 → 1` Create: anyone can put a cell under the Zero Lock; `1 → ✗` Spend: always fails
+- [zk-Lock (Groth16 proof lock)](https://retricsu.github.io/community-scripts/zk_lock.md) `zk_lock` — lock · identity, zk · testnet: `0 → 1` Lock: create a zk-Lock cell (lock does not run); `1 → N` Generic unlock (Binding::None, contracts/zk-lock): any valid proof, in any transaction; `1 → N` Transaction-bound unlock (Binding::Transaction, contracts/zk-lock-bound): pi[0] = tx_hash scalar
+
+## Optional
+
+- [Source repository](https://github.com/gpBlockchain/ckb-contract-flow-html): specs (contracts/<id>/spec.json), plugins, tests, generator
+- [Adding a contract](https://github.com/gpBlockchain/ckb-contract-flow-html/blob/main/docs/ADD_CONTRACT.md) · [agent skill](https://github.com/gpBlockchain/ckb-contract-flow-html/blob/main/skills/ckb-contract-flow/SKILL.md)

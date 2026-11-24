@@ -1,0 +1,1246 @@
+<!doctype html>
+<html lang="zh" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src https:; img-src data:">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CKB Contract Hub · 合约流转门户</title>
+<style>
+:root{--bg:#f7f6f3;--card:#fff;--ink:#1c2430;--dim:#6b7280;--line:#e5e2da;--acc:#1d4ed8;--mon:#7c3aed}
+[data-theme=dark]{--bg:#12151b;--card:#1b2029;--ink:#e6e8ec;--dim:#8b93a1;--line:#2a303b;--acc:#60a5fa}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 -apple-system,"Segoe UI",Roboto,"PingFang SC","Noto Sans SC",sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:0 20px}
+header.site{border-bottom:1px solid var(--line);background:var(--card);position:sticky;top:0;z-index:5}
+header.site .wrap{display:flex;align-items:center;gap:14px;padding:12px 20px;flex-wrap:wrap}
+header.site h1{font-size:18px;margin:0}
+header.site nav{margin-left:auto;display:flex;gap:12px;flex-wrap:wrap}
+a{color:var(--acc);text-decoration:none}a:hover{text-decoration:underline}
+button,.btn{background:var(--acc);color:#fff;border:0;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:14px}
+button.ghost,.tgl{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.hero{padding:36px 0 8px}
+.hero p{color:var(--dim);max-width:640px}
+.decode{display:flex;gap:8px;margin:18px 0 6px;flex-wrap:wrap}
+.decode input{flex:1;min-width:220px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-family:ui-monospace,monospace}
+.decode select{padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
+section{padding:26px 0;border-top:1px solid var(--line)}
+h2{font-size:20px;margin:0 0 10px}
+.dim{color:var(--dim)}.small{font-size:12px}
+.badge{display:inline-block;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600;color:#fff;margin:1px 2px}
+.badge.mon{background:var(--mon)}
+.net{display:inline-block;border:1px solid var(--line);border-radius:5px;padding:0 6px;font-size:11px;color:var(--dim);margin:1px}
+.net.mainnet{border-color:var(--acc);color:var(--acc)}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 18px}
+.filters input,.filters select{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
+.filters label{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--dim)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.card h3{margin:0 0 2px;font-size:15px}.card .entitle{display:block;color:var(--dim);font-size:13px;font-weight:400}
+.card .cid{font-size:12px;color:var(--dim)}
+.tags{margin:6px 0}.tag{display:inline-block;background:color-mix(in srgb,var(--acc) 12%,transparent);color:var(--acc);border-radius:5px;padding:0 6px;font-size:11px;margin:1px}
+.links{display:flex;gap:10px;margin-top:8px;font-size:13px}
+footer{border-top:1px solid var(--line);margin-top:30px;padding:18px 0 40px;color:var(--dim);font-size:13px}
+[data-l=en]{display:none}html[data-lang=en] [data-l=zh]{display:none}html[data-lang=en] [data-l=en]{display:inline}
+html[data-lang=en] .entitle{display:block}
+code{background:color-mix(in srgb,var(--line) 60%,transparent);border-radius:5px;padding:1px 5px;font-size:12.5px}
+</style>
+</head>
+<body>
+<header class="site"><div class="wrap">
+  <h1>🛡 CKB Contract Hub</h1>
+  <nav>
+    <a href="tx.html"><span data-l="zh">交易解码器</span><span data-l="en">Tx decoder</span></a>
+    <a href="llms.txt">llms.txt</a>
+    <a href="https://github.com/gpBlockchain/ckb-contract-flow-html">upstream</a>
+    <button class="tgl" id="lang" type="button">EN</button>
+    <button class="tgl" id="theme" type="button">◐</button>
+  </nav>
+</div></header>
+
+<div class="wrap">
+  <div class="hero">
+    <h2 style="font-size:26px"><span data-l="zh">CKB 生态核心合约：状态流转 × 交易诊断，一个入口</span><span data-l="en">CKB core contracts: cell-flow specs × tx diagnosis, one entry</span></h2>
+    <p><span data-l="zh">下方是全合约知识库的约束流转规范；粘贴任意交易哈希即可图形化解码并校验合约约束。链上安全巡检结果请关注 CI。</span><span data-l="en">Constraint specs for the whole contract KB below; paste any tx hash to decode and verify contract constraints graphically. On-chain security scan results live in CI.</span></p>
+    <div class="decode">
+      <input id="tx" placeholder="0x…" spellcheck="false">
+      <select id="net">
+        <option value="https://mainnet.ckb.dev/rpc">mainnet</option>
+        <option value="https://testnet.ckb.dev/rpc">testnet</option>
+      </select>
+      <button id="go" type="button"><span data-l="zh">解码 →</span><span data-l="en">Decode →</span></button>
+    </div>
+    <p class="dim small"><span data-l="zh">共</span><span data-l="en">Total</span>: 24 <span data-l="zh">个受监控合约</span><span data-l="en">monitored contracts</span> · 94 <span data-l="zh">个知识库合约</span><span data-l="en">KB contracts</span> · <span data-l="zh">生成于</span><span data-l="en">built</span> 2026-11-24 02:56Z</p>
+  </div>
+
+  <section id="directory">
+    <h2><span data-l="zh">合约目录</span><span data-l="en">Contract directory</span></h2>
+    <div class="filters">
+      <input id="q" size="24">
+      <select id="fnet"><option value="" id="fnet-all">all</option><option value="mainnet">mainnet</option><option value="testnet">testnet</option></select>
+      <label><input type="checkbox" id="fmon"> <span data-l="zh">仅看监控中</span><span data-l="en">monitored only</span></label>
+      <span class="dim" id="cnt"></span>
+    </div>
+    <div class="grid" id="cards">
+<article class="card" data-id="acp" data-mon="1"
+      data-nets="mainnet,testnet" data-tags="token,identity,nervos,open-source" data-text="acp anyone_can_pay（lock）约束 anyone_can_pay (lock) constraints token identity nervos open-source">
+      <h3>anyone_can_pay（lock）约束<span data-l="en" class="entitle">anyone_can_pay (lock) Constraints</span></h3>
+      <code class="cid">acp</code>
+      <div class="tags"><span class="tag">token</span><span class="tag">identity</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"><span class="badge mon"><span data-l="zh">🛡 监控中</span><span data-l="en">🛡 monitored</span></span></div>
+      <div class="links">
+        <a href="acp.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-20</div>
+    </article>
+<article class="card" data-id="always_success" data-mon="1"
+      data-nets="mainnet,testnet" data-tags="proxy,nervos,open-source,p-proxy-locks" data-text="always_success always success 约束 always success constraints proxy nervos open-source p-proxy-locks">
+      <h3>Always Success 约束<span data-l="en" class="entitle">Always Success Constraints</span></h3>
+      <code class="cid">always_success</code>
+      <div class="tags"><span class="tag">proxy</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="tag">p-proxy-locks</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"><span class="badge mon"><span data-l="zh">🛡 监控中</span><span data-l="en">🛡 monitored</span></span></div>
+      <div class="links">
+        <a href="always_success.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-20</div>
+    </article>
+<article class="card" data-id="btc_spv_type_lock" data-mon="0"
+      data-nets="mainnet" data-tags="btc,cryptape,open-source,p-rgbpp" data-text="btc_spv_type_lock bitcoin spv type lock 约束（主网 btc-mainnet-v0.1.0） bitcoin spv type lock constraints (mainnet btc-mainnet-v0.1.0) btc cryptape open-source p-rgbpp">
+      <h3>Bitcoin SPV Type Lock 约束（主网 btc-mainnet-v0.1.0）<span data-l="en" class="entitle">Bitcoin SPV Type Lock Constraints (mainnet btc-mainnet-v0.1.0)</span></h3>
+      <code class="cid">btc_spv_type_lock</code>
+      <div class="tags"><span class="tag">btc</span><span class="tag">cryptape</span><span class="tag">open-source</span><span class="tag">p-rgbpp</span><span class="net mainnet">mainnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="btc_spv_type_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-06</div>
+    </article>
+<article class="card" data-id="btc_time_lock" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="btc,community,open-source,p-rgbpp" data-text="btc_time_lock btc time lock 约束 btc time lock constraints btc community open-source p-rgbpp">
+      <h3>BTC time lock 约束<span data-l="en" class="entitle">BTC time lock Constraints</span></h3>
+      <code class="cid">btc_time_lock</code>
+      <div class="tags"><span class="tag">btc</span><span class="tag">community</span><span class="tag">open-source</span><span class="tag">p-rgbpp</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="btc_time_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-20</div>
+    </article>
+<article class="card" data-id="ccbtc_asset" data-mon="0"
+      data-nets="mainnet" data-tags="token,btc,community,no-source" data-text="ccbtc_asset ccbtc asset（无公开源码） ccbtc asset (no public source) token btc community no-source">
+      <h3>ccBTC Asset（无公开源码）<span data-l="en" class="entitle">ccBTC Asset (no public source)</span></h3>
+      <code class="cid">ccbtc_asset</code>
+      <div class="tags"><span class="tag">token</span><span class="tag">btc</span><span class="tag">community</span><span class="tag">no-source</span><span class="net mainnet">mainnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="ccbtc_asset.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-06</div>
+    </article>
+<article class="card" data-id="ccc_btc_lock" data-mon="1"
+      data-nets="testnet" data-tags="identity,community,open-source" data-text="ccc_btc_lock ccc_btc_lock ccc_btc_lock identity community open-source">
+      <h3>ccc_btc_lock<span data-l="en" class="entitle">ccc_btc_lock</span></h3>
+      <code class="cid">ccc_btc_lock</code>
+      <div class="tags"><span class="tag">identity</span><span class="tag">community</span><span class="tag">open-source</span><span class="net testnet">testnet</span></div>
+      <div class="badges"><span class="badge mon"><span data-l="zh">🛡 监控中</span><span data-l="en">🛡 monitored</span></span></div>
+      <div class="links">
+        <span class="dim"><span data-l="zh">无规范页</span><span data-l="en">no spec page</span></span>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-24</div>
+    </article>
+<article class="card" data-id="ccc_eth_lock" data-mon="1"
+      data-nets="testnet" data-tags="identity,community,open-source" data-text="ccc_eth_lock ccc_eth_lock ccc_eth_lock identity community open-source">
+      <h3>ccc_eth_lock<span data-l="en" class="entitle">ccc_eth_lock</span></h3>
+      <code class="cid">ccc_eth_lock</code>
+      <div class="tags"><span class="tag">identity</span><span class="tag">community</span><span class="tag">open-source</span><span class="net testnet">testnet</span></div>
+      <div class="badges"><span class="badge mon"><span data-l="zh">🛡 监控中</span><span data-l="en">🛡 monitored</span></span></div>
+      <div class="links">
+        <span class="dim"><span data-l="zh">无规范页</span><span data-l="en">no spec page</span></span>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-24</div>
+    </article>
+<article class="card" data-id="ccc_sol_lock" data-mon="1"
+      data-nets="testnet" data-tags="identity,community,open-source" data-text="ccc_sol_lock ccc_sol_lock ccc_sol_lock identity community open-source">
+      <h3>ccc_sol_lock<span data-l="en" class="entitle">ccc_sol_lock</span></h3>
+      <code class="cid">ccc_sol_lock</code>
+      <div class="tags"><span class="tag">identity</span><span class="tag">community</span><span class="tag">open-source</span><span class="net testnet">testnet</span></div>
+      <div class="badges"><span class="badge mon"><span data-l="zh">🛡 监控中</span><span data-l="en">🛡 monitored</span></span></div>
+      <div class="links">
+        <span class="dim"><span data-l="zh">无规范页</span><span data-l="en">no spec page</span></span>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-24</div>
+    </article>
+<article class="card" data-id="cells_account_lock" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="identity,community,open-source,p-cells" data-text="cells_account_lock cells 名字 lock（account-lock）约束 cells name lock (account-lock) constraints identity community open-source p-cells">
+      <h3>Cells 名字 lock（account-lock）约束<span data-l="en" class="entitle">Cells name lock (account-lock) Constraints</span></h3>
+      <code class="cid">cells_account_lock</code>
+      <div class="tags"><span class="tag">identity</span><span class="tag">community</span><span class="tag">open-source</span><span class="tag">p-cells</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="cells_account_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-09</div>
+    </article>
+<article class="card" data-id="cells_account_type" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="identity,community,open-source,p-cells" data-text="cells_account_type cells 名字（account-cell-type）约束 cells name (account-cell-type) constraints identity community open-source p-cells">
+      <h3>Cells 名字（account-cell-type）约束<span data-l="en" class="entitle">Cells name (account-cell-type) Constraints</span></h3>
+      <code class="cid">cells_account_type</code>
+      <div class="tags"><span class="tag">identity</span><span class="tag">community</span><span class="tag">open-source</span><span class="tag">p-cells</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="cells_account_type.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-09</div>
+    </article>
+<article class="card" data-id="cells_price_type" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="identity,community,open-source,p-cells" data-text="cells_price_type cells 价格 cell（price-cell-type）约束 cells price cell (price-cell-type) constraints identity community open-source p-cells">
+      <h3>Cells 价格 cell（price-cell-type）约束<span data-l="en" class="entitle">Cells price cell (price-cell-type) Constraints</span></h3>
+      <code class="cid">cells_price_type</code>
+      <div class="tags"><span class="tag">identity</span><span class="tag">community</span><span class="tag">open-source</span><span class="tag">p-cells</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="cells_price_type.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-09</div>
+    </article>
+<article class="card" data-id="cells_sale_lock" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="identity,community,open-source,p-cells" data-text="cells_sale_lock cells 挂单（sale-lock）约束 cells listing (sale-lock) constraints identity community open-source p-cells">
+      <h3>Cells 挂单（sale-lock）约束<span data-l="en" class="entitle">Cells listing (sale-lock) Constraints</span></h3>
+      <code class="cid">cells_sale_lock</code>
+      <div class="tags"><span class="tag">identity</span><span class="tag">community</span><span class="tag">open-source</span><span class="tag">p-cells</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="cells_sale_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-09</div>
+    </article>
+<article class="card" data-id="cheque" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="token,defi,nervos,open-source" data-text="cheque cheque（lock）约束 cheque (lock) constraints token defi nervos open-source">
+      <h3>Cheque（lock）约束<span data-l="en" class="entitle">Cheque (lock) Constraints</span></h3>
+      <code class="cid">cheque</code>
+      <div class="tags"><span class="tag">token</span><span class="tag">defi</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="cheque.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-20</div>
+    </article>
+<article class="card" data-id="ckbfs_v2" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="proxy,community,open-source" data-text="ckbfs_v2 ckbfs v2 约束（witness 文件存储） ckbfs v2 constraints (witness file storage) proxy community open-source">
+      <h3>CKBFS V2 约束（witness 文件存储）<span data-l="en" class="entitle">CKBFS V2 Constraints (witness file storage)</span></h3>
+      <code class="cid">ckbfs_v2</code>
+      <div class="tags"><span class="tag">proxy</span><span class="tag">community</span><span class="tag">open-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="ckbfs_v2.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-06</div>
+    </article>
+<article class="card" data-id="ckbfs_v3" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="proxy,community,open-source" data-text="ckbfs_v3 ckbfs v3 约束（witness 文件存储，backlink 移入 witness） ckbfs v3 constraints (witness file storage, backlinks moved into witnesses) proxy community open-source">
+      <h3>CKBFS V3 约束（witness 文件存储，backlink 移入 witness）<span data-l="en" class="entitle">CKBFS V3 Constraints (witness file storage, backlinks moved into witnesses)</span></h3>
+      <code class="cid">ckbfs_v3</code>
+      <div class="tags"><span class="tag">proxy</span><span class="tag">community</span><span class="tag">open-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="ckbfs_v3.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-06</div>
+    </article>
+<article class="card" data-id="ckbswap_amm" data-mon="0"
+      data-nets="" data-tags="defi,token,open-source,community" data-text="ckbswap_amm ckbswap 恒定乘积 amm 约束 ckbswap constant-product amm constraints defi token open-source community">
+      <h3>CKBSwap 恒定乘积 AMM 约束<span data-l="en" class="entitle">CKBSwap Constant-product AMM Constraints</span></h3>
+      <code class="cid">ckbswap_amm</code>
+      <div class="tags"><span class="tag">defi</span><span class="tag">token</span><span class="tag">open-source</span><span class="tag">community</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="ckbswap_amm.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-12</div>
+    </article>
+<article class="card" data-id="cluster" data-mon="1"
+      data-nets="mainnet,testnet" data-tags="nft,community,open-source,p-spore" data-text="cluster spore cluster（type）约束 spore cluster (type) constraints nft community open-source p-spore">
+      <h3>Spore Cluster（type）约束<span data-l="en" class="entitle">Spore Cluster (type) Constraints</span></h3>
+      <code class="cid">cluster</code>
+      <div class="tags"><span class="tag">nft</span><span class="tag">community</span><span class="tag">open-source</span><span class="tag">p-spore</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"><span class="badge mon"><span data-l="zh">🛡 监控中</span><span data-l="en">🛡 monitored</span></span></div>
+      <div class="links">
+        <a href="cluster.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-20</div>
+    </article>
+<article class="card" data-id="cobuild_otx_lock" data-mon="0"
+      data-nets="" data-tags="identity,open-source,community" data-text="cobuild_otx_lock cobuild otx lock 约束 cobuild otx lock constraints identity open-source community">
+      <h3>Cobuild OTX Lock 约束<span data-l="en" class="entitle">Cobuild OTX Lock Constraints</span></h3>
+      <code class="cid">cobuild_otx_lock</code>
+      <div class="tags"><span class="tag">identity</span><span class="tag">open-source</span><span class="tag">community</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="cobuild_otx_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-12</div>
+    </article>
+<article class="card" data-id="comp_shared_lock" data-mon="0"
+      data-nets="testnet" data-tags="proxy,open-source,community" data-text="comp_shared_lock comp 共享 lock（shared cell）约束 comp shared lock (shared cell) constraints proxy open-source community">
+      <h3>COMP 共享 Lock（Shared Cell）约束<span data-l="en" class="entitle">COMP Shared Lock (Shared Cell) Constraints</span></h3>
+      <code class="cid">comp_shared_lock</code>
+      <div class="tags"><span class="tag">proxy</span><span class="tag">open-source</span><span class="tag">community</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="comp_shared_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-12</div>
+    </article>
+<article class="card" data-id="cota" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="nft,community,no-source" data-text="cota cota cota nft community no-source">
+      <h3>cota<span data-l="en" class="entitle">cota</span></h3>
+      <code class="cid">cota</code>
+      <div class="tags"><span class="tag">nft</span><span class="tag">community</span><span class="tag">no-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <span class="dim"><span data-l="zh">无规范页</span><span data-l="en">no spec page</span></span>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-20</div>
+    </article>
+<article class="card" data-id="cota_registry" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="nft,community,no-source" data-text="cota_registry cota registry（已废弃）（无公开源码） cota registry (deprecated) (no public source) nft community no-source">
+      <h3>CoTA Registry（已废弃）（无公开源码）<span data-l="en" class="entitle">CoTA Registry (deprecated) (no public source)</span></h3>
+      <code class="cid">cota_registry</code>
+      <div class="tags"><span class="tag">nft</span><span class="tag">community</span><span class="tag">no-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="cota_registry.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-06</div>
+    </article>
+<article class="card" data-id="crowdcell_campaign" data-mon="0"
+      data-nets="testnet" data-tags="defi,open-source,community,p-crowdcell" data-text="crowdcell_campaign crowdcell campaign 类型脚本 约束 crowdcell campaign type script constraints defi open-source community p-crowdcell">
+      <h3>CrowdCell Campaign 类型脚本 约束<span data-l="en" class="entitle">CrowdCell Campaign Type Script Constraints</span></h3>
+      <code class="cid">crowdcell_campaign</code>
+      <div class="tags"><span class="tag">defi</span><span class="tag">open-source</span><span class="tag">community</span><span class="tag">p-crowdcell</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="crowdcell_campaign.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-04</div>
+    </article>
+<article class="card" data-id="crowdcell_campaign_lock" data-mon="0"
+      data-nets="testnet" data-tags="defi,open-source,community,p-crowdcell" data-text="crowdcell_campaign_lock crowdcell campaign lock 约束 crowdcell campaign lock constraints defi open-source community p-crowdcell">
+      <h3>CrowdCell Campaign Lock 约束<span data-l="en" class="entitle">CrowdCell Campaign Lock Constraints</span></h3>
+      <code class="cid">crowdcell_campaign_lock</code>
+      <div class="tags"><span class="tag">defi</span><span class="tag">open-source</span><span class="tag">community</span><span class="tag">p-crowdcell</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="crowdcell_campaign_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-04</div>
+    </article>
+<article class="card" data-id="crowdcell_pledge" data-mon="0"
+      data-nets="testnet" data-tags="defi,open-source,community,p-crowdcell" data-text="crowdcell_pledge crowdcell pledge 类型脚本 约束 crowdcell pledge type script constraints defi open-source community p-crowdcell">
+      <h3>CrowdCell Pledge 类型脚本 约束<span data-l="en" class="entitle">CrowdCell Pledge Type Script Constraints</span></h3>
+      <code class="cid">crowdcell_pledge</code>
+      <div class="tags"><span class="tag">defi</span><span class="tag">open-source</span><span class="tag">community</span><span class="tag">p-crowdcell</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="crowdcell_pledge.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-04</div>
+    </article>
+<article class="card" data-id="crowdcell_pledge_lock" data-mon="0"
+      data-nets="testnet" data-tags="defi,open-source,community,p-crowdcell" data-text="crowdcell_pledge_lock crowdcell pledge lock 约束 crowdcell pledge lock constraints defi open-source community p-crowdcell">
+      <h3>CrowdCell Pledge Lock 约束<span data-l="en" class="entitle">CrowdCell Pledge Lock Constraints</span></h3>
+      <code class="cid">crowdcell_pledge_lock</code>
+      <div class="tags"><span class="tag">defi</span><span class="tag">open-source</span><span class="tag">community</span><span class="tag">p-crowdcell</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="crowdcell_pledge_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-04</div>
+    </article>
+<article class="card" data-id="crowdcell_receipt" data-mon="0"
+      data-nets="testnet" data-tags="defi,open-source,community,p-crowdcell" data-text="crowdcell_receipt crowdcell receipt 类型脚本 约束 crowdcell receipt type script constraints defi open-source community p-crowdcell">
+      <h3>CrowdCell Receipt 类型脚本 约束<span data-l="en" class="entitle">CrowdCell Receipt Type Script Constraints</span></h3>
+      <code class="cid">crowdcell_receipt</code>
+      <div class="tags"><span class="tag">defi</span><span class="tag">open-source</span><span class="tag">community</span><span class="tag">p-crowdcell</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="crowdcell_receipt.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-04</div>
+    </article>
+<article class="card" data-id="did_ckb" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="identity,community,open-source" data-text="did_ckb did ckb 约束 did ckb constraints identity community open-source">
+      <h3>DID CKB 约束<span data-l="en" class="entitle">DID CKB Constraints</span></h3>
+      <code class="cid">did_ckb</code>
+      <div class="tags"><span class="tag">identity</span><span class="tag">community</span><span class="tag">open-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="did_ckb.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-20</div>
+    </article>
+<article class="card" data-id="dob_0" data-mon="1"
+      data-nets="mainnet,testnet" data-tags="nft,community,open-source,p-spore" data-text="dob_0 dob_0 dob_0 nft community open-source p-spore">
+      <h3>dob_0<span data-l="en" class="entitle">dob_0</span></h3>
+      <code class="cid">dob_0</code>
+      <div class="tags"><span class="tag">nft</span><span class="tag">community</span><span class="tag">open-source</span><span class="tag">p-spore</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"><span class="badge mon"><span data-l="zh">🛡 监控中</span><span data-l="en">🛡 monitored</span></span></div>
+      <div class="links">
+        <span class="dim"><span data-l="zh">无规范页</span><span data-l="en">no spec page</span></span>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-24</div>
+    </article>
+<article class="card" data-id="dob_1" data-mon="1"
+      data-nets="mainnet,testnet" data-tags="nft,community,open-source,p-spore" data-text="dob_1 dob_1 dob_1 nft community open-source p-spore">
+      <h3>dob_1<span data-l="en" class="entitle">dob_1</span></h3>
+      <code class="cid">dob_1</code>
+      <div class="tags"><span class="tag">nft</span><span class="tag">community</span><span class="tag">open-source</span><span class="tag">p-spore</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"><span class="badge mon"><span data-l="zh">🛡 监控中</span><span data-l="en">🛡 monitored</span></span></div>
+      <div class="links">
+        <span class="dim"><span data-l="zh">无规范页</span><span data-l="en">no spec page</span></span>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-24</div>
+    </article>
+<article class="card" data-id="dotbit_income" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="identity,community,open-source" data-text="dotbit_income .bit incomecell type 约束 .bit incomecell type constraints identity community open-source">
+      <h3>.bit IncomeCell Type 约束<span data-l="en" class="entitle">.bit IncomeCell Type Constraints</span></h3>
+      <code class="cid">dotbit_income</code>
+      <div class="tags"><span class="tag">identity</span><span class="tag">community</span><span class="tag">open-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="dotbit_income.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-06</div>
+    </article>
+<article class="card" data-id="dotbit_reverse_record" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="identity,community,open-source" data-text="dotbit_reverse_record .bit reverserecordcell type 约束 .bit reverserecordcell type constraints identity community open-source">
+      <h3>.bit ReverseRecordCell Type 约束<span data-l="en" class="entitle">.bit ReverseRecordCell Type Constraints</span></h3>
+      <code class="cid">dotbit_reverse_record</code>
+      <div class="tags"><span class="tag">identity</span><span class="tag">community</span><span class="tag">open-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="dotbit_reverse_record.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-06</div>
+    </article>
+<article class="card" data-id="dotbit_time_index_state" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="identity,community,open-source" data-text="dotbit_time_index_state .bit time index state type 约束 .bit time index state type constraints identity community open-source">
+      <h3>.bit Time Index State Type 约束<span data-l="en" class="entitle">.bit Time Index State Type Constraints</span></h3>
+      <code class="cid">dotbit_time_index_state</code>
+      <div class="tags"><span class="tag">identity</span><span class="tag">community</span><span class="tag">open-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="dotbit_time_index_state.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-06</div>
+    </article>
+<article class="card" data-id="dotbit_time_info" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="identity,community,open-source" data-text="dotbit_time_info .bit time info type 约束 .bit time info type constraints identity community open-source">
+      <h3>.bit Time Info Type 约束<span data-l="en" class="entitle">.bit Time Info Type Constraints</span></h3>
+      <code class="cid">dotbit_time_info</code>
+      <div class="tags"><span class="tag">identity</span><span class="tag">community</span><span class="tag">open-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="dotbit_time_info.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-06</div>
+    </article>
+<article class="card" data-id="easy_to_discover_type" data-mon="1"
+      data-nets="mainnet,testnet" data-tags="proxy,nervos,open-source,p-proxy-locks" data-text="easy_to_discover_type 易发现 type 约束 easy-to-discover type constraints proxy nervos open-source p-proxy-locks">
+      <h3>易发现 Type 约束<span data-l="en" class="entitle">Easy-to-discover Type Constraints</span></h3>
+      <code class="cid">easy_to_discover_type</code>
+      <div class="tags"><span class="tag">proxy</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="tag">p-proxy-locks</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"><span class="badge mon"><span data-l="zh">🛡 监控中</span><span data-l="en">🛡 monitored</span></span></div>
+      <div class="links">
+        <a href="easy_to_discover_type.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-20</div>
+    </article>
+<article class="card" data-id="fiber_commitment_lock" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="channel,nervos,open-source,p-fiber" data-text="fiber_commitment_lock fiber commitment lock 约束 fiber commitment lock constraints channel nervos open-source p-fiber">
+      <h3>Fiber Commitment Lock 约束<span data-l="en" class="entitle">Fiber Commitment Lock Constraints</span></h3>
+      <code class="cid">fiber_commitment_lock</code>
+      <div class="tags"><span class="tag">channel</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="tag">p-fiber</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="fiber_commitment_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-09</div>
+    </article>
+<article class="card" data-id="fiber_funding_lock" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="channel,nervos,open-source,p-fiber" data-text="fiber_funding_lock fiber funding lock 约束 fiber funding lock constraints channel nervos open-source p-fiber">
+      <h3>Fiber Funding Lock 约束<span data-l="en" class="entitle">Fiber Funding Lock Constraints</span></h3>
+      <code class="cid">fiber_funding_lock</code>
+      <div class="tags"><span class="tag">channel</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="tag">p-fiber</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="fiber_funding_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-09</div>
+    </article>
+<article class="card" data-id="flashsigner" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="identity,community,no-source" data-text="flashsigner flashsigner lock（无公开源码） flashsigner lock (no public source) identity community no-source">
+      <h3>FlashSigner lock（无公开源码）<span data-l="en" class="entitle">FlashSigner lock (no public source)</span></h3>
+      <code class="cid">flashsigner</code>
+      <div class="tags"><span class="tag">identity</span><span class="tag">community</span><span class="tag">no-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="flashsigner.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-06</div>
+    </article>
+<article class="card" data-id="force_bridge_lock" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="token,nervos,open-source" data-text="force_bridge_lock force bridge 跨链锁（bridge lockscript）约束 force bridge bridge lockscript constraints token nervos open-source">
+      <h3>Force Bridge 跨链锁（bridge lockscript）约束<span data-l="en" class="entitle">Force Bridge bridge lockscript Constraints</span></h3>
+      <code class="cid">force_bridge_lock</code>
+      <div class="tags"><span class="tag">token</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="force_bridge_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-06</div>
+    </article>
+<article class="card" data-id="godwoken_challenge_lock" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="layer2,nervos,open-source,p-godwoken" data-text="godwoken_challenge_lock godwoken 挑战（challenge-lock）约束 godwoken challenge (challenge-lock) constraints layer2 nervos open-source p-godwoken">
+      <h3>Godwoken 挑战（challenge-lock）约束<span data-l="en" class="entitle">Godwoken challenge (challenge-lock) Constraints</span></h3>
+      <code class="cid">godwoken_challenge_lock</code>
+      <div class="tags"><span class="tag">layer2</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="tag">p-godwoken</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="godwoken_challenge_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-21</div>
+    </article>
+<article class="card" data-id="godwoken_custodian_lock" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="layer2,nervos,open-source,p-godwoken" data-text="godwoken_custodian_lock godwoken 托管（custodian-lock）约束 godwoken custodian (custodian-lock) constraints layer2 nervos open-source p-godwoken">
+      <h3>Godwoken 托管（custodian-lock）约束<span data-l="en" class="entitle">Godwoken custodian (custodian-lock) Constraints</span></h3>
+      <code class="cid">godwoken_custodian_lock</code>
+      <div class="tags"><span class="tag">layer2</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="tag">p-godwoken</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="godwoken_custodian_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-21</div>
+    </article>
+<article class="card" data-id="godwoken_delegate_cell_lock" data-mon="0"
+      data-nets="" data-tags="layer2,nervos,open-source,p-godwoken" data-text="godwoken_delegate_cell_lock godwoken 委托 cell lock（delegate-cell-lock）约束 godwoken delegate-cell lock constraints layer2 nervos open-source p-godwoken">
+      <h3>Godwoken 委托 cell lock（delegate-cell-lock）约束<span data-l="en" class="entitle">Godwoken delegate-cell lock Constraints</span></h3>
+      <code class="cid">godwoken_delegate_cell_lock</code>
+      <div class="tags"><span class="tag">layer2</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="tag">p-godwoken</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="godwoken_delegate_cell_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-21</div>
+    </article>
+<article class="card" data-id="godwoken_deposit_lock" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="layer2,nervos,open-source,p-godwoken" data-text="godwoken_deposit_lock godwoken 存款请求（deposit-lock）约束 godwoken deposit request (deposit-lock) constraints layer2 nervos open-source p-godwoken">
+      <h3>Godwoken 存款请求（deposit-lock）约束<span data-l="en" class="entitle">Godwoken deposit request (deposit-lock) Constraints</span></h3>
+      <code class="cid">godwoken_deposit_lock</code>
+      <div class="tags"><span class="tag">layer2</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="tag">p-godwoken</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="godwoken_deposit_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-21</div>
+    </article>
+<article class="card" data-id="godwoken_eth_account_lock" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="layer2,nervos,open-source,p-godwoken" data-text="godwoken_eth_account_lock godwoken 以太坊账户 lock（eth-account-lock）约束 godwoken ethereum account lock (eth-account-lock) constraints layer2 nervos open-source p-godwoken">
+      <h3>Godwoken 以太坊账户 lock（eth-account-lock）约束<span data-l="en" class="entitle">Godwoken Ethereum account lock (eth-account-lock) Constraints</span></h3>
+      <code class="cid">godwoken_eth_account_lock</code>
+      <div class="tags"><span class="tag">layer2</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="tag">p-godwoken</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="godwoken_eth_account_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-21</div>
+    </article>
+<article class="card" data-id="godwoken_stake_lock" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="layer2,nervos,open-source,p-godwoken" data-text="godwoken_stake_lock godwoken 出块质押（stake-lock）约束 godwoken block-producer stake (stake-lock) constraints layer2 nervos open-source p-godwoken">
+      <h3>Godwoken 出块质押（stake-lock）约束<span data-l="en" class="entitle">Godwoken block-producer stake (stake-lock) Constraints</span></h3>
+      <code class="cid">godwoken_stake_lock</code>
+      <div class="tags"><span class="tag">layer2</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="tag">p-godwoken</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="godwoken_stake_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-21</div>
+    </article>
+<article class="card" data-id="godwoken_state_validator" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="layer2,nervos,open-source,p-godwoken" data-text="godwoken_state_validator godwoken rollup cell（state-validator，type）约束 godwoken rollup cell (state-validator, type) constraints layer2 nervos open-source p-godwoken">
+      <h3>Godwoken rollup cell（state-validator，type）约束<span data-l="en" class="entitle">Godwoken rollup cell (state-validator, type) Constraints</span></h3>
+      <code class="cid">godwoken_state_validator</code>
+      <div class="tags"><span class="tag">layer2</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="tag">p-godwoken</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="godwoken_state_validator.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-21</div>
+    </article>
+<article class="card" data-id="godwoken_withdrawal_lock" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="layer2,nervos,open-source,p-godwoken" data-text="godwoken_withdrawal_lock godwoken 提款（withdrawal-lock）约束 godwoken withdrawal (withdrawal-lock) constraints layer2 nervos open-source p-godwoken">
+      <h3>Godwoken 提款（withdrawal-lock）约束<span data-l="en" class="entitle">Godwoken withdrawal (withdrawal-lock) Constraints</span></h3>
+      <code class="cid">godwoken_withdrawal_lock</code>
+      <div class="tags"><span class="tag">layer2</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="tag">p-godwoken</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="godwoken_withdrawal_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-21</div>
+    </article>
+<article class="card" data-id="groth16_verifier" data-mon="0"
+      data-nets="testnet" data-tags="zk,open-source,community" data-text="groth16_verifier groth16-ckb 验证器 type script 约束 groth16-ckb verifier type script constraints zk open-source community">
+      <h3>groth16-ckb 验证器 Type Script 约束<span data-l="en" class="entitle">groth16-ckb Verifier Type Script Constraints</span></h3>
+      <code class="cid">groth16_verifier</code>
+      <div class="tags"><span class="tag">zk</span><span class="tag">open-source</span><span class="tag">community</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="groth16_verifier.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-12</div>
+    </article>
+<article class="card" data-id="ickb_logic" data-mon="0"
+      data-nets="mainnet" data-tags="defi,token,community,open-source,p-ickb" data-text="ickb_logic ickb logic（lock + type）约束 ickb logic (lock + type) constraints defi token community open-source p-ickb">
+      <h3>iCKB logic（lock + type）约束<span data-l="en" class="entitle">iCKB logic (lock + type) Constraints</span></h3>
+      <code class="cid">ickb_logic</code>
+      <div class="tags"><span class="tag">defi</span><span class="tag">token</span><span class="tag">community</span><span class="tag">open-source</span><span class="tag">p-ickb</span><span class="net mainnet">mainnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="ickb_logic.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-20</div>
+    </article>
+<article class="card" data-id="input_type_proxy_lock" data-mon="1"
+      data-nets="mainnet,testnet" data-tags="proxy,nervos,open-source,p-proxy-locks" data-text="input_type_proxy_lock 输入 type 代理锁 约束 input type proxy lock constraints proxy nervos open-source p-proxy-locks">
+      <h3>输入 Type 代理锁 约束<span data-l="en" class="entitle">Input Type Proxy Lock Constraints</span></h3>
+      <code class="cid">input_type_proxy_lock</code>
+      <div class="tags"><span class="tag">proxy</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="tag">p-proxy-locks</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"><span class="badge mon"><span data-l="zh">🛡 监控中</span><span data-l="en">🛡 monitored</span></span></div>
+      <div class="links">
+        <a href="input_type_proxy_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-24</div>
+    </article>
+<article class="card" data-id="joyid" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="identity,community,no-source" data-text="joyid joyid joyid identity community no-source">
+      <h3>joyid<span data-l="en" class="entitle">joyid</span></h3>
+      <code class="cid">joyid</code>
+      <div class="tags"><span class="tag">identity</span><span class="tag">community</span><span class="tag">no-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <span class="dim"><span data-l="zh">无规范页</span><span data-l="en">no spec page</span></span>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-20</div>
+    </article>
+<article class="card" data-id="limit_order" data-mon="0"
+      data-nets="mainnet" data-tags="defi,community,open-source,p-ickb" data-text="limit_order ickb limit_order（lock + type）约束 ickb limit_order (lock + type) constraints defi community open-source p-ickb">
+      <h3>iCKB limit_order（lock + type）约束<span data-l="en" class="entitle">iCKB limit_order (lock + type) Constraints</span></h3>
+      <code class="cid">limit_order</code>
+      <div class="tags"><span class="tag">defi</span><span class="tag">community</span><span class="tag">open-source</span><span class="tag">p-ickb</span><span class="net mainnet">mainnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="limit_order.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-20</div>
+    </article>
+<article class="card" data-id="lock_proxy_lock" data-mon="1"
+      data-nets="mainnet,testnet" data-tags="proxy,nervos,open-source,p-proxy-locks" data-text="lock_proxy_lock lock 代理锁 约束 lock proxy lock constraints proxy nervos open-source p-proxy-locks">
+      <h3>Lock 代理锁 约束<span data-l="en" class="entitle">Lock Proxy Lock Constraints</span></h3>
+      <code class="cid">lock_proxy_lock</code>
+      <div class="tags"><span class="tag">proxy</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="tag">p-proxy-locks</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"><span class="badge mon"><span data-l="zh">🛡 监控中</span><span data-l="en">🛡 monitored</span></span></div>
+      <div class="links">
+        <a href="lock_proxy_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-20</div>
+    </article>
+<article class="card" data-id="mnft_class" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="nft,community,open-source" data-text="mnft_class m-nft class 约束 m-nft class constraints nft community open-source">
+      <h3>M-NFT Class 约束<span data-l="en" class="entitle">M-NFT Class Constraints</span></h3>
+      <code class="cid">mnft_class</code>
+      <div class="tags"><span class="tag">nft</span><span class="tag">community</span><span class="tag">open-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="mnft_class.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-06</div>
+    </article>
+<article class="card" data-id="mnft_issuer" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="nft,community,open-source" data-text="mnft_issuer m-nft issuer 约束 m-nft issuer constraints nft community open-source">
+      <h3>M-NFT Issuer 约束<span data-l="en" class="entitle">M-NFT Issuer Constraints</span></h3>
+      <code class="cid">mnft_issuer</code>
+      <div class="tags"><span class="tag">nft</span><span class="tag">community</span><span class="tag">open-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="mnft_issuer.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-06</div>
+    </article>
+<article class="card" data-id="mnft_nft" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="nft,community,open-source" data-text="mnft_nft m-nft nft 约束 m-nft nft constraints nft community open-source">
+      <h3>M-NFT NFT 约束<span data-l="en" class="entitle">M-NFT NFT Constraints</span></h3>
+      <code class="cid">mnft_nft</code>
+      <div class="tags"><span class="tag">nft</span><span class="tag">community</span><span class="tag">open-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="mnft_nft.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-06</div>
+    </article>
+<article class="card" data-id="multisig_legacy" data-mon="1"
+      data-nets="mainnet,testnet" data-tags="system,identity,nervos,open-source" data-text="multisig_legacy secp256k1_blake160_multisig_all（lock）约束 secp256k1_blake160_multisig_all (lock) constraints system identity nervos open-source">
+      <h3>secp256k1_blake160_multisig_all（lock）约束<span data-l="en" class="entitle">secp256k1_blake160_multisig_all (lock) Constraints</span></h3>
+      <code class="cid">multisig_legacy</code>
+      <div class="tags"><span class="tag">system</span><span class="tag">identity</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"><span class="badge mon"><span data-l="zh">🛡 监控中</span><span data-l="en">🛡 monitored</span></span></div>
+      <div class="links">
+        <a href="multisig_legacy.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-20</div>
+    </article>
+<article class="card" data-id="multisig_v2" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="system,identity,nervos,open-source" data-text="multisig_v2 secp256k1_blake160_multisig_all v2（lock）约束 secp256k1_blake160_multisig_all v2 (lock) constraints system identity nervos open-source">
+      <h3>secp256k1_blake160_multisig_all V2（lock）约束<span data-l="en" class="entitle">secp256k1_blake160_multisig_all V2 (lock) Constraints</span></h3>
+      <code class="cid">multisig_v2</code>
+      <div class="tags"><span class="tag">system</span><span class="tag">identity</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="multisig_v2.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-20</div>
+    </article>
+<article class="card" data-id="nervos_dao" data-mon="1"
+      data-nets="mainnet,testnet" data-tags="system,defi,nervos,open-source" data-text="nervos_dao nervosdao 合约约束 nervosdao contract constraints system defi nervos open-source">
+      <h3>NervosDAO 合约约束<span data-l="en" class="entitle">NervosDAO Contract Constraints</span></h3>
+      <code class="cid">nervos_dao</code>
+      <div class="tags"><span class="tag">system</span><span class="tag">defi</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"><span class="badge mon"><span data-l="zh">🛡 监控中</span><span data-l="en">🛡 monitored</span></span></div>
+      <div class="links">
+        <a href="nervos_dao.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-20</div>
+    </article>
+<article class="card" data-id="nexisdao_type_lock" data-mon="0"
+      data-nets="mainnet" data-tags="defi,community,open-source" data-text="nexisdao_type_lock nexisdao dckb type lock 约束 nexisdao dckb type lock constraints defi community open-source">
+      <h3>NexisDAO dCKB Type Lock 约束<span data-l="en" class="entitle">NexisDAO dCKB Type Lock Constraints</span></h3>
+      <code class="cid">nexisdao_type_lock</code>
+      <div class="tags"><span class="tag">defi</span><span class="tag">community</span><span class="tag">open-source</span><span class="net mainnet">mainnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="nexisdao_type_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-06</div>
+    </article>
+<article class="card" data-id="noir_owned_counter" data-mon="0"
+      data-nets="testnet" data-tags="zk,open-source,community" data-text="noir_owned_counter noir owned counter（type）约束 noir owned counter (type) constraints zk open-source community">
+      <h3>Noir owned counter（type）约束<span data-l="en" class="entitle">Noir owned counter (type) Constraints</span></h3>
+      <code class="cid">noir_owned_counter</code>
+      <div class="tags"><span class="tag">zk</span><span class="tag">open-source</span><span class="tag">community</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="noir_owned_counter.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-29</div>
+    </article>
+<article class="card" data-id="noir_private_tally" data-mon="0"
+      data-nets="testnet" data-tags="zk,open-source,community" data-text="noir_private_tally noir 隐私计数（private tally v2）约束 noir private tally (v2) constraints zk open-source community">
+      <h3>Noir 隐私计数（private tally v2）约束<span data-l="en" class="entitle">Noir Private Tally (v2) Constraints</span></h3>
+      <code class="cid">noir_private_tally</code>
+      <div class="tags"><span class="tag">zk</span><span class="tag">open-source</span><span class="tag">community</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="noir_private_tally.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-12</div>
+    </article>
+<article class="card" data-id="nostr_binding" data-mon="1"
+      data-nets="mainnet,testnet" data-tags="identity,cryptape,open-source" data-text="nostr_binding nostr_binding nostr_binding identity cryptape open-source">
+      <h3>nostr_binding<span data-l="en" class="entitle">nostr_binding</span></h3>
+      <code class="cid">nostr_binding</code>
+      <div class="tags"><span class="tag">identity</span><span class="tag">cryptape</span><span class="tag">open-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"><span class="badge mon"><span data-l="zh">🛡 监控中</span><span data-l="en">🛡 monitored</span></span></div>
+      <div class="links">
+        <span class="dim"><span data-l="zh">无规范页</span><span data-l="en">no spec page</span></span>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-24</div>
+    </article>
+<article class="card" data-id="nostr_lock" data-mon="1"
+      data-nets="mainnet,testnet" data-tags="identity,nervos,open-source" data-text="nostr_lock nostr lock 约束 nostr lock constraints identity nervos open-source">
+      <h3>Nostr lock 约束<span data-l="en" class="entitle">Nostr lock Constraints</span></h3>
+      <code class="cid">nostr_lock</code>
+      <div class="tags"><span class="tag">identity</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"><span class="badge mon"><span data-l="zh">🛡 监控中</span><span data-l="en">🛡 monitored</span></span></div>
+      <div class="links">
+        <a href="nostr_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-20</div>
+    </article>
+<article class="card" data-id="omnilock" data-mon="1"
+      data-nets="mainnet,testnet" data-tags="identity,nervos,open-source" data-text="omnilock omnilock（lock）约束 omnilock (lock) constraints identity nervos open-source">
+      <h3>Omnilock（lock）约束<span data-l="en" class="entitle">Omnilock (lock) Constraints</span></h3>
+      <code class="cid">omnilock</code>
+      <div class="tags"><span class="tag">identity</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"><span class="badge mon"><span data-l="zh">🛡 监控中</span><span data-l="en">🛡 monitored</span></span></div>
+      <div class="links">
+        <a href="omnilock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-24</div>
+    </article>
+<article class="card" data-id="omnilock_v1" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="identity,nervos,open-source" data-text="omnilock_v1 omnilock v1 约束（2022 年早期版本） omnilock v1 constraints (early 2022 build) identity nervos open-source">
+      <h3>Omnilock V1 约束（2022 年早期版本）<span data-l="en" class="entitle">Omnilock V1 Constraints (early 2022 build)</span></h3>
+      <code class="cid">omnilock_v1</code>
+      <div class="tags"><span class="tag">identity</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="omnilock_v1.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-06</div>
+    </article>
+<article class="card" data-id="opticrum_lock" data-mon="0"
+      data-nets="testnet" data-tags="defi,channel,open-source,community" data-text="opticrum_lock opticrum（fiber 流动性租赁）lock script 约束 opticrum (fiber liquidity rental) lock script constraints defi channel open-source community">
+      <h3>Opticrum（Fiber 流动性租赁）Lock Script 约束<span data-l="en" class="entitle">Opticrum (Fiber liquidity rental) Lock Script Constraints</span></h3>
+      <code class="cid">opticrum_lock</code>
+      <div class="tags"><span class="tag">defi</span><span class="tag">channel</span><span class="tag">open-source</span><span class="tag">community</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="opticrum_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-12</div>
+    </article>
+<article class="card" data-id="output_type_proxy_lock" data-mon="1"
+      data-nets="mainnet,testnet" data-tags="proxy,nervos,open-source,p-proxy-locks" data-text="output_type_proxy_lock 输出 type 代理锁 约束 output type proxy lock constraints proxy nervos open-source p-proxy-locks">
+      <h3>输出 Type 代理锁 约束<span data-l="en" class="entitle">Output Type Proxy Lock Constraints</span></h3>
+      <code class="cid">output_type_proxy_lock</code>
+      <div class="tags"><span class="tag">proxy</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="tag">p-proxy-locks</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"><span class="badge mon"><span data-l="zh">🛡 监控中</span><span data-l="en">🛡 monitored</span></span></div>
+      <div class="links">
+        <a href="output_type_proxy_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-20</div>
+    </article>
+<article class="card" data-id="owned_owner" data-mon="0"
+      data-nets="mainnet" data-tags="defi,community,open-source,p-ickb" data-text="owned_owner ickb owned_owner（lock + type）约束 ickb owned_owner (lock + type) constraints defi community open-source p-ickb">
+      <h3>iCKB owned_owner（lock + type）约束<span data-l="en" class="entitle">iCKB owned_owner (lock + type) Constraints</span></h3>
+      <code class="cid">owned_owner</code>
+      <div class="tags"><span class="tag">defi</span><span class="tag">community</span><span class="tag">open-source</span><span class="tag">p-ickb</span><span class="net mainnet">mainnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="owned_owner.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-20</div>
+    </article>
+<article class="card" data-id="pw_lock" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="identity,community,open-source" data-text="pw_lock pw lock 约束 pw lock constraints identity community open-source">
+      <h3>PW lock 约束<span data-l="en" class="entitle">PW lock Constraints</span></h3>
+      <code class="cid">pw_lock</code>
+      <div class="tags"><span class="tag">identity</span><span class="tag">community</span><span class="tag">open-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="pw_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-09</div>
+    </article>
+<article class="card" data-id="rgbpp_lock" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="btc,community,open-source,p-rgbpp" data-text="rgbpp_lock rgb++ lock 约束 rgb++ lock constraints btc community open-source p-rgbpp">
+      <h3>RGB++ lock 约束<span data-l="en" class="entitle">RGB++ lock Constraints</span></h3>
+      <code class="cid">rgbpp_lock</code>
+      <div class="tags"><span class="tag">btc</span><span class="tag">community</span><span class="tag">open-source</span><span class="tag">p-rgbpp</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="rgbpp_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-20</div>
+    </article>
+<article class="card" data-id="secp256k1_blake160" data-mon="1"
+      data-nets="mainnet,testnet" data-tags="system,identity,nervos,open-source" data-text="secp256k1_blake160 secp256k1_blake160_sighash_all（lock）约束 secp256k1_blake160_sighash_all (lock) constraints system identity nervos open-source">
+      <h3>secp256k1_blake160_sighash_all（lock）约束<span data-l="en" class="entitle">secp256k1_blake160_sighash_all (lock) Constraints</span></h3>
+      <code class="cid">secp256k1_blake160</code>
+      <div class="tags"><span class="tag">system</span><span class="tag">identity</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"><span class="badge mon"><span data-l="zh">🛡 监控中</span><span data-l="en">🛡 monitored</span></span></div>
+      <div class="links">
+        <a href="secp256k1_blake160.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-20</div>
+    </article>
+<article class="card" data-id="session_lock" data-mon="0"
+      data-nets="testnet" data-tags="identity,open-source,community" data-text="session_lock session lock（会话密钥 lock）约束 session lock (session-key lock) constraints identity open-source community">
+      <h3>Session lock（会话密钥 lock）约束<span data-l="en" class="entitle">Session lock (session-key lock) Constraints</span></h3>
+      <code class="cid">session_lock</code>
+      <div class="tags"><span class="tag">identity</span><span class="tag">open-source</span><span class="tag">community</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="session_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-31</div>
+    </article>
+<article class="card" data-id="shrincs_lock" data-mon="0"
+      data-nets="testnet" data-tags="quantum,identity,open-source,community" data-text="shrincs_lock shrincs 抗量子 lock 约束 shrincs post-quantum lock constraints quantum identity open-source community">
+      <h3>SHRINCS 抗量子 Lock 约束<span data-l="en" class="entitle">SHRINCS Post-quantum Lock Constraints</span></h3>
+      <code class="cid">shrincs_lock</code>
+      <div class="tags"><span class="tag">quantum</span><span class="tag">identity</span><span class="tag">open-source</span><span class="tag">community</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="shrincs_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-12</div>
+    </article>
+<article class="card" data-id="single_use_lock" data-mon="1"
+      data-nets="mainnet,testnet" data-tags="proxy,nervos,open-source,p-proxy-locks" data-text="single_use_lock 一次性锁 约束 single use lock constraints proxy nervos open-source p-proxy-locks">
+      <h3>一次性锁 约束<span data-l="en" class="entitle">Single Use Lock Constraints</span></h3>
+      <code class="cid">single_use_lock</code>
+      <div class="tags"><span class="tag">proxy</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="tag">p-proxy-locks</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"><span class="badge mon"><span data-l="zh">🛡 监控中</span><span data-l="en">🛡 monitored</span></span></div>
+      <div class="links">
+        <a href="single_use_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-20</div>
+    </article>
+<article class="card" data-id="sphincs_lock" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="quantum,identity,cryptape,open-source" data-text="sphincs_lock 抗量子 sphincs+ lock 约束 quantum-resistant sphincs+ lock constraints quantum identity cryptape open-source">
+      <h3>抗量子 SPHINCS+ Lock 约束<span data-l="en" class="entitle">Quantum-resistant SPHINCS+ Lock Constraints</span></h3>
+      <code class="cid">sphincs_lock</code>
+      <div class="tags"><span class="tag">quantum</span><span class="tag">identity</span><span class="tag">cryptape</span><span class="tag">open-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="sphincs_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-20</div>
+    </article>
+<article class="card" data-id="spore" data-mon="1"
+      data-nets="mainnet,testnet" data-tags="nft,community,open-source,p-spore" data-text="spore spore（type）约束 spore (type) constraints nft community open-source p-spore">
+      <h3>Spore（type）约束<span data-l="en" class="entitle">Spore (type) Constraints</span></h3>
+      <code class="cid">spore</code>
+      <div class="tags"><span class="tag">nft</span><span class="tag">community</span><span class="tag">open-source</span><span class="tag">p-spore</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"><span class="badge mon"><span data-l="zh">🛡 监控中</span><span data-l="en">🛡 monitored</span></span></div>
+      <div class="links">
+        <a href="spore.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-20</div>
+    </article>
+<article class="card" data-id="stablepp_asset" data-mon="0"
+      data-nets="mainnet" data-tags="token,defi,community,no-source" data-text="stablepp_asset stable++ asset（无公开源码） stable++ asset (no public source) token defi community no-source">
+      <h3>Stable++ Asset（无公开源码）<span data-l="en" class="entitle">Stable++ Asset (no public source)</span></h3>
+      <code class="cid">stablepp_asset</code>
+      <div class="tags"><span class="tag">token</span><span class="tag">defi</span><span class="tag">community</span><span class="tag">no-source</span><span class="net mainnet">mainnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="stablepp_asset.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-06</div>
+    </article>
+<article class="card" data-id="stablepp_intent_lock" data-mon="0"
+      data-nets="mainnet" data-tags="defi,community,no-source" data-text="stablepp_intent_lock stable++ intent lock（无公开源码） stable++ intent lock (no public source) defi community no-source">
+      <h3>Stable++ Intent Lock（无公开源码）<span data-l="en" class="entitle">Stable++ Intent Lock (no public source)</span></h3>
+      <code class="cid">stablepp_intent_lock</code>
+      <div class="tags"><span class="tag">defi</span><span class="tag">community</span><span class="tag">no-source</span><span class="net mainnet">mainnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="stablepp_intent_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-06</div>
+    </article>
+<article class="card" data-id="stablepp_pool" data-mon="0"
+      data-nets="mainnet" data-tags="defi,community,no-source" data-text="stablepp_pool stable++ pool（无公开源码） stable++ pool (no public source) defi community no-source">
+      <h3>Stable++ Pool（无公开源码）<span data-l="en" class="entitle">Stable++ Pool (no public source)</span></h3>
+      <code class="cid">stablepp_pool</code>
+      <div class="tags"><span class="tag">defi</span><span class="tag">community</span><span class="tag">no-source</span><span class="net mainnet">mainnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="stablepp_pool.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-06</div>
+    </article>
+<article class="card" data-id="stablepp_vault_lock" data-mon="0"
+      data-nets="mainnet" data-tags="defi,community,no-source" data-text="stablepp_vault_lock stable++ vault lock（无公开源码） stable++ vault lock (no public source) defi community no-source">
+      <h3>Stable++ Vault Lock（无公开源码）<span data-l="en" class="entitle">Stable++ Vault Lock (no public source)</span></h3>
+      <code class="cid">stablepp_vault_lock</code>
+      <div class="tags"><span class="tag">defi</span><span class="tag">community</span><span class="tag">no-source</span><span class="net mainnet">mainnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="stablepp_vault_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-06</div>
+    </article>
+<article class="card" data-id="std_sudt" data-mon="0"
+      data-nets="" data-tags="token,open-source,community" data-text="std_sudt standard-udt sudt type script 约束 standard-udt sudt type script constraints token open-source community">
+      <h3>standard-udt sUDT Type Script 约束<span data-l="en" class="entitle">standard-udt sUDT Type Script Constraints</span></h3>
+      <code class="cid">std_sudt</code>
+      <div class="tags"><span class="tag">token</span><span class="tag">open-source</span><span class="tag">community</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="std_sudt.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-12</div>
+    </article>
+<article class="card" data-id="std_sudt_meta" data-mon="0"
+      data-nets="" data-tags="token,open-source,community" data-text="std_sudt_meta standard-udt sudt 元数据 type script 约束 standard-udt sudt metadata type script constraints token open-source community">
+      <h3>standard-udt sUDT 元数据 Type Script 约束<span data-l="en" class="entitle">standard-udt sUDT Metadata Type Script Constraints</span></h3>
+      <code class="cid">std_sudt_meta</code>
+      <div class="tags"><span class="tag">token</span><span class="tag">open-source</span><span class="tag">community</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="std_sudt_meta.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-12</div>
+    </article>
+<article class="card" data-id="sudt" data-mon="1"
+      data-nets="mainnet,testnet" data-tags="token,nervos,open-source" data-text="sudt sudt（simple udt）合约约束 sudt (simple udt) contract constraints token nervos open-source">
+      <h3>sUDT（Simple UDT）合约约束<span data-l="en" class="entitle">sUDT (Simple UDT) Contract Constraints</span></h3>
+      <code class="cid">sudt</code>
+      <div class="tags"><span class="tag">token</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"><span class="badge mon"><span data-l="zh">🛡 监控中</span><span data-l="en">🛡 monitored</span></span></div>
+      <div class="links">
+        <a href="sudt.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-20</div>
+    </article>
+<article class="card" data-id="time_lock" data-mon="1"
+      data-nets="mainnet,testnet" data-tags="proxy,nervos,open-source,p-proxy-locks" data-text="time_lock 时间锁（proxy-locks） 约束 time lock (proxy-locks) constraints proxy nervos open-source p-proxy-locks">
+      <h3>时间锁（proxy-locks） 约束<span data-l="en" class="entitle">Time Lock (proxy-locks) Constraints</span></h3>
+      <code class="cid">time_lock</code>
+      <div class="tags"><span class="tag">proxy</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="tag">p-proxy-locks</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"><span class="badge mon"><span data-l="zh">🛡 监控中</span><span data-l="en">🛡 monitored</span></span></div>
+      <div class="links">
+        <a href="time_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-20</div>
+    </article>
+<article class="card" data-id="type_burn_lock" data-mon="1"
+      data-nets="mainnet,testnet" data-tags="proxy,nervos,open-source,p-proxy-locks" data-text="type_burn_lock type 销毁锁 约束 type burn lock constraints proxy nervos open-source p-proxy-locks">
+      <h3>Type 销毁锁 约束<span data-l="en" class="entitle">Type Burn Lock Constraints</span></h3>
+      <code class="cid">type_burn_lock</code>
+      <div class="tags"><span class="tag">proxy</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="tag">p-proxy-locks</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"><span class="badge mon"><span data-l="zh">🛡 监控中</span><span data-l="en">🛡 monitored</span></span></div>
+      <div class="links">
+        <a href="type_burn_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-20</div>
+    </article>
+<article class="card" data-id="type_id" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="system,nervos,open-source" data-text="type_id type id（内置 type）约束 type id (built-in type) constraints system nervos open-source">
+      <h3>Type ID（内置 type）约束<span data-l="en" class="entitle">Type ID (built-in type) Constraints</span></h3>
+      <code class="cid">type_id</code>
+      <div class="tags"><span class="tag">system</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="type_id.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-20</div>
+    </article>
+<article class="card" data-id="unipass" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="identity,community,no-source" data-text="unipass unipass lock（已废弃）（无公开源码） unipass lock (deprecated) (no public source) identity community no-source">
+      <h3>UniPass lock（已废弃）（无公开源码）<span data-l="en" class="entitle">UniPass lock (deprecated) (no public source)</span></h3>
+      <code class="cid">unipass</code>
+      <div class="tags"><span class="tag">identity</span><span class="tag">community</span><span class="tag">no-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="unipass.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-06</div>
+    </article>
+<article class="card" data-id="unique_type" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="token,btc,community,open-source" data-text="unique_type unique cell 约束 unique cell constraints token btc community open-source">
+      <h3>Unique Cell 约束<span data-l="en" class="entitle">Unique Cell Constraints</span></h3>
+      <code class="cid">unique_type</code>
+      <div class="tags"><span class="tag">token</span><span class="tag">btc</span><span class="tag">community</span><span class="tag">open-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="unique_type.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-20</div>
+    </article>
+<article class="card" data-id="usdi" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="token,community,open-source" data-text="usdi usdi asset 约束（主网 = xudt 二进制） usdi asset constraints (mainnet = xudt binary) token community open-source">
+      <h3>USDI Asset 约束（主网 = xUDT 二进制）<span data-l="en" class="entitle">USDI Asset Constraints (mainnet = xUDT binary)</span></h3>
+      <code class="cid">usdi</code>
+      <div class="tags"><span class="tag">token</span><span class="tag">community</span><span class="tag">open-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="usdi.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-06</div>
+    </article>
+<article class="card" data-id="utxoswap_intent_lock" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="defi,community,no-source" data-text="utxoswap_intent_lock utxoswap intent lock（无公开源码） utxoswap intent lock (no public source) defi community no-source">
+      <h3>UTXOSwap Intent Lock（无公开源码）<span data-l="en" class="entitle">UTXOSwap Intent Lock (no public source)</span></h3>
+      <code class="cid">utxoswap_intent_lock</code>
+      <div class="tags"><span class="tag">defi</span><span class="tag">community</span><span class="tag">no-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="utxoswap_intent_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-06</div>
+    </article>
+<article class="card" data-id="utxoswap_proxy_lock" data-mon="0"
+      data-nets="mainnet,testnet" data-tags="defi,community,no-source" data-text="utxoswap_proxy_lock utxoswap 池代理锁（sequencer proxy lock）（无公开源码） utxoswap pool proxy lock (sequencer proxy lock) (no public source) defi community no-source">
+      <h3>UTXOSwap 池代理锁（sequencer proxy lock）（无公开源码）<span data-l="en" class="entitle">UTXOSwap pool proxy lock (sequencer proxy lock) (no public source)</span></h3>
+      <code class="cid">utxoswap_proxy_lock</code>
+      <div class="tags"><span class="tag">defi</span><span class="tag">community</span><span class="tag">no-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="utxoswap_proxy_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-06</div>
+    </article>
+<article class="card" data-id="xudt" data-mon="1"
+      data-nets="mainnet,testnet" data-tags="token,nervos,open-source" data-text="xudt xudt（extensible udt）合约约束 xudt (extensible udt) contract constraints token nervos open-source">
+      <h3>xUDT（Extensible UDT）合约约束<span data-l="en" class="entitle">xUDT (Extensible UDT) Contract Constraints</span></h3>
+      <code class="cid">xudt</code>
+      <div class="tags"><span class="tag">token</span><span class="tag">nervos</span><span class="tag">open-source</span><span class="net mainnet">mainnet</span><span class="net testnet">testnet</span></div>
+      <div class="badges"><span class="badge mon"><span data-l="zh">🛡 监控中</span><span data-l="en">🛡 monitored</span></span></div>
+      <div class="links">
+        <a href="xudt.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-10-20</div>
+    </article>
+<article class="card" data-id="zero_lock" data-mon="0"
+      data-nets="" data-tags="system,nervos,open-source" data-text="zero_lock zero lock（全零 code hash，不是合约） zero lock (all-zero code hash, not a contract) system nervos open-source">
+      <h3>Zero Lock（全零 code hash，不是合约）<span data-l="en" class="entitle">Zero Lock (all-zero code hash, not a contract)</span></h3>
+      <code class="cid">zero_lock</code>
+      <div class="tags"><span class="tag">system</span><span class="tag">nervos</span><span class="tag">open-source</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="zero_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-06</div>
+    </article>
+<article class="card" data-id="zk_lock" data-mon="0"
+      data-nets="testnet" data-tags="zk,identity,open-source,community" data-text="zk_lock zk-lock（groth16 证明解锁）约束 zk-lock (groth16 proof-unlocked) constraints zk identity open-source community">
+      <h3>zk-Lock（Groth16 证明解锁）约束<span data-l="en" class="entitle">zk-Lock (Groth16 proof-unlocked) Constraints</span></h3>
+      <code class="cid">zk_lock</code>
+      <div class="tags"><span class="tag">zk</span><span class="tag">identity</span><span class="tag">open-source</span><span class="tag">community</span><span class="net testnet">testnet</span></div>
+      <div class="badges"></div>
+      <div class="links">
+        <a href="zk_lock.html"><span data-l="zh">约束流转 →</span><span data-l="en">Constraints →</span></a>
+        <a href="tx.html"><span data-l="zh">解码交易 →</span><span data-l="en">Decode tx →</span></a>
+      </div>
+      <div class="dim small"><span data-l="zh">核对于</span><span data-l="en">checked</span> 2026-11-12</div>
+    </article>
+    </div>
+  </section>
+
+  <footer>
+    <p><span data-l="zh">合约流转规范与解码器来自</span><span data-l="en">Flow specs and decoder vendored from</span> <a href="https://github.com/gpBlockchain/ckb-contract-flow-html">gpBlockchain/ckb-contract-flow-html</a> @ <code>69014e7ac38e</code>；<span data-l="zh">安全巡检由本仓库 CI 工作流负责，不在门户展示。</span><span data-l="en">on-chain security scanning is handled by this repo’s CI workflows and is not rendered here.</span></p>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var lang=localStorage.getItem('hub-lang')||'zh',theme=localStorage.getItem('hub-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+  var PH={q:{zh:'搜索名称 / 标签…',en:'Search name / tags…'},'fnet-all':{zh:'全部网络',en:'all networks'}};
+  function apply(){document.documentElement.setAttribute('data-lang',lang);document.documentElement.setAttribute('data-theme',theme);
+    document.getElementById('lang').textContent=lang==='zh'?'EN':'中';
+    Object.keys(PH).forEach(function(id){var el=document.getElementById(id);if(!el)return;
+      if(el.tagName==='INPUT')el.placeholder=PH[id][lang];else el.textContent=PH[id][lang];});}
+  document.getElementById('lang').onclick=function(){lang=lang==='zh'?'en':'zh';localStorage.setItem('hub-lang',lang);apply();};
+  document.getElementById('theme').onclick=function(){theme=theme==='dark'?'light':'dark';localStorage.setItem('hub-theme',theme);apply();};
+  apply();
+  document.getElementById('go').onclick=function(){var v=document.getElementById('tx').value.trim();
+    if(v)location.href='tx.html#'+new URLSearchParams({tx:v,rpc:document.getElementById('net').value});};
+  document.getElementById('tx').onkeydown=function(e){if(e.key==='Enter')document.getElementById('go').click();};
+  var q=document.getElementById('q'),fnet=document.getElementById('fnet'),fmon=document.getElementById('fmon');
+  var cards=[].slice.call(document.querySelectorAll('.card')),cnt=document.getElementById('cnt');
+  function filter(){var t=q.value.trim().toLowerCase(),n=fnet.value,mo=fmon.checked,shown=0;
+    cards.forEach(function(c){var ok=(!t||c.getAttribute('data-text').indexOf(t)>=0)
+      &&(!n||c.getAttribute('data-nets').split(',').indexOf(n)>=0)
+      &&(!mo||c.getAttribute('data-mon')==='1');
+      c.style.display=ok?'':'none';if(ok)shown++;});
+    cnt.textContent=shown+' / '+cards.length;}
+  [q,fnet,fmon].forEach(function(el){el.addEventListener('input',filter);el.addEventListener('change',filter);});
+  filter();
+})();
+</script>
+</body>
+</html>
