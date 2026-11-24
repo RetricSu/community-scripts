@@ -1,62 +1,62 @@
-# CKB 核心合约安全监控与预警系统实施计划
+# CKB Core Contract Security Monitoring & Alerting System — Implementation Plan
 
-## 一、 项目背景与演进定位
+## 1. Project Background & Evolution
 
-本项目（`community-scripts`）原设计用于测试与校验 CKB 各主流 SDK 中的脚本配置。现将其升级为 **CKB 核心合约链上安全防篡改与升级监测预警系统**。
+This project (`community-scripts`) was originally designed to test and validate script configurations across mainstream CKB SDKs. It is now being upgraded into a **CKB core-contract on-chain tamper-proofing and upgrade monitoring & alerting system**.
 
-### 核心定位原则
-- **Git 部署基线（Canonical Deployments）为单一可信源**：`src/deployments/*.json` 作为权威资产清单，保持纯粹，不混入爬虫规则、外部 URL 或特定平台专有结构。
-- **适配器模式（Adapter Pattern）解耦外部源**：所有外部观测面（文档站、CKB Explorer、SDK、链上 RPC）均通过独立的适配器接入，实现零侵入与即插即用。
-- **全链路闭环防篡改与异动捕获**：
-  1. **防篡改与投毒**：自动比对文档站与 Explorer 中呈现的部署信息，防止开发者入口被恶意篡改。
-  2. **链上异动与升级监控**：实时感知可升级合约（Type ID）的部署 Cell 是否被消费、替换，并在第一时间内警报与分析。
+### Core positioning principles
+- **The Git deployment baseline (Canonical Deployments) is the single source of truth**: `src/deployments/*.json` serves as the authoritative asset inventory, kept pure — no crawler rules, external URLs, or platform-specific structures mixed in.
+- **The Adapter Pattern decouples external sources**: every external observation surface (docs site, CKB Explorer, SDKs, on-chain RPC) is integrated through an independent adapter, achieving zero-intrusion plug-and-play.
+- **Closed-loop tamper-proofing and anomaly capture**:
+  1. **Tamper & poisoning detection**: automatically compares deployment info presented on docs sites and Explorer to catch malicious tampering of developer entry points.
+  2. **On-chain anomaly & upgrade monitoring**: senses in real time whether deployment cells of upgradable contracts (Type ID) have been consumed or replaced, and alerts and analyzes at the first moment.
 
 ---
 
-## 二、 目标系统架构与模块规划
+## 2. Target System Architecture & Module Plan
 
 ```
 src/
-├── deployments/                  # [纯净基线] 官方已收录的标准合约部署 JSON (保持原状)
-├── types/                        # 统一数据规范
-│   ├── deployment.ts             # 现有的基础部署类型
-│   ├── adapter.ts                # 适配器接口与归一化合约信息类型
-│   └── report.ts                 # 差异诊断与安全风险评级报告类型
-├── adapters/                     # [适配器层] 对接各类异构数据源
-│   ├── base.ts                   # 适配器抽象基类
-│   ├── onchain/                  # 链上真值源 (通过 RPC 查询)
+├── deployments/                  # [pure baseline] officially catalogued standard contract deployment JSONs (kept as-is)
+├── types/                        # unified data specs
+│   ├── deployment.ts             # existing base deployment types
+│   ├── adapter.ts                # adapter interface and normalized script info types
+│   └── report.ts                 # diff diagnosis and security risk rating report types
+├── adapters/                     # [adapter layer] integrating heterogeneous data sources
+│   ├── base.ts                   # adapter abstract base class
+│   ├── onchain/                  # on-chain truth source (via RPC queries)
 │   │   └── ckb-rpc-adapter.ts
-│   ├── docs/                     # 文档站源 (Markdown / 静态页面解析)
+│   ├── docs/                     # docs-site sources (Markdown / static page parsing)
 │   │   ├── ckb-docs-adapter.ts
 │   │   └── rfcs-adapter.ts
-│   ├── explorer/                 # 浏览器源 (CKB Explorer API)
+│   ├── explorer/                 # Explorer source (CKB Explorer API)
 │   │   └── explorer-api-adapter.ts
-│   └── sdk/                      # SDK 源 (复用并迁移现有能力)
+│   └── sdk/                      # SDK sources (reusing and migrating existing capability)
 │       └── ccc-sdk-adapter.ts
-├── engine/                       # [核心比对与审计引擎]
-│   ├── verifier.ts               # 多源交叉校验与哈希比对器
-│   ├── upgrade-tracker.ts        # Type ID 合约升级与交易溯源分析
-│   └── risk-evaluator.ts         # 风险等级评估规则引擎
-├── notifier/                     # [预警与分发渠道]
-│   ├── notifier.ts               # 统一通知接口
-│   ├── telegram.ts               # Telegram Bot 告警
-│   ├── feishu.ts                 # 飞书 / Lark Webhook 告警
-│   ├── discord.ts                # Discord Webhook 告警
-│   └── github-issue.ts           # 自动触发 GitHub Security Issue
-├── cli/                          # CLI 命令行入口
-│   └── monitor.ts                # 单次检查 / 持续守护进程
-└── index.ts                      # 主入口导出
+├── engine/                       # [core comparison & audit engine]
+│   ├── verifier.ts               # multi-source cross-check and hash comparator
+│   ├── upgrade-tracker.ts        # Type ID contract upgrade and transaction tracing analysis
+│   └── risk-evaluator.ts         # risk level evaluation rule engine
+├── notifier/                     # [alerting & distribution channels]
+│   ├── notifier.ts               # unified notification interface
+│   ├── telegram.ts               # Telegram Bot alerts
+│   ├── feishu.ts                 # Lark (Feishu) webhook alerts
+│   ├── discord.ts                # Discord webhook alerts
+│   └── github-issue.ts           # auto-triggered GitHub security issues
+├── cli/                          # CLI entry points
+│   └── monitor.ts                # one-shot check / continuous daemon
+└── index.ts                      # main entry exports
 ```
 
 ---
 
-## 三、 核心接口与数据模型
+## 3. Core Interfaces & Data Models
 
-### 1. 归一化合约信息 (`NormalizedScriptInfo`)
+### 1. Normalized script info (`NormalizedScriptInfo`)
 ```typescript
 export interface NormalizedScriptInfo {
-  canonicalName: string;            // 映射回的标准名称（如 "secp256k1_blake160_sighash_all"）
-  sourceName: string;               // 外部源原生命名（如 "SECP256K1/blake160"）
+  canonicalName: string;            // mapped standard name (e.g. "secp256k1_blake160_sighash_all")
+  sourceName: string;               // native name in the external source (e.g. "SECP256K1/blake160")
   network: 'mainnet' | 'testnet';
   codeHash?: string;
   hashType?: 'data' | 'data1' | 'data2' | 'type';
@@ -73,34 +73,34 @@ export interface NormalizedScriptInfo {
     args: string;
   };
   metadata?: {
-    sourceUrl?: string;             // 抓取来源 URL / API 路径
-    fetchedAt: number;              // 抓取时间戳
-    blockNumber?: number;           // 链上所在区块高度 (链上源)
-    isLive?: boolean;               // Cell 是否活跃 (链上源)
-    actualDataHash?: string;        // 实时计算得到的 Data Blake2b (链上源)
+    sourceUrl?: string;             // fetch source URL / API path
+    fetchedAt: number;              // fetch timestamp
+    blockNumber?: number;           // on-chain block height (on-chain source)
+    isLive?: boolean;               // whether the cell is live (on-chain source)
+    actualDataHash?: string;        // real-time computed Data Blake2b (on-chain source)
   };
 }
 ```
 
-### 2. 统一适配器接口 (`ScriptSourceAdapter`)
+### 2. Unified adapter interface (`ScriptSourceAdapter`)
 ```typescript
 export interface ScriptSourceAdapter {
   readonly id: string;
   readonly name: string;
   readonly type: 'onchain' | 'docs' | 'explorer' | 'sdk';
 
-  /** 抓取并归一化输出合约数据 */
+  /** Fetch and normalize contract data */
   fetchScripts(network: 'mainnet' | 'testnet'): Promise<NormalizedScriptInfo[]>;
 }
 ```
 
-### 3. 校验诊断差异 (`VerificationMismatch`)
+### 3. Verification mismatch (`VerificationMismatch`)
 ```typescript
 export enum RiskLevel {
-  P0_CRITICAL = 'P0_CRITICAL',  // 严重安全事件：疑似投毒挂马、非预期链上升级
-  P1_HIGH     = 'P1_HIGH',      // 严重功能中断：链上已升级但外部依然指向 Dead Cell
-  P2_MEDIUM   = 'P2_MEDIUM',    // 信息脱节：文档站或 SDK 配置滞后
-  P3_INFO     = 'P3_INFO',      // 提示信息：巡检正常通过、常规版本更新
+  P0_CRITICAL = 'P0_CRITICAL',  // critical security event: suspected poisoning/tampering, unexpected on-chain upgrade
+  P1_HIGH     = 'P1_HIGH',      // severe functional breakage: upgraded on-chain but external sources still point to dead cells
+  P2_MEDIUM   = 'P2_MEDIUM',    // information lag: docs site or SDK config out of date
+  P3_INFO     = 'P3_INFO',      // informational: patrol passed, routine version updates
 }
 
 export interface VerificationMismatch {
@@ -118,96 +118,96 @@ export interface VerificationMismatch {
 
 ---
 
-## 四、 核心适配器详细设计
+## 4. Detailed Adapter Design
 
-### 1. 链上真值适配器 (`OnChainAdapter`)
-- **定位**：最高权威，所有外部展示都必须符合链上实时物理事实。
-- **核心逻辑**：
-  - 基于 `@ckb-ccc/core` 的 `ClientPublicMainnet` / `ClientPublicTestnet`。
-  - 读取每个 deployment 配置中记录的 `cellDeps[].outPoint`：
-    - 调用 `getCellLive(outPoint, true)`：
-      - 若返回 Cell：计算 `ccc.hashCkb(cell.outputData)` 作为实测 `dataHash`；若存在 Type Script，计算 `type.hash()` 得到其实测 `typeHash`。
-      - 若返回 null：**标记该 OutPoint 已死亡（Dead）！触发合约升级追踪器**。
-  - 对于带有 `typeId` 的合约，按 Type Script 定位当前唯一的 Live Cell，记录最新有效 OutPoint。
+### 1. On-chain truth adapter (`OnChainAdapter`)
+- **Positioning**: highest authority; every external presentation must match real-time on-chain physical facts.
+- **Core logic**:
+  - Based on `@ckb-ccc/core`'s `ClientPublicMainnet` / `ClientPublicTestnet`.
+  - Reads `cellDeps[].outPoint` recorded in each deployment config:
+    - Calls `getCellLive(outPoint, true)`:
+      - If a cell is returned: computes `ccc.hashCkb(cell.outputData)` as the measured `dataHash`; if a Type Script exists, computes `type.hash()` as the measured `typeHash`.
+      - If null is returned: **marks the OutPoint as dead! Triggers the contract upgrade tracker**.
+  - For contracts with a `typeId`, locates the current unique live cell by Type Script and records the latest valid OutPoint.
 
-### 2. 文档站适配器 (`DocsAdapter`)
-- **定位**：检测开发者最常参考的官方文档入口是否存在挂马篡改或配置过期。
-- **数据获取策略**：
-  - 首选方案：直接通过 GitHub Raw API 读取 `nervosnetwork/docs.nervos.org` 对应部署章节的 Markdown 源文件（相比于网页爬虫更稳定、不受 CDN 样式改版影响）。
-  - 备选方案：网页无头解析指定 URL。
-- **解析与映射**：
-  - 提取 Markdown 表格中的 Code Hash、Tx Hash、Index、Dep Type。
-  - 内部内置 `DocAliasMap`，将文档中的别名转换为 `canonicalName`。
+### 2. Docs-site adapter (`DocsAdapter`)
+- **Positioning**: detects tampering/stale config in the official docs entry points most referenced by developers.
+- **Data acquisition strategy**:
+  - Preferred: read the Markdown sources of the deployment chapters of `nervosnetwork/docs.nervos.org` directly via the GitHub Raw API (more stable than web scraping, immune to CDN restyling).
+  - Fallback: headless parsing of designated URLs.
+- **Parsing & mapping**:
+  - Extracts Code Hash, Tx Hash, Index, Dep Type from Markdown tables.
+  - Ships an internal `DocAliasMap` converting aliases in docs to `canonicalName`.
 
-### 3. CKB Explorer 适配器 (`ExplorerAdapter`)
-- **定位**：检测 CKB 区块浏览器 Scripts 详情与合约聚合接口。
-- **核心逻辑**：
-  - 定时调用 CKB Explorer OpenAPI 获取官方收录的脚本元数据。
-  - 比对 Explorer 当前收录的脚本 `code_hash`、`tx_hash`、部署 Cell 状态。
+### 3. CKB Explorer adapter (`ExplorerAdapter`)
+- **Positioning**: detects the CKB Explorer script detail pages and contract aggregation APIs.
+- **Core logic**:
+  - Periodically calls the CKB Explorer OpenAPI for officially catalogued script metadata.
+  - Compares the script `code_hash`, `tx_hash`, and deployment cell status currently catalogued by Explorer.
 
-### 4. SDK 适配器 (`SdkAdapter`)
-- **定位**：保持并优化现有 SDK 校验逻辑（如 CCC、Lumos 等）。
-- **重构方式**：将原 `CCCValidator` 的提取逻辑收敛为 `CccSdkAdapter`，只产出 `NormalizedScriptInfo[]`，移交给核心校验引擎比对。
-
----
-
-## 五、 链上可升级合约（Type ID）异动追踪与安全预警
-
-在 CKB 中，支持升级的合约（如 Omnilock、Spore）通常采用 `Type ID` 保护。
-
-### 异动捕获与告警流程：
-1. **感知消费**：`OnChainAdapter` 发现基线中登记的 OutPoint 返回为 Dead。
-2. **交易溯源 (`UpgradeTracker`)**：
-   - 提取该 OutPoint 的 `txHash` 和 `index`。
-   - 调用 RPC `getTransaction` 追溯消费该 Cell 的交易。
-   - 检查该交易的 Outputs：寻找带有相同 `Type ID` args 的新 Cell。
-3. **安全审计分析**：
-   - 抓取新 Cell 的字节码哈希（新 DataHash）以及字节大小变化。
-   - 抓取触发交易的发起者 Lock、多签签名 Witness。
-4. **风险定级与上报**：
-   - 若该升级交易未在「白名单计划表」中：触发 **P0 紧急安全警报**，通知安全团队核实是否私钥泄露。
-   - 若属于官方公告升级：触发 **P1 升级提醒**，提示文档站、Explorer、SDK 需更新 OutPoint。
+### 4. SDK adapter (`SdkAdapter`)
+- **Positioning**: keeps and improves existing SDK validation logic (CCC, Lumos, etc.).
+- **Refactoring approach**: consolidates the original `CCCValidator` extraction logic into `CccSdkAdapter`, which only produces `NormalizedScriptInfo[]` and hands comparison to the core verification engine.
 
 ---
 
-## 六、 风险定级与告警响应体系
+## 5. On-Chain Upgradable Contract (Type ID) Anomaly Tracking & Security Alerting
 
-| 风险级别 | 触发条件 | 通知渠道 | 自动化应急响应 |
+In CKB, upgradable contracts (e.g. Omnilock, Spore) are usually protected by a `Type ID`.
+
+### Anomaly capture & alerting flow:
+1. **Consumption sensing**: `OnChainAdapter` finds that an OutPoint recorded in the baseline returns dead.
+2. **Transaction tracing (`UpgradeTracker`)**:
+   - Extracts the `txHash` and `index` of that OutPoint.
+   - Calls RPC `getTransaction` to trace the transaction consuming the cell.
+   - Inspects the transaction's outputs: looking for a new cell carrying the same `Type ID` args.
+3. **Security audit analysis**:
+   - Captures the bytecode hash of the new cell (new DataHash) and byte-size change.
+   - Captures the initiator lock of the triggering transaction and multisig witness.
+4. **Risk grading & reporting**:
+   - If the upgrade transaction is not in the "whitelist plan": trigger a **P0 emergency security alert** and notify the security team to verify possible key leakage.
+   - If it is an officially announced upgrade: trigger a **P1 upgrade reminder**, prompting docs site, Explorer, and SDKs to update their OutPoints.
+
+---
+
+## 6. Risk Grading & Alert Response System
+
+| Risk level | Trigger conditions | Notification channels | Automated emergency response |
 | :--- | :--- | :--- | :--- |
-| **P0 致命** | 1. 链上检测到未报备的 Type ID 升级交易；<br>2. 文档站或 Explorer 展示的 CodeHash 与链上不符（疑似挂马投毒）。 | Telegram 机器人、飞书加急群、Discord @here、短信/电话 Webhook | 立即自动创建 GitHub Security Advisory / Issue，邮件抄送核心维护者。 |
-| **P1 严重** | 链上发生正常升级，但文档站/Explorer/SDK 仍展示已死亡的旧 OutPoint（会导致交易报错）。 | Telegram、飞书、Discord | 自动创建“配置同步待办” Issue，并附带升级交易详情与新 OutPoint 建议。 |
-| **P2 警告** | 文档站内容缺失部分字段，或外部源接口暂时网络异常。 | 运维日志、飞书低优先级通知 | 重试机制，记录连续失败次数。 |
-| **P3 正常** | 自动化巡检全部通过，所有源数据一致。 | 定时日报 / Status Page 绿灯 | 更新 `latest-status.json` 与 CI 状态勋章。 |
+| **P0 fatal** | 1. Unreported Type ID upgrade tx detected on-chain;<br>2. CodeHash presented on docs site or Explorer differs from on-chain (suspected tampering/poisoning). | Telegram bot, Lark urgent group, Discord @here, SMS/call webhook | Immediately auto-create GitHub Security Advisory / Issue and email core maintainers. |
+| **P1 severe** | A normal upgrade happened on-chain, but docs/Explorer/SDK still show the dead old OutPoint (transactions would fail). | Telegram, Lark, Discord | Auto-create a "config sync todo" issue with upgrade tx details and suggested new OutPoint. |
+| **P2 warning** | Docs site missing some fields, or a transient external-source network failure. | Ops logs, low-priority Lark notice | Retry mechanism, consecutive failure counters. |
+| **P3 normal** | Automated patrol fully passed, all sources consistent. | Scheduled daily report / status page green | Update `latest-status.json` and CI status badge. |
 
 ---
 
-## 七、 实施里程碑规划（Milestones）
+## 7. Implementation Milestones
 
-### Milestone 1：架构重构与链上真值适配器（1 ~ 2 天）
-- [x] 创建 `src/types/adapter.ts` 与 `src/types/report.ts`。
-- [x] 实现 `OnChainAdapter`：基于 `@ckb-ccc/core` 轮询现有 23+ 个合约的 OutPoint 活跃度与 DataHash 校验。
-- [x] 实现核心校验引擎 `CrossVerifier`：支持基准库与链上状态的交叉校验。
-- [x] 重构现有 `CCCValidator` 为 `CccSdkAdapter`，验证原有 SDK 测试功能不受影响。
+### Milestone 1: Architecture refactoring & on-chain truth adapter (1–2 days)
+- [x] Create `src/types/adapter.ts` and `src/types/report.ts`.
+- [x] Implement `OnChainAdapter`: poll OutPoint liveness and DataHash validation for the existing 23+ contracts based on `@ckb-ccc/core`.
+- [x] Implement the core verification engine `CrossVerifier`: cross-check baseline against on-chain state.
+- [x] Refactor the existing `CCCValidator` into `CccSdkAdapter` and verify the original SDK test functionality is unaffected.
 
-### Milestone 2：链上 Type ID 升级追踪器与多渠道告警（2 ~ 3 天）
-- [x] 实现 `UpgradeTracker`：当 OutPoint 死亡时，反查消费交易，提取新 Cell 与新旧 DataHash Diff。
-- [x] 实现通知器分发框架 `src/notifier/`，支持 Telegram Bot 与飞书 Webhook。
-- [x] 配置 GitHub Actions 定时任务（每天自动化执行一次）。
+### Milestone 2: On-chain Type ID upgrade tracker & multi-channel alerting (2–3 days)
+- [x] Implement `UpgradeTracker`: when an OutPoint dies, trace the consuming transaction and extract the new cell plus old/new DataHash diff.
+- [x] Implement the notifier dispatch framework `src/notifier/` supporting Telegram Bot and Lark webhooks.
+- [x] Configure a GitHub Actions scheduled job (run once daily).
 
-### Milestone 3：文档站与 Explorer 适配器对接（2 ~ 3 天）
-- [x] 实现 `DocsAdapter`：解析 CKB 文档站关键 Markdown 页面，建立别名转换表。
-- [x] 实现 `ExplorerAdapter`：对接 CKB Explorer 数据接口。
-- [x] 联调四方交叉比对（基准库 ⟷ 链上 ⟷ 文档站 ⟷ Explorer ⟷ SDK）。
+### Milestone 3: Docs-site & Explorer adapter integration (2–3 days)
+- [x] Implement `DocsAdapter`: parse key CKB docs-site Markdown pages and build the alias mapping table.
+- [x] Implement `ExplorerAdapter`: integrate the CKB Explorer data API.
+- [x] Joint debugging of the four-way cross-comparison (baseline ⟷ on-chain ⟷ docs site ⟷ Explorer ⟷ SDK).
 
-### Milestone 4：自动化运维与报告交付（1 ~ 2 天）
-- [x] 编写 CLI 命令：`pnpm run monitor`、`pnpm run monitor:upgrade`。
-- [x] 自动化 PR 生成能力：链上升级后，可一键生成基线库更新 PR。
-- [x] 完善测试用例与文档，完成整体交付。
+### Milestone 4: Automation ops & report delivery (1–2 days)
+- [x] Write CLI commands: `pnpm run monitor`, `pnpm run monitor:upgrade`.
+- [x] Automated PR generation: after an on-chain upgrade, generate a baseline-update PR in one step.
+- [x] Complete test cases and documentation for overall delivery.
 
-## 实现备注（对原计划的必要澄清）
+## Implementation Notes (necessary clarifications to the original plan)
 
-- `dep_group` Cell 的数据是 OutPointVec 而不是合约字节码；实现先解析成员，再定位匹配 DataHash/TypeHash 的代码 Cell，避免对组 Cell 错误做代码哈希比较。
-- CKB RPC 没有直接查询“谁消费了某 OutPoint”的接口；实现通过 Indexer 按 Type Script 优先、Lock Script 兜底，并逐笔检查 input，且支持多 hop。
-- 外部源可能包含合法的辅助 CellDep（例如 CCC 的 secp256k1 dep group），因此辅助组与直接错误代码 Cell 分开定级，减少误报。
-- 通知状态、连续失败次数和白名单均不写入部署基线；白名单可通过 `UPGRADE_WHITELIST_FILE` 注入。
-- 非 Type ID Cell 消费后无法可靠证明 successor，系统只报警并要求人工审计，不自动改写基线。
+- A `dep_group` cell's data is an OutPointVec, not contract bytecode; the implementation parses members first, then locates the code cell matching DataHash/TypeHash, avoiding incorrect code-hash comparison against group cells.
+- CKB RPC has no direct "who consumed this OutPoint" query; the implementation uses the indexer by Type Script first, Lock Script as fallback, checks inputs tx-by-tx, and supports multiple hops.
+- External sources may legitimately include auxiliary cellDeps (e.g. CCC's secp256k1 dep group), so auxiliary groups are graded separately from direct wrong-code cells to reduce false positives.
+- Notification state, consecutive failure counts, and whitelists are never written into the deployment baseline; whitelists can be injected via `UPGRADE_WHITELIST_FILE`.
+- After a non-Type-ID cell is consumed, no successor can be reliably proven; the system only alerts and requires manual audit, and never rewrites the baseline automatically.

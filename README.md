@@ -1,178 +1,178 @@
 # CKB Contract Hub · community-scripts
 
-CKB 生态核心合约的**统一入口**：94 个合约的约束流转规范 + 纯前端交易解码器 + AI 可读知识库，
-外加一套面向 24 个核心合约的**链上安全防篡改与升级监测预警系统**。
+The **single entry point** for core contracts in the CKB ecosystem: constraint-flow specs for 94 contracts + a pure-frontend transaction decoder + an AI-readable knowledge base,
+plus an **on-chain tamper-proofing and upgrade monitoring & alerting system** covering 24 core contracts.
 
-> 🔗 **在线门户：<https://retricsu.github.io/community-scripts/>**（gp 原版前端：合约目录 + 交易解码入口）
-> · [交易解码器](https://retricsu.github.io/community-scripts/tx.html)
-> · [llms.txt（AI agent 入口）](https://retricsu.github.io/community-scripts/llms.txt)
+> 🔗 **Live portal: <https://retricsu.github.io/community-scripts/>** (gp's original frontend: contract directory + tx decoder entry)
+> · [Tx decoder](https://retricsu.github.io/community-scripts/tx.html)
+> · [llms.txt (AI agent entry)](https://retricsu.github.io/community-scripts/llms.txt)
 >
-> 门户由 CI 自动构建发布（`.github/workflows/portal.yml`），仓库内容变更后数分钟内自动更新。
+> The portal is built and published automatically by CI (`.github/workflows/portal.yml`); it updates within minutes of any repo change.
 
 ---
 
-## 这个仓库是什么
+## What this repo is
 
-两个子系统合并成的单一仓库：
+Two subsystems merged into a single repository:
 
-### ① 合约知识门户（`flow/` + `scripts/`）
+### ① Contract Knowledge Portal (`flow/` + `scripts/`)
 
-原 [`gpBlockchain/ckb-contract-flow-html`](https://github.com/gpBlockchain/ckb-contract-flow-html) 已整体 vendored 进 `flow/`（上游仓库已归档，**本仓库是其唯一 canonical 家**，见 `flow/NOTICE.md`），门户即 gp 原版前端，样式与上游一致：
+The original [`gpBlockchain/ckb-contract-flow-html`](https://github.com/gpBlockchain/ckb-contract-flow-html) has been fully vendored into `flow/` (the upstream repo is archived; **this repo is its only canonical home**, see `flow/NOTICE.md`). The portal is gp's original frontend, styled identically to upstream:
 
-- **合约目录层**：94 个合约的约束流转规范页（`flow/contracts/<id>/spec.json` 生成），中英文双语，支持按网络 / 标签 / 关键字过滤
-- **交易诊断层**：首页粘贴任意交易哈希，纯浏览器直连 RPC 解码，并按合约插件执行无签名约束校验——不用安装任何东西
-- **AI 可读产物**：`llms.txt`、每个合约一份 `<id>.md`、`contracts.json`、单文件解码器 `decode-tx.js`，供 coding agent 直接消费
+- **Contract directory layer**: constraint-flow spec pages for 94 contracts (generated from `flow/contracts/<id>/spec.json`), bilingual Chinese/English, filterable by network / tags / keywords
+- **Transaction diagnostics layer**: paste any tx hash on the home page to decode it directly in the browser via RPC, with signature-free constraint validation executed by per-contract plugins — no installation needed
+- **AI-readable outputs**: `llms.txt`, one `<id>.md` per contract, `contracts.json`, and a single-file decoder `decode-tx.js`, ready for coding agents to consume
 
-安全巡检结果**故意不在门户展示**：链上巡检告警完全由 CI 工作流产出与分发，门户是公开网站，不暴露可被攻击参考的风险细节。
+Security patrol results are **deliberately not rendered on the portal**: on-chain patrol alerts are produced and distributed entirely by the CI workflow. The portal is a public website and must not expose risk details that attackers could reference.
 
-### ② 链上安全监测（`src/` TypeScript）
+### ② On-Chain Security Monitoring (`src/` TypeScript)
 
-以 `src/deployments/*.json` 为**唯一规范部署基线（Canonical Deployment Baseline）**，每天自动把链上真实状态与 5 类权威来源交叉比对，发现篡改、供应链投毒或未审计升级时按 P0–P3 分级多渠道告警。详见 **[`docs/SECURITY_MONITORING.md`](docs/SECURITY_MONITORING.md)**。
+Using `src/deployments/*.json` as the **single Canonical Deployment Baseline**, it cross-checks the real on-chain state daily against 5 authoritative sources, and raises tiered P0–P3 alerts on tampering, supply-chain poisoning, or unaudited upgrades, delivered through multiple channels. See **[`docs/SECURITY_MONITORING.md`](docs/SECURITY_MONITORING.md)** for details.
 
 ---
 
-## 快速开始
+## Quick Start
 
 ```bash
-# 1. 安装依赖与构建
+# 1. Install dependencies and build
 pnpm install
 pnpm run build
 
-# 2. 离线单元测试（TS 监控引擎 + flow 生成器）
+# 2. Offline unit tests (TS monitor engine + flow generator)
 pnpm test
 node --test flow/tests/*.test.js
 
-# 3. 本地构建并预览门户 http://localhost:4173
+# 3. Build the portal locally and preview at http://localhost:4173
 pnpm run flow:build
 pnpm run portal:serve
 
-# 4. 跑一次完整安全巡检（主网+测试网，不发通知，容忍风险退出码）
+# 4. Run a full security patrol (mainnet + testnet, no notifications, tolerate risk exit codes)
 pnpm run monitor -- --network both --no-notify --fail-on none
 ```
 
-巡检报告写入 `results/`：`latest-report.json`（完整报告）、`latest-status.json`（看板/探针用摘要）、`monitor-<timestamp>.json`（历史归档）。`monitor upgrade` 只溯源升级链路，不覆盖上述两个 latest 文件。
+Patrol reports are written to `results/`: `latest-report.json` (full report), `latest-status.json` (summary for dashboards/probes), and `monitor-<timestamp>.json` (historical archive). `monitor upgrade` only traces upgrade chains and does not overwrite the two latest files.
 
 ---
 
-## 数据所有权与合并策略
+## Data Ownership & Merge Strategy
 
-两个子系统的数据在**构建时**才合并，源数据互不污染：
+The two subsystems' data is merged only **at build time**; neither source pollutes the other:
 
-| 数据源 | 角色 | 说明 |
+| Data source | Role | Notes |
 | --- | --- | --- |
-| `src/deployments/*.json` | 监控基线（安全 SSOT，24 个） | 保持最小结构；唯一可选扩展字段 `flowId` 指向 flow 目录 |
-| `flow/contracts/<id>/meta.json` | flow 元数据 | 基线成员由**投影生成**（`generated_from` 标记）：机械字段随基线再生成；知识字段（tags / source.commit / contributors 等）人工补过后永不被覆盖 |
-| `flow/contracts/<id>/spec.json` 等 | 知识本体 | 手写、上游格式原样保留，不翻译、不迁移，投影层永远不会自动生成 |
+| `src/deployments/*.json` | Monitoring baseline (security SSOT, 24 entries) | Keep the structure minimal; the only optional extension field is `flowId` pointing into the flow directory |
+| `flow/contracts/<id>/meta.json` | Flow metadata | Baseline members are **projection-generated** (marked `generated_from`): mechanical fields are regenerated from the baseline; knowledge fields (tags / source.commit / contributors etc.) are hand-curated and never overwritten once filled |
+| `flow/contracts/<id>/spec.json` etc. | Knowledge body | Hand-written, preserved exactly in upstream format — not translated, not migrated; the projection layer never auto-generates them |
 
-新增一个受监控合约：`src/deployments/<name>.json`（唯一手写事实源）→ `pnpm run flow:meta <name> --rpc <url>` 生成 meta → 手写 `spec.json`（约束知识本体）。
+To add a new monitored contract: create `src/deployments/<name>.json` (the only hand-written source of truth) → run `pnpm run flow:meta <name> --rpc <url>` to generate meta → hand-write `spec.json` (the constraint knowledge body).
 
-### 漂移检查的责任划分
+### Responsibility split for drift checks
 
-两套 CI 各管一段，互不重叠（基线成员名单通过 `flow-lib.resolveFlowId` 自动映射，无需手工维护清单）：
+Two CI workflows each own a disjoint slice (baseline membership is mapped automatically via `flow-lib.resolveFlowId`, no hand-maintained list needed):
 
-| 合约范围 | 链上漂移检查 | 修复路径 |
+| Contract scope | On-chain drift check | Fix path |
 | --- | --- | --- |
-| 基线拥有的（`src/deployments` 投影的 meta） | `security-monitor.yml`（每日，告警 + 白名单升级自动 PR）；`ci.yml` 的 `gen-flow-meta --check` 门禁保证基线与 flow meta 一致 | 只改基线，flow meta 由投影再生成；**不要**对基线拥有的 meta 跑 `check-deployments.js --write` |
-| 其余 flow 合约（手写 meta） | `flow-drift.yml`（每周，源自 gp 上游 `deployments.yml`，检出开/评论 `deployment-drift` issue） | 本地 `--write` 后提 PR |
+| Baseline-owned (meta projected from `src/deployments`) | `security-monitor.yml` (daily, alerts + auto PR for whitelisted upgrades); the `gen-flow-meta --check` gate in `ci.yml` keeps the baseline and flow meta in sync | Change the baseline only; flow meta is regenerated by projection; **do not** run `check-deployments.js --write` on baseline-owned metas |
+| All other flow contracts (hand-written meta) | `flow-drift.yml` (weekly, ported from gp's upstream `deployments.yml`, opens/comments `deployment-drift` issues on findings) | Run `--write` locally and open a PR |
 
 ```bash
-pnpm run flow:meta my_contract --rpc-mainnet https://mainnet.ckb.dev/rpc --rpc-testnet https://testnet.ckb.dev/rpc  # 基线 -> flow meta 投影
-pnpm run flow:meta --all --check   # CI 漂移检查（只读，不写入）
+pnpm run flow:meta my_contract --rpc-mainnet https://mainnet.ckb.dev/rpc --rpc-testnet https://testnet.ckb.dev/rpc  # baseline -> flow meta projection
+pnpm run flow:meta --all --check   # CI drift check (read-only, no writes)
 ```
 
 ---
 
-## 贡献合约（社区 PR 入口）
+## Contributing a Contract (community PR entry)
 
-想让自己的合约出现在门户上？三条路：
+Want your contract on the portal? Three ways:
 
-1. **用 AI agent 一键添加（推荐）**——把这句话发给 Cursor / Claude Code / Codex 等：
-   > 阅读 <https://raw.githubusercontent.com/RetricSu/community-scripts/master/flow/skills/ckb-contract-flow/SKILL.md> 并按其步骤为 <你的合约仓库 URL> 生成合约 cell 流转 HTML
+1. **One-shot add with an AI agent (recommended)** — send this to Cursor / Claude Code / Codex or any agent that can read code and run commands:
+   > Read <https://raw.githubusercontent.com/RetricSu/community-scripts/master/flow/skills/ckb-contract-flow/SKILL.md> and follow its steps to generate the contract cell-flow HTML for <your contract repo URL>
 
-   可选：安装 skill 后只需说「用 ckb-contract-flow 给 <仓库> 生成合约流转 HTML」：
+   Optional: after installing the skill, just say "use ckb-contract-flow to generate the flow HTML for <repo>":
    ```bash
    curl -fsSL https://raw.githubusercontent.com/RetricSu/community-scripts/master/flow/install.sh | sh
    ```
-2. **手动添加**——`node flow/scripts/new-contract.js <id> --kind lock|type` 生成骨架，按 [`flow/docs/ADD_CONTRACT.md`](flow/docs/ADD_CONTRACT.md) 填写。
-3. **只提需求**——开 issue 选「新增合约」模板（[issue #new-contract](https://github.com/RetricSu/community-scripts/issues/new/choose)），填部署信息即可。
+2. **Manual** — `node flow/scripts/new-contract.js <id> --kind lock|type` generates the skeleton; fill it in following [`flow/docs/ADD_CONTRACT.md`](flow/docs/ADD_CONTRACT.md).
+3. **Just request it** — open an issue with the "New contract" template ([issue #new-contract](https://github.com/RetricSu/community-scripts/issues/new/choose)) and fill in the deployment info.
 
-提交 PR 时会自动加载**合约 PR 模板清单**（来源引用、limit 与源码 `ERROR_*` 逐条核对、双语、检查命令通过等），逐项勾选即可。署名（可选）：`meta.json` 的 `contributors` 填你的 GitHub 用户名。
+When you open a PR, a **contract PR template checklist** is auto-loaded (source citations, spec `limits` checked line-by-line against `ERROR_*` in source, bilingual text, passing check commands, etc.) — just tick each item. Attribution (optional): add your GitHub username to `contributors` in `meta.json`.
 
 ---
 
-## CI 工作流一览
+## CI Workflows
 
-| 工作流 | 触发 | 干什么 |
+| Workflow | Trigger | What it does |
 | --- | --- | --- |
-| `portal.yml` | push master 且门户源数据变更 | 构建门户并发布到 GitHub Pages（构建/部署分两 job，生成器无写权限） |
-| `security-monitor.yml` | 每日定时 | 全量多源巡检，P1+ 告警；白名单内升级自动开基线更新 PR |
-| `flow-drift.yml` | 每周定时 | 非基线 flow 合约的部署漂移检查，检出开/评论 issue |
-| `ci.yml` | PR / push master | 构建 + lint + 测试 + flow 规范校验 + 基线→meta 投影漂移门禁 |
+| `portal.yml` | push to master with portal source changes | Builds the portal and publishes to GitHub Pages (build/deploy are separate jobs; the generator gets no write permissions) |
+| `security-monitor.yml` | Daily schedule | Full multi-source patrol, P1+ alerts; auto-opens baseline-update PRs for whitelisted upgrades |
+| `flow-drift.yml` | Weekly schedule | Deployment drift check for non-baseline flow contracts; opens/comments issues on findings |
+| `ci.yml` | PR / push to master | Build + lint + test + flow spec validation + baseline→meta projection drift gate |
 
 ---
 
-## 安全监测机制速览
+## Security Monitoring at a Glance
 
-### 五类多源交叉对比
+### Five-source cross-comparison
 
-| 来源 | 适配器 | 采集内容 |
+| Source | Adapter | What it collects |
 | --- | --- | --- |
-| 链上 RPC | `onchain-rpc` | 逐一核验基线 OutPoint、dep group 成员、Data/TypeHash、Type ID Live Cell 状态 |
-| 官方文档 | `docs-nervos` | 解析 docs.nervos.org 的 ecosystem-scripts 部署表 |
-| Nervos RFC | `rfcs-nervos` | 解析 RFC-0024/0025/0026/0042/0052 部署表 |
-| CKB Explorer | `ckb-explorer` | 校验 OutPoint 与死 Cell 标记 |
-| CCC SDK | `sdk-ccc` | 跨 SDK 校验核心脚本元数据一致性 |
+| On-chain RPC | `onchain-rpc` | Verifies every baseline OutPoint, dep group members, Data/TypeHash, Type ID live-cell state |
+| Official docs | `docs-nervos` | Parses the ecosystem-scripts deployment tables on docs.nervos.org |
+| Nervos RFC | `rfcs-nervos` | Parses deployment tables in RFC-0024/0025/0026/0042/0052 |
+| CKB Explorer | `ckb-explorer` | Validates OutPoints and dead-cell flags |
+| CCC SDK | `sdk-ccc` | Cross-SDK consistency check of core script metadata |
 
-### P0–P3 风险分级（节选）
+### P0–P3 risk tiers (excerpt)
 
-- **P0 严重**：代码哈希与链上实际不符（疑似篡改/供应链投毒）；未授权 Type ID 升级；部署 Cell 被销毁且无 successor
-- **P1 高**：引用死 Cell；白名单内授权升级（提醒同步基线）
-- **P2 中**：CellDep 漂移；基线未记录哈希；单一来源故障
-- **P3 低**：格式与缺失字段建议
+- **P0 critical**: code hash differs from on-chain reality (suspected tampering / supply-chain poisoning); unauthorized Type ID upgrade; deployment cell destroyed with no successor
+- **P1 high**: dead cell referenced; whitelisted authorized upgrade (reminder to sync the baseline)
+- **P2 medium**: cellDep drift; baseline hash not recorded; single-source outage
+- **P3 low**: formatting and missing-field suggestions
 
-### Type ID 升级追踪与白名单
+### Type ID upgrade tracking & whitelist
 
-升级 Tracker 沿 Type ID 链路多跳溯源，记录升级时间/区块/消费交易/新旧 Lock/签名 Lock；升级交易必须在白名单内（`src/engine/upgrade-tracker.ts` 内置或 `UPGRADE_WHITELIST_FILE` 注入），否则直接 P0。白名单升级可用 `pnpm run monitor:upgrade -- --network mainnet --apply` 回写基线，并由 CI 自动开 PR 交人工审查。
+The upgrade tracker follows Type ID chains across multiple hops, recording upgrade time/block, consuming tx, old/new locks and signer locks. An upgrade tx must be in the whitelist (built into `src/engine/upgrade-tracker.ts` or injected via `UPGRADE_WHITELIST_FILE`), otherwise it is raised as P0 directly. Whitelisted upgrades can be written back to the baseline with `pnpm run monitor:upgrade -- --network mainnet --apply`, and CI then auto-opens a PR for human review.
 
-### 多渠道告警
+### Multi-channel alerting
 
-Telegram / 飞书 / Discord / GitHub Issue / 通用 Webhook，未配置的渠道自动跳过；指纹去重（同问题 24h 不重复，风险跃升立即再通知）。各渠道阈值用 `*_MIN_LEVEL` 覆盖。完整配置见 [`docs/SECURITY_MONITORING.md`](docs/SECURITY_MONITORING.md)。
+Telegram / Lark (Feishu) / Discord / GitHub Issue / generic webhook; unconfigured channels are skipped automatically; alert dedup by fingerprint (no repeats within 24h for the same issue; risk escalation re-notifies immediately). Per-channel thresholds are overridable with `*_MIN_LEVEL`. Full configuration in [`docs/SECURITY_MONITORING.md`](docs/SECURITY_MONITORING.md).
 
 ---
 
-## 目录结构
+## Directory Layout
 
 ```
-src/                    # 安全监测引擎（TypeScript）
-├── adapters/           # 五类数据源适配器（docs / rfcs / explorer / onchain / sdk）
-├── cli/                # monitor / upgrade 命令行
-├── deployments/        # 唯一规范部署基线（24 个 JSON，手写 SSOT）
-├── engine/             # 巡检编排、风险分级、升级追踪、多源比对、状态去重
-├── notifier/           # Telegram / 飞书 / Discord / GitHub Issue / Webhook
-├── discovery/ testing/ validate/   # [附属] SDK 动态发现与测试
+src/                    # Security monitoring engine (TypeScript)
+├── adapters/           # Five data-source adapters (docs / rfcs / explorer / onchain / sdk)
+├── cli/                # monitor / upgrade CLIs
+├── deployments/        # The single canonical deployment baseline (24 hand-written JSONs, SSOT)
+├── engine/             # Patrol orchestration, risk grading, upgrade tracking, multi-source diffing, state dedup
+├── notifier/           # Telegram / Lark / Discord / GitHub Issue / Webhook
+├── discovery/ testing/ validate/   # [ancillary] dynamic SDK discovery and testing
 └── ...
-flow/                   # 合约知识库（vendored，上游已归档，本仓库为 canonical 家）
-├── contracts/<id>/     # spec.json（手写规范）+ plugin.js + meta.json + tests.json
-├── gen.js lib/         # 零依赖静态生成器（规范页 / tx.html / llms.txt / decode-tx.js）
+flow/                   # Contract knowledge base (vendored; upstream archived, this repo is the canonical home)
+├── contracts/<id>/     # spec.json (hand-written spec) + plugin.js + meta.json + tests.json
+├── gen.js lib/         # Zero-dependency static generator (spec pages / tx.html / llms.txt / decode-tx.js)
 ├── scripts/            # check.js / check-deployments.js / new-contract.js ...
-├── skills/             # ckb-contract-flow agent skill（AI 一键添加合约）
-└── docs/               # ADD_CONTRACT.md 等贡献文档
-scripts/                # 门户接合层
-├── flow-lib.js         # 基线 ↔ flow 身份解析（code_hash 校验）
-├── gen-flow-meta.js    # 基线 -> flow meta 投影（三种字段策略）
-└── serve-portal.js     # 本地预览静态服务器
-docs/                   # SECURITY_MONITORING.md（完整监测文档）
-.github/workflows/      # portal / security-monitor / flow-drift / ci 四套工作流
+├── skills/             # ckb-contract-flow agent skill (one-shot contract adding for AI)
+└── docs/               # ADD_CONTRACT.md and other contribution docs
+scripts/                # Portal glue layer
+├── flow-lib.js         # Baseline ↔ flow identity resolution (code_hash validation)
+├── gen-flow-meta.js    # Baseline -> flow meta projection (three field policies)
+└── serve-portal.js     # Local preview static server
+docs/                   # SECURITY_MONITORING.md (full monitoring documentation)
+.github/workflows/      # portal / security-monitor / flow-drift / ci workflows
 ```
 
 ---
 
-## 附属功能：SDK 动态发现与测试
+## Ancillary: Dynamic SDK Discovery & Testing
 
-原 SDK 动态发现与测试能力保留为附属功能：`pnpm run discover`（npm 发现 CKB SDK）、`npm start test <sdk>`、`pnpm run daily`（全量日常验证）。细节见 `src/discovery/`、`src/testing/`、`src/validate/`。
+The original dynamic SDK discovery and testing capability is kept as an ancillary feature: `pnpm run discover` (npm-based CKB SDK discovery), `npm start test <sdk>`, `pnpm run daily` (full daily validation). Details in `src/discovery/`, `src/testing/`, `src/validate/`.
 
-## 贡献与许可证
+## Contributing & License
 
-- 合约知识库贡献：见上文「贡献合约」，PR 模板与 new-contract issue 模板已就位
-- 监测引擎 / 基线变更：保持 `src/deployments/*.json` 严谨性，基线变更须附链上交易哈希与官方审计来源；提交前 `pnpm run check && pnpm run build && pnpm test`
+- Contributing to the contract knowledge base: see "Contributing a Contract" above; the PR template and new-contract issue template are in place
+- Monitoring engine / baseline changes: keep `src/deployments/*.json` rigorous; baseline changes must include the on-chain tx hash and an official audit source; run `pnpm run check && pnpm run build && pnpm test` before submitting
 - License: ISC
