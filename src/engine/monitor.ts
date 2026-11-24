@@ -14,6 +14,7 @@ import type {
 import { withRetry } from '../utils/http';
 import { errorMessage } from '../utils/normalize';
 import { Baseline } from './baseline';
+import type { KnownIssuesRegistry } from './known-issues';
 import { RiskEvaluator } from './risk-evaluator';
 import { UpgradeTracker } from './upgrade-tracker';
 import { CrossVerifier, makeTruthMap } from './verifier';
@@ -25,6 +26,8 @@ export interface MonitorRunOptions {
   baseline?: Baseline;
   onchain: OnChainAdapter;
   tracker?: UpgradeTracker;
+  /** Known-issues registry; matching findings stay visible but are acknowledged. */
+  knownIssues?: KnownIssuesRegistry;
   onSource?: (status: SourceStatus) => void;
 }
 
@@ -156,6 +159,10 @@ export class MonitorRunner {
     const risk = new RiskEvaluator();
     const sorted = risk.sort(uniqueMismatches);
     const summary = risk.summarize(sorted);
+    const knownCount = options.knownIssues?.annotate(sorted) ?? 0;
+    const unresolvedSummary = options.knownIssues
+      ? risk.summarize(sorted.filter((m) => !m.known))
+      : undefined;
     const finished = Date.now();
     return {
       startedAt: new Date(started).toISOString(),
@@ -168,6 +175,8 @@ export class MonitorRunner {
       upgrades,
       counts: summary.counts,
       highestRisk: summary.highestRisk,
+      knownCount,
+      highestUnresolvedRisk: unresolvedSummary?.highestRisk,
     };
   }
 }

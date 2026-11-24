@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "comment": "Known-but-unresolved findings. fingerprint must exactly equal VerificationMismatch.fingerprint (printed in every report and alert as 指纹). expiresAt is optional ISO time; once passed the finding resurfaces. See docs/SECURITY_MONITORING.md 已知问题.",
+  "issues": [
+    {
+      "fingerprint": "sdk-ccc:mainnet:nostr_lock:liveness:CELLDEP_DEAD:0x1911208b136957d5f7c1708a8835edfe8ae1d02700d5cb2c3a6aacf4d5906306:0x0",
+      "note": "nostr_lock 已于 2026-01-14 经官方迁移到新部署（见升级白名单内 Nostr 迁移记录，依据 cryptape/nostr-binding 官方 migration 文件）；CCC SDK 静态脚本表尚未同步，仍引用迁移前的死 Cell。待 @ckb-ccc/core 脚本表更新后移除此条。",
+      "recordedAt": "2026-11-23T00:00:00Z",
+      "expiresAt": "2027-02-23T00:00:00Z",
+      "recordedBy": "retric (via ctx agent)"
+    }
+  ]
+}
