@@ -1,9 +1,10 @@
 name: CKB Contract Hub Portal
 
-# Builds the unified portal (flow specs + tx decoder) and publishes it to
-# GitHub Pages. Security posture is intentionally NOT rendered here — it lives
-# in the security-monitor workflow and its report artifacts. Build and deploy
-# are separate jobs so the vendored generator never runs with write
+# Builds the portal (gp's vendored generator: contract spec pages +
+# tx decoder + AI-readable outputs) and publishes it to GitHub Pages.
+# Security posture is intentionally NOT rendered here — it lives in the
+# security-monitor workflow and its report artifacts. Build and deploy are
+# separate jobs so the vendored generator never runs with write
 # permissions.
 
 on:
@@ -40,7 +41,7 @@ jobs:
           # absolute links in llms.txt / <id>.md / decode-tx.js (gp generator
           # defaults to its own upstream Pages URL without this)
           SITE_URL: https://retricsu.github.io/community-scripts
-        run: node flow/gen.js --all portal && node scripts/build-portal.js
+        run: node flow/gen.js --all portal
 
       - name: Upload portal artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

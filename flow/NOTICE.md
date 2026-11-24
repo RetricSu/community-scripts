@@ -14,10 +14,9 @@ from [`gpBlockchain/ckb-contract-flow-html`](https://github.com/gpBlockchain/ckb
   (skill install / SKILL.md links / PR target). The two Claude Code
   plugin-marketplace lines in `gen.js` still reference the archived upstream
   repo because its `.claude-plugin` manifest is not vendored here. The upstream
-  generator logic itself is unmodified. This repo additionally provides
-  `../scripts/build-portal.js`, which runs after `gen.js --all` and writes the
-  unified portal entry `portal/index.html` (contract directory + tx decode
-  entry; security monitoring results stay in CI and are not rendered).
+  generator logic and its frontend design are unmodified — the published
+  portal is gp's original frontend. Security monitoring results stay in CI
+  and are intentionally not rendered in the portal.
 
 ## What lives here
 
@@ -38,4 +37,4 @@ pnpm run portal:serve
 ```
 
 Do not edit vendored files when a hook or wrapper will do; prefer extending
-`scripts/build-portal.js` or the monitor side instead.
+`scripts/gen-flow-meta.js` or the monitor side instead.
