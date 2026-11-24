@@ -1,8 +1,33 @@
-# CKB 核心合约链上安全防篡改与升级监测预警系统
+# CKB Contract Hub · community-scripts
 
-CKB 核心合约链上安全防篡改与升级监测预警系统是一套面向 Nervos CKB 生态核心合约的自动化安全防护基础设施。系统以 `src/deployments/*.json` 作为**唯一规范部署基线（Canonical Deployment Baseline）**，通过持续抓取链上真实状态与生态权威来源，进行多源交叉比对、Type ID 升级溯源以及风险分级评估，并在出现异常篡改、供应链投毒或合约升级时通过多渠道实时告警。
+CKB 生态核心合约的**统一入口**：94 个合约的约束流转规范 + 纯前端交易解码器 + AI 可读知识库，
+外加一套面向 24 个核心合约的**链上安全防篡改与升级监测预警系统**。
 
-> 提示：原 SDK 动态发现与测试能力已保留为系统的[附属/兼容功能](#附属功能sdk-动态发现与测试)，满足多场景验证需求。
+> 🔗 **在线门户：<https://retricsu.github.io/community-scripts/>**
+> · [交易解码器](https://retricsu.github.io/community-scripts/tx.html)
+> · [llms.txt（AI agent 入口）](https://retricsu.github.io/community-scripts/llms.txt)
+>
+> 门户由 CI 自动构建发布（`.github/workflows/portal.yml`），仓库内容变更后数分钟内自动更新。
+
+---
+
+## 这个仓库是什么
+
+两个子系统合并成的单一仓库：
+
+### ① 合约知识门户（`flow/` + `scripts/`）
+
+原 [`gpBlockchain/ckb-contract-flow-html`](https://github.com/gpBlockchain/ckb-contract-flow-html) 已整体 vendored 进 `flow/`（上游仓库已归档，**本仓库是其唯一 canonical 家**，见 `flow/NOTICE.md`），并与本仓库的监控基线合并为单一门户：
+
+- **合约目录层**：94 个合约的约束流转规范页（`flow/contracts/<id>/spec.json` 生成），中英文双语，支持按网络 / 标签 / 关键字过滤；其中 24 个受监控合约带 🛡 标记
+- **交易诊断层**：首页粘贴任意交易哈希，纯浏览器直连 RPC 解码，并按合约插件执行无签名约束校验——不用安装任何东西
+- **AI 可读产物**：`llms.txt`、每个合约一份 `<id>.md`、`contracts.json`、单文件解码器 `decode-tx.js`，供 coding agent 直接消费
+
+安全巡检结果**故意不在门户展示**：链上巡检告警完全由 CI 工作流产出与分发，门户是公开网站，不暴露可被攻击参考的风险细节。
+
+### ② 链上安全监测（`src/` TypeScript）
+
+以 `src/deployments/*.json` 为**唯一规范部署基线（Canonical Deployment Baseline）**，每天自动把链上真实状态与 5 类权威来源交叉比对，发现篡改、供应链投毒或未审计升级时按 P0–P3 分级多渠道告警。详见 **[`docs/SECURITY_MONITORING.md`](docs/SECURITY_MONITORING.md)**。
 
 ---
 
@@ -13,252 +38,142 @@ CKB 核心合约链上安全防篡改与升级监测预警系统是一套面向 
 pnpm install
 pnpm run build
 
-# 2. 运行离线单元测试
+# 2. 离线单元测试（TS 监控引擎 + flow 生成器）
 pnpm test
+node --test flow/tests/*.test.js
 
-# 3. 运行完整安全巡检（同时覆盖主网与测试网，不发送外部通知，容忍风险退出码）
+# 3. 本地构建并预览门户 http://localhost:4173
+pnpm run flow:build
+pnpm run portal:serve
+
+# 4. 跑一次完整安全巡检（主网+测试网，不发通知，容忍风险退出码）
 pnpm run monitor -- --network both --no-notify --fail-on none
 ```
 
-### 巡检报告与状态文件
-
-巡检完成后，结果将保存在 `results/` 目录下：
-
-- **`results/latest-report.json`**：最近一次完整巡检报告，包含各来源比对差异、P0-P3 风险事件详情、Type ID 升级溯源链路及签名 Lock 信息。
-- **`results/latest-status.json`**：精简版状态摘要，提供给状态监控看板、健康检查探针或 CI 门禁直接消费。
-- **`results/monitor-<timestamp>.json`**：每次巡检生成的带时间戳历史归档报告。
-- **`results/monitor-state.json`**：记录数据源连续失败计数与通知指纹去重状态。
+巡检报告写入 `results/`：`latest-report.json`（完整报告）、`latest-status.json`（看板/探针用摘要）、`monitor-<timestamp>.json`（历史归档）。`monitor upgrade` 只溯源升级链路，不覆盖上述两个 latest 文件。
 
 ---
 
-## 统一门户入口（CKB Contract Hub）
+## 数据所有权与合并策略
 
-本仓库集成了 [`gpBlockchain/ckb-contract-flow-html`](https://github.com/gpBlockchain/ckb-contract-flow-html) 的合约 Cell 流转规范与纯前端交易解码器（vendored 于 `flow/`，见 `flow/NOTICE.md`），并将其与本系统的合约知识库合并为**单一门户入口**：
-
-- **合约目录层**：90+ 合约的约束流转规范页（`flow/contracts/<id>/spec.json` 生成），受监控合约带 🛡 标记，支持按网络 / 标签过滤；
-- **交易诊断层**：首页粘贴任意交易哈希，纯浏览器直连 RPC 解码并按合约插件执行无签名约束校验。
-
-> 安全巡检结果**不在门户展示**：链上巡检告警完全由 CI 工作流（`security-monitor.yml`）产出与分发。
-
-```bash
-pnpm run flow:build    # 生成全部 flow 页面 + tx.html 解码器 + 统一 portal/index.html
-pnpm run portal:serve  # 本地预览 http://localhost:4173
-```
-
-### 数据所有权与合并策略
-
-门户的数据在**构建时**合并，源数据互不污染：
+两个子系统的数据在**构建时**才合并，源数据互不污染：
 
 | 数据源 | 角色 | 说明 |
 | --- | --- | --- |
-| `src/deployments/*.json` | 监控基线（安全 SSOT） | 保持最小结构；唯一可选扩展字段 `flowId` 指向 flow 目录 |
-| `flow/contracts/<id>/meta.json` | flow 元数据 | 由基线**投影生成**（`generated_from` 标记）；机械字段随基线再生成，知识字段（tags / source.commit / binary 等）人工补过后永不被覆盖 |
-| `flow/contracts/<id>/spec.json` 等 | 知识库 | 上游手写格式原样保留，不翻译、不迁移 |
+| `src/deployments/*.json` | 监控基线（安全 SSOT，24 个） | 保持最小结构；唯一可选扩展字段 `flowId` 指向 flow 目录 |
+| `flow/contracts/<id>/meta.json` | flow 元数据 | 基线成员由**投影生成**（`generated_from` 标记）：机械字段随基线再生成；知识字段（tags / source.commit / contributors 等）人工补过后永不被覆盖 |
+| `flow/contracts/<id>/spec.json` 等 | 知识本体 | 手写、上游格式原样保留，不翻译、不迁移，投影层永远不会自动生成 |
 
-新增一个受监控合约只需：`src/deployments/<name>.json`（唯一手写事实源）→ `pnpm run flow:meta <name> --rpc <url>` 生成 meta → 手写 `spec.json`（约束知识本体）。
+新增一个受监控合约：`src/deployments/<name>.json`（唯一手写事实源）→ `pnpm run flow:meta <name> --rpc <url>` 生成 meta → 手写 `spec.json`（约束知识本体）。
+
+### 漂移检查的责任划分
+
+两套 CI 各管一段，互不重叠（基线成员名单通过 `flow-lib.resolveFlowId` 自动映射，无需手工维护清单）：
+
+| 合约范围 | 链上漂移检查 | 修复路径 |
+| --- | --- | --- |
+| 基线拥有的（`src/deployments` 投影的 meta） | `security-monitor.yml`（每日，告警 + 白名单升级自动 PR）；`ci.yml` 的 `gen-flow-meta --check` 门禁保证基线与 flow meta 一致 | 只改基线，flow meta 由投影再生成；**不要**对基线拥有的 meta 跑 `check-deployments.js --write` |
+| 其余 flow 合约（手写 meta） | `flow-drift.yml`（每周，源自 gp 上游 `deployments.yml`，检出开/评论 `deployment-drift` issue） | 本地 `--write` 后提 PR |
 
 ```bash
 pnpm run flow:meta my_contract --rpc-mainnet https://mainnet.ckb.dev/rpc --rpc-testnet https://testnet.ckb.dev/rpc  # 基线 -> flow meta 投影
-pnpm run flow:meta --all --check                                                            # CI 漂移检查（只读，不写入）
+pnpm run flow:meta --all --check   # CI 漂移检查（只读，不写入）
 ```
-
-CI 工作流 `portal.yml` 在门户源数据变更时自动构建并发布 GitHub Pages（安全巡检结果由 `security-monitor.yml` 独立产出，不进入门户）。
 
 ---
 
-## 核心监控机制
+## 贡献合约（社区 PR 入口）
 
-### 1. 五类多源交叉对比 (Sources & Adapters)
+想让自己的合约出现在门户上？三条路：
 
-系统解耦了数据获取与安全比对逻辑，通过适配器定期采集 5 类权威来源：
+1. **用 AI agent 一键添加（推荐）**——把这句话发给 Cursor / Claude Code / Codex 等：
+   > 阅读 <https://raw.githubusercontent.com/RetricSu/community-scripts/master/flow/skills/ckb-contract-flow/SKILL.md> 并按其步骤为 <你的合约仓库 URL> 生成合约 cell 流转 HTML
 
-| 来源类别 | 适配器标识 | 采集内容与说明 |
+   可选：安装 skill 后只需说「用 ckb-contract-flow 给 <仓库> 生成合约流转 HTML」：
+   ```bash
+   curl -fsSL https://raw.githubusercontent.com/RetricSu/community-scripts/master/flow/install.sh | sh
+   ```
+2. **手动添加**——`node flow/scripts/new-contract.js <id> --kind lock|type` 生成骨架，按 [`flow/docs/ADD_CONTRACT.md`](flow/docs/ADD_CONTRACT.md) 填写。
+3. **只提需求**——开 issue 选「新增合约」模板（[issue #new-contract](https://github.com/RetricSu/community-scripts/issues/new/choose)），填部署信息即可。
+
+提交 PR 时会自动加载**合约 PR 模板清单**（来源引用、limit 与源码 `ERROR_*` 逐条核对、双语、检查命令通过等），逐项勾选即可。署名（可选）：`meta.json` 的 `contributors` 填你的 GitHub 用户名。
+
+---
+
+## CI 工作流一览
+
+| 工作流 | 触发 | 干什么 |
 | --- | --- | --- |
-| **链上 RPC** | `onchain-rpc` | 直接连接 CKB 节点，逐一核验基线 OutPoint、dep group 成员、DataHash、TypeHash 以及 Type ID 当前 Live Cell 状态 |
-| **官方文档** | `docs-nervos` | 解析 `nervosnetwork/docs.nervos.org` 中的 `ecosystem-scripts` 部署表格 |
-| **Nervos RFC** | `rfcs-nervos` | 解析 RFC-0024/0025/0026/0042/0052 等规范文档中的部署表格 |
-| **CKB Explorer** | `ckb-explorer` | 调用 Explorer API (`/api/v2/scripts` 及 `/general_info`) 校验脚本 OutPoint 与死 Cell 标记 |
-| **CCC SDK** | `sdk-ccc` | 读取 `@ckb-ccc/core` 静态脚本表，跨 SDK 校验核心脚本元数据一致性 |
-
-### 2. P0 - P3 风险分级模型
-
-风险评估引擎对所有比对差异实施结构化分级：
-
-- **`P0_CRITICAL`（严重风险）**：
-  - **代码哈希不匹配**：外部文档、SDK 或 Explorer 声明的 `code_hash` 与链上实际代码不一致（疑似恶意篡改或外部供应链投毒）。
-  - **未授权升级**：合约 Type ID 被消费并生成了新 Cell，但该消费交易不在白名单中。
-  - **部署 Cell 销毁**：合约 Cell 被消费且未能找到持有相同 Type ID 的 successor Cell。
-- **`P1_HIGH`（高风险）**：
-  - **引用死 Cell**：外部文档或 SDK 引用了链上已死亡的 Cell（将直接导致用户交易组装或验证失败）。
-  - **授权升级事件**：合约发生了符合官方白名单记录的正常链上升级，提醒同步基线。
-- **`P2_MEDIUM`（中风险）**：
-  - **CellDep 漂移**：存在额外的辅助 dep group 成员，或指向了可用的同代码备用 Live Cell。
-  - **基线未记录**：规范基线中缺少 DataHash/TypeHash 初始记录（触发补全提示）。
-  - **单一来源故障**：个别外部 API/文档网络请求失败（不阻断其他数据源巡检）。
-- **`P3_LOW`（低风险/建议）**：
-  - 格式不规范、非关键字段缺失等非阻塞性改进建议。
-
-### 3. Type ID 升级追踪与白名单 PR
-
-对于采用 Type ID 管理的核心合约，当部署 Cell 被链上消费时，`UpgradeTracker` 通过 CKB Indexer 沿 Type ID 链路自动进行多跳（hop）深度溯源：
-
-- **完整审计要素记录**：
-  - **升级时间**（`upgradedAt`）与**区块高度**（`upgradedBlock`）
-  - **消费交易哈希**（`consumingTxHash`）
-  - **旧 / 新 Cell Lock**（`oldLock` / `newLock`，包括 script hash 与 multisig args）
-  - **输入签名 Lock**（`signerLocks`）与 Witness 尺寸
-- **白名单机制**：
-  - 升级交易必须经官方公告与人工安全审计后，方可写入白名单（内置于 `src/engine/upgrade-tracker.ts` 或通过 `UPGRADE_WHITELIST_FILE` 注入）。
-  - **未授权升级（P0）**：直接触发严重警报并阻断自动化流程。
-  - **白名单升级（P1）**：运行 `pnpm run monitor:upgrade -- --network mainnet --apply` 更新规范基线，并在 CI 中自动生成 GitHub Pull Request 交由核心团队人工审查，杜绝未审计代码静默写入 master 分支。
+| `portal.yml` | push master 且门户源数据变更 | 构建门户并发布到 GitHub Pages（构建/部署分两 job，生成器无写权限） |
+| `security-monitor.yml` | 每日定时 | 全量多源巡检，P1+ 告警；白名单内升级自动开基线更新 PR |
+| `flow-drift.yml` | 每周定时 | 非基线 flow 合约的部署漂移检查，检出开/评论 issue |
+| `ci.yml` | PR / push master | 构建 + lint + 测试 + flow 规范校验 + 基线→meta 投影漂移门禁 |
 
 ---
 
-## 多渠道预警通知
+## 安全监测机制速览
 
-系统支持主流通讯软件与工单平台的实时告警，未配置环境变量的渠道将自动跳过。报警具备指纹去重机制（相同问题 24 小时内不重复发送，风险级别跃升时立即再次通知）。
+### 五类多源交叉对比
 
-| 渠道 | 环境变量配置入口 | 默认告警阈值 | 说明 |
-| --- | --- | --- | --- |
-| **Telegram** | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | P1 | 支持群组与私聊推送，附带风险等级与事件摘要 |
-| **飞书 / Lark** | `FEISHU_WEBHOOK_URL`, `FEISHU_SECRET` (可选) | P1 | 富文本卡片格式，支持签名安全校验 |
-| **Discord** | `DISCORD_WEBHOOK_URL` | P1 | Webhook Embed 卡片消息 |
-| **GitHub Issue**| `GITHUB_TOKEN`, `GITHUB_REPOSITORY` (`owner/repo`) | P1 | 自动打标 `ckb-monitor`，按指纹去重更新或新建 Issue |
-| **通用 Webhook** | `ALERT_WEBHOOK_URL`, `ALERT_WEBHOOK_BEARER_TOKEN` (可选) | P0 | 标准 JSON POST，适用于短信、电话网关或 PagerDuty |
+| 来源 | 适配器 | 采集内容 |
+| --- | --- | --- |
+| 链上 RPC | `onchain-rpc` | 逐一核验基线 OutPoint、dep group 成员、Data/TypeHash、Type ID Live Cell 状态 |
+| 官方文档 | `docs-nervos` | 解析 docs.nervos.org 的 ecosystem-scripts 部署表 |
+| Nervos RFC | `rfcs-nervos` | 解析 RFC-0024/0025/0026/0042/0052 部署表 |
+| CKB Explorer | `ckb-explorer` | 校验 OutPoint 与死 Cell 标记 |
+| CCC SDK | `sdk-ccc` | 跨 SDK 校验核心脚本元数据一致性 |
 
-各渠道最低告警阈值均可通过 `*_MIN_LEVEL`（如 `TELEGRAM_MIN_LEVEL=P0`）单独覆盖。
+### P0–P3 风险分级（节选）
 
-> 完整配置选项、节点 RPC 镜像与更多高级用法请参阅 **[`docs/SECURITY_MONITORING.md`](docs/SECURITY_MONITORING.md)**。
+- **P0 严重**：代码哈希与链上实际不符（疑似篡改/供应链投毒）；未授权 Type ID 升级；部署 Cell 被销毁且无 successor
+- **P1 高**：引用死 Cell；白名单内授权升级（提醒同步基线）
+- **P2 中**：CellDep 漂移；基线未记录哈希；单一来源故障
+- **P3 低**：格式与缺失字段建议
+
+### Type ID 升级追踪与白名单
+
+升级 Tracker 沿 Type ID 链路多跳溯源，记录升级时间/区块/消费交易/新旧 Lock/签名 Lock；升级交易必须在白名单内（`src/engine/upgrade-tracker.ts` 内置或 `UPGRADE_WHITELIST_FILE` 注入），否则直接 P0。白名单升级可用 `pnpm run monitor:upgrade -- --network mainnet --apply` 回写基线，并由 CI 自动开 PR 交人工审查。
+
+### 多渠道告警
+
+Telegram / 飞书 / Discord / GitHub Issue / 通用 Webhook，未配置的渠道自动跳过；指纹去重（同问题 24h 不重复，风险跃升立即再通知）。各渠道阈值用 `*_MIN_LEVEL` 覆盖。完整配置见 [`docs/SECURITY_MONITORING.md`](docs/SECURITY_MONITORING.md)。
 
 ---
 
-## 架构设计
-
-项目采用分层解耦架构，核心模块分布如下：
+## 目录结构
 
 ```
-src/
-├── adapters/                    # 多源数据采集适配器
-│   ├── base.ts                  # 适配器基类与统一数据接口
-│   ├── docs/                    # Nervos 官方文档与 RFC 表格解析
-│   │   ├── ckb-docs-adapter.ts
-│   │   ├── markdown-table-parser.ts
-│   │   └── rfcs-adapter.ts
-│   ├── explorer/                # CKB Explorer API 适配器
-│   │   └── explorer-api-adapter.ts
-│   ├── onchain/                 # 链上 RPC 实时状态与 Type ID 提取
-│   │   └── ckb-rpc-adapter.ts
-│   └── sdk/                     # SDK 静态脚本表适配器
-│       └── ccc-sdk-adapter.ts
-├── cli/                         # 命令行接口与参数解析 (Commander)
-│   ├── argv.ts                  # CLI 参数清洗与 pnpm 参数解耦
-│   └── monitor.ts               # monitor 及 upgrade 命令行指令
-├── deployments/                 # 唯一规范部署基线 (24+ 核心合约规范 JSON)
-├── engine/                      # 核心监控与分析引擎
-│   ├── baseline.ts              # 规范部署基线加载与只读校验
-│   ├── baseline-writer.ts       # 规范部署基线安全写回器
-│   ├── monitor.ts               # 巡检流程编排与调度器
-│   ├── risk-evaluator.ts        # P0-P3 风险分级评估器
-│   ├── state.ts                 # 连续故障状态与通知去重缓存
-│   ├── upgrade-tracker.ts       # Type ID 链上升级深度追踪与白名单
-│   └── verifier.ts              # 多源交叉比对与漂移检测
-├── notifier/                    # 多渠道预警通知系统
-│   ├── discord.ts               # Discord Webhook 通知
-│   ├── feishu.ts                # 飞书机器人通知
-│   ├── github-issue.ts          # GitHub Issue 告警与去重
-│   ├── notifier.ts              # 通知调度聚合器与指纹管理
-│   ├── telegram.ts              # Telegram Bot 通知
-│   └── webhook.ts               # 通用 HTTP Webhook 通知
-├── types/                       # 领域数据模型与类型定义
-│   ├── adapter.ts               # 标准化脚本结构与适配器类型
-│   ├── deployment.ts            # 规范基线配置定义
-│   └── report.ts                # 差异发现与分析报告类型
-├── utils/                       # 基础工具库 (HTTP 重试、标准化、Molecule 解析)
-│   ├── http.ts
-│   └── normalize.ts
-├── discovery/                   # [附属功能] npm CKB SDK 自动发现
-│   └── npm-sdk-discoverer.ts
-├── testing/                     # [附属功能] SDK 运行时动态安装与测试
-│   ├── daily-test-runner.ts
-│   └── dynamic-sdk-tester.ts
-├── validate/                    # [附属功能] SDK 脚本规范校验器
-│   ├── base.ts
-│   ├── ccc.ts
-│   └── index.ts
-├── security-monitor.ts          # 监控逻辑统一导出
-└── index.ts                     # CLI 统一主入口
+src/                    # 安全监测引擎（TypeScript）
+├── adapters/           # 五类数据源适配器（docs / rfcs / explorer / onchain / sdk）
+├── cli/                # monitor / upgrade 命令行
+├── deployments/        # 唯一规范部署基线（24 个 JSON，手写 SSOT）
+├── engine/             # 巡检编排、风险分级、升级追踪、多源比对、状态去重
+├── notifier/           # Telegram / 飞书 / Discord / GitHub Issue / Webhook
+├── discovery/ testing/ validate/   # [附属] SDK 动态发现与测试
+└── ...
+flow/                   # 合约知识库（vendored，上游已归档，本仓库为 canonical 家）
+├── contracts/<id>/     # spec.json（手写规范）+ plugin.js + meta.json + tests.json
+├── gen.js lib/         # 零依赖静态生成器（规范页 / tx.html / llms.txt / decode-tx.js）
+├── scripts/            # check.js / check-deployments.js / new-contract.js ...
+├── skills/             # ckb-contract-flow agent skill（AI 一键添加合约）
+└── docs/               # ADD_CONTRACT.md 等贡献文档
+scripts/                # 门户接合层
+├── flow-lib.js         # 基线 ↔ flow 身份解析（code_hash 校验）
+├── gen-flow-meta.js    # 基线 -> flow meta 投影（三种字段策略）
+├── build-portal.js     # 构建时合并，产出统一 portal/index.html
+└── serve-portal.js     # 本地预览静态服务器
+docs/                   # SECURITY_MONITORING.md（完整监测文档）
+.github/workflows/      # portal / security-monitor / flow-drift / ci 四套工作流
 ```
 
 ---
 
 ## 附属功能：SDK 动态发现与测试
 
-除了安全监控主定位外，本项目依然完整保留了对 CKB 生态 SDK 的动态发现、运行时测试与脚本规范一致性校验功能。
+原 SDK 动态发现与测试能力保留为附属功能：`pnpm run discover`（npm 发现 CKB SDK）、`npm start test <sdk>`、`pnpm run daily`（全量日常验证）。细节见 `src/discovery/`、`src/testing/`、`src/validate/`。
 
-### 命令行使用
+## 贡献与许可证
 
-```bash
-# 自动在 npm 上发现 CKB 相关 SDK
-pnpm run discover
-# 或 npm start discover
-
-# 测试指定的 SDK
-npm start test ckb-sdk-js
-
-# 运行全量日常 SDK 验证测试
-pnpm run daily
-# 或 npm start daily
-
-# 查看帮助信息
-npm start help
-```
-
-### 代码集成调用
-
-```typescript
-import { DailyTestRunner } from './src/testing/daily-test-runner';
-import { NPMSDKDiscoverer } from './src/discovery/npm-sdk-discoverer';
-import { DynamicSDKTester } from './src/testing/dynamic-sdk-tester';
-
-// 运行全量日常测试
-const runner = new DailyTestRunner();
-await runner.runDailyTests();
-
-// 发现可用的 SDK
-const discoverer = new NPMSDKDiscoverer();
-const sdkNames = await discoverer.discoverSDKs();
-
-// 测试指定 SDK 列表
-const tester = new DynamicSDKTester();
-const reports = await tester.testAllSDKs(['ckb-sdk-js', 'another-sdk']);
-```
-
-### SDK 验证工作流程
-
-1. **动态发现**：在 npm 上检索匹配 `ckb-sdk`、`nervos-sdk`、`ckb-js` 等关键字的包。
-2. **运行时安装**：动态临时安装最新版本并反射加载模块。
-3. **元数据提取**：尝试多种调用模式（如 `sdk.getScriptInfo`、`sdk.scripts.get` 等）提取脚本配置。
-4. **一致性比对**：与规范基线中的 `codeHash`、`hashType`、`cellDeps` 进行比对。
-5. **产出报告**：输出控制台统计并在 `results/` 生成 `validation-results-*.json` 与 `validation-summary-*.json`。
-
-### GitHub Actions 持续集成
-
-项目的 `.github/workflows/ci.yml` 会在 Pull Request 和 master push 时执行依赖安装、TypeScript 构建、Biome Lint 与单元测试，作为常规代码质量检查。
-
----
-
-## 贡献指南
-
-1. Fork 本仓库并基于最新代码创建分支。
-2. 保持 `src/deployments/*.json` 规范部署基线的严谨性，任何基线变更均需附带链上交易哈希与官方审计来源。
-3. 提交代码前确保运行并通过格式与单元测试：
-   ```bash
-   pnpm run check
-   pnpm run build
-   pnpm test
-   ```
-4. 提交 Pull Request 并详细描述变更内容。
-
-## 许可证
-
-ISC License
+- 合约知识库贡献：见上文「贡献合约」，PR 模板与 new-contract issue 模板已就位
+- 监测引擎 / 基线变更：保持 `src/deployments/*.json` 严谨性，基线变更须附链上交易哈希与官方审计来源；提交前 `pnpm run check && pnpm run build && pnpm test`
+- License: ISC

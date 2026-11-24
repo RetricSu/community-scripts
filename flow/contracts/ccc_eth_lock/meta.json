@@ -1,17 +1,30 @@
 {
   "tags": [
-    "lock"
+    "identity",
+    "community",
+    "open-source"
   ],
   "contributors": [],
   "source": {
     "repo": "https://github.com/ckb-devrel/ccc-locks",
-    "commit": null,
-    "paths": [],
+    "commit": "8c8dc2fc7db45a802af024a5d1817137962480cf",
+    "paths": [
+      "contracts/ccc-eth-lock/src/entry.rs"
+    ],
     "binary": {
       "status": "unverified",
-      "per": [],
-      "note": "generated from community-scripts baseline; provenance not yet verified"
-    }
+      "per": [
+        {
+          "data_hash": "0x66be3ce5f50be813bc583e733583db33bc1757b462006258471e52e358aced50",
+          "evidence": [
+            "deployed tx + data hash match deployment/testnet/eth-lock/migrations/2024-08-02-064738.json"
+          ],
+          "matches_commit": false
+        }
+      ],
+      "note": "deployment provenance confirmed against the repo's own deployment records (deployment/testnet/eth-lock/migrations/2024-08-02-064738.json); no committed binary or checksum at the recorded commit, so the build itself is not verified (reproducible build not attempted)"
+    },
+    "commit_note": "default-branch HEAD recorded at community-scripts merge; binary provenance not yet verified"
   },
   "deployments": [
     {

@@ -113,6 +113,8 @@ public
 dist/
 build/
 lib/
+# ...except the vendored gp generator runtime under flow/
+!flow/lib/
 
 # IDE files
 .vscode/

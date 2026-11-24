@@ -43,6 +43,24 @@ export const DEFAULT_UPGRADE_WHITELIST: readonly PlannedUpgrade[] = [
     note: 'Official Omnilock mainnet upgrade (block 12017064)',
   },
   {
+    scriptName: 'omnilock',
+    network: 'testnet',
+    txHash:
+      '0x7d9c9ccd12f40eebe508bbbf24b0d746c991e055f2f1b61c6fe8ca60467ae750',
+    newDataHash:
+      '0x3f303aa87238dbc34a81a1c42109e07aad9c8e4ab3e8741d87fffca43851b2d7',
+    note: 'SDK config upgrade record (ckb-js/lumos#665): https://github.com/ckb-js/lumos/pull/665 — accepted as an SDK config upgrade record, not a contract-author signed announcement.',
+  },
+  {
+    scriptName: 'omnilock',
+    network: 'testnet',
+    txHash:
+      '0xec18bf0d857c981c3d1f4e17999b9b90c484b303378e94de1a57b0872f5d4602',
+    newDataHash:
+      '0x6b29b6f10346b43c540e53806ba88ba0fe3a0c3a29d7448ef555840c8f8318fa',
+    note: 'SDK config upgrade record (ckb-js/lumos#669): https://github.com/ckb-js/lumos/pull/669 — accepted as an SDK config upgrade record, not a contract-author signed announcement.',
+  },
+  {
     scriptName: 'nostr_binding',
     network: 'mainnet',
     txHash:

@@ -36,6 +36,10 @@ jobs:
         run: node scripts/gen-flow-meta.js --all --rpc-mainnet https://mainnet.ckb.dev/rpc --rpc-testnet https://testnet.ckb.dev/rpc
 
       - name: Build portal
+        env:
+          # absolute links in llms.txt / <id>.md / decode-tx.js (gp generator
+          # defaults to its own upstream Pages URL without this)
+          SITE_URL: https://retricsu.github.io/community-scripts
         run: node flow/gen.js --all portal && node scripts/build-portal.js
 
       - name: Upload portal artifact

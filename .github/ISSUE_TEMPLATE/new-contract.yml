@@ -1,0 +1,65 @@
+name: 新增合约 / Add a new contract
+description: 申请或贡献一个新的 CKB 合约解析页 / Request or contribute a new CKB contract page
+title: "[合约 / Contract] <name>"
+labels: ["new-contract"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 如何添加新合约 / How to add a new contract
+
+        **方式一：用 AI agent 一键添加（推荐）/ Option 1: with an AI agent (recommended)**
+        1. 把这句话发给能读代码、跑命令的 agent（Cursor / Claude Code / Codex 等）：
+           > 阅读 https://raw.githubusercontent.com/RetricSu/community-scripts/master/flow/skills/ckb-contract-flow/SKILL.md 并按其步骤为 <合约仓库 URL 或本地路径> 生成合约 cell 流转 HTML
+        2. agent 会生成 `flow/contracts/<id>/{spec.json, plugin.js, tests.json, meta.json}`。
+        3. agent 运行检查，全部通过 / The agent runs and must pass:
+           ```bash
+           node flow/gen.js --all out
+           node flow/scripts/check.js
+           node flow/scripts/test-tx.js <id>
+           ```
+        4. 核对后让 agent 提 PR（分支 `contract/<id>`，PR 模板清单逐项勾选）。想署名可在 `meta.json` 的 `contributors` 填 GitHub 用户名（可选）。
+
+        **方式二：手动 / Option 2: manually**
+        `node flow/scripts/new-contract.js <id> --kind lock|type` 生成骨架，按 [flow/docs/ADD_CONTRACT.md](https://github.com/RetricSu/community-scripts/blob/master/flow/docs/ADD_CONTRACT.md) 填写。
+
+        **只想提需求？** 填下面的信息即可，维护者或 agent 会跟进。/ Just requesting? Fill in the fields below.
+  - type: input
+    id: repo
+    attributes:
+      label: 合约源码 / Source repo
+      description: 源码仓库链接，最好带 commit / Repo URL, ideally pinned to a commit
+      placeholder: https://github.com/owner/repo/tree/<commit>
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: 脚本类型 / Script kind
+      options: [lock, type, 不确定 / unsure]
+    validations:
+      required: true
+  - type: textarea
+    id: deployments
+    attributes:
+      label: 部署信息 / Deployments
+      description: 主网 / 测试网的 code_hash、hash_type、cell_dep（官方文档或 SDK 常量来源）
+      placeholder: |
+        mainnet: code_hash=0x... hash_type=type  来源: ...
+        testnet: code_hash=0x... hash_type=type  来源: ...
+  - type: input
+    id: example_tx
+    attributes:
+      label: 示例交易 / Example tx hash
+      description: 至少一笔使用该合约的真实链上交易（可选）
+  - type: input
+    id: tags
+    attributes:
+      label: 标签 / Tags
+      description: 见 flow/contracts/tags.json，如 token / nft / defi / identity / channel / btc / proxy / quantum
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: 贡献 / Contribution
+      options:
+        - label: 我会自己（或用 agent）提交 PR / I'll open a PR myself (or with an agent)

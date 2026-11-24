@@ -2,7 +2,7 @@
 
 [中文](#中文) | [English](#english)
 
-典型流程 / Typical flow: **合约仓库 URL → AI 阅读源码 → 生成 `contracts/<id>/`（spec.json、plugin.js、tests.json、meta.json）→ 构建 HTML → （可选）向 `gpBlockchain/ckb-contract-flow-html` 提 PR**
+典型流程 / Typical flow: **合约仓库 URL → AI 阅读源码 → 生成 `contracts/<id>/`（spec.json、plugin.js、tests.json、meta.json）→ 构建 HTML → （可选）向 `RetricSu/community-scripts` 提 PR**
 
 ---
 

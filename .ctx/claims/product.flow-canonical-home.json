@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "id": "product.flow-canonical-home",
+  "type": "decision",
+  "lifecycle": "active",
+  "policy": "advisory",
+  "claim": "The vendored flow/ knowledge base (from gpBlockchain/ckb-contract-flow-html) does NOT sync back to the gp upstream repo: gp will be archived and RetricSu/community-scripts is the sole canonical home. The repo must stand alone; do not propose upstream-sync machinery, only self-contained maintenance.",
+  "why": "Human clarified (2026-11-24): gp repo will be archived, only this repo remains as the richer portal entry; independence is the design goal, not a gap.",
+  "anchors": [
+    {
+      "kind": "file",
+      "path": "flow/NOTICE.md",
+      "watch": "file"
+    },
+    {
+      "kind": "file",
+      "path": "flow/README.md",
+      "watch": "file"
+    }
+  ],
+  "tags": [
+    "flow",
+    "vendoring",
+    "upstream",
+    "portal"
+  ]
+}

@@ -1,17 +1,32 @@
 {
   "tags": [
-    "type"
+    "nft",
+    "community",
+    "open-source",
+    "p-spore"
   ],
   "contributors": [],
   "source": {
     "repo": "https://github.com/sporeprotocol/spore-dob-1",
-    "commit": null,
-    "paths": [],
+    "commit": "43ad12a24bdee2df9288d772097f6e0ab2fc22fb",
+    "paths": [
+      "src/main.rs"
+    ],
     "binary": {
       "status": "unverified",
-      "per": [],
-      "note": "generated from community-scripts baseline; provenance not yet verified"
-    }
+      "per": [
+        {
+          "data_hash": "0xda3525549b72970b4c95f5b5749357f20d1293d335710b674f09c32f7d54b6dc",
+          "evidence": [
+            "deployed tx + data hash match migration/mainnet/2024-07-15-142055.json",
+            "deployed tx + data hash match migration/testnet/2024-07-15-142016.json"
+          ],
+          "matches_commit": false
+        }
+      ],
+      "note": "deployment provenance confirmed against the repo's own deployment records (migration/mainnet/2024-07-15-142055.json; migration/testnet/2024-07-15-142016.json); no committed binary or checksum at the recorded commit, so the build itself is not verified (reproducible build not attempted)"
+    },
+    "commit_note": "default-branch HEAD recorded at community-scripts merge; binary provenance not yet verified"
   },
   "deployments": [
     {

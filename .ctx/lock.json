@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "claims": {
+    "product.flow-canonical-home": {
+      "policy": "advisory",
+      "claim_hash": "sha256:82f2fa8f844686d296a6c0efa05d5b58e55c0933d7ac98fd0b5501ceefda6929",
+      "semantic_hash": "sha256:54564b8557b56313fa47e95119da5610f65c6625a50dec0eebfd51efa01291af",
+      "anchors": {
+        "file:flow/NOTICE.md": "sha256:f243f18c17f336f3b979875ae81d6e7ea9ee22e1e764de531cf4048d6da28120",
+        "file:flow/README.md": "sha256:062eb41f3d495774fb4a297e8f4b9dd881cc4c17875c6a52e527a965bbecc37f"
+      },
+      "dependencies": {}
+    }
+  }
+}
