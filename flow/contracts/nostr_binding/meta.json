@@ -13,8 +13,18 @@
     ],
     "binary": {
       "status": "unverified",
-      "per": [],
-      "note": "generated from community-scripts baseline; provenance not yet verified"
+      "per": [
+        {
+          "data_hash": "0xee39c944c5bea6857d1b55fc1d4ff9fc1e22e59fd89d1a0fed8e6eabc08dda66",
+          "evidence": [
+            "deployed tx + data hash match deployment/mainnet/nostr-binding-type-script/migrations/2024-07-18-010238.json",
+            "deployed tx + data hash match deployment/mainnet/nostr-binding-type-script/migrations/2026-01-14-050950.json",
+            "deployed tx + data hash match deployment/testnet/nostr-binding-type-script/migrations/2024-07-03-014444.json"
+          ],
+          "matches_commit": false
+        }
+      ],
+      "note": "deployment provenance confirmed against the repo's own deployment records (deployment/mainnet/nostr-binding-type-script/migrations/2024-07-18-010238.json; deployment/mainnet/nostr-binding-type-script/migrations/2026-01-14-050950.json; deployment/testnet/nostr-binding-type-script/migrations/2024-07-03-014444.json); no committed binary or checksum at the recorded commit, so the build itself is not verified (reproducible build not attempted)"
     },
     "commit_note": "default-branch HEAD recorded at community-scripts merge; binary provenance not yet verified"
   },

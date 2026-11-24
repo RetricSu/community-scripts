@@ -13,8 +13,16 @@
     ],
     "binary": {
       "status": "unverified",
-      "per": [],
-      "note": "generated from community-scripts baseline; provenance not yet verified"
+      "per": [
+        {
+          "data_hash": "0x3fa562b394f65aac8c2649b6d7d1dea25c677ccfcd4d912e63b272b78bbacb14",
+          "evidence": [
+            "deployed tx + data hash match deployment/testnet/btc-lock/migrations/2024-08-02-064528.json"
+          ],
+          "matches_commit": false
+        }
+      ],
+      "note": "deployment provenance confirmed against the repo's own deployment records (deployment/testnet/btc-lock/migrations/2024-08-02-064528.json); no committed binary or checksum at the recorded commit, so the build itself is not verified (reproducible build not attempted)"
     },
     "commit_note": "default-branch HEAD recorded at community-scripts merge; binary provenance not yet verified"
   },

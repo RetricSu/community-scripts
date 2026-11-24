@@ -14,8 +14,17 @@
     ],
     "binary": {
       "status": "unverified",
-      "per": [],
-      "note": "generated from community-scripts baseline; provenance not yet verified"
+      "per": [
+        {
+          "data_hash": "0x13cac78ad8482202f18f9df4ea707611c35f994375fa03ae79121312dda9925c",
+          "evidence": [
+            "deployed tx + data hash match migration/mainnet/2024-06-24-124552.json",
+            "deployed tx + data hash match migration/testnet/2024-06-12-094426.json"
+          ],
+          "matches_commit": false
+        }
+      ],
+      "note": "deployment provenance confirmed against the repo's own deployment records (migration/mainnet/2024-06-24-124552.json; migration/testnet/2024-06-12-094426.json); no committed binary or checksum at the recorded commit, so the build itself is not verified (reproducible build not attempted)"
     },
     "commit_note": "default-branch HEAD recorded at community-scripts merge; binary provenance not yet verified"
   },
