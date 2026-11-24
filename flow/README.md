@@ -98,7 +98,7 @@ node scripts/check.js                 # 检查标签闭合 + 双语覆盖（在�
 复制这句话发给任意 coding agent，无需安装：
 
 ```text
-阅读 https://raw.githubusercontent.com/gpBlockchain/ckb-contract-flow-html/main/skills/ckb-contract-flow/SKILL.md 并按其步骤为 <合约仓库 URL 或本地路径> 生成合约 cell 流转 HTML
+阅读 https://raw.githubusercontent.com/RetricSu/community-scripts/main/flow/skills/ckb-contract-flow/SKILL.md 并按其步骤为 <合约仓库 URL 或本地路径> 生成合约 cell 流转 HTML
 ```
 
 可选安装见 [SKILL.md](skills/ckb-contract-flow/SKILL.md#install-this-skill-optional)。
@@ -167,7 +167,7 @@ Every HTML page has a "For AI agents" line under its title: links to these files
 Paste this to any coding agent, no install needed:
 
 ```text
-Read https://raw.githubusercontent.com/gpBlockchain/ckb-contract-flow-html/main/skills/ckb-contract-flow/SKILL.md and follow it to generate a cell-flow HTML for <contract repo URL or local path>
+Read https://raw.githubusercontent.com/RetricSu/community-scripts/main/flow/skills/ckb-contract-flow/SKILL.md and follow it to generate a cell-flow HTML for <contract repo URL or local path>
 ```
 
 Optional install: see [SKILL.md](skills/ckb-contract-flow/SKILL.md#install-this-skill-optional).

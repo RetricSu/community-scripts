@@ -3,9 +3,9 @@
 'use strict';
 const fs = require('fs'), path = require('path');
 const META = require('./meta.js'), C = require('./contracts.js');
-const REPO = 'https://github.com/gpBlockchain/ckb-contract-flow-html';
+const REPO = 'https://github.com/RetricSu/community-scripts';
 // absolute links (agents get the files out of context); CI passes the Pages URL, forks get their own
-const SITE = (process.env.SITE_URL || 'https://gpblockchain.github.io/ckb-contract-flow-html/').replace(/\/*$/, '/');
+const SITE = (process.env.SITE_URL || 'https://retricsu.github.io/community-scripts/').replace(/\/*$/, '/');
 const EXP = { mainnet: 'https://explorer.nervos.org', testnet: 'https://testnet.explorer.nervos.org' };
 const STATUS = { verified: 'verified (deployed binary matches the source)', unverified: 'unverified (deployed binary not matched to the source)', mismatch: 'MISMATCH (deployed binary differs from the source)', 'no-source': 'no public source', builtin: 'built into CKB' };
 const en = x => x == null ? '' : typeof x === 'object' ? String(x.en != null ? x.en : x.zh) : String(x);
@@ -66,8 +66,8 @@ function llms(recs, sha) {
     '## What each contract does', '',
     ...recs.map(r => `- ${link(r)} \`${r.id}\` — ${r.kind}${cats(r) ? ' · ' + cats(r) : ''} · ${r.nets.join(', ') || 'not deployed'}: ${ops(r) || 'no cell-flow spec yet (deployments and decoder only)'}`), '',
     '## Optional', '',
-    `- [Source repository](${REPO}): specs (contracts/<id>/spec.json), plugins, tests, generator`,
-    `- [Adding a contract](${REPO}/blob/main/docs/ADD_CONTRACT.md) · [agent skill](${REPO}/blob/main/skills/ckb-contract-flow/SKILL.md)`, ''].join('\n');
+    `- [Source repository](${REPO}): specs (flow/contracts/<id>/spec.json), plugins, tests, generator`,
+    `- [Adding a contract](${REPO}/blob/main/flow/docs/ADD_CONTRACT.md) · [agent skill](${REPO}/blob/main/flow/skills/ckb-contract-flow/SKILL.md)`, ''].join('\n');
 }
 
 const box = (b, what) => b.layout ? layout(b, what) : `${what ? `**${what}** · ` : ''}${en(b.label)}\n\n${code(b.body)}`;

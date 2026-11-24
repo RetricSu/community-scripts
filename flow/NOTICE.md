@@ -8,9 +8,16 @@ from [`gpBlockchain/ckb-contract-flow-html`](https://github.com/gpBlockchain/ckb
 - **License**: MIT (upstream author's standard license, confirmed by the
   community-scripts maintainer; the upstream repo does not carry a LICENSE file
   yet — see https://github.com/gpBlockchain/ckb-contract-flow-html).
-- **Local modifications**: none to the generator itself. This repo adds
-  `../scripts/build-portal.js`, which runs after `gen.js --all` and rewrites
-  `portal/index.html` into the unified security + flow hub entry point.
+- **Local modifications**: pointers repointed to this repo as the canonical home
+  (the gp upstream repo is being archived): `lib/agent.js` (REPO/SITE defaults +
+  doc paths), `gen.js` + `install.sh` + `docs/ADD_CONTRACT.md` + `README.md`
+  (skill install / SKILL.md links / PR target). The two Claude Code
+  plugin-marketplace lines in `gen.js` still reference the archived upstream
+  repo because its `.claude-plugin` manifest is not vendored here. The upstream
+  generator logic itself is unmodified. This repo additionally provides
+  `../scripts/build-portal.js`, which runs after `gen.js --all` and writes the
+  unified portal entry `portal/index.html` (contract directory + tx decode
+  entry; security monitoring results stay in CI and are not rendered).
 
 ## What lives here
 

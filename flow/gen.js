@@ -210,8 +210,10 @@ function main() {
     const steps = [[{ zh: '填入合约仓库', en: 'Enter the contract repo' }, { zh: 'GitHub 链接或本地路径都可以', en: 'A GitHub URL or a local path' }],
       [{ zh: '复制这句话', en: 'Copy the sentence' }, { zh: '点「复制」或在输入框里按回车', en: 'Click Copy, or press Enter in the field' }],
       [{ zh: '发给你的 coding agent', en: 'Paste it into your coding agent' }, 'Claude Code · Cursor · Codex …']];
-    const inst = [['npx', 'npx skills add gpBlockchain/ckb-contract-flow-html -g -y -a claude-code cursor codex'],
-      ['curl', 'curl -fsSL https://raw.githubusercontent.com/gpBlockchain/ckb-contract-flow-html/main/install.sh | sh'],
+    // the plugin-marketplace lines still point at the archived gp upstream repo (its
+    // .claude-plugin manifest is not vendored here); archived repos stay readable
+    const inst = [['npx', 'npx skills add RetricSu/community-scripts -g -y -a claude-code cursor codex'],
+      ['curl', 'curl -fsSL https://raw.githubusercontent.com/RetricSu/community-scripts/main/flow/install.sh | sh'],
       ['Claude Code', '/plugin marketplace add gpBlockchain/ckb-contract-flow-html'], ['', '/plugin install ckb-contract-flow@ckb-contract-flow-html']];
     const gen = `<section class="gen" id="skill"><div class="gen-t"><span class="eyebrow">${ic('<path d="M12 2.8l2.1 6.1 6.1 2.1-6.1 2.1L12 19.2l-2.1-6.1L3.8 11l6.1-2.1z"></path><path d="M19 15.6l.8 2.1 2.1.8-2.1.8-.8 2.1-.8-2.1-2.1-.8 2.1-.8z"></path>')}${T({ zh: 'AI 生成', en: 'Generate with AI' }, esc)}</span>
 <h2>${T({ zh: '没找到你的合约？\n一句话让 AI 生成', en: 'Contract not listed?\nGenerate it in one sentence' }, s => esc(s).replace('\n', '<br>'))}</h2>
@@ -223,8 +225,8 @@ function main() {
 <details class="more gen-more"><summary>${T({ zh: '可选：安装为 skill', en: 'Optional: install as a skill' }, esc)}</summary>
 <p class="small">${T({ zh: '任选一种装好后，只需对 agent 说「用 ckb-contract-flow 给 <仓库> 生成合约流转 HTML」。', en: 'Pick any one; afterwards just tell your agent "use ckb-contract-flow for <repo>".' }, esc)}</p>
 <ul class="inst">${inst.map(([k, c]) => `<li><span>${esc(k)}</span><code>${esc(c)}</code><button class="cpi" type="button" aria-label="copy" title="copy">${copyIc}</button></li>`).join('')}</ul>
-<a href="https://github.com/gpBlockchain/ckb-contract-flow-html/blob/main/skills/ckb-contract-flow/SKILL.md">SKILL.md →</a></details></section>
-<script>(function(){var R='https://raw.githubusercontent.com/gpBlockchain/ckb-contract-flow-html/main/skills/ckb-contract-flow/SKILL.md',d=document,u=d.getElementById('sku'),p=d.getElementById('skp'),c=d.getElementById('skc');
+<a href="https://github.com/RetricSu/community-scripts/blob/main/flow/skills/ckb-contract-flow/SKILL.md">SKILL.md →</a></details></section>
+<script>(function(){var R='https://raw.githubusercontent.com/RetricSu/community-scripts/main/flow/skills/ckb-contract-flow/SKILL.md',d=document,u=d.getElementById('sku'),p=d.getElementById('skp'),c=d.getElementById('skc');
 // the sentence as [text, SKILL.md url, text, repo or placeholder, text]: the preview shows the url as a SKILL.md chip, copying gives the full text
 function parts(){var v=u.value.trim(),zh=d.documentElement.getAttribute('data-lang')==='zh',r=v||(zh?'<合约仓库 URL 或本地路径>':'<contract repo URL or local path>');return zh?['阅读 ',R,' 并按其步骤为 ',r,' 生成合约 cell 流转 HTML']:['Read ',R,' and follow it to generate a cell-flow HTML for ',r,'']}
 function text(){return parts().join('')}
