@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 添加合约文档 / Adding a contract guide
+    url: https://github.com/RetricSu/community-scripts/blob/master/flow/docs/ADD_CONTRACT.md
+    about: 手动或用 agent 添加合约的完整步骤 / Full steps
